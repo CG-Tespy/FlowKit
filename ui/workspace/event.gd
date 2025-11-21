@@ -1,6 +1,61 @@
 @tool
 extends MarginContainer
 
+signal insert_condition_requested(event_node)
+signal delete_event_requested(event_node)
+signal edit_event_requested(event_node)
+
+var event_data: FKEventBlock
+var event_index: int = -1
+
+var context_menu: PopupMenu
+var label: Label
+
+func _ready() -> void:
+	label = get_node_or_null("Panel/MarginContainer/HBoxContainer/Label")
+	
+	# Connect gui_input for right-click detection
+	gui_input.connect(_on_gui_input)
+	
+	# Try to get context menu and connect if available
+	call_deferred("_setup_context_menu")
+
+func _setup_context_menu() -> void:
+	context_menu = get_node_or_null("ContextMenu")
+	if context_menu:
+		context_menu.id_pressed.connect(_on_context_menu_id_pressed)
+
+func _on_gui_input(event: InputEvent) -> void:
+	if event is InputEventMouseButton:
+		if event.button_index == MOUSE_BUTTON_RIGHT and event.pressed:
+			# Try to get context menu if we don't have it yet
+			if not context_menu:
+				context_menu = get_node_or_null("ContextMenu")
+				if context_menu and not context_menu.id_pressed.is_connected(_on_context_menu_id_pressed):
+					context_menu.id_pressed.connect(_on_context_menu_id_pressed)
+			
+			if context_menu:
+				context_menu.position = get_global_mouse_position()
+				context_menu.popup()
+
+func _on_context_menu_id_pressed(id: int) -> void:
+	match id:
+		0: # Insert Condition
+			insert_condition_requested.emit(self)
+		1: # Edit Event
+			edit_event_requested.emit(self)
+		2: # Delete Event
+			delete_event_requested.emit(self)
+
+func set_event_data(data: FKEventBlock, index: int) -> void:
+	event_data = data
+	event_index = index
+	_update_label()
+
+func _update_label() -> void:
+	if label and event_data:
+		label.text = "Event: %s (Node: %s)" % [event_data.event_id, String(event_data.target_node).get_file()]
+
 func _get_drag_data(at_position: Vector2):
 	var preview := duplicate()
 	preview.modulate.a = 0.5

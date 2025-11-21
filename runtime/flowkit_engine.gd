@@ -5,7 +5,7 @@ var registry: FKRegistry
 var active_sheets: Array = []
 var last_scene: Node = null
 
-func _ready():
+func _ready() -> void:
 	# Load registry
 	registry = FKRegistry.new()
 	registry.load_all()
@@ -15,7 +15,7 @@ func _ready():
 	# Do a deferred check in case the scene is already present at startup.
 	call_deferred("_check_current_scene")
 
-func _process(delta):
+func _process(delta: float) -> void:
 	# Regularly check if the current_scene changed (robust against timing issues).
 	_check_for_scene_change()
 	for sheet in active_sheets:
@@ -23,13 +23,13 @@ func _process(delta):
 
 
 # --- Scene detection helpers -----------------------------------------------
-func _check_current_scene():
-	var cs = get_tree().current_scene
+func _check_current_scene() -> void:
+	var cs: Node = get_tree().current_scene
 	if cs:
 		_on_scene_changed(cs)
 
-func _check_for_scene_change():
-	var cs = get_tree().current_scene
+func _check_for_scene_change() -> void:
+	var cs: Node = get_tree().current_scene
 	if cs != last_scene:
 		# Scene changed (including from null -> scene)
 		_on_scene_changed(cs)
@@ -52,48 +52,50 @@ func _load_sheet_for_scene(scene_root: Node) -> void:
 	active_sheets.clear()
 
 	var scene_name: String = scene_root.name
-	var sheet_path := "res://events/%s.tres" % scene_name
+	var sheet_path: String = "res://addons/flowkit/saved/event_sheet/%s.tres" % scene_name
 
 	# Debug: show whether the file exists
 	if ResourceLoader.exists(sheet_path):
-		var sheet = load(sheet_path)
+		var sheet: FKEventSheet = load(sheet_path)
 		if sheet:
 			active_sheets.append(sheet)
-			print("[FlowKit] Loaded event sheet for scene:", scene_name, "->", sheet_path)
+			print("[FlowKit] Loaded event sheet for scene: ", scene_name, " with ", sheet.events.size(), " events")
 		else:
-			print("[FlowKit] Failed to load sheet resource at:", sheet_path)
+			print("[FlowKit] Failed to load sheet resource at: ", sheet_path)
 	else:
-		print("[FlowKit] No sheet found for scene:", scene_name, "(expected at %s)" % sheet_path)
+		print("[FlowKit] No sheet found for scene: ", scene_name, " (expected at ", sheet_path, ")")
 
 
 # --- Event loop ------------------------------------------------------------
-func _run_sheet(sheet):
+func _run_sheet(sheet: FKEventSheet) -> void:
 	# Defensive: ensure we have a current scene
-	var current_scene = get_tree().current_scene
+	var current_scene: Node = get_tree().current_scene
 	if not current_scene:
 		return
 
 	for block in sheet.events:
 		# Resolve target node (relative to the current scene)
-		var node = current_scene.get_node_or_null(block.target_node)
+		var node: Node = current_scene.get_node_or_null(block.target_node)
 		if not node:
 			# Optionally debug: print missing node paths if you want
 			# print("[FlowKit] Missing target node for block:", block.target_node)
 			continue
 
 		# Event trigger
-		if not registry.poll_event(block.event_id, node):
+		var event_triggered: bool = registry.poll_event(block.event_id, node)
+		if not event_triggered:
 			continue
 
 		# Conditions
-		var passed := true
+		var passed: bool = true
 		for cond in block.conditions:
-			var cnode = current_scene.get_node_or_null(cond.target_node)
+			var cnode: Node = current_scene.get_node_or_null(cond.target_node)
 			if not cnode:
 				passed = false
 				break
 
-			if not registry.check_condition(cond.condition_id, cnode, cond.inputs):
+			var cond_result: bool = registry.check_condition(cond.condition_id, cnode, cond.inputs)
+			if not cond_result:
 				passed = false
 				break
 
@@ -102,6 +104,8 @@ func _run_sheet(sheet):
 
 		# Actions
 		for act in block.actions:
-			var anode = current_scene.get_node_or_null(act.target_node)
+			var anode: Node = current_scene.get_node_or_null(act.target_node)
 			if anode:
 				registry.execute_action(act.action_id, anode, act.inputs)
+			else:
+				print("[FlowKit] Action target node not found: ", act.target_node)

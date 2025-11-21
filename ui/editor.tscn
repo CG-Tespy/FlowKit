@@ -8,6 +8,10 @@
 [ext_resource type="PackedScene" uid="uid://cct35451lta26" path="res://addons/flowkit/ui/workspace/condition.tscn" id="3_l3oxx"]
 [ext_resource type="PackedScene" uid="uid://dl3kh1mn8jl71" path="res://addons/flowkit/ui/workspace/action.tscn" id="4_awtyg"]
 [ext_resource type="PackedScene" uid="uid://buxqkjavs51qe" path="res://addons/flowkit/ui/modals/select.tscn" id="8_select"]
+[ext_resource type="PackedScene" uid="uid://crj5y8vh2m3qi" path="res://addons/flowkit/ui/modals/select_event.tscn" id="9_select_event"]
+[ext_resource type="PackedScene" uid="uid://c7j2y9vh3m4rj" path="res://addons/flowkit/ui/modals/select_action.tscn" id="10_select_action"]
+[ext_resource type="PackedScene" uid="uid://d8k3z0wi5n6pk" path="res://addons/flowkit/ui/modals/expression_editor.tscn" id="11_expression_editor"]
+[ext_resource type="PackedScene" uid="uid://b9m4a1xj6n7ql" path="res://addons/flowkit/ui/modals/select_condition.tscn" id="12_select_condition"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_bg"]
 bg_color = Color(0.12, 0.12, 0.15, 1)
@@ -107,9 +111,40 @@ theme_override_styles/pressed = SubResource("StyleBoxFlat_button")
 theme_override_styles/hover = SubResource("StyleBoxFlat_button")
 text = "➕ Add Event"
 
+[node name="AddActionButton" type="Button" parent="ScrollContainer/MarginContainer/VBoxContainer"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.9, 0.95, 1, 1)
+theme_override_font_sizes/font_size = 14
+theme_override_styles/normal = SubResource("StyleBoxFlat_button")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_button")
+theme_override_styles/hover = SubResource("StyleBoxFlat_button")
+text = "➕ Add Action"
+
 [node name="SelectModal" parent="." instance=ExtResource("8_select")]
+
+[node name="SelectEventModal" parent="." instance=ExtResource("9_select_event")]
+
+[node name="SelectActionNodeModal" parent="." instance=ExtResource("8_select")]
+
+[node name="SelectActionModal" parent="." instance=ExtResource("10_select_action")]
+
+[node name="SelectConditionNodeModal" parent="." instance=ExtResource("8_select")]
+
+[node name="SelectConditionModal" parent="." instance=ExtResource("12_select_condition")]
+
+[node name="ExpressionEditorModal" parent="." instance=ExtResource("11_expression_editor")]
+
+[node name="ConditionExpressionEditorModal" parent="." instance=ExtResource("11_expression_editor")]
 
 [connection signal="new_sheet" from="ScrollContainer/MarginContainer/VBoxContainer/MenuBar" to="." method="_on_menu_bar_new_sheet"]
 [connection signal="id_pressed" from="ScrollContainer/MarginContainer/VBoxContainer/MenuBar/File" to="ScrollContainer/MarginContainer/VBoxContainer/MenuBar" method="_on_file_id_pressed"]
 [connection signal="pressed" from="ScrollContainer/MarginContainer/VBoxContainer/AddEventButton" to="." method="_on_add_event_button_pressed"]
+[connection signal="pressed" from="ScrollContainer/MarginContainer/VBoxContainer/AddActionButton" to="." method="_on_add_action_button_pressed"]
 [connection signal="node_selected" from="SelectModal" to="." method="_on_select_modal_node_selected"]
+[connection signal="event_selected" from="SelectEventModal" to="." method="_on_select_modal_event_selected"]
+[connection signal="node_selected" from="SelectActionNodeModal" to="." method="_on_select_action_node_selected"]
+[connection signal="action_selected" from="SelectActionModal" to="." method="_on_select_action_modal_action_selected"]
+[connection signal="node_selected" from="SelectConditionNodeModal" to="." method="_on_select_condition_node_selected"]
+[connection signal="condition_selected" from="SelectConditionModal" to="." method="_on_select_condition_modal_condition_selected"]
+[connection signal="expressions_confirmed" from="ExpressionEditorModal" to="." method="_on_expression_editor_confirmed"]
+[connection signal="expressions_confirmed" from="ConditionExpressionEditorModal" to="." method="_on_condition_expression_editor_confirmed"]

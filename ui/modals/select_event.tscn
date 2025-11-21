@@ -1,15 +1,15 @@
-[gd_scene load_steps=2 format=3 uid="uid://buxqkjavs51qe"]
+[gd_scene load_steps=2 format=3 uid="uid://crj5y8vh2m3qi"]
 
-[ext_resource type="Script" uid="uid://dbwkcp776nx4d" path="res://addons/flowkit/ui/modals/select.gd" id="1_select"]
+[ext_resource type="Script" path="res://addons/flowkit/ui/modals/select_event.gd" id="1_event"]
 
-[node name="select" type="PopupPanel"]
+[node name="SelectEvent" type="PopupPanel"]
 oversampling_override = 1.0
-title = "Select a Node"
+title = "Select an Event"
 initial_position = 1
 size = Vector2i(400, 320)
 borderless = false
 keep_title_visible = true
-script = ExtResource("1_select")
+script = ExtResource("1_event")
 
 [node name="ItemList" type="ItemList" parent="."]
 anchors_preset = 15

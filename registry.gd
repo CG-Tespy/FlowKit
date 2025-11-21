@@ -1,39 +1,71 @@
 extends Node
 class_name FKRegistry
 
-var action_providers = []
-var condition_providers = []
-var event_providers = []
+var action_providers: Array = []
+var condition_providers: Array = []
+var event_providers: Array = []
 
-func load_all():
-    _load_folder("actions", action_providers)
-    _load_folder("conditions", condition_providers)
-    _load_folder("events", event_providers)
+func load_all() -> void:
+	_load_folder("actions", action_providers)
+	_load_folder("conditions", condition_providers)
+	_load_folder("events", event_providers)
+	
+	print("[FlowKit Registry] Loaded %d actions, %d conditions, %d events" % [
+		action_providers.size(),
+		condition_providers.size(),
+		event_providers.size()
+	])
 
-func load_providers():
-    # Alias for load_all() for backward compatibility
-    load_all()
+func load_providers() -> void:
+	# Alias for load_all() for backward compatibility
+	load_all()
 
-func _load_folder(subpath: String, array: Array):
-    var path = "res://addons/flowkit/" + subpath
-    var dir = DirAccess.open(path)
-    if dir:
-        for file in dir.get_files():
-            if file.ends_with(".gd"):
-                array.append(load(path + "/" + file).new())
+func _load_folder(subpath: String, array: Array) -> void:
+	var path: String = "res://addons/flowkit/" + subpath
+	_scan_directory_recursive(path, array)
+
+func _scan_directory_recursive(path: String, array: Array) -> void:
+	var dir: DirAccess = DirAccess.open(path)
+	if not dir:
+		return
+	
+	dir.list_dir_begin()
+	var file_name: String = dir.get_next()
+	
+	while file_name != "":
+		var file_path: String = path + "/" + file_name
+		
+		if dir.current_is_dir():
+			# Recursively scan subdirectories
+			_scan_directory_recursive(file_path, array)
+		elif file_name.ends_with(".gd") and not file_name.ends_with(".uid"):
+			# Load the script and instantiate it
+			var script: GDScript = load(file_path)
+			if script:
+				var instance: Variant = script.new()
+				array.append(instance)
+		
+		file_name = dir.get_next()
+	
+	dir.list_dir_end()
 
 func poll_event(event_id: String, node: Node) -> bool:
-    for provider in event_providers:
-        if provider.poll(event_id, node):
-            return true
-    return false
+	for provider in event_providers:
+		if provider.has_method("get_id") and provider.get_id() == event_id:
+			if provider.has_method("poll"):
+				return provider.poll(node)
+	return false
 
 func check_condition(condition_id: String, node: Node, inputs: Dictionary) -> bool:
-    for provider in condition_providers:
-        if provider.check(condition_id, node, inputs):
-            return true
-    return false
+	for provider in condition_providers:
+		if provider.has_method("get_id") and provider.get_id() == condition_id:
+			if provider.has_method("check"):
+				return provider.check(node, inputs)
+	return false
 
 func execute_action(action_id: String, node: Node, inputs: Dictionary) -> void:
-    for provider in action_providers:
-        provider.execute(action_id, node, inputs)
+	for provider in action_providers:
+		if provider.has_method("get_id") and provider.get_id() == action_id:
+			if provider.has_method("execute"):
+				provider.execute(node, inputs)
+				return
