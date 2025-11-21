@@ -1,0 +1,115 @@
+[gd_scene load_steps=11 format=3 uid="uid://d1uy22pv42td3"]
+
+[ext_resource type="Script" uid="uid://dbjqp3gp5vovf" path="res://addons/flowkit/ui/editor.gd" id="1_orosd"]
+[ext_resource type="PackedScene" uid="uid://drmro4mknscop" path="res://addons/flowkit/ui/workspace/no_action_available.tscn" id="1_qt4uu"]
+[ext_resource type="PackedScene" uid="uid://bh6btjhk8rtay" path="res://addons/flowkit/ui/workspace/event.tscn" id="2_gk5k1"]
+[ext_resource type="Script" uid="uid://con4s50tuscrj" path="res://addons/flowkit/ui/v_box_container.gd" id="2_il07c"]
+[ext_resource type="Script" uid="uid://dg46wtoo70ju2" path="res://addons/flowkit/ui/menu_bar.gd" id="2_tc3av"]
+[ext_resource type="PackedScene" uid="uid://cct35451lta26" path="res://addons/flowkit/ui/workspace/condition.tscn" id="3_l3oxx"]
+[ext_resource type="PackedScene" uid="uid://dl3kh1mn8jl71" path="res://addons/flowkit/ui/workspace/action.tscn" id="4_awtyg"]
+[ext_resource type="PackedScene" uid="uid://buxqkjavs51qe" path="res://addons/flowkit/ui/modals/select.tscn" id="8_select"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_bg"]
+bg_color = Color(0.12, 0.12, 0.15, 1)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_button"]
+bg_color = Color(0.25, 0.35, 0.45, 1)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.4, 0.6, 0.95, 1)
+corner_radius_top_left = 6
+corner_radius_top_right = 6
+corner_radius_bottom_right = 6
+corner_radius_bottom_left = 6
+
+[node name="Control" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+script = ExtResource("1_orosd")
+
+[node name="Background" type="Panel" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_bg")
+
+[node name="ScrollContainer" type="ScrollContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+size_flags_horizontal = 2
+
+[node name="MarginContainer" type="MarginContainer" parent="ScrollContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+theme_override_constants/margin_left = 12
+theme_override_constants/margin_top = 12
+theme_override_constants/margin_right = 12
+theme_override_constants/margin_bottom = 12
+
+[node name="VBoxContainer" type="VBoxContainer" parent="ScrollContainer/MarginContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+theme_override_constants/separation = 8
+script = ExtResource("2_il07c")
+
+[node name="MenuBar" type="MenuBar" parent="ScrollContainer/MarginContainer/VBoxContainer"]
+layout_mode = 2
+script = ExtResource("2_tc3av")
+
+[node name="File" type="PopupMenu" parent="ScrollContainer/MarginContainer/VBoxContainer/MenuBar"]
+oversampling_override = 1.0
+size = Vector2i(150, 100)
+item_count = 1
+item_0/text = "New Event Sheet"
+item_0/id = 0
+
+[node name="Event" parent="ScrollContainer/MarginContainer/VBoxContainer" instance=ExtResource("2_gk5k1")]
+layout_mode = 2
+
+[node name="Condition" parent="ScrollContainer/MarginContainer/VBoxContainer" instance=ExtResource("3_l3oxx")]
+layout_mode = 2
+
+[node name="Action" parent="ScrollContainer/MarginContainer/VBoxContainer" instance=ExtResource("4_awtyg")]
+layout_mode = 2
+
+[node name="No Action Available" parent="ScrollContainer/MarginContainer/VBoxContainer" instance=ExtResource("1_qt4uu")]
+visible = false
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_colors/font_color = Color(1, 0.53207755, 0.46697795, 1)
+theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.49803922)
+theme_override_font_sizes/font_size = 21
+vertical_alignment = 1
+
+[node name="AddEventButton" type="Button" parent="ScrollContainer/MarginContainer/VBoxContainer"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.9, 0.95, 1, 1)
+theme_override_font_sizes/font_size = 14
+theme_override_styles/normal = SubResource("StyleBoxFlat_button")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_button")
+theme_override_styles/hover = SubResource("StyleBoxFlat_button")
+text = "➕ Add Event"
+
+[node name="SelectModal" parent="." instance=ExtResource("8_select")]
+
+[connection signal="new_sheet" from="ScrollContainer/MarginContainer/VBoxContainer/MenuBar" to="." method="_on_menu_bar_new_sheet"]
+[connection signal="id_pressed" from="ScrollContainer/MarginContainer/VBoxContainer/MenuBar/File" to="ScrollContainer/MarginContainer/VBoxContainer/MenuBar" method="_on_file_id_pressed"]
+[connection signal="pressed" from="ScrollContainer/MarginContainer/VBoxContainer/AddEventButton" to="." method="_on_add_event_button_pressed"]
+[connection signal="node_selected" from="SelectModal" to="." method="_on_select_modal_node_selected"]
