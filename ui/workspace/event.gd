@@ -54,7 +54,13 @@ func set_event_data(data: FKEventBlock, index: int) -> void:
 
 func _update_label() -> void:
 	if label and event_data:
-		label.text = "Event: %s (Node: %s)" % [event_data.event_id, String(event_data.target_node).get_file()]
+		var params_text = ""
+		if not event_data.inputs.is_empty():
+			var param_pairs = []
+			for key in event_data.inputs:
+				param_pairs.append("%s: %s" % [key, event_data.inputs[key]])
+			params_text = " [" + ", ".join(param_pairs) + "]"
+		label.text = "Event: %s (Node: %s)%s" % [event_data.event_id, String(event_data.target_node).get_file(), params_text]
 
 func _get_drag_data(at_position: Vector2):
 	var preview := duplicate()

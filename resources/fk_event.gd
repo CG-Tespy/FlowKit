@@ -10,5 +10,8 @@ func get_name() -> String:
 func get_supported_types() -> Array[String]:
     return []
 
-func poll(node: Node) -> bool:
+func get_inputs() -> Array:
+    return []
+
+func poll(node: Node, inputs: Dictionary = {}) -> bool:
     return false

@@ -145,6 +145,8 @@ text = "➕ Add Action"
 
 [node name="ConditionExpressionEditorModal" parent="." instance=ExtResource("11_expression_editor")]
 
+[node name="EventExpressionEditorModal" parent="." instance=ExtResource("11_expression_editor")]
+
 [connection signal="new_sheet" from="ScrollContainer/MarginContainer/VBoxContainer/MenuBar" to="." method="_on_menu_bar_new_sheet"]
 [connection signal="id_pressed" from="ScrollContainer/MarginContainer/VBoxContainer/MenuBar/File" to="ScrollContainer/MarginContainer/VBoxContainer/MenuBar" method="_on_file_id_pressed"]
 [connection signal="pressed" from="ScrollContainer/MarginContainer/VBoxContainer/AddEventButton" to="." method="_on_add_event_button_pressed"]
@@ -158,3 +160,4 @@ text = "➕ Add Action"
 [connection signal="condition_selected" from="SelectConditionModal" to="." method="_on_select_condition_modal_condition_selected"]
 [connection signal="expressions_confirmed" from="ExpressionEditorModal" to="." method="_on_expression_editor_confirmed"]
 [connection signal="expressions_confirmed" from="ConditionExpressionEditorModal" to="." method="_on_condition_expression_editor_confirmed"]
+[connection signal="expressions_confirmed" from="EventExpressionEditorModal" to="." method="_on_event_expression_editor_confirmed"]

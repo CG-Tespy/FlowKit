@@ -26,6 +26,9 @@ func _setup_context_menu() -> void:
 	context_menu = get_node_or_null("ContextMenu")
 	if context_menu:
 		context_menu.id_pressed.connect(_on_context_menu_id_pressed)
+		# Make the Negate item checkable
+		context_menu.set_item_as_checkable(3, true)
+		context_menu.set_item_checked(3, condition_data.negated if condition_data else false)
 
 func _on_gui_input(event: InputEvent) -> void:
 	if event is InputEventMouseButton:
@@ -69,7 +72,12 @@ func _update_label() -> void:
 		
 		# Check if this is a standalone condition (event_index == -1)
 		var prefix = "Standalone Condition" if event_index == -1 else "Condition"
-		label.text = "%s: %s%s" % [prefix, condition_data.condition_id, params_text]
+		var negation_prefix = "NOT " if condition_data.negated else ""
+		label.text = "%s: %s%s%s" % [prefix, negation_prefix, condition_data.condition_id, params_text]
+	
+	# Update context menu checkmark
+	if context_menu:
+		context_menu.set_item_checked(3, condition_data.negated if condition_data else false)
 
 func _get_drag_data(at_position: Vector2):
 	var preview := duplicate()

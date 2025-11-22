@@ -27,6 +27,7 @@ var action_scene = preload("res://addons/flowkit/ui/workspace/action.tscn")
 @onready var select_condition_modal := $SelectConditionModal
 @onready var expression_editor_modal := $ExpressionEditorModal
 @onready var condition_expression_editor_modal := $ConditionExpressionEditorModal
+@onready var event_expression_editor_modal := $EventExpressionEditorModal
 
 func _ready() -> void:
 	# Connect when running inside the editor
@@ -117,6 +118,12 @@ func set_editor_interface(interface: EditorInterface):
 	editor_interface = interface
 	update_scene_name()
 
+var pending_event_node_path: String = ""
+var pending_event_id: String = ""
+var pending_event_inputs: Array = []
+var is_editing_event: bool = false
+var pending_event_index: int = -1
+
 func _on_add_event_button_pressed() -> void:
 	if not editor_interface:
 		print("Editor interface not available")
@@ -144,13 +151,30 @@ func _on_select_modal_node_selected(node_path: String, node_class: String) -> vo
 	select_event_modal.populate_events(node_path, node_class)
 	select_event_modal.popup_centered()
 
-func _on_select_modal_event_selected(node_path: String, event_id: String) -> void:
-	print("Event selected - Node: ", node_path, " Event: ", event_id)
-	# TODO: Create a new event block and add it to the event sheet
-	# For now, just print the selection
-	_create_event_block(node_path, event_id)
+func _on_select_modal_event_selected(node_path: String, event_id: String, event_inputs: Array) -> void:
+	print("Event selected - Node: ", node_path, " Event: ", event_id, " Inputs: ", event_inputs)
+	
+	# Store pending event data
+	pending_event_node_path = node_path
+	pending_event_id = event_id
+	pending_event_inputs = event_inputs
+	
+	# Hide the event selection modal first
+	select_event_modal.hide()
+	
+	# If the event has inputs, show the expression editor (deferred to ensure previous modal is fully hidden)
+	if event_inputs.size() > 0:
+		event_expression_editor_modal.populate_inputs(node_path, event_id, event_inputs)
+		call_deferred("_show_event_expression_editor")
+	else:
+		# No inputs needed, create the event directly
+		_create_event_block(node_path, event_id, {})
 
-func _create_event_block(node_path: String, event_id: String) -> void:
+func _show_event_expression_editor() -> void:
+	"""Helper to show event expression editor (called deferred)."""
+	event_expression_editor_modal.popup_centered()
+
+func _create_event_block(node_path: String, event_id: String, inputs: Dictionary = {}) -> void:
 	"""Create a new event block and add it to the current event sheet."""
 	# Load or create the event sheet for the current scene
 	var file_path: String = "res://addons/flowkit/saved/event_sheet/%s.tres" % scene_name
@@ -169,6 +193,7 @@ func _create_event_block(node_path: String, event_id: String) -> void:
 	var new_event = FKEventBlock.new()
 	new_event.event_id = event_id
 	new_event.target_node = node_path
+	new_event.inputs = inputs
 	
 	# Create a new events array with existing events plus the new one
 	var new_events: Array[FKEventBlock] = []
@@ -187,6 +212,19 @@ func _create_event_block(node_path: String, event_id: String) -> void:
 		_display_sheet(sheet)
 	else:
 		print("Failed to save event sheet. Error code: ", error)
+
+func _update_event_with_expressions(event_idx: int, expressions: Dictionary) -> void:
+	"""Update an existing event's parameters."""
+	var file_path = "res://addons/flowkit/saved/event_sheet/%s.tres" % scene_name
+	var sheet = _load_event_sheet(file_path)
+	
+	if not sheet or event_idx >= sheet.events.size():
+		print("Invalid event index for update")
+		return
+	
+	# Update the inputs
+	sheet.events[event_idx].inputs = expressions
+	_save_and_refresh(sheet, file_path)
 
 func _clear_content() -> void:
 	"""Clear all dynamically created event, condition, and action nodes."""
@@ -434,11 +472,28 @@ func _on_delete_condition_requested(condition_node) -> void:
 	_save_and_refresh(sheet, file_path)
 
 func _on_negate_condition_requested(condition_node) -> void:
-	"""Negate a condition (placeholder for now)."""
-	print("Negate condition at event %d, condition %d" % [condition_node.event_index, condition_node.condition_index])
+	"""Toggle the negated flag for a condition."""
+	var event_idx = condition_node.event_index
+	var cond_idx = condition_node.condition_index
+	
+	if event_idx < 0 or cond_idx < 0:
+		print("Invalid indices")
+		return
+	
+	var file_path = "res://addons/flowkit/saved/event_sheet/%s.tres" % scene_name
+	var sheet = _load_event_sheet(file_path)
+	if not sheet or event_idx >= sheet.events.size():
+		return
+	
+	if cond_idx >= sheet.events[event_idx].conditions.size():
+		return
+	
+	# Toggle negation
+	sheet.events[event_idx].conditions[cond_idx].negated = not sheet.events[event_idx].conditions[cond_idx].negated
+	_save_and_refresh(sheet, file_path)
 
 func _on_insert_action_requested(action_node) -> void:
-	"""Insert a new action below the selected action."""
+	"""Insert a new action below the selected action - start workflow."""
 	var event_idx = action_node.event_index
 	var action_idx = action_node.action_index
 	
@@ -451,20 +506,28 @@ func _on_insert_action_requested(action_node) -> void:
 	if not sheet or event_idx >= sheet.events.size():
 		return
 	
-	# Create a new action
-	var new_action = FKEventAction.new()
-	new_action.action_id = "new_action"
-	new_action.target_node = sheet.events[event_idx].target_node
+	# Store context for later - where to insert the action
+	pending_action_event_index = event_idx
+	pending_action_index = action_idx + 1  # Insert after this action
 	
-	# Create new actions array with the new action inserted
-	var new_actions: Array[FKEventAction] = []
-	for i in range(sheet.events[event_idx].actions.size()):
-		new_actions.append(sheet.events[event_idx].actions[i])
-		if i == action_idx:
-			new_actions.append(new_action)
+	# Start the action selection workflow
+	if not editor_interface:
+		print("Editor interface not available")
+		return
 	
-	sheet.events[event_idx].actions = new_actions
-	_save_and_refresh(sheet, file_path)
+	var current_scene = editor_interface.get_edited_scene_root()
+	if not current_scene:
+		print("No scene currently open")
+		return
+	
+	# Pass the editor interface to the modal so it can access node icons
+	select_action_node_modal.set_editor_interface(editor_interface)
+	
+	# Populate the modal with nodes from the current scene
+	select_action_node_modal.populate_from_scene(current_scene)
+	
+	# Show the popup centered
+	select_action_node_modal.popup_centered()
 
 func _on_delete_action_requested(action_node) -> void:
 	"""Delete an action."""
@@ -490,9 +553,45 @@ func _on_delete_action_requested(action_node) -> void:
 	_save_and_refresh(sheet, file_path)
 
 func _on_edit_event_requested(event_node) -> void:
-	"""Edit an event (currently just logs info)."""
-	print("Edit event at index %d" % event_node.event_index)
-	# Future: Open event editor dialog
+	"""Edit an event's parameters."""
+	var event_idx = event_node.event_index
+	
+	if event_idx < 0:
+		print("Invalid event index")
+		return
+	
+	var file_path = "res://addons/flowkit/saved/event_sheet/%s.tres" % scene_name
+	var sheet = _load_event_sheet(file_path)
+	if not sheet or event_idx >= sheet.events.size():
+		return
+	
+	var event = sheet.events[event_idx]
+	
+	# Get the event provider to check if it has inputs
+	var registry = FKRegistry.new()
+	registry.load_all()
+	
+	var event_inputs: Array = []
+	for provider in registry.event_providers:
+		if provider.has_method("get_id") and provider.get_id() == event.event_id:
+			if provider.has_method("get_inputs"):
+				event_inputs = provider.get_inputs()
+			break
+	
+	if event_inputs.size() == 0:
+		print("Event '%s' has no editable parameters" % event.event_id)
+		return
+	
+	# Store context for saving later
+	is_editing_event = true
+	pending_event_index = event_idx
+	pending_event_id = event.event_id
+	pending_event_node_path = String(event.target_node)
+	
+	# Open expression editor with current values
+	event_expression_editor_modal.populate_inputs(pending_event_node_path, pending_event_id, event_inputs)
+	# TODO: Pre-fill with existing values from event.inputs
+	event_expression_editor_modal.popup_centered()
 
 func _on_edit_condition_requested(condition_node) -> void:
 	"""Edit a condition's parameters."""
@@ -642,6 +741,19 @@ func _on_select_action_modal_action_selected(node_path: String, action_id: Strin
 		else:
 			_create_action_with_expressions(node_path, action_id, {})
 
+func _on_event_expression_editor_confirmed(node_path: String, event_id: String, expressions: Dictionary) -> void:
+	"""Handle event expression editor confirmation - create or update the event."""
+	print("Event confirmed with expressions: ", expressions)
+	
+	if is_editing_event:
+		# Update existing event
+		_update_event_with_expressions(pending_event_index, expressions)
+		is_editing_event = false
+		pending_event_index = -1
+	else:
+		# Create new event
+		_create_event_block(node_path, event_id, expressions)
+
 func _on_expression_editor_confirmed(node_path: String, action_id: String, expressions: Dictionary) -> void:
 	"""Handle expression editor confirmation - create or update the action."""
 	print("Action confirmed with expressions: ", expressions)
@@ -667,7 +779,7 @@ func _on_expression_editor_confirmed(node_path: String, action_id: String, expre
 		_create_action_with_expressions(node_path, action_id, expressions)
 
 func _create_action_with_expressions(node_path: String, action_id: String, expressions: Dictionary) -> void:
-	"""Create a new action and add it to the most recent event or standalone condition in the event sheet."""
+	"""Create a new action and add it to the event sheet at the appropriate position."""
 	var file_path = "res://addons/flowkit/saved/event_sheet/%s.tres" % scene_name
 	var sheet = _load_event_sheet(file_path)
 	
@@ -677,6 +789,37 @@ func _create_action_with_expressions(node_path: String, action_id: String, expre
 	new_action.target_node = node_path
 	new_action.inputs = expressions
 	
+	# Check if we're inserting at a specific position (from "Insert Action Below")
+	if pending_action_event_index >= 0 and pending_action_index >= 0:
+		if pending_action_event_index >= sheet.events.size():
+			print("Invalid event index for action insertion")
+			pending_action_event_index = -1
+			pending_action_index = -1
+			return
+		
+		# Insert at the specified position
+		var new_actions: Array[FKEventAction] = []
+		var insert_at = pending_action_index
+		
+		for i in range(sheet.events[pending_action_event_index].actions.size()):
+			new_actions.append(sheet.events[pending_action_event_index].actions[i])
+			if i == insert_at - 1:
+				new_actions.append(new_action)
+		
+		# If inserting at the end or in an empty list
+		if insert_at >= sheet.events[pending_action_event_index].actions.size():
+			new_actions.append(new_action)
+		
+		sheet.events[pending_action_event_index].actions = new_actions
+		
+		# Reset pending indices
+		pending_action_event_index = -1
+		pending_action_index = -1
+		
+		_save_and_refresh(sheet, file_path)
+		return
+	
+	# Otherwise, add to the most recent event or standalone condition
 	# Prioritize adding to standalone conditions if they exist and no events
 	if not sheet.standalone_conditions.is_empty() and sheet.events.is_empty():
 		# Add to the last standalone condition
@@ -838,8 +981,21 @@ func _on_delete_standalone_condition_requested(condition_node) -> void:
 	_save_and_refresh(sheet, file_path)
 
 func _on_negate_standalone_condition_requested(condition_node) -> void:
-	"""Negate a standalone condition (placeholder for now)."""
-	print("Negate standalone condition at index %d" % condition_node.condition_index)
+	"""Toggle the negated flag for a standalone condition."""
+	var cond_idx = condition_node.condition_index
+	
+	if cond_idx < 0:
+		print("Invalid condition index")
+		return
+	
+	var file_path = "res://addons/flowkit/saved/event_sheet/%s.tres" % scene_name
+	var sheet = _load_event_sheet(file_path)
+	if not sheet or cond_idx >= sheet.standalone_conditions.size():
+		return
+	
+	# Toggle negation
+	sheet.standalone_conditions[cond_idx].negated = not sheet.standalone_conditions[cond_idx].negated
+	_save_and_refresh(sheet, file_path)
 
 func _on_edit_standalone_condition_requested(condition_node) -> void:
 	"""Edit a standalone condition's parameters."""

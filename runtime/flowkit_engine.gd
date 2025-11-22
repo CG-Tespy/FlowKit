@@ -80,7 +80,7 @@ func _run_sheet(sheet: FKEventSheet) -> void:
 		if not cnode:
 			continue
 
-		var cond_result: bool = registry.check_condition(standalone_cond.condition_id, cnode, standalone_cond.inputs)
+		var cond_result: bool = registry.check_condition(standalone_cond.condition_id, cnode, standalone_cond.inputs, standalone_cond.negated)
 		if cond_result:
 			# Execute actions associated with this standalone condition
 			for act in standalone_cond.actions:
@@ -99,7 +99,7 @@ func _run_sheet(sheet: FKEventSheet) -> void:
 			continue
 
 		# Event trigger
-		var event_triggered: bool = registry.poll_event(block.event_id, node)
+		var event_triggered: bool = registry.poll_event(block.event_id, node, block.inputs)
 		if not event_triggered:
 			continue
 
@@ -111,7 +111,7 @@ func _run_sheet(sheet: FKEventSheet) -> void:
 				passed = false
 				break
 
-			var cond_result: bool = registry.check_condition(cond.condition_id, cnode, cond.inputs)
+			var cond_result: bool = registry.check_condition(cond.condition_id, cnode, cond.inputs, cond.negated)
 			if not cond_result:
 				passed = false
 				break

@@ -1,7 +1,7 @@
 @tool
 extends PopupPanel
 
-signal event_selected(node_path: String, event_id: String)
+signal event_selected(node_path: String, event_id: String, event_inputs: Array)
 
 var selected_node_path: String = ""
 var selected_node_class: String = ""
@@ -103,6 +103,15 @@ func _on_item_activated(index: int) -> void:
 		return
 	
 	var event_id = item_list.get_item_metadata(index)
-	print("Event selected: ", event_id, " for node: ", selected_node_path)
-	event_selected.emit(selected_node_path, event_id)
+	
+	# Find the event provider to get its inputs
+	var event_inputs: Array = []
+	for event in available_events:
+		if event.has_method("get_id") and event.get_id() == event_id:
+			if event.has_method("get_inputs"):
+				event_inputs = event.get_inputs()
+			break
+	
+	print("Event selected: ", event_id, " for node: ", selected_node_path, " with inputs: ", event_inputs)
+	event_selected.emit(selected_node_path, event_id, event_inputs)
 	hide()

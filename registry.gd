@@ -49,18 +49,19 @@ func _scan_directory_recursive(path: String, array: Array) -> void:
 	
 	dir.list_dir_end()
 
-func poll_event(event_id: String, node: Node) -> bool:
+func poll_event(event_id: String, node: Node, inputs: Dictionary = {}) -> bool:
 	for provider in event_providers:
 		if provider.has_method("get_id") and provider.get_id() == event_id:
 			if provider.has_method("poll"):
-				return provider.poll(node)
+				return provider.poll(node, inputs)
 	return false
 
-func check_condition(condition_id: String, node: Node, inputs: Dictionary) -> bool:
+func check_condition(condition_id: String, node: Node, inputs: Dictionary, negated: bool = false) -> bool:
 	for provider in condition_providers:
 		if provider.has_method("get_id") and provider.get_id() == condition_id:
 			if provider.has_method("check"):
-				return provider.check(node, inputs)
+				var result = provider.check(node, inputs)
+				return not result if negated else result
 	return false
 
 func execute_action(action_id: String, node: Node, inputs: Dictionary) -> void:
