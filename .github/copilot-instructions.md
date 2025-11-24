@@ -7,8 +7,9 @@ FlowKit is a Godot 4 editor plugin for visual event-driven programming, inspired
 **Plugin Structure**: FlowKit is a dual-mode system with editor-time visual authoring and runtime execution:
 
 - **Editor side** (`flowkit.gd`, `ui/`): Godot `@tool` plugin that adds a bottom panel for visual event editing
-- **Runtime side** (`runtime/flowkit_engine.gd`): Autoloaded singleton that executes event sheets during gameplay
+- **Runtime side** (`runtime/flowkit_engine.gd`, `runtime/flowkit_system.gd`): Autoloaded singletons that execute event sheets during gameplay
 - **Registry system** (`registry.gd`): Auto-discovers and instantiates provider scripts at plugin load
+- **Generator system** (`generator.gd`): Automatically generates actions, conditions, and events from scene node types and their properties/methods/signals
 
 **Event Sheet Model**: Scene-specific `.tres` resources saved to `saved/event_sheet/{scene_name}.tres`:
 
@@ -33,10 +34,11 @@ FKEventSheet
 
 **Creating New Providers**:
 
-1. Add `.gd` file to `actions/{NodeType}/`, `conditions/`, or `events/`
+1. Add `.gd` file to `actions/{NodeType}/`, `conditions/{NodeType}/`, or `events/{NodeType}/`
 2. Extend `FKAction`, `FKCondition`, or `FKEvent`
-3. Implement required methods (see `actions/Node/print.gd` for reference)
+3. Implement required methods (see base classes in `resources/` directory)
 4. Registry auto-discovers on plugin reload (no manual registration needed)
+5. **Alternative**: Use `generator.gd` to auto-generate providers from scene nodes - it introspects node properties, methods, and signals to create boilerplate providers
 
 **Event Sheet Execution** (runtime):
 
@@ -135,11 +137,15 @@ Each modal step stores context in `pending_*` variables (e.g., `pending_action_n
 
 ## Key Integration Points
 
-**Runtime Autoload**: `FlowKitEngine` added as singleton in `_enter_tree()`:
+**Runtime Autoloads**: Two singletons added in `_enter_tree()`:
 
 ```gdscript
+add_autoload_singleton("FlowKitSystem", "res://addons/flowkit/runtime/flowkit_system.gd")
 add_autoload_singleton("FlowKit", "res://addons/flowkit/runtime/flowkit_engine.gd")
 ```
+
+- `FlowKitSystem`: System-level utilities and global state management
+- `FlowKit`: Main execution engine for event sheet processing
 
 **Scene Detection**: Engine uses deferred `_check_current_scene()` + `_process()` polling to handle scene changes robustly (works even if scene loads before engine ready).
 
@@ -158,3 +164,5 @@ add_autoload_singleton("FlowKit", "res://addons/flowkit/runtime/flowkit_engine.g
 - Resource schemas: `resources/event_sheet.gd`, `resources/event_block.gd`
 - Editor workflow: `ui/editor.gd` (\_on_add_action_button_pressed → \_create_action_with_expressions)
 - Runtime loop: `runtime/flowkit_engine.gd` (\_run_sheet)
+- Generator system: `generator.gd` (auto-generates providers from node introspection)
+- Expression evaluator: `runtime/expression_evaluator.gd` (evaluates GDScript expressions in action/condition inputs)
