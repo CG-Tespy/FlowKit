@@ -21,6 +21,11 @@ func _process(delta: float) -> void:
 	for sheet in active_sheets:
 		_run_sheet(sheet)
 
+func _physics_process(delta: float) -> void:
+	# Run sheets in physics process for physics-based events
+	for sheet in active_sheets:
+		_run_sheet(sheet)
+
 
 # --- Scene detection helpers -----------------------------------------------
 func _check_current_scene() -> void:

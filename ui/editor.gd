@@ -3,6 +3,7 @@ extends Control
 
 var editor_interface: EditorInterface
 var registry: Node
+var generator
 var current_scene_name: String = ""
 
 # Scene preloads
@@ -58,6 +59,9 @@ func set_registry(reg: Node) -> void:
 		select_condition_modal.set_registry(reg)
 	if select_action_modal:
 		select_action_modal.set_registry(reg)
+
+func set_generator(gen) -> void:
+	generator = gen
 
 func _process(_delta: float) -> void:
 	if not editor_interface:
@@ -345,6 +349,52 @@ func _on_new_sheet() -> void:
 
 func _on_save_sheet() -> void:
 	_save_sheet()
+
+func _on_generate_providers() -> void:
+	if not generator:
+		print("[FlowKit] Generator not available")
+		return
+	
+	print("[FlowKit] Starting provider generation...")
+	
+	var result = generator.generate_all()
+	
+	var message = "Generation complete!\n"
+	message += "Actions: %d\n" % result.actions
+	message += "Conditions: %d\n" % result.conditions
+	message += "Events: %d\n" % result.events
+	
+	if result.errors.size() > 0:
+		message += "\nErrors:\n"
+		for error in result.errors:
+			message += "- " + error + "\n"
+	
+	message += "\nRestart Godot editor to load new providers?"
+	
+	print(message)
+	
+	# Show confirmation dialog with restart option
+	var dialog = ConfirmationDialog.new()
+	dialog.dialog_text = message
+	dialog.title = "FlowKit Generator"
+	dialog.ok_button_text = "Restart Editor"
+	dialog.cancel_button_text = "Not Now"
+	add_child(dialog)
+	dialog.popup_centered()
+	
+	dialog.confirmed.connect(func():
+		# Restart the editor
+		if editor_interface:
+			editor_interface.restart_editor()
+		dialog.queue_free()
+	)
+	
+	dialog.canceled.connect(func():
+		# Just reload registry without restart
+		if registry:
+			registry.load_all()
+		dialog.queue_free()
+	)
 
 func _on_add_event_button_pressed() -> void:
 	if not editor_interface:

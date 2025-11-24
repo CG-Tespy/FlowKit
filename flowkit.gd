@@ -3,6 +3,7 @@ extends EditorPlugin
 
 var action_registry
 var editor
+var generator
 
 func _enable_plugin() -> void:
 	# Add autoloads here if needed later.
@@ -19,10 +20,14 @@ func _enter_tree() -> void:
 	# Load registry
 	action_registry = preload("res://addons/flowkit/registry.gd").new()
 	action_registry.load_providers()
+	
+	# Initialize generator
+	generator = preload("res://addons/flowkit/generator.gd").new(get_editor_interface())
 
 	# Pass editor interface and registry to the editor UI
 	editor.set_editor_interface(get_editor_interface())
 	editor.set_registry(action_registry)
+	editor.set_generator(generator)
 
 	# Add runtime autoloads
 	add_autoload_singleton(
@@ -37,6 +42,8 @@ func _enter_tree() -> void:
 
 	# Add editor panel
 	add_control_to_bottom_panel(editor, "FlowKit")
+	
+	print("[FlowKit] Plugin loaded")
 
 func _exit_tree() -> void:
 	action_registry.free()

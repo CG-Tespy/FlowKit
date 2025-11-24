@@ -9,7 +9,7 @@ func get_name() -> String:
 func get_inputs() -> Array[Dictionary]:
 	return [
 		{"name": "Name", "type": "String"},
-		{"name": "Comparison", "type": "String"},  # ==, !=, <, >, <=, >=
+		{"name": "Comparison", "type": "String"},
 		{"name": "Value", "type": "Variant"}
 	]
 

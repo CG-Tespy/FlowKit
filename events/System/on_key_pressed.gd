@@ -7,7 +7,7 @@ func get_name() -> String:
 	return "On Key Pressed"
 
 func get_supported_types() -> Array[String]:
-	return ["Node", "System"]
+	return ["System"]
 
 func get_inputs() -> Array:
 	return [
