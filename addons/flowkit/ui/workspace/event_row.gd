@@ -131,7 +131,6 @@ func _update_event_header() -> void:
 						display_name = provider.get_name()
 					break
 		
-		var node_name = String(event_data.target_node).get_file()
 		var params_text = ""
 		if not event_data.inputs.is_empty():
 			var param_pairs = []
