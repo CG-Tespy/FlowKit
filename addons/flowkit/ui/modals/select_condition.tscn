@@ -83,7 +83,7 @@ size_flags_vertical = 3
 [node name="DescriptionPanel" type="Panel" parent="VBoxContainer/HSplitContainer/MainPanel/MainVBox"]
 layout_mode = 2
 size_flags_vertical = 0
-custom_minimum_size = Vector2(0, 60)
+custom_minimum_size = Vector2(0, 150)
 
 [node name="ScrollContainer" type="ScrollContainer" parent="VBoxContainer/HSplitContainer/MainPanel/MainVBox/DescriptionPanel"]
 layout_mode = 1
