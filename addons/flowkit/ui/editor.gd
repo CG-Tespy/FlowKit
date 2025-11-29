@@ -73,7 +73,11 @@ func set_generator(gen) -> void:
 
 func _popup_centered_on_editor(popup: Window) -> void:
 	"""Center popup on the same window as the editor, supporting multi-monitor setups."""
-	var editor_window: Window = get_window()
+	# Use editor_interface to get the actual main editor window
+	var editor_window: Window = null
+	if editor_interface:
+		editor_window = editor_interface.get_base_control().get_window()
+	
 	if not editor_window:
 		# Fallback to default behavior if window not available
 		popup.popup_centered()
