@@ -122,21 +122,38 @@ func _run_sheet(sheet: FKEventSheet) -> void:
 				
 				registry.execute_action(act.action_id, anode, act.inputs)
 
+	# Group events by event_id to poll each event only once per _run_sheet call
+	var event_groups: Dictionary = {}
+	var event_nodes: Dictionary = {}
 	for block in sheet.events:
-		# Resolve target node (relative to the current scene)
-		# Handle "System" as the FlowKitSystem singleton
-		var node: Node = null
-		if str(block.target_node) == "System":
-			node = get_node("/root/FlowKitSystem")
-		else:
-			node = current_scene.get_node_or_null(block.target_node)
-			if not node:
-				# Optionally debug: print missing node paths if you want
-				# print("[FlowKit] Missing target node for block:", block.target_node)
-				continue
+		var event_id = block.event_id
+		if not event_groups.has(event_id):
+			event_groups[event_id] = []
+		
+		event_groups[event_id].append(block)
+		
+		# Resolve target node for polling (use the first block's node for each event_id)
+		if not event_nodes.has(event_id):
+			var node: Node = null
+			if str(block.target_node) == "System":
+				node = get_node("/root/FlowKitSystem")
+			else:
+				node = current_scene.get_node_or_null(block.target_node)
+			event_nodes[event_id] = node
 
-		# Event trigger
-		var event_triggered: bool = registry.poll_event(block.event_id, node, block.inputs)
+	# Poll each event once
+	var event_triggered_status: Dictionary = {}
+	for event_id in event_groups.keys():
+		var node = event_nodes[event_id]
+		if node:
+			var triggered = registry.poll_event(event_id, node, {})  # Use empty inputs for polling
+			event_triggered_status[event_id] = triggered
+		else:
+			event_triggered_status[event_id] = false
+
+	# Process each block
+	for block in sheet.events:
+		var event_triggered = event_triggered_status.get(block.event_id, false)
 		if not event_triggered:
 			continue
 

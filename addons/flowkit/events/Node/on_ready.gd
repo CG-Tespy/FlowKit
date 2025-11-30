@@ -18,8 +18,7 @@ func get_inputs() -> Array:
 # Track the frame when on_ready fired for the current scene
 var _ready_frame: int = -1
 var _last_scene_path: String = ""
-var _fired_this_frame: bool = false
-var _last_frame: int = -1
+var _has_fired: bool = false
 
 
 func poll(node: Node, inputs: Dictionary = {}) -> bool:
@@ -33,25 +32,22 @@ func poll(node: Node, inputs: Dictionary = {}) -> bool:
 		if scene_path != _last_scene_path:
 			_last_scene_path = scene_path
 			_ready_frame = -1
-			_fired_this_frame = false
-			_last_frame = -1
+			_has_fired = false
+	
+	if _has_fired:
+		return false
 	
 	var current_frame = Engine.get_process_frames()
-	
-	# Reset fired flag each new frame
-	if current_frame != _last_frame:
-		_fired_this_frame = false
-		_last_frame = current_frame
 	
 	# If this is the first poll for this scene, record the frame and fire
 	if _ready_frame == -1:
 		_ready_frame = current_frame
-		_fired_this_frame = true
+		_has_fired = true
 		return true
 	
-	# If still on the same frame and haven't fired yet, allow firing
-	if current_frame == _ready_frame and not _fired_this_frame:
-		_fired_this_frame = true
+	# If still on the same frame, allow firing
+	if current_frame == _ready_frame:
+		_has_fired = true
 		return true
 	
 	# Otherwise, already fired
