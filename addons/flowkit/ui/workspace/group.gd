@@ -1,0 +1,747 @@
+@tool
+extends MarginContainer
+## Collapsible group block for organizing events, comments, and nested groups.
+##
+## Groups can contain events, comments, and other groups.
+## They can be collapsed/expanded, renamed, and recolored.
+## Items can be dragged in and out of groups.
+
+# === Signals ===
+signal selected(group_node)  ## Emitted when group or child is selected
+signal delete_requested  ## Emitted when group deletion is requested
+signal data_changed  ## Emitted after any data within group changes
+signal before_data_changed  ## Emitted before data changes (for undo)
+signal add_event_requested(group_node)  ## Emitted when user wants to add event to group
+signal add_comment_requested(group_node)  ## Emitted when user wants to add comment to group
+signal condition_edit_requested(condition_item, row)  ## Emitted when condition needs editing
+signal action_edit_requested(action_item, row)  ## Emitted when action needs editing
+signal insert_event_below_requested(row)  ## Emitted when inserting event below
+signal replace_event_requested(row)  ## Emitted when replacing event
+signal edit_event_requested(row)  ## Emitted when editing event
+signal add_condition_requested(row)  ## Emitted when adding condition to event
+signal add_action_requested(row)  ## Emitted when adding action to event
+
+# === Constants ===
+const EVENT_ROW_SCENE = preload("res://addons/flowkit/ui/workspace/event_row.tscn")
+const COMMENT_SCENE = preload("res://addons/flowkit/ui/workspace/comment.tscn")
+
+# === State ===
+var group_data: FKGroupBlock
+var is_selected: bool = false
+var registry: Node
+
+# === Drag State ===
+var _drag_start_pos: Vector2 = Vector2.ZERO
+var _is_potential_drag: bool = false
+const DRAG_THRESHOLD: float = 8.0
+
+# === Node References ===
+@onready var panel: PanelContainer = $Panel
+@onready var collapse_btn: Label = $Panel/VBox/Header/CollapseButton
+@onready var title_label: Label = $Panel/VBox/Header/TitleLabel
+@onready var title_edit: LineEdit = $Panel/VBox/Header/TitleEdit
+@onready var children_container: VBoxContainer = $Panel/VBox/ChildrenMargin/ChildrenContainer
+@onready var drop_hint: Label = $Panel/VBox/ChildrenMargin/ChildrenContainer/DropHint
+@onready var context_menu: PopupMenu = $ContextMenu
+
+# === Style ===
+var normal_stylebox: StyleBox
+var selected_stylebox: StyleBox
+
+# === Lifecycle ===
+
+func _ready() -> void:
+	_setup_styles()
+	_setup_signal_connections()
+	
+	# Setup children_container drag-drop by setting script methods
+	if children_container:
+		children_container.set_meta("_parent_group", self)
+		# Override drag-drop methods
+		children_container.set_script(preload("res://addons/flowkit/ui/workspace/group_children_container.gd"))
+
+
+func _input(event: InputEvent) -> void:
+	"""Cancel title edit when clicking outside."""
+	if title_edit and title_edit.visible:
+		if event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT:
+			if not title_edit.get_global_rect().has_point(event.global_position):
+				_finish_title_edit(title_edit.text)
+
+
+func _notification(what: int) -> void:
+	if what == NOTIFICATION_DRAG_END:
+		DropIndicatorManager.hide_indicator()
+
+# === Setup ===
+
+func _setup_styles() -> void:
+	"""Initialize styleboxes."""
+	if panel:
+		normal_stylebox = panel.get_theme_stylebox("panel")
+		if normal_stylebox:
+			selected_stylebox = normal_stylebox.duplicate()
+			if selected_stylebox is StyleBoxFlat:
+				selected_stylebox.border_color = Color.WHITE
+				selected_stylebox.border_width_left = 2
+				selected_stylebox.border_width_top = 1
+				selected_stylebox.border_width_right = 1
+				selected_stylebox.border_width_bottom = 1
+
+
+func _setup_signal_connections() -> void:
+	"""Connect UI signals."""
+	if collapse_btn:
+		collapse_btn.gui_input.connect(_on_collapse_btn_input)
+	if title_label:
+		title_label.gui_input.connect(_on_title_input)
+	if title_edit:
+		title_edit.text_submitted.connect(_on_title_submitted)
+		title_edit.focus_exited.connect(_on_title_focus_lost)
+	if context_menu:
+		context_menu.id_pressed.connect(_on_context_menu_id_pressed)
+	if $Panel/VBox/Header:
+		$Panel/VBox/Header.gui_input.connect(_on_header_gui_input)
+	gui_input.connect(_on_gui_input)
+
+# === Data Management ===
+
+func set_group_data(data: FKGroupBlock) -> void:
+	"""Set the group's data resource."""
+	group_data = data
+	call_deferred("_refresh_display")
+
+
+func get_group_data() -> FKGroupBlock:
+	"""Get the group's data resource."""
+	return group_data
+
+
+func set_registry(reg: Node) -> void:
+	"""Set the provider registry reference."""
+	registry = reg
+	call_deferred("_refresh_display")
+
+# === Display Management ===
+
+func _refresh_display() -> void:
+	"""Refresh all visual elements from data."""
+	if not group_data:
+		return
+	
+	_update_title_display()
+	_update_collapse_display()
+	_update_color_display()
+	_rebuild_child_nodes()
+
+
+func _update_title_display() -> void:
+	"""Update title label from data."""
+	if title_label:
+		title_label.text = group_data.title
+
+
+func _update_collapse_display() -> void:
+	"""Update collapse button and visibility."""
+	if collapse_btn:
+		collapse_btn.text = "▶" if group_data.collapsed else "▼"
+	
+	var children_margin = get_node_or_null("Panel/VBox/ChildrenMargin")
+	if children_margin:
+		children_margin.visible = not group_data.collapsed
+	
+	custom_minimum_size.y = 32 if group_data.collapsed else 60
+
+
+func _update_color_display() -> void:
+	"""Update panel color from data."""
+	if not panel or not group_data:
+		return
+	
+	var style = panel.get_theme_stylebox("panel")
+	if style:
+		style = style.duplicate()
+		if style is StyleBoxFlat:
+			style.bg_color = group_data.color
+			style.border_color = group_data.color.lightened(0.3)
+			style.border_width_left = 3
+			style.border_width_top = 1
+			style.border_width_right = 1
+			style.border_width_bottom = 1
+		panel.add_theme_stylebox_override("panel", style)
+		normal_stylebox = style
+		
+		selected_stylebox = style.duplicate()
+		if selected_stylebox is StyleBoxFlat:
+			selected_stylebox.border_color = Color.WHITE
+			selected_stylebox.border_width_left = 3
+			selected_stylebox.border_width_top = 2
+			selected_stylebox.border_width_right = 2
+			selected_stylebox.border_width_bottom = 2
+
+
+func _rebuild_child_nodes() -> void:
+	"""Rebuild child UI nodes from group_data.children."""
+	if not children_container or not group_data:
+		return
+	
+	# Remove old children (except drop_hint)
+	for child in children_container.get_children():
+		if child != drop_hint and not DropIndicatorManager.is_indicator(child):
+			children_container.remove_child(child)
+			child.queue_free()
+	
+	# Create new children from data
+	for child_dict in group_data.children:
+		var child_type: String = child_dict.get("type", "")
+		var child_data = child_dict.get("data")
+		
+		match child_type:
+			"event":
+				if child_data is FKEventBlock:
+					var row = _instantiate_event_row(child_data)
+					children_container.add_child(row)
+			"comment":
+				if child_data is FKCommentBlock:
+					var comment = _instantiate_comment(child_data)
+					children_container.add_child(comment)
+			"group":
+				if child_data is FKGroupBlock:
+					var nested = _instantiate_group(child_data)
+					children_container.add_child(nested)
+	
+	# Update drop hint visibility
+	if drop_hint:
+		drop_hint.visible = group_data.children.is_empty()
+
+# === Child Node Instantiation ===
+
+func _instantiate_event_row(data: FKEventBlock) -> Control:
+	"""Create an event row UI node for the given data."""
+	var row = EVENT_ROW_SCENE.instantiate()
+	
+	# Defer initialization to ensure node is ready
+	row.call_deferred("set_event_data", data)
+	row.call_deferred("set_registry", registry)
+	
+	# Connect row signals to group handlers - propagate all signals to parent
+	row.delete_event_requested.connect(_on_child_row_delete_requested.bind(data))
+	row.selected.connect(func(n): selected.emit(n))
+	row.condition_selected.connect(func(n): selected.emit(n))
+	row.action_selected.connect(func(n): selected.emit(n))
+	row.condition_edit_requested.connect(func(item): condition_edit_requested.emit(item, row))
+	row.action_edit_requested.connect(func(item): action_edit_requested.emit(item, row))
+	row.insert_event_below_requested.connect(func(r): insert_event_below_requested.emit(r))
+	row.replace_event_requested.connect(func(r): replace_event_requested.emit(r))
+	row.edit_event_requested.connect(func(r): edit_event_requested.emit(r))
+	row.add_condition_requested.connect(func(r): add_condition_requested.emit(r))
+	row.add_action_requested.connect(func(r): add_action_requested.emit(r))
+	row.data_changed.connect(_on_child_modified)
+	row.before_data_changed.connect(func(): before_data_changed.emit())
+	
+	return row
+
+
+func _instantiate_comment(data: FKCommentBlock) -> Control:
+	"""Create a comment UI node for the given data."""
+	var comment = COMMENT_SCENE.instantiate()
+	comment.set_comment_data(data)
+	
+	# Connect comment signals to group handlers
+	comment.delete_requested.connect(_on_child_comment_delete_requested.bind(data))
+	comment.selected.connect(func(n): selected.emit(n))
+	comment.data_changed.connect(_on_child_modified)
+	
+	return comment
+
+
+func _instantiate_group(data: FKGroupBlock) -> Control:
+	"""Create a nested group UI node for the given data."""
+	var group_scene = load("res://addons/flowkit/ui/workspace/group.tscn")
+	var nested = group_scene.instantiate()
+	nested.set_group_data(data)
+	nested.set_registry(registry)
+	
+	# Connect nested group signals to parent handlers - propagate everything
+	nested.delete_requested.connect(_on_child_group_delete_requested.bind(data))
+	nested.selected.connect(func(n): selected.emit(n))
+	nested.data_changed.connect(_on_child_modified)
+	nested.before_data_changed.connect(func(): before_data_changed.emit())
+	nested.add_event_requested.connect(func(g): add_event_requested.emit(g))
+	nested.add_comment_requested.connect(func(g): add_comment_requested.emit(g))
+	nested.condition_edit_requested.connect(func(item, row): condition_edit_requested.emit(item, row))
+	nested.action_edit_requested.connect(func(item, row): action_edit_requested.emit(item, row))
+	nested.insert_event_below_requested.connect(func(r): insert_event_below_requested.emit(r))
+	nested.replace_event_requested.connect(func(r): replace_event_requested.emit(r))
+	nested.edit_event_requested.connect(func(r): edit_event_requested.emit(r))
+	nested.add_condition_requested.connect(func(r): add_condition_requested.emit(r))
+	nested.add_action_requested.connect(func(r): add_action_requested.emit(r))
+	
+	return nested
+
+# === Child Event Handlers ===
+
+func _on_child_modified() -> void:
+	"""Child data changed - propagate to parent."""
+	data_changed.emit()
+
+
+func _on_child_row_delete_requested(row: Node, data: FKEventBlock) -> void:
+	"""Handle deletion of an event row child."""
+	_remove_child_data(data)
+
+
+func _on_child_comment_delete_requested(data: FKCommentBlock) -> void:
+	"""Handle deletion of a comment child."""
+	_remove_child_data(data)
+
+
+func _on_child_group_delete_requested(data: FKGroupBlock) -> void:
+	"""Handle deletion of a nested group child."""
+	_remove_child_data(data)
+
+
+func _remove_child_data(child_data) -> void:
+	"""Remove child data and rebuild UI."""
+	if not group_data:
+		return
+	
+	# Find and remove from data
+	var idx = -1
+	for i in range(group_data.children.size()):
+		if group_data.children[i].get("data") == child_data:
+			idx = i
+			break
+	
+	if idx >= 0:
+		before_data_changed.emit()
+		group_data.children.remove_at(idx)
+		_rebuild_child_nodes()
+		data_changed.emit()
+
+
+func _sync_children_to_data() -> void:
+	"""Sync the data array to match the current UI child order."""
+	if not group_data or not children_container:
+		return
+	
+	var new_children = []
+	
+	for child in children_container.get_children():
+		if child == drop_hint or DropIndicatorManager.is_indicator(child):
+			continue
+		
+		if child.has_method("get_event_data"):
+			var data = child.get_event_data()
+			if data:
+				new_children.append({"type": "event", "data": data})
+		elif child.has_method("get_group_data"):
+			var data = child.get_group_data()
+			if data:
+				new_children.append({"type": "group", "data": data})
+		elif child.has_method("get_comment_data"):
+			var data = child.get_comment_data()
+			if data:
+				new_children.append({"type": "comment", "data": data})
+	
+	group_data.children = new_children
+
+
+func add_event_to_group(event_data: FKEventBlock) -> void:
+	"""Add an event to this group (called by editor when workflow completes)."""
+	if not group_data:
+		return
+	
+	group_data.children.append({"type": "event", "data": event_data})
+	_rebuild_child_nodes()
+	data_changed.emit()
+
+# === Collapse/Expand ===
+
+func _on_collapse_btn_input(event: InputEvent) -> void:
+	"""Handle collapse button input."""
+	if event is InputEventMouseButton:
+		if event.button_index == MOUSE_BUTTON_LEFT:
+			if event.pressed:
+				selected.emit(self)
+				_drag_start_pos = event.position
+				_is_potential_drag = true
+			else:
+				if _is_potential_drag:
+					_toggle_collapse()
+				_is_potential_drag = false
+		elif event.button_index == MOUSE_BUTTON_RIGHT and event.pressed:
+			selected.emit(self)
+			_show_context_menu(event.global_position)
+	elif event is InputEventMouseMotion and _is_potential_drag:
+		var distance = event.position.distance_to(_drag_start_pos)
+		if distance >= DRAG_THRESHOLD and not get_viewport().gui_is_dragging():
+			_is_potential_drag = false
+			_start_group_drag()
+
+
+func _toggle_collapse() -> void:
+	"""Toggle collapsed state."""
+	if group_data:
+		before_data_changed.emit()
+		group_data.collapsed = not group_data.collapsed
+		_update_collapse_display()
+		data_changed.emit()
+
+
+func _start_group_drag() -> void:
+	"""Initiate group drag."""
+	var preview = Label.new()
+	preview.text = "📁 " + (group_data.title if group_data else "Group")
+	preview.add_theme_color_override("font_color", Color(0.6, 0.8, 1.0, 0.9))
+	force_drag({"node": self, "type": "group"}, preview)
+
+# === Title Editing ===
+
+func _on_title_input(event: InputEvent) -> void:
+	"""Handle title label input."""
+	if event is InputEventMouseButton:
+		if event.button_index == MOUSE_BUTTON_LEFT:
+			if event.pressed:
+				selected.emit(self)
+				if event.double_click:
+					_start_title_edit()
+					_is_potential_drag = false
+				else:
+					_drag_start_pos = event.position
+					_is_potential_drag = true
+			else:
+				if _is_potential_drag:
+					_toggle_collapse()
+				_is_potential_drag = false
+		elif event.button_index == MOUSE_BUTTON_RIGHT and event.pressed:
+			selected.emit(self)
+			_show_context_menu(event.global_position)
+	elif event is InputEventMouseMotion and _is_potential_drag:
+		var distance = event.position.distance_to(_drag_start_pos)
+		if distance >= DRAG_THRESHOLD and not get_viewport().gui_is_dragging():
+			_is_potential_drag = false
+			_start_group_drag()
+
+
+func _start_title_edit() -> void:
+	"""Enter title edit mode."""
+	_is_potential_drag = false
+	
+	if title_label and title_edit:
+		title_label.visible = false
+		title_edit.visible = true
+		title_edit.text = group_data.title if group_data else "Group"
+		title_edit.grab_focus()
+		title_edit.select_all()
+
+
+func _on_title_submitted(new_text: String) -> void:
+	"""Handle title edit submission."""
+	_finish_title_edit(new_text)
+
+
+func _on_title_focus_lost() -> void:
+	"""Handle title edit focus loss."""
+	if title_edit and title_edit.visible:
+		_finish_title_edit(title_edit.text)
+
+
+func _finish_title_edit(new_text: String) -> void:
+	"""Exit title edit mode."""
+	if title_label and title_edit:
+		before_data_changed.emit()
+		title_edit.visible = false
+		title_label.visible = true
+		if group_data:
+			group_data.title = new_text if new_text != "" else "Group"
+			title_label.text = group_data.title
+			data_changed.emit()
+
+# === Context Menu ===
+
+func _show_context_menu(pos: Vector2) -> void:
+	"""Show context menu."""
+	if context_menu:
+		context_menu.clear()
+		context_menu.add_item("Add Event", 10)
+		context_menu.add_item("Add Comment", 11)
+		context_menu.add_separator()
+		context_menu.add_item("Rename Group", 0)
+		context_menu.add_item("Change Color", 1)
+		context_menu.add_separator()
+		context_menu.add_item("Delete Group", 2)
+		context_menu.position = Vector2i(pos)
+		context_menu.popup()
+
+
+func _on_context_menu_id_pressed(id: int) -> void:
+	"""Handle context menu selection."""
+	match id:
+		0: _start_title_edit()
+		1: _show_color_picker()
+		2: delete_requested.emit()
+		10: add_event_requested.emit(self)
+		11: _add_comment_to_group()
+
+
+func _add_comment_to_group() -> void:
+	"""Add a new comment inside this group."""
+	if not group_data:
+		return
+	
+	before_data_changed.emit()
+	
+	var comment = FKCommentBlock.new()
+	comment.text = ""
+	group_data.children.append({"type": "comment", "data": comment})
+	
+	_rebuild_child_nodes()
+	data_changed.emit()
+
+
+func _show_color_picker() -> void:
+	"""Show color picker dialog."""
+	var picker = ColorPickerButton.new()
+	picker.color = group_data.color if group_data else Color(0.25, 0.22, 0.35, 1.0)
+	
+	var dialog = AcceptDialog.new()
+	dialog.title = "Choose Group Color"
+	dialog.add_child(picker)
+	add_child(dialog)
+	
+	picker.color_changed.connect(func(color):
+		if group_data:
+			before_data_changed.emit()
+			group_data.color = color
+			_update_color_display()
+			data_changed.emit()
+	)
+	
+	dialog.confirmed.connect(func(): dialog.queue_free())
+	dialog.canceled.connect(func(): dialog.queue_free())
+	dialog.popup_centered()
+
+# === Input Handling ===
+
+func _on_gui_input(event: InputEvent) -> void:
+	"""Handle general input."""
+	if event is InputEventMouseButton and event.pressed:
+		var children_margin = get_node_or_null("Panel/VBox/ChildrenMargin")
+		if children_margin and children_margin.visible:
+			var local_pos = children_margin.get_local_mouse_position()
+			if children_margin.get_rect().has_point(local_pos + children_margin.position):
+				return
+		
+		if event.button_index == MOUSE_BUTTON_LEFT:
+			selected.emit(self)
+		elif event.button_index == MOUSE_BUTTON_RIGHT:
+			selected.emit(self)
+			_show_context_menu(event.global_position)
+
+
+func _on_header_gui_input(event: InputEvent) -> void:
+	"""Handle header input."""
+	if title_edit and title_edit.visible:
+		_is_potential_drag = false
+		return
+	
+	if event is InputEventMouseButton:
+		if event.button_index == MOUSE_BUTTON_LEFT:
+			if event.pressed:
+				_drag_start_pos = event.position
+				_is_potential_drag = true
+				selected.emit(self)
+			else:
+				_is_potential_drag = false
+		elif event.button_index == MOUSE_BUTTON_RIGHT and event.pressed:
+			selected.emit(self)
+			_show_context_menu(event.global_position)
+	elif event is InputEventMouseMotion and _is_potential_drag:
+		var distance = event.position.distance_to(_drag_start_pos)
+		if distance >= DRAG_THRESHOLD and not get_viewport().gui_is_dragging():
+			_is_potential_drag = false
+			_start_group_drag()
+
+# === Selection ===
+
+func set_selected(value: bool) -> void:
+	"""Set selection state."""
+	is_selected = value
+	if panel and normal_stylebox and selected_stylebox:
+		if is_selected:
+			panel.add_theme_stylebox_override("panel", selected_stylebox)
+		else:
+			panel.add_theme_stylebox_override("panel", normal_stylebox)
+
+# === Drag and Drop ===
+
+func _get_drag_data(_at_position: Vector2):
+	"""Provide drag data."""
+	var preview = Label.new()
+	preview.text = "📁 " + (group_data.title if group_data else "Group")
+	preview.add_theme_color_override("font_color", Color(0.6, 0.8, 1.0, 0.9))
+	set_drag_preview(preview)
+	return {"node": self, "type": "group"}
+
+
+func _can_drop_data(at_position: Vector2, data) -> bool:
+	"""Check if drop is allowed."""
+	if not data is Dictionary:
+		return false
+	
+	var drag_type = data.get("type", "")
+	var drag_node = data.get("node")
+	
+	# Prevent self or ancestor drops
+	if drag_node == self:
+		DropIndicatorManager.hide_indicator()
+		return false
+	
+	var current = drag_node
+	while current:
+		if current == self:
+			DropIndicatorManager.hide_indicator()
+			return false
+		current = current.get_parent() if current.get_parent() else null
+	
+	# Accept block types
+	if drag_type not in ["event_row", "comment", "group"]:
+		DropIndicatorManager.hide_indicator()
+		return false
+	
+	# Check if drop is in children area
+	var children_margin = get_node_or_null("Panel/VBox/ChildrenMargin")
+	if children_margin and children_margin.visible:
+		var local_pos = children_margin.get_local_mouse_position()
+		if children_margin.get_rect().has_point(local_pos + children_margin.position):
+			_show_drop_indicator(at_position, drag_node)
+			return true
+	
+	DropIndicatorManager.hide_indicator()
+	return false
+
+
+func _drop_data(at_position: Vector2, data) -> void:
+	"""Handle drop."""
+	DropIndicatorManager.hide_indicator()
+	
+	if not data is Dictionary:
+		return
+	
+	var drag_node = data.get("node")
+	if not drag_node or not is_instance_valid(drag_node):
+		return
+	
+	var children_margin = get_node_or_null("Panel/VBox/ChildrenMargin")
+	if not (children_margin and children_margin.visible):
+		return
+	
+	var local_pos = children_margin.get_local_mouse_position()
+	if not children_margin.get_rect().has_point(local_pos + children_margin.position):
+		return
+	
+	_handle_drop(drag_node, data.get("type", ""))
+
+
+func _handle_drop(drag_node: Node, drag_type: String) -> void:
+	"""Handle the actual drop operation."""
+	var original_parent = drag_node.get_parent()
+	
+	# Check if this is an internal reorder (same parent = children_container)
+	if original_parent == children_container:
+		_handle_internal_reorder(drag_node)
+		return
+	
+	# External drop - moving from another container
+	_handle_external_drop(drag_node, drag_type, original_parent)
+
+
+func _handle_internal_reorder(drag_node: Node) -> void:
+	"""Handle reordering within this group."""
+	before_data_changed.emit()
+	
+	# Just move the visual node - data will be synced from UI
+	var drop_idx = _calculate_drop_index(drag_node)
+	children_container.move_child(drag_node, drop_idx)
+	
+	# Sync data from new visual order
+	_sync_children_to_data()
+	data_changed.emit()
+
+
+func _handle_external_drop(drag_node: Node, drag_type: String, original_parent: Node) -> void:
+	"""Handle drop from external source (another group or blocks_container)."""
+	# Extract data from the dragged node
+	var drag_data = null
+	match drag_type:
+		"event_row":
+			if drag_node.has_method("get_event_data"):
+				drag_data = drag_node.get_event_data()
+		"comment":
+			if drag_node.has_method("get_comment_data"):
+				drag_data = drag_node.get_comment_data()
+		"group":
+			if drag_node.has_method("get_group_data"):
+				drag_data = drag_node.get_group_data()
+	
+	if not drag_data:
+		return
+	
+	before_data_changed.emit()
+	
+	# Find and sync the source owner (another group or blocks_container)
+	var source_owner = original_parent
+	var max_depth = 5
+	var depth = 0
+	while source_owner and not (source_owner.has_method("_sync_children_to_data") or source_owner.has_signal("before_block_moved")) and depth < max_depth:
+		source_owner = source_owner.get_parent()
+		depth += 1
+	
+	# Remove from source and sync its data
+	if original_parent and is_instance_valid(original_parent):
+		original_parent.remove_child(drag_node)
+		
+		if source_owner:
+			if source_owner.has_method("_sync_children_to_data"):
+				# Source is a group
+				source_owner._sync_children_to_data()
+			# If source is blocks_container, it will sync on reload
+	
+	# Free the old visual node
+	drag_node.queue_free()
+	
+	# Calculate drop position
+	var drop_idx = _calculate_drop_index(drag_node)
+	
+	# Determine the type name for storage
+	var type_name = drag_type
+	if type_name == "event_row":
+		type_name = "event"
+	
+	# Add to this group's data
+	group_data.children.insert(drop_idx, {"type": type_name, "data": drag_data})
+	
+	# Rebuild UI
+	_rebuild_child_nodes()
+	data_changed.emit()
+
+
+func _calculate_drop_index(dragged_node: Node) -> int:
+	"""Calculate insert position for drop."""
+	var local_y = children_container.get_local_mouse_position().y
+	var result = DropIndicatorManager.calculate_drop_position(
+		children_container, local_y, [drop_hint, dragged_node]
+	)
+	return result["index"]
+
+
+func _show_drop_indicator(at_position: Vector2, dragged_node: Node) -> void:
+	"""Show drop indicator."""
+	var local_y = children_container.get_local_mouse_position().y
+	var result = DropIndicatorManager.calculate_drop_position(
+		children_container, local_y, [drop_hint, dragged_node]
+	)
+	DropIndicatorManager.show_indicator(
+		children_container, result["y_position"], children_container.size.x - 20
+	)
