@@ -162,6 +162,10 @@ func _input(event: InputEvent) -> void:
 	if not _is_mouse_in_blocks_area():
 		return
 	
+	# Check if a text editing control has focus - if so, don't intercept copy/paste
+	var focused = get_viewport().gui_get_focus_owner()
+	var is_editing_text = focused is TextEdit or focused is LineEdit
+	
 	# Handle Delete key
 	if event.keycode == KEY_DELETE:
 		if selected_item and is_instance_valid(selected_item):
@@ -170,16 +174,16 @@ func _input(event: InputEvent) -> void:
 		elif selected_row and is_instance_valid(selected_row):
 			_delete_selected_row()
 			get_viewport().set_input_as_handled()
-	# Handle Ctrl+C (copy)
-	elif event.keycode == KEY_C and event.ctrl_pressed:
+	# Handle Ctrl+C (copy) - only if not editing text
+	elif event.keycode == KEY_C and event.ctrl_pressed and not is_editing_text:
 		if selected_item and is_instance_valid(selected_item):
 			_copy_selected_item()
 			get_viewport().set_input_as_handled()
 		elif selected_row and is_instance_valid(selected_row):
 			_copy_selected_row()
 			get_viewport().set_input_as_handled()
-	# Handle Ctrl+V (paste)
-	elif event.keycode == KEY_V and event.ctrl_pressed:
+	# Handle Ctrl+V (paste) - only if not editing text
+	elif event.keycode == KEY_V and event.ctrl_pressed and not is_editing_text:
 		_paste_from_clipboard()
 		get_viewport().set_input_as_handled()
 
