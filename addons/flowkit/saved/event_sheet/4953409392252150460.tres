@@ -1,4 +1,4 @@
-[gd_resource type="Resource" script_class="FKEventSheet" load_steps=16 format=3 uid="uid://b83l5jwe7e8b7"]
+[gd_resource type="Resource" script_class="FKEventSheet" load_steps=20 format=3 uid="uid://b83l5jwe7e8b7"]
 
 [ext_resource type="Script" uid="uid://b1y3c8rnt2rcg" path="res://addons/flowkit/resources/fk_comment.gd" id="1_6310v"]
 [ext_resource type="Script" uid="uid://bxdhylwvr4osy" path="res://addons/flowkit/resources/event_block.gd" id="1_iqjwq"]
@@ -8,6 +8,47 @@
 [ext_resource type="Script" path="res://addons/flowkit/resources/fk_group.gd" id="5_1iq3u"]
 
 [sub_resource type="Resource" id="Resource_6310v"]
+script = ExtResource("1_6310v")
+text = "If you're looking for the event sheet for the player movement, we're using the platformer behavior, not the event sheet, behaviors allow you to just use pre-defined scripts."
+
+[sub_resource type="Resource" id="Resource_1iq3u"]
+script = ExtResource("2_e5301")
+action_id = "play"
+target_node = NodePath("Jump")
+
+[sub_resource type="Resource" id="Resource_cbhwn"]
+script = ExtResource("2_e5301")
+action_id = "print"
+target_node = NodePath("System")
+inputs = {
+"Message": "play"
+}
+
+[sub_resource type="Resource" id="Resource_jqahe"]
+script = ExtResource("3_6310v")
+condition_id = "is_on_floor"
+target_node = NodePath(".")
+
+[sub_resource type="Resource" id="Resource_qhwv1"]
+script = ExtResource("1_iqjwq")
+block_id = "event_1764740196_2578577456"
+event_id = "on_action_pressed"
+target_node = NodePath("System")
+inputs = {
+"key": "ui_accept"
+}
+conditions = Array[ExtResource("3_6310v")]([SubResource("Resource_jqahe")])
+actions = Array[ExtResource("2_e5301")]([SubResource("Resource_1iq3u"), SubResource("Resource_cbhwn")])
+
+[sub_resource type="Resource" id="Resource_8fi06"]
+script = ExtResource("5_1iq3u")
+title = "Handle player sounds"
+children = [{
+"data": SubResource("Resource_qhwv1"),
+"type": "event"
+}]
+
+[sub_resource type="Resource" id="Resource_lifsa"]
 script = ExtResource("2_e5301")
 action_id = "set_flip_h"
 target_node = NodePath("AnimatedSprite2D")
@@ -15,15 +56,7 @@ inputs = {
 "Value": "true"
 }
 
-[sub_resource type="Resource" id="Resource_1iq3u"]
-script = ExtResource("2_e5301")
-action_id = "print"
-target_node = NodePath("System")
-inputs = {
-"Message": "<<<"
-}
-
-[sub_resource type="Resource" id="Resource_cbhwn"]
+[sub_resource type="Resource" id="Resource_4pupr"]
 script = ExtResource("3_6310v")
 condition_id = "compare_node_variable"
 target_node = NodePath(".")
@@ -33,63 +66,63 @@ inputs = {
 "Value": "0"
 }
 
-[sub_resource type="Resource" id="Resource_jqahe"]
+[sub_resource type="Resource" id="Resource_rqf3r"]
 script = ExtResource("1_iqjwq")
 block_id = "event_1764627242_1978017420"
 event_id = "on_process_physics"
 target_node = NodePath(".")
-conditions = Array[ExtResource("3_6310v")]([SubResource("Resource_cbhwn")])
-actions = Array[ExtResource("2_e5301")]([SubResource("Resource_6310v"), SubResource("Resource_1iq3u")])
+conditions = Array[ExtResource("3_6310v")]([SubResource("Resource_4pupr")])
+actions = Array[ExtResource("2_e5301")]([SubResource("Resource_lifsa")])
 
-[sub_resource type="Resource" id="Resource_qhwv1"]
+[sub_resource type="Resource" id="Resource_smre5"]
 script = ExtResource("2_e5301")
 action_id = "set_flip_h"
 target_node = NodePath("AnimatedSprite2D")
 inputs = {
-"Value": "true"
+"Value": "false"
 }
 
-[sub_resource type="Resource" id="Resource_8fi06"]
-script = ExtResource("2_e5301")
-action_id = "print"
-target_node = NodePath("System")
-inputs = {
-"Message": "<<<"
-}
-
-[sub_resource type="Resource" id="Resource_lifsa"]
+[sub_resource type="Resource" id="Resource_1tvq8"]
 script = ExtResource("3_6310v")
 condition_id = "compare_node_variable"
 target_node = NodePath(".")
 inputs = {
-"Comparison": "<",
+"Comparison": ">",
 "Property": "velocity.x",
 "Value": "0"
 }
 
-[sub_resource type="Resource" id="Resource_4pupr"]
+[sub_resource type="Resource" id="Resource_rd6mx"]
 script = ExtResource("1_iqjwq")
 block_id = "on_key_pressed_1734183459_0987654321"
 event_id = "on_process_physics"
 target_node = NodePath(".")
-conditions = Array[ExtResource("3_6310v")]([SubResource("Resource_lifsa")])
-actions = Array[ExtResource("2_e5301")]([SubResource("Resource_qhwv1"), SubResource("Resource_8fi06")])
+conditions = Array[ExtResource("3_6310v")]([SubResource("Resource_1tvq8")])
+actions = Array[ExtResource("2_e5301")]([SubResource("Resource_smre5")])
 
-[sub_resource type="Resource" id="Resource_rqf3r"]
+[sub_resource type="Resource" id="Resource_ercbp"]
 script = ExtResource("5_1iq3u")
-title = "This is a group"
+title = "Sets the direction of the player sprite to flip the sprite horizontally based on if the player is moving left or right."
+color = Color(0.16839236, 0.07305908, 0.4453125, 1)
 children = [{
-"data": SubResource("Resource_jqahe"),
+"data": SubResource("Resource_rqf3r"),
 "type": "event"
 }, {
-"data": SubResource("Resource_4pupr"),
+"data": SubResource("Resource_rd6mx"),
 "type": "event"
 }]
 
 [resource]
 script = ExtResource("4_1iq3u")
-groups = Array[ExtResource("5_1iq3u")]([SubResource("Resource_rqf3r")])
+comments = Array[ExtResource("1_6310v")]([SubResource("Resource_6310v")])
+groups = Array[ExtResource("5_1iq3u")]([SubResource("Resource_8fi06"), SubResource("Resource_ercbp")])
 item_order = Array[Dictionary]([{
 "index": 0,
+"type": "comment"
+}, {
+"index": 0,
+"type": "group"
+}, {
+"index": 1,
 "type": "group"
 }])
