@@ -1,6 +1,7 @@
-[gd_scene load_steps=24 format=3 uid="uid://cctp6t57n3goy"]
+[gd_scene load_steps=25 format=3 uid="uid://cctp6t57n3goy"]
 
 [ext_resource type="Texture2D" uid="uid://cc1yi2e52w81w" path="res://addons/flowkit/demos/assets/brackeys_platformer_assets/sprites/knight.png" id="1_4xkeg"]
+[ext_resource type="AudioStream" uid="uid://bnlonyigquoup" path="res://addons/flowkit/demos/assets/brackeys_platformer_assets/sounds/jump.wav" id="2_wile8"]
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_wile8"]
 atlas = ExtResource("1_4xkeg")
@@ -178,3 +179,6 @@ sprite_frames = SubResource("SpriteFrames_dcvue")
 position = Vector2(2.3841852e-07, 2.4999998)
 scale = Vector2(0.99999976, 0.99999976)
 shape = SubResource("RectangleShape2D_4xkeg")
+
+[node name="Jump" type="AudioStreamPlayer2D" parent="."]
+stream = ExtResource("2_wile8")
