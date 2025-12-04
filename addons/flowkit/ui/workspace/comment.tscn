@@ -11,7 +11,6 @@ border_width_bottom = 0
 border_color = Color(0.72, 0.64, 0.3, 1.0)
 
 [node name="Comment" type="MarginContainer"]
-custom_minimum_size = Vector2(0, 28)
 mouse_filter = 0
 theme_override_constants/margin_bottom = 1
 script = ExtResource("1_uyxcp")
@@ -32,13 +31,15 @@ theme_override_constants/margin_bottom = 4
 [node name="DisplayLabel" type="Label" parent="Panel/MarginContainer"]
 layout_mode = 2
 size_flags_horizontal = 3
-size_flags_vertical = 1
+size_flags_vertical = 3
 mouse_filter = 2
 theme_override_colors/font_color = Color(0.1, 0.08, 0.02, 1)
 theme_override_colors/font_outline_color = Color(0.1, 0.08, 0.02, 0.5)
 theme_override_constants/outline_size = 2
 theme_override_font_sizes/font_size = 13
 text = "Add comment..."
+autowrap_mode = 3
+vertical_alignment = 0
 
 [node name="TextEdit" type="TextEdit" parent="Panel/MarginContainer"]
 visible = false
@@ -50,4 +51,5 @@ theme_override_colors/font_color = Color(0.95, 0.9, 0.6, 1)
 theme_override_colors/background_color = Color(0, 0, 0, 0)
 theme_override_font_sizes/font_size = 13
 placeholder_text = "Add comment..."
+wrap_mode = 1
 scroll_fit_content_height = true

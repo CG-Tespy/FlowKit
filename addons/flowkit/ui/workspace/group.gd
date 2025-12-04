@@ -510,16 +510,33 @@ func _show_color_picker() -> void:
 	dialog.add_child(picker)
 	add_child(dialog)
 	
+	var original_color = picker.color
+	
+	# Preview color changes without saving
 	picker.color_changed.connect(func(color):
 		if group_data:
-			before_data_changed.emit()
 			group_data.color = color
 			_update_color_display()
-			data_changed.emit()
 	)
 	
-	dialog.confirmed.connect(func(): dialog.queue_free())
-	dialog.canceled.connect(func(): dialog.queue_free())
+	dialog.confirmed.connect(func():
+		# Only save when confirmed
+		if group_data:
+			before_data_changed.emit()
+			group_data.color = picker.color
+			_update_color_display()
+			data_changed.emit()
+		dialog.queue_free()
+	)
+	
+	dialog.canceled.connect(func():
+		# Restore original color on cancel
+		if group_data:
+			group_data.color = original_color
+			_update_color_display()
+		dialog.queue_free()
+	)
+	
 	dialog.popup_centered()
 
 # === Input Handling ===

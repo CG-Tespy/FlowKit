@@ -22,6 +22,10 @@ func _ready() -> void:
 	# Ensure we receive mouse events
 	mouse_filter = Control.MOUSE_FILTER_STOP
 	
+	# Initialize text_edit with comment_data if available
+	if text_edit and comment_data:
+		text_edit.text = comment_data.text
+	
 	if text_edit:
 		text_edit.text_changed.connect(_on_text_changed)
 	
@@ -51,6 +55,14 @@ func set_selected(value: bool) -> void:
 func _set_display_mode() -> void:
 	"""Switch to display mode (yellow solid, not editable)."""
 	is_editing = false
+	
+	# Update comment data and emit signal when exiting edit mode
+	if text_edit and comment_data:
+		var new_text = text_edit.text
+		if comment_data.text != new_text:
+			comment_data.text = new_text
+			data_changed.emit()
+	
 	if text_edit:
 		text_edit.visible = false
 	if display_label:
@@ -98,9 +110,9 @@ func _update_style() -> void:
 		panel.add_theme_stylebox_override("panel", style)
 
 func _on_text_changed() -> void:
-	if comment_data:
-		comment_data.text = text_edit.text
-		data_changed.emit()
+	# Update display label preview but don't save yet
+	# Saving happens when edit mode is exited (_set_display_mode)
+	pass
 
 func _get_drag_data(_at_position: Vector2):
 	if is_editing:
