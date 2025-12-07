@@ -79,11 +79,19 @@ func get_node_var(node: Node, var_name: String, default: Variant = null) -> Vari
 	if node.has_meta("flowkit_variables"):
 		var meta_vars: Dictionary = node.get_meta("flowkit_variables")
 		if meta_vars.has(var_name):
+			var value = meta_vars[var_name]
+			
+			# Apply type conversion if type metadata exists
+			if node.has_meta("flowkit_variable_types"):
+				var var_types: Dictionary = node.get_meta("flowkit_variable_types")
+				if var_types.has(var_name):
+					value = _convert_to_type(value, var_types[var_name])
+			
 			# Sync to memory
 			if not node_variables.has(node_path):
 				node_variables[node_path] = {}
-			node_variables[node_path][var_name] = meta_vars[var_name]
-			return meta_vars[var_name]
+			node_variables[node_path][var_name] = value
+			return value
 	
 	return default
 
@@ -171,11 +179,58 @@ func _sync_node_recursive(node: Node) -> void:
 			if not node_variables.has(node_path):
 				node_variables[node_path] = {}
 			
+			# Get type metadata if available
+			var var_types: Dictionary = {}
+			if node.has_meta("flowkit_variable_types"):
+				var_types = node.get_meta("flowkit_variable_types", {})
+			
 			for var_name in meta_vars.keys():
-				node_variables[node_path][var_name] = meta_vars[var_name]
+				var value = meta_vars[var_name]
+				
+				# Apply type conversion if type metadata exists
+				if var_types.has(var_name):
+					value = _convert_to_type(value, var_types[var_name])
+				
+				node_variables[node_path][var_name] = value
 			
 			print("[FlowKitSystem] Synced %d variables for node: %s" % [meta_vars.size(), node.name])
 	
 	# Recursively sync children
 	for child in node.get_children():
 		_sync_node_recursive(child)
+
+## Convert a value to the specified type
+func _convert_to_type(value: Variant, target_type: String) -> Variant:
+	match target_type:
+		"int":
+			if value is int:
+				return value
+			if value is float:
+				return int(value)
+			if value is String:
+				return int(value) if value.is_valid_int() else 0
+			if value is bool:
+				return 1 if value else 0
+			return 0
+		"float":
+			if value is float:
+				return value
+			if value is int:
+				return float(value)
+			if value is String:
+				return float(value) if value.is_valid_float() else 0.0
+			if value is bool:
+				return 1.0 if value else 0.0
+			return 0.0
+		"bool":
+			if value is bool:
+				return value
+			if value is int:
+				return value != 0
+			if value is float:
+				return value != 0.0
+			if value is String:
+				return value.to_lower() == "true"
+			return false
+		_:  # String or unknown type
+			return str(value)
