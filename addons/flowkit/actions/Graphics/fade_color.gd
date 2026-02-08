@@ -13,8 +13,8 @@ func get_name() -> String:
 func get_supported_types() -> Array:
 	return [
 		"ColorRect",
-		"Label",
-		"RichTextLabel"
+		"Light2D",
+		"Light3D"
 	]
 
 func get_inputs() -> Array:
@@ -95,7 +95,9 @@ var tween: Tween = null
 func decide_color_prop_name_for(node: Node) -> String:
 	# Later on, we might support node types that don't have their main color
 	# properties simply named "color". Hence the need for this func.
-	if (node.get_class() == "ColorRect"):
-		return "color"
-	else:
-		return "color"
+	var result: String = "color"
+
+	if (node.get_class() == "Light3D"):
+		result = "light_color"
+
+	return result
