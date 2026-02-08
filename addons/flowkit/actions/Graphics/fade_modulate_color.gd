@@ -1,20 +1,19 @@
 extends FKAction
 
 func get_description() -> String:
-	var result: String = "Fades the main color of a Node over time."
+	var result: String = "Changes the Modulate property/color of a Node over time. This is separate from"
+	result += " the color of the node's color property (if it has one)."
 	return result
 
 func get_id() -> String:
-	return "Fade Color"
+	return "Fade Modulate Color"
 
 func get_name() -> String:
-	return "Fade Color"
+	return "Fade Modulate Color"
 
 func get_supported_types() -> Array:
 	return [
-		"ColorRect",
-		"Light2D",
-		"Light3D"
+		"CanvasItem",
 	]
 
 func get_inputs() -> Array:
@@ -53,7 +52,7 @@ func decide_arg_vals(_node: Node, inputs: Dictionary) -> void:
 	duration = inputs.get("duration", default_duration)
 	alpha_only = inputs.get("Alpha Only", false)
 	alpha = inputs.get("Alpha", default_alpha) / 100.0
-
+	
 	var color_prop_name: String = decide_color_prop_name_for(_node)
 	if alpha_only:
 		target_color = _node.get(color_prop_name)
@@ -92,12 +91,6 @@ func rgb_to_hex(rgb_string: String) -> String:
 
 var tween: Tween = null
 
-func decide_color_prop_name_for(node: Node) -> String:
-	# Later on, we might support node types that don't have their main color
-	# properties simply named "color". Hence the need for this func.
-	var result: String = "color"
-
-	if (node.get_class() == "Light3D"):
-		result = "light_color"
-
+func decide_color_prop_name_for(_node: Node) -> String:
+	var result: String = "modulate"
 	return result

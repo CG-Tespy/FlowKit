@@ -1,4 +1,4 @@
-[gd_resource type="Resource" script_class="FKEventSheet" load_steps=10 format=3 uid="uid://uo45usge3b6k"]
+[gd_resource type="Resource" script_class="FKEventSheet" format=3 uid="uid://uo45usge3b6k"]
 
 [ext_resource type="Script" uid="uid://b1y3c8rnt2rcg" path="res://addons/flowkit/resources/fk_comment.gd" id="1_t5adf"]
 [ext_resource type="Script" uid="uid://bxdhylwvr4osy" path="res://addons/flowkit/resources/event_block.gd" id="2_s7o4u"]
@@ -8,32 +8,161 @@
 [ext_resource type="Script" uid="uid://bumsyiqkp46l1" path="res://addons/flowkit/resources/event_sheet.gd" id="6_1sc5p"]
 
 [sub_resource type="Resource" id="Resource_t5adf"]
+script = ExtResource("1_t5adf")
+text = "First, fade into the \"studio logo\""
+
+[sub_resource type="Resource" id="Resource_s7o4u"]
+script = ExtResource("3_ytm5k")
+action_id = "Print Message"
+target_node = NodePath(".")
+inputs = {
+"color": "",
+"message": "Fading in"
+}
+
+[sub_resource type="Resource" id="Resource_ytm5k"]
+script = ExtResource("3_ytm5k")
+action_id = "set_window_mode"
+target_node = NodePath("System")
+inputs = {
+"Mode": "windowed"
+}
+
+[sub_resource type="Resource" id="Resource_rm0fh"]
+script = ExtResource("3_ytm5k")
+action_id = "set_window_size"
+target_node = NodePath("System")
+inputs = {
+"Height": "720",
+"Width": "1280"
+}
+
+[sub_resource type="Resource" id="Resource_iynvq"]
 script = ExtResource("3_ytm5k")
 action_id = "Fade Color"
 target_node = NodePath("CanvasLayer/CoversScreen")
 inputs = {
-"Alpha": "100",
-"Alpha Only": "false",
-"Duration": "1.5",
-"Target Color": "255, 255, 255"
+"Alpha": "0",
+"Alpha Only": "true",
+"Duration": "$FirstTimer.wait_time",
+"Target Color": ""
 }
 
-[sub_resource type="Resource" id="Resource_s7o4u"]
+[sub_resource type="Resource" id="Resource_1sc5p"]
 script = ExtResource("3_ytm5k")
 action_id = "start"
 target_node = NodePath("FirstTimer")
 
-[sub_resource type="Resource" id="Resource_ytm5k"]
+[sub_resource type="Resource" id="Resource_ejtba"]
 script = ExtResource("2_s7o4u")
-block_id = "event_1770495651_3656512735"
+block_id = "event_1770581979_2245071578"
 event_id = "on_ready"
-target_node = NodePath("Logic")
-actions = Array[ExtResource("3_ytm5k")]([SubResource("Resource_t5adf"), SubResource("Resource_s7o4u")])
+target_node = NodePath(".")
+actions = Array[ExtResource("3_ytm5k")]([SubResource("Resource_s7o4u"), SubResource("Resource_ytm5k"), SubResource("Resource_rm0fh"), SubResource("Resource_iynvq"), SubResource("Resource_1sc5p")])
+
+[sub_resource type="Resource" id="Resource_kbegb"]
+script = ExtResource("3_ytm5k")
+action_id = "Print Message"
+target_node = NodePath(".")
+inputs = {
+"color": "",
+"message": "Fading into the \"studio logo\""
+}
+
+[sub_resource type="Resource" id="Resource_2i0f5"]
+script = ExtResource("3_ytm5k")
+action_id = "Fade Modulate Color"
+target_node = NodePath("CanvasLayer/FlowkitIcon")
+inputs = {
+"Alpha": "100",
+"Alpha Only": "true",
+"Duration": "$SecondTimer.wait_time",
+"Target Color": ""
+}
+
+[sub_resource type="Resource" id="Resource_8saiw"]
+script = ExtResource("3_ytm5k")
+action_id = "start"
+target_node = NodePath("SecondTimer")
+
+[sub_resource type="Resource" id="Resource_vta5f"]
+script = ExtResource("3_ytm5k")
+action_id = "Fade Modulate Color"
+target_node = NodePath("CanvasLayer/StudioLogo")
+inputs = {
+"Alpha": "100",
+"Alpha Only": "true",
+"Duration": "$FirstTimer.wait_time",
+"Target Color": "0, 0, 255"
+}
+
+[sub_resource type="Resource" id="Resource_a77t4"]
+script = ExtResource("2_s7o4u")
+block_id = "event_1770582558_3960496043"
+event_id = "Timer on Timeout"
+target_node = NodePath("FirstTimer")
+actions = Array[ExtResource("3_ytm5k")]([SubResource("Resource_kbegb"), SubResource("Resource_2i0f5"), SubResource("Resource_8saiw"), SubResource("Resource_vta5f")])
+
+[sub_resource type="Resource" id="Resource_g2c3u"]
+script = ExtResource("3_ytm5k")
+action_id = "Print Message"
+target_node = NodePath(".")
+inputs = {
+"color": "",
+"message": "Fading out of that one"
+}
+
+[sub_resource type="Resource" id="Resource_li7lq"]
+script = ExtResource("3_ytm5k")
+action_id = "Fade Modulate Color"
+target_node = NodePath("CanvasLayer/FlowkitIcon")
+inputs = {
+"Alpha": "80",
+"Alpha Only": "false",
+"Duration": "2",
+"Target Color": "255, 0, 0"
+}
+
+[sub_resource type="Resource" id="Resource_b3hw7"]
+script = ExtResource("2_s7o4u")
+block_id = "event_1770582842_1470228278"
+event_id = "Timer on Timeout"
+target_node = NodePath("SecondTimer")
+actions = Array[ExtResource("3_ytm5k")]([SubResource("Resource_g2c3u"), SubResource("Resource_li7lq")])
+
+[sub_resource type="Resource" id="Resource_1qadt"]
+script = ExtResource("3_ytm5k")
+action_id = "Print Message"
+target_node = NodePath(".")
+inputs = {
+"color": "",
+"message": "Fading out FlowKit logo"
+}
+
+[sub_resource type="Resource" id="Resource_cdt56"]
+script = ExtResource("2_s7o4u")
+block_id = "event_1770583236_907862993"
+event_id = "Timer on Timeout"
+target_node = NodePath("ThirdTimer")
+actions = Array[ExtResource("3_ytm5k")]([SubResource("Resource_1qadt")])
 
 [resource]
 script = ExtResource("6_1sc5p")
-events = Array[ExtResource("2_s7o4u")]([SubResource("Resource_ytm5k")])
+events = Array[ExtResource("2_s7o4u")]([SubResource("Resource_ejtba"), SubResource("Resource_a77t4"), SubResource("Resource_b3hw7"), SubResource("Resource_cdt56")])
+comments = Array[ExtResource("1_t5adf")]([SubResource("Resource_t5adf")])
 item_order = Array[Dictionary]([{
 "index": 0,
+"type": "event"
+}, {
+"index": 0,
+"type": "comment"
+}, {
+"index": 1,
+"type": "event"
+}, {
+"index": 2,
+"type": "event"
+}, {
+"index": 3,
 "type": "event"
 }])
