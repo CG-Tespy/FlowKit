@@ -1,7 +1,7 @@
 extends FKAction
 
 func get_description() -> String:
-	var result: String = "Fades the main color of a Node over time."
+	var result: String = "Fades the main color of a Node."
 	return result
 
 func get_id() -> String:
@@ -41,19 +41,25 @@ func get_inputs() -> Array:
 		},
 	]
 
-func execute(_node: Node, inputs: Dictionary, _str: String = "") -> void:
-	decide_arg_vals(_node, inputs)
+func execute(node: Node, inputs: Dictionary, _str: String = "") -> void:
+	decide_arg_vals(node, inputs)
+	var color_prop_name: String = decide_color_prop_name_for(node)
 	if tween != null:
 		tween.cancel_free()
-	tween = _node.create_tween()
-	var color_prop_name: String = decide_color_prop_name_for(_node)
-	tween.tween_property(_node, color_prop_name, target_color, duration)
-	
+	if duration <= 0:
+		node.set(color_prop_name, target_color)
+	else:
+		tween = node.create_tween()
+		tween.tween_property(node, color_prop_name, target_color, duration)
+
 func decide_arg_vals(_node: Node, inputs: Dictionary) -> void:
-	duration = inputs.get("duration", default_duration)
+	var duration_input = inputs.get("Duration", default_duration)
+	print("Duration input is: " + str(duration_input))
+	duration = float(inputs.get("Duration", default_duration))
+	print("Duration is " + str(duration))
 	alpha_only = inputs.get("Alpha Only", false)
 	alpha = inputs.get("Alpha", default_alpha) / 100.0
-
+	
 	var color_prop_name: String = decide_color_prop_name_for(_node)
 	if alpha_only:
 		target_color = _node.get(color_prop_name)

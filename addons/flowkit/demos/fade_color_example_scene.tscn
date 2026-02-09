@@ -1,6 +1,7 @@
 [gd_scene format=3 uid="uid://cub03n1ue4tq8"]
 
 [ext_resource type="Texture2D" uid="uid://cwmew5d8um1pr" path="res://icon.svg" id="1_bmscr"]
+[ext_resource type="Texture2D" uid="uid://bwn53gvm70d3a" path="res://addons/flowkit/assets/PNG_Godot Font 1 Circle.png" id="2_kn5r7"]
 
 [sub_resource type="LabelSettings" id="LabelSettings_bmscr"]
 font_size = 64
@@ -19,7 +20,7 @@ size_flags_horizontal = 3
 size_flags_vertical = 3
 color = Color(0, 0, 0, 1)
 
-[node name="FlowkitIcon" type="TextureRect" parent="CanvasLayer" unique_id=493449777]
+[node name="FlowkitLogo" type="TextureRect" parent="CanvasLayer" unique_id=493449777]
 modulate = Color(1, 1, 1, 0)
 anchors_preset = 15
 anchor_right = 1.0
@@ -30,15 +31,23 @@ grow_horizontal = 2
 grow_vertical = 2
 texture = ExtResource("1_bmscr")
 
-[node name="CoversScreen" type="ColorRect" parent="CanvasLayer" unique_id=307315208]
-visible = false
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
+[node name="GodotLogo" type="TextureRect" parent="CanvasLayer" unique_id=790376195]
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -450.0
+offset_top = -330.0
+offset_right = 450.0
+offset_bottom = 330.0
 grow_horizontal = 2
 grow_vertical = 2
-size_flags_horizontal = 3
-size_flags_vertical = 3
+size_flags_horizontal = 0
+size_flags_vertical = 0
+texture = ExtResource("2_kn5r7")
+expand_mode = 1
+stretch_mode = 5
 
 [node name="StudioLogo" type="Label" parent="CanvasLayer" unique_id=1674411970]
 modulate = Color(0.3254902, 0.30588236, 1, 0)
@@ -53,23 +62,37 @@ horizontal_alignment = 1
 vertical_alignment = 1
 autowrap_mode = 2
 
-[node name="Logic" type="Node" parent="." unique_id=1633121671]
+[node name="CoversScreen" type="ColorRect" parent="CanvasLayer" unique_id=307315208]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
 
-[node name="FirstTimer" type="Timer" parent="." unique_id=1123183781]
+[node name="Timers" type="Node" parent="." unique_id=1633121671]
+
+[node name="FirstTimer" type="Timer" parent="Timers" unique_id=1123183781]
+wait_time = 5.0
 one_shot = true
 
-[node name="SecondTimer" type="Timer" parent="." unique_id=1236989976]
+[node name="SecondTimer" type="Timer" parent="Timers" unique_id=1236989976]
 wait_time = 2.0
 one_shot = true
 
-[node name="ThirdTimer" type="Timer" parent="." unique_id=1614469964]
+[node name="ThirdTimer" type="Timer" parent="Timers" unique_id=1614469964]
 wait_time = 3.0
 one_shot = true
 
-[node name="FourthTimer" type="Timer" parent="." unique_id=450560524]
+[node name="FourthTimer" type="Timer" parent="Timers" unique_id=450560524]
 wait_time = 2.0
 one_shot = true
 
-[node name="FifthTimer" type="Timer" parent="." unique_id=1727687272]
+[node name="FifthTimer" type="Timer" parent="Timers" unique_id=1727687272]
+wait_time = 2.0
+one_shot = true
+
+[node name="SixthTimer" type="Timer" parent="Timers" unique_id=535738891]
 wait_time = 2.0
 one_shot = true
