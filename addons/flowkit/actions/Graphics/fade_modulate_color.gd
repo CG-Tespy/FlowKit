@@ -54,9 +54,9 @@ func execute(node: Node, inputs: Dictionary, _str: String = "") -> void:
 	
 func decide_arg_vals(_node: Node, inputs: Dictionary) -> void:
 	var duration_input = inputs.get("Duration", default_duration)
-	print("Duration input is: " + str(duration_input))
+	print("Duration input is: " + str(duration_input) + " Target node: " + _node.name)
 	duration = float(inputs.get("Duration", default_duration))
-	print("Duration is " + str(duration))
+	print("Duration is " + str(duration)  + " Target node: " + _node.name)
 	alpha_only = inputs.get("Alpha Only", false)
 	alpha = inputs.get("Alpha", default_alpha) / 100.0
 	
