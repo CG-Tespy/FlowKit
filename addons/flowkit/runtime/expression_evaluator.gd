@@ -17,19 +17,25 @@ class_name FKExpressionEvaluator
 
 ## Evaluate a string expression and returns the result
 ## Tries to parse as literal first, then as GDScript expression
-static func evaluate(expr_str: String, context_node: Node = null) -> Variant:
+## context_node: the base instance for expression execution (determines where get_node() resolves from)
+## scene_root: optional scene root node, exposed as 'scene_root' variable in expressions
+## target_node: optional action target node, used for n_ variable lookups (falls back to context_node)
+static func evaluate(expr_str: String, context_node: Node = null, scene_root: Node = null, target_node: Node = null) -> Variant:
 	if expr_str.is_empty():
 		return ""
 	
 	# Trim whitespace
 	expr_str = expr_str.strip_edges()
 	
+	# For n_ variable lookups, use target_node if provided; otherwise context_node
+	var n_var_node: Node = target_node if target_node else context_node
+	
 	# Check if this is a node variable reference (n_variable_name)
-	if expr_str.begins_with("n_") and context_node:
+	if expr_str.begins_with("n_") and n_var_node:
 		var var_name = expr_str.substr(2)
-		var system = context_node.get_tree().root.get_node_or_null("/root/FlowKitSystem")
+		var system = n_var_node.get_tree().root.get_node_or_null("/root/FlowKitSystem")
 		if system and system.has_method("get_node_var"):
-			var value = system.get_node_var(context_node, var_name, null)
+			var value = system.get_node_var(n_var_node, var_name, null)
 			# Always return the value (even if null) for n_ prefixed variables
 			# This prevents them from being treated as string literals
 			return value
@@ -40,7 +46,7 @@ static func evaluate(expr_str: String, context_node: Node = null) -> Variant:
 		return literal_result
 	
 	# If not a literal, try to evaluate as a GDScript expression
-	var expr_result = _evaluate_expression(expr_str, context_node)
+	var expr_result = _evaluate_expression(expr_str, context_node, scene_root, target_node)
 	if expr_result != null:
 		return expr_result
 	
@@ -162,17 +168,26 @@ static func _is_constructor_literal(expr: String) -> bool:
 
 
 ## Evaluate a GDScript expression using Godot's Expression class
-static func _evaluate_expression(expr_str: String, context_node: Node) -> Variant:
+## context_node: used as the base instance for Expression.execute() (where get_node() resolves from)
+## scene_root: optional scene root node, exposed as 'scene_root' in expressions
+## target_node: optional action target node, exposed as 'node' in expressions (falls back to context_node)
+static func _evaluate_expression(expr_str: String, context_node: Node, scene_root: Node = null, target_node: Node = null) -> Variant:
 	var expression = Expression.new()
 	
 	# Build input variables for the expression
 	var input_names: Array = []
 	var input_values: Array = []
 	
-	# Always provide 'node' if we have a context
-	if context_node:
+	# 'node' variable always points to the action's target node for property access
+	var node_var: Node = target_node if target_node else context_node
+	if node_var:
 		input_names.append("node")
-		input_values.append(context_node)
+		input_values.append(node_var)
+	
+	# Provide 'scene_root' for scene-root-relative node lookups
+	if scene_root:
+		input_names.append("scene_root")
+		input_values.append(scene_root)
 	
 	# Try to get FlowKitSystem for accessing global variables
 	if context_node:
@@ -205,7 +220,10 @@ static func _evaluate_expression(expr_str: String, context_node: Node) -> Varian
 
 ## Convenience method to evaluate all inputs in a dictionary
 ## Returns a new dictionary with evaluated values
-static func evaluate_inputs(inputs: Dictionary, context_node: Node = null) -> Dictionary:
+## context_node: the base instance for expression execution
+## scene_root: optional scene root node, forwarded to evaluate()
+## target_node: optional action target node for n_ variable lookups
+static func evaluate_inputs(inputs: Dictionary, context_node: Node = null, scene_root: Node = null, target_node: Node = null) -> Dictionary:
 	var evaluated: Dictionary = {}
 	
 	for key in inputs.keys():
@@ -213,7 +231,7 @@ static func evaluate_inputs(inputs: Dictionary, context_node: Node = null) -> Di
 		
 		# Only evaluate if the value is a string
 		if value is String:
-			evaluated[key] = evaluate(value, context_node)
+			evaluated[key] = evaluate(value, context_node, scene_root, target_node)
 		else:
 			evaluated[key] = value
 	
