@@ -170,7 +170,8 @@ func _run_sheet(entry: Dictionary) -> void:
 					if not anode:
 						print("[FlowKit] Standalone condition action target node not found: ", act.target_node)
 						continue
-				registry.execute_action(act.action_id, anode, act.inputs, current_root, "")
+				var provider: Variant = await registry.execute_action(act.action_id, anode, act.inputs, current_root, "")
+
 
 	# Collect all events from the sheet (both top-level and nested in groups)
 	var all_events: Array = []
@@ -194,7 +195,7 @@ func _run_sheet(entry: Dictionary) -> void:
 			continue
 
 		# Poll the event with the block's inputs
-		var event_triggered = registry.poll_event(block.event_id, node, block.inputs, block.block_id)
+		var event_triggered = registry.poll_event(block.event_id, node, block.inputs, block.block_id, current_root)
 		if not event_triggered:
 			continue
 
@@ -291,7 +292,13 @@ func _execute_block(block: FKEventBlock, current_root: Node) -> void:
 			if not anode:
 				print("[FlowKit] Action target node not found: ", act.target_node)
 				continue
-		registry.execute_action(act.action_id, anode, act.inputs, current_root, block.block_id)
+		var provider: Variant = await registry.execute_action(act.action_id, anode, act.inputs, current_root, block.block_id)
+		#if _is_multi_frame_provider(provider):
+		#	print("Awaiting async provider in _execute_block")
+		#	await provider.exec_completed
+
+func _is_multi_frame_provider(provider: Variant) -> bool:
+	return provider and provider.has_method("requires_multi_frames") and provider.requires_multi_frames()
 
 func _collect_events_from_groups(groups: Array, out_events: Array) -> void:
 	for group in groups:

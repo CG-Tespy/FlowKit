@@ -109,12 +109,12 @@ func _scan_directory_recursive(path: String, array: Array) -> void:
 	
 	dir.list_dir_end()
 
-func poll_event(event_id: String, node: Node, inputs: Dictionary = {}, block_id: String = "") -> bool:
+func poll_event(event_id: String, node: Node, inputs: Dictionary = {}, block_id: String = "", scene_root: Node = null) -> bool:
 	for provider in event_providers:
 		if provider.has_method("get_id") and provider.get_id() == event_id:
 			if provider.has_method("poll"):
 				# Evaluate expressions in inputs before polling
-				var evaluated_inputs: Dictionary = FKExpressionEvaluator.evaluate_inputs(inputs, node)
+				var evaluated_inputs: Dictionary = FKExpressionEvaluator.evaluate_inputs(inputs, node, scene_root)
 				return provider.poll(node, evaluated_inputs, block_id)
 	return false
 
@@ -152,20 +152,43 @@ func check_condition(condition_id: String, node: Node, inputs: Dictionary, negat
 				# Evaluate expressions in inputs before checking
 				# Use node as context for variable resolution (not scene_root)
 				var context = node
-				var evaluated_inputs: Dictionary = FKExpressionEvaluator.evaluate_inputs(inputs, context)
+				var evaluated_inputs: Dictionary = FKExpressionEvaluator.evaluate_inputs(inputs, context, scene_root)
 				var result = provider.check(node, evaluated_inputs, block_id)
 				return not result if negated else result
 	return false
 
-func execute_action(action_id: String, node: Node, inputs: Dictionary, scene_root: Node = null, block_id: String = "") -> void:
+func execute_action(action_id: String, node: Node, inputs: Dictionary, scene_root: Node = null, block_id: String = "") -> Variant:
 	for provider in action_providers:
 		if provider.has_method("get_id") and provider.get_id() == action_id:
 			if provider.has_method("execute"):
-				# Evaluate expressions in inputs before executing
-				# Always use the node as context for variable lookup (node variables are stored on the target node)
-				var evaluated_inputs: Dictionary = FKExpressionEvaluator.evaluate_inputs(inputs, node)
+				# Use scene_root as the base instance so get_node() resolves from the scene root
+				# Pass original node as target_node so n_ variable lookups resolve on the correct node
+				var context = scene_root if scene_root else node
+				var evaluated_inputs: Dictionary = FKExpressionEvaluator.evaluate_inputs(inputs, context, scene_root, node)
+				
+				var is_multi_frame_action: bool = provider.has_method("requires_multi_frames") and provider.requires_multi_frames()
+				if is_multi_frame_action:
+					_waiting_on_action = true
+					provider.exec_completed.connect(_on_exec_completed)
+					# ^Need to listen for the completion signal BEFORE we execute the action.
+					# Otherwise, under circumstances where the action only needs one frame to work,
+					# we'll miss the timing and end up freezing the game.
+					
 				provider.execute(node, evaluated_inputs, block_id)
-				return
+				while _waiting_on_action:
+					await node.get_tree().process_frame
+				
+				if is_multi_frame_action:
+					provider.exec_completed.disconnect(_on_exec_completed) 
+					# ^Signal-hygiene
+					
+				return provider
+	return null
+
+func _on_exec_completed():
+	_waiting_on_action = false
+
+var _waiting_on_action: bool = false
 
 func get_behavior(behavior_id: String) -> Variant:
 	for provider in behavior_providers:
@@ -178,7 +201,7 @@ func apply_behavior(behavior_id: String, node: Node, inputs: Dictionary = {}, sc
 	if behavior and behavior.has_method("apply"):
 		# Use scene_root as context if provided, otherwise use the node
 		var context = scene_root if scene_root else node
-		var evaluated_inputs: Dictionary = FKExpressionEvaluator.evaluate_inputs(inputs, context)
+		var evaluated_inputs: Dictionary = FKExpressionEvaluator.evaluate_inputs(inputs, context, scene_root)
 		behavior.apply(node, evaluated_inputs)
 
 func remove_behavior(behavior_id: String, node: Node) -> void:
