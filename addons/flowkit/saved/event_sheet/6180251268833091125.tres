@@ -86,10 +86,10 @@ inputs = {
 
 [sub_resource type="Resource" id="Resource_kbegb"]
 script = ExtResource("3_ytm5k")
-action_id = "Wait For Seconds"
-target_node = NodePath(".")
+action_id = "Wait For Input"
+target_node = NodePath("System")
 inputs = {
-"Duration": "2.5"
+"Input Binding Name": "ui_accept"
 }
 
 [sub_resource type="Resource" id="Resource_2i0f5"]
@@ -118,10 +118,10 @@ inputs = {
 
 [sub_resource type="Resource" id="Resource_vta5f"]
 script = ExtResource("3_ytm5k")
-action_id = "Wait For Frames"
-target_node = NodePath(".")
+action_id = "Wait For Input"
+target_node = NodePath("System")
 inputs = {
-"Frame Count": "42"
+"Input Binding Name": "ui_accept"
 }
 
 [sub_resource type="Resource" id="Resource_a77t4"]
@@ -150,10 +150,10 @@ inputs = {
 
 [sub_resource type="Resource" id="Resource_li7lq"]
 script = ExtResource("3_ytm5k")
-action_id = "Wait For Seconds"
-target_node = NodePath(".")
+action_id = "Wait For Input"
+target_node = NodePath("System")
 inputs = {
-"Duration": "2.5"
+"Input Binding Name": "ui_accept"
 }
 
 [sub_resource type="Resource" id="Resource_b3hw7"]

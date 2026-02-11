@@ -10,7 +10,7 @@ func get_name() -> String:
 	return "Wait For Seconds"
 
 func get_supported_types() -> Array:
-	return ["Node"]
+	return ["System"]
 	
 func requires_multi_frames() -> bool:
 	return true
