@@ -1,5 +1,14 @@
 extends FKAction
 
+func get_description() -> String:
+	return "What you'd expect."
+
+func get_id() -> String:
+	return "Set Text"
+
+func get_name() -> String:
+	return "Set Text"
+	
 func get_inputs() -> Array:
 	return [
 		{
@@ -10,9 +19,9 @@ func get_inputs() -> Array:
 	]
 	
 func get_supported_types() -> Array:
-	return ["Label", "RichTextLabel", "Button"]
+	return ["Label", "RichTextLabel", "Button", "TextEdit", "LineEdit"]
 
 func execute(target_node: Node, inputs: Dictionary, _str := "") -> void:
-	var new_text = inputs.get("New Text", "")
-	var has_text = target_node
+	var new_text: String = inputs.get("New Text", "")
+	var has_text: Variant = target_node
 	has_text.text = new_text
