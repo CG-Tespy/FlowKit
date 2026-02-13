@@ -17,6 +17,14 @@ signal data_changed()
 signal condition_dropped(source_row, condition_data, target_row)
 signal action_dropped(source_row, action_data, target_row)
 signal before_data_changed()  # Emitted before any data modification for undo state capture
+# Branch signals
+signal add_branch_requested(event_row)  # User wants to add an IF branch
+signal add_elseif_requested(branch_item, event_row)  # Add elseif after a branch
+signal add_else_requested(branch_item, event_row)  # Add else after a branch
+signal branch_condition_edit_requested(branch_item, event_row)  # Edit branch condition
+signal branch_action_add_requested(branch_item, event_row)  # Add action inside a branch
+signal branch_action_edit_requested(action_item, branch_item, event_row)  # Edit action inside branch
+signal nested_branch_add_requested(branch_item, event_row)  # Add nested IF branch inside a branch
 
 # Data
 var event_data: FKEventBlock
@@ -26,6 +34,7 @@ var is_selected: bool = false
 # Preloads
 const CONDITION_ITEM_SCENE = preload("res://addons/flowkit/ui/workspace/condition_item.tscn")
 const ACTION_ITEM_SCENE = preload("res://addons/flowkit/ui/workspace/action_item.tscn")
+const BRANCH_ITEM_SCENE = preload("res://addons/flowkit/ui/workspace/branch_item.tscn")
 
 # UI References
 var panel: PanelContainer
@@ -120,7 +129,25 @@ func _on_add_action_input(event: InputEvent) -> void:
 	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT:
 		if event.pressed:
 			_flash_label(add_action_label)
-			add_action_requested.emit(self)
+			_show_add_action_context_menu()
+	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_RIGHT:
+		if event.pressed:
+			_show_add_action_context_menu()
+
+func _show_add_action_context_menu() -> void:
+	var popup := PopupMenu.new()
+	popup.add_item("Add Action", 0)
+	popup.add_separator()
+	popup.add_item("Add If Branch", 1)
+	popup.id_pressed.connect(func(id):
+		match id:
+			0: add_action_requested.emit(self)
+			1: add_branch_requested.emit(self)
+		popup.queue_free()
+	)
+	add_child(popup)
+	popup.position = DisplayServer.mouse_get_position()
+	popup.popup()
 
 func _on_add_condition_hover(is_hovering: bool) -> void:
 	if add_condition_label:
@@ -234,13 +261,20 @@ func _update_actions() -> void:
 		actions_container.remove_child(child)
 		child.queue_free()
 	
-	# Add action items
-	for action_data in event_data.actions:
-		var item = ACTION_ITEM_SCENE.instantiate()
-		item.set_action_data(action_data)
-		item.set_registry(registry)
-		_connect_action_item_signals(item)
-		actions_container.add_child(item)
+	# Add action items (handles both regular actions and branches)
+	for act_data in event_data.actions:
+		if act_data.is_branch:
+			var branch = BRANCH_ITEM_SCENE.instantiate()
+			branch.set_action_data(act_data)
+			branch.set_registry(registry)
+			_connect_branch_item_signals(branch)
+			actions_container.add_child(branch)
+		else:
+			var item = ACTION_ITEM_SCENE.instantiate()
+			item.set_action_data(act_data)
+			item.set_registry(registry)
+			_connect_action_item_signals(item)
+			actions_container.add_child(item)
 
 func _connect_condition_item_signals(item) -> void:
 	if item.has_signal("selected"):
@@ -263,6 +297,46 @@ func _connect_action_item_signals(item) -> void:
 		item.delete_requested.connect(_on_action_item_delete)
 	if item.has_signal("reorder_requested"):
 		item.reorder_requested.connect(_on_action_reorder)
+
+func _connect_branch_item_signals(branch) -> void:
+	if branch.has_signal("selected"):
+		branch.selected.connect(func(node): action_selected.emit(node))
+	if branch.has_signal("edit_condition_requested"):
+		branch.edit_condition_requested.connect(func(item): branch_condition_edit_requested.emit(item, self))
+	if branch.has_signal("delete_requested"):
+		branch.delete_requested.connect(_on_branch_item_delete)
+	if branch.has_signal("add_elseif_requested"):
+		branch.add_elseif_requested.connect(func(item): add_elseif_requested.emit(item, self))
+	if branch.has_signal("add_else_requested"):
+		branch.add_else_requested.connect(func(item): add_else_requested.emit(item, self))
+	if branch.has_signal("add_branch_action_requested"):
+		branch.add_branch_action_requested.connect(func(item): branch_action_add_requested.emit(item, self))
+	if branch.has_signal("branch_action_edit_requested"):
+		branch.branch_action_edit_requested.connect(func(act_item, br_item): branch_action_edit_requested.emit(act_item, br_item, self))
+	if branch.has_signal("branch_action_selected"):
+		branch.branch_action_selected.connect(func(node): action_selected.emit(node))
+	if branch.has_signal("reorder_requested"):
+		branch.reorder_requested.connect(_on_action_reorder)
+	if branch.has_signal("action_cross_reorder_requested"):
+		branch.action_cross_reorder_requested.connect(_on_action_cross_reorder)
+	if branch.has_signal("action_dropped_into_branch"):
+		branch.action_dropped_into_branch.connect(_on_action_dropped_into_branch)
+	if branch.has_signal("data_changed"):
+		branch.data_changed.connect(func(): data_changed.emit())
+	if branch.has_signal("before_data_changed"):
+		branch.before_data_changed.connect(func(): before_data_changed.emit())
+	if branch.has_signal("add_nested_branch_requested"):
+		branch.add_nested_branch_requested.connect(func(item): nested_branch_add_requested.emit(item, self))
+
+func _on_branch_item_delete(item) -> void:
+	before_data_changed.emit()
+	var act_data = item.get_action_data()
+	if act_data and event_data:
+		var idx = event_data.actions.find(act_data)
+		if idx >= 0:
+			event_data.actions.remove_at(idx)
+			_update_actions()
+			data_changed.emit()
 
 func _on_condition_item_edit(item) -> void:
 	condition_edit_requested.emit(item)
@@ -350,6 +424,59 @@ func _on_condition_reorder(source_item, target_item, drop_above: bool) -> void:
 	_update_conditions()
 	data_changed.emit()
 
+func _recursive_remove_action(actions_array: Array, target_action) -> bool:
+	"""Recursively search and remove an action from actions array and branch sub-actions."""
+	var idx = actions_array.find(target_action)
+	if idx >= 0:
+		actions_array.remove_at(idx)
+		return true
+	for act in actions_array:
+		if act.is_branch and _recursive_remove_action(act.branch_actions, target_action):
+			return true
+	return false
+
+func _on_action_cross_reorder(source_data, target_data, is_drop_above: bool, target_branch) -> void:
+	"""Handle cross-context action reorder (action moved into a different branch)."""
+	if not event_data:
+		return
+	
+	before_data_changed.emit()
+	
+	# Remove source from wherever it is (top-level or any branch)
+	_recursive_remove_action(event_data.actions, source_data)
+	
+	# Insert into target branch at the correct position
+	var target_actions = target_branch.action_data.branch_actions
+	var target_idx = target_actions.find(target_data)
+	if target_idx >= 0:
+		var insert_idx = target_idx if is_drop_above else target_idx + 1
+		target_actions.insert(insert_idx, source_data)
+	else:
+		target_actions.append(source_data)
+	
+	_update_actions()
+	data_changed.emit()
+
+func _on_action_dropped_into_branch(source_item, target_branch) -> void:
+	"""Handle action/branch dropped into a branch's body area."""
+	if not event_data:
+		return
+	
+	var source_data = source_item.get_action_data()
+	if not source_data:
+		return
+	
+	before_data_changed.emit()
+	
+	# Remove source from wherever it is (top-level or any branch)
+	_recursive_remove_action(event_data.actions, source_data)
+	
+	# Add to target branch's sub-actions
+	target_branch.action_data.branch_actions.append(source_data)
+	
+	_update_actions()
+	data_changed.emit()
+
 func _on_action_reorder(source_item, target_item, drop_above: bool) -> void:
 	"""Handle reordering actions within the same event block."""
 	if not event_data:
@@ -364,11 +491,28 @@ func _on_action_reorder(source_item, target_item, drop_above: bool) -> void:
 	var source_idx = event_data.actions.find(source_data)
 	var target_idx = event_data.actions.find(target_data)
 	
-	# Source not in this event block - it's a cross-block drag, let the existing system handle it
-	if source_idx < 0:
+	if target_idx < 0:
 		return
 	
-	if target_idx < 0:
+	# Source not at top level - it's being moved from a branch to top level
+	if source_idx < 0:
+		before_data_changed.emit()
+		
+		# Recursively remove source from wherever it is (inside a branch)
+		if not _recursive_remove_action(event_data.actions, source_data):
+			return
+		
+		# Recalculate target index after removal (branch removal doesn't shift top-level indices
+		# unless the branch itself was removed, but we're removing an item FROM a branch)
+		target_idx = event_data.actions.find(target_data)
+		if target_idx < 0:
+			return
+		
+		var insert_idx = target_idx if drop_above else target_idx + 1
+		event_data.actions.insert(insert_idx, source_data)
+		
+		_update_actions()
+		data_changed.emit()
 		return
 	
 	# Same position, no change needed
