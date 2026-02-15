@@ -6,6 +6,8 @@ var registry: Node
 var generator
 var current_scene_uid: int = 0
 
+var undo_manager: FKUndoManager
+
 # Scene preloads - GDevelop-style event rows
 const EVENT_ROW_SCENE = preload("res://addons/flowkit/ui/workspace/event_row.tscn")
 const COMMENT_SCENE = preload("res://addons/flowkit/ui/workspace/comment.tscn")
@@ -40,35 +42,36 @@ var pending_target_group = null  # The group to add content to (for event_in_gro
 var pending_target_branch = null  # The branch item for branch sub-action workflows
 var selected_row = null  # Currently selected event row
 var selected_item = null  # Currently selected condition/action item
-var clipboard_events: Array = []  # Stores copied event data for paste
 
-# Undo/Redo state
-var undo_stack: Array = []  # Stack of previous states
-var redo_stack: Array = []  # Stack of undone states
-const MAX_UNDO_STATES: int = 50  # Maximum number of undo states to keep
-
-# Clipboard for different item types
-var clipboard_type: String = ""  # "event", "action", "condition", "group"
-var clipboard_actions: Array = []  # Stores copied action data
-var clipboard_conditions: Array = []  # Stores copied condition data
-var clipboard_group: Dictionary = {}  # Stores copied group data
+var clipboard_manager: FKClipboardManager
+var serializer: FKEventSheetSerializer
+var block_factory: FKBlockFactory
+var block_controller: FKBlockController
+var paste_controller: FKPasteController
 
 func _ready() -> void:
-	# Initialize undo/redo stacks
-	if undo_stack == null:
-		undo_stack = []
-	if redo_stack == null:
-		redo_stack = []
+	clipboard_manager = FKClipboardManager.new(self)
+	undo_manager = FKUndoManager.new(self)
+	serializer = FKEventSheetSerializer.new()
+	block_factory = FKBlockFactory.new(EVENT_ROW_SCENE, COMMENT_SCENE, GROUP_SCENE)
+	block_controller = FKBlockController.new(self, blocks_container, block_factory)
+	paste_controller = FKPasteController.new(self, block_controller, serializer, undo_manager)
 	
 	_setup_ui()
 	# Connect block_moved signals for autosave and undo state on drag-and-drop reorder
-	blocks_container.before_block_moved.connect(_push_undo_state)
+	blocks_container.before_block_moved.connect(undo_manager.push_state)
 	blocks_container.block_moved.connect(_save_and_reload_sheet)
 
 func _setup_ui() -> void:
 	"""Initialize UI state."""
 	_show_empty_state()
 
+func _capture_sheet_state() -> Array:
+	return serializer.serialize_blocks(_get_blocks())
+
+func _get_blocks() -> Array:
+	return block_controller.get_blocks()
+	
 func set_editor_interface(interface: EditorInterface) -> void:
 	editor_interface = interface
 	# Pass to modals (deferred in case they're not ready yet)
@@ -173,19 +176,19 @@ func _input(event: InputEvent) -> void:
 			_delete_selected_item()
 			get_viewport().set_input_as_handled()
 		elif selected_row and is_instance_valid(selected_row):
-			_delete_selected_row()
+			block_controller.remove_block(selected_row)
 			get_viewport().set_input_as_handled()
 	# Handle Ctrl+C (copy) - only if not editing text
 	elif event.keycode == KEY_C and event.ctrl_pressed and not is_editing_text:
 		if selected_item and is_instance_valid(selected_item):
-			_copy_selected_item()
+			clipboard_manager.copy_item(selected_item)
 			get_viewport().set_input_as_handled()
 		elif selected_row and is_instance_valid(selected_row):
-			_copy_selected_row()
+			clipboard_manager.copy_row(selected_row)
 			get_viewport().set_input_as_handled()
 	# Handle Ctrl+V (paste) - only if not editing text
 	elif event.keycode == KEY_V and event.ctrl_pressed and not is_editing_text:
-		_paste_from_clipboard()
+		clipboard_manager.paste(paste_controller, selected_row, selected_item)
 		get_viewport().set_input_as_handled()
 
 func _is_click_on_event_row(mouse_pos: Vector2) -> bool:
@@ -214,182 +217,40 @@ func _has_focus_in_subtree() -> bool:
 
 # === Undo/Redo System ===
 
-func _capture_sheet_state() -> Array:
-	"""Capture current sheet state as serialized data."""
-	var state: Array = []
-	for block in _get_blocks():
-		# Double-check the block is still valid and not queued for deletion
-		if not is_instance_valid(block) or block.is_queued_for_deletion():
-			continue
-		
-		if block.has_method("get_event_data"):
-			var data = block.get_event_data()
-			if data:
-				state.append(_serialize_event_block(data))
-		elif block.has_method("get_comment_data"):
-			var data = block.get_comment_data()
-			if data:
-				state.append(_serialize_comment_block(data))
-		elif block.has_method("get_group_data"):
-			var data = block.get_group_data()
-			if data:
-				state.append(_serialize_group_block(data))
-	return state
 
-func _serialize_comment_block(data: FKCommentBlock) -> Dictionary:
-	"""Serialize a comment block to a dictionary."""
-	return {
-		"type": "comment",
-		"text": data.text
-	}
 
-func _serialize_event_block(data: FKEventBlock) -> Dictionary:
-	"""Serialize an event block to a dictionary."""
-	var result = {
-		"type": "event",
-		"block_id": data.block_id,
-		"event_id": data.event_id,
-		"target_node": str(data.target_node),
-		"inputs": data.inputs.duplicate(),
-		"conditions": [],
-		"actions": []
-	}
-	
-	for cond in data.conditions:
-		result["conditions"].append({
-			"condition_id": cond.condition_id,
-			"target_node": str(cond.target_node),
-			"inputs": cond.inputs.duplicate(),
-			"negated": cond.negated
-		})
-	
-	for act in data.actions:
-		result["actions"].append(_serialize_action(act))
-	
-	return result
 
-func _serialize_action(act: FKEventAction) -> Dictionary:
-	"""Serialize an action (including branch data) to a dictionary."""
-	var act_dict = {
-		"action_id": act.action_id,
-		"target_node": str(act.target_node),
-		"inputs": act.inputs.duplicate(),
-		"is_branch": act.is_branch,
-		"branch_type": act.branch_type
-	}
-	if act.is_branch:
-		if act.branch_condition:
-			act_dict["branch_condition"] = {
-				"condition_id": act.branch_condition.condition_id,
-				"target_node": str(act.branch_condition.target_node),
-				"inputs": act.branch_condition.inputs.duplicate(),
-				"negated": act.branch_condition.negated
-			}
-		act_dict["branch_actions"] = []
-		for sub_act in act.branch_actions:
-			act_dict["branch_actions"].append(_serialize_action(sub_act))
-	return act_dict
 
-func _serialize_group_block(data: FKGroupBlock) -> Dictionary:
-	"""Serialize a group block to a dictionary."""
-	var result = {
-		"type": "group",
-		"title": data.title,
-		"collapsed": data.collapsed,
-		"color": data.color,
-		"children": []
-	}
-	
-	for child_dict in data.children:
-		var child_type = child_dict.get("type", "")
-		var child_data = child_dict.get("data")
-		
-		if child_type == "event" and child_data is FKEventBlock:
-			result["children"].append(_serialize_event_block(child_data))
-		elif child_type == "comment" and child_data is FKCommentBlock:
-			result["children"].append(_serialize_comment_block(child_data))
-		elif child_type == "group" and child_data is FKGroupBlock:
-			result["children"].append(_serialize_group_block(child_data))
-	
-	return result
-
-func _push_undo_state() -> void:
-	"""Push current state to undo stack before making changes."""
-	var state = _capture_sheet_state()
-	undo_stack.append(state)
-	
-	# Limit undo stack size
-	while undo_stack.size() > MAX_UNDO_STATES:
-		undo_stack.pop_front()
-	
-	# Clear redo stack when new action is performed
-	redo_stack.clear()
 
 func _clear_undo_history() -> void:
-	"""Clear undo/redo history (called when switching scenes)."""
-	undo_stack.clear()
-	redo_stack.clear()
+	undo_manager.clear_history()
 
 func _undo() -> void:
-	"""Undo the last action."""
-	if undo_stack.is_empty():
-		return
-	
-	# Push current state to redo stack
-	var current_state = _capture_sheet_state()
-	redo_stack.append(current_state)
-	
-	# Pop previous state from undo stack
-	var previous_state = undo_stack.pop_back()
-	
-	# Restore state
-	_restore_sheet_state(previous_state)
-	_save_sheet()
-	print("[FlowKit] Undo performed")
+	undo_manager.undo()
 
 func _redo() -> void:
-	"""Redo the last undone action."""
-	if redo_stack.is_empty():
-		return
-	
-	# Push current state to undo stack
-	var current_state = _capture_sheet_state()
-	undo_stack.append(current_state)
-	
-	# Pop next state from redo stack
-	var next_state = redo_stack.pop_back()
-	
-	# Restore state
-	_restore_sheet_state(next_state)
-	_save_sheet()
-	print("[FlowKit] Redo performed")
+	undo_manager.redo()
 
 func _restore_sheet_state(state: Array) -> void:
-	"""Restore sheet to a previous state."""
-	# Clear current blocks
 	_clear_all_blocks()
-	
-	# Recreate blocks from state
-	for item_dict in state:
-		var item_type = item_dict.get("type", "event")
-		if item_type == "comment":
-			var data = _deserialize_comment_block(item_dict)
-			var comment = _create_comment_block(data)
-			blocks_container.add_child(comment)
-		elif item_type == "group":
-			var data = _deserialize_group_block(item_dict)
-			var group = _create_group_block(data)
-			blocks_container.add_child(group)
-		else:
-			var data = _deserialize_event_block(item_dict)
-			var row = _create_event_row(data)
-			blocks_container.add_child(row)
-	
-	# Update UI state
+
+	var data_blocks = serializer.deserialize_blocks(state)
+
+	for data in data_blocks:
+		if data is FKEventBlock:
+			var row := block_controller.add_event_block(data)
+			_connect_event_row_signals(row)
+
+		elif data is FKCommentBlock:
+			block_controller.add_comment_block(data)
+		elif data is FKGroupBlock:
+			block_controller.add_group_block(data)
+
 	if _get_blocks().size() > 0:
 		_show_content_state()
 	else:
 		_show_empty_blocks_state()
+
 
 func _deserialize_comment_block(dict: Dictionary) -> FKCommentBlock:
 	"""Deserialize a dictionary to a comment block."""
@@ -467,31 +328,6 @@ func _deserialize_group_block(dict: Dictionary) -> FKGroupBlock:
 	
 	return data
 
-func _delete_selected_row() -> void:
-	"""Delete the currently selected event row."""
-	if not selected_row or not is_instance_valid(selected_row):
-		return
-	
-	# Push undo state before deleting
-	_push_undo_state()
-	
-	var row_to_delete = selected_row
-	
-	# Clear selection first
-	if row_to_delete.has_method("set_selected"):
-		row_to_delete.set_selected(false)
-	selected_row = null
-	
-	# Check if row is a direct child of blocks_container or inside a group
-	if row_to_delete.get_parent() == blocks_container:
-		# Direct child of blocks_container - delete it
-		blocks_container.remove_child(row_to_delete)
-		row_to_delete.queue_free()
-		_save_sheet()
-	else:
-		# Row is inside a group - emit the delete signal to let the group handle it
-		row_to_delete.delete_event_requested.emit(row_to_delete)
-
 func _delete_selected_item() -> void:
 	"""Delete the currently selected condition or action item."""
 	if not selected_item or not is_instance_valid(selected_item):
@@ -500,12 +336,12 @@ func _delete_selected_item() -> void:
 	var item_to_delete = selected_item
 	
 	# Find the parent event_row
-	var parent_row = _find_parent_event_row(item_to_delete)
+	var parent_row = block_controller.find_parent_event_row(item_to_delete)
 	if not parent_row:
 		return
 	
 	# Push undo state before deleting
-	_push_undo_state()
+	undo_manager.push_state()
 	
 	# Check if it's a condition or action
 	if item_to_delete.has_method("get_condition_data"):
@@ -555,80 +391,6 @@ func _find_parent_branch(node: Node):
 		current = current.get_parent()
 	return null
 
-func _find_parent_event_row(node: Node):
-	"""Find the event_row that contains this node."""
-	var current = node.get_parent()
-	while current:
-		if current.has_method("get_event_data"):
-			return current
-		current = current.get_parent()
-	return null
-
-func _copy_selected_row() -> void:
-	"""Copy selected event row or group to clipboard."""
-	if not selected_row or not is_instance_valid(selected_row):
-		return
-	
-	# Check if it's a group
-	if selected_row.has_method("get_group_data"):
-		var group_data = selected_row.get_group_data()
-		if group_data:
-			clipboard_type = "group"
-			clipboard_group = _serialize_group_block(group_data)
-			print("Copied 1 group to clipboard")
-		return
-	
-	# Otherwise it's an event row
-	clipboard_events.clear()
-	clipboard_type = "event"
-	
-	if selected_row.has_method("get_event_data"):
-		var data = selected_row.get_event_data()
-		if data:
-			clipboard_events.append({
-				"event_id": data.event_id,
-				"target_node": data.target_node,
-				"inputs": data.inputs.duplicate(),
-				"conditions": _duplicate_conditions(data.conditions),
-				"actions": _duplicate_actions(data.actions)
-			})
-	
-	print("Copied %d event(s) to clipboard" % clipboard_events.size())
-
-func _copy_selected_item() -> void:
-	"""Copy selected action or condition to clipboard."""
-	if not selected_item or not is_instance_valid(selected_item):
-		return
-	
-	# Check if it's an action
-	if selected_item.has_method("get_action_data"):
-		var action_data = selected_item.get_action_data()
-		if action_data:
-			clipboard_type = "action"
-			clipboard_actions.clear()
-			clipboard_actions.append({
-				"action_id": action_data.action_id,
-				"target_node": action_data.target_node,
-				"inputs": action_data.inputs.duplicate()
-			})
-			print("Copied 1 action to clipboard")
-			return
-	
-	# Check if it's a condition
-	if selected_item.has_method("get_condition_data"):
-		var condition_data = selected_item.get_condition_data()
-		if condition_data:
-			clipboard_type = "condition"
-			clipboard_conditions.clear()
-			clipboard_conditions.append({
-				"condition_id": condition_data.condition_id,
-				"target_node": condition_data.target_node,
-				"inputs": condition_data.inputs.duplicate(),
-				"negated": condition_data.negated
-			})
-			print("Copied 1 condition to clipboard")
-			return
-
 func _duplicate_conditions(conditions: Array) -> Array:
 	var result = []
 	for cond in conditions:
@@ -661,283 +423,6 @@ func _duplicate_actions(actions: Array) -> Array:
 			act_dict["branch_actions"] = _duplicate_actions(act.branch_actions)
 		result.append(act_dict)
 	return result
-
-func _paste_from_clipboard() -> void:
-	"""Paste from clipboard - events, actions, conditions, or groups depending on clipboard type."""
-	if clipboard_type == "action":
-		_paste_actions_from_clipboard()
-	elif clipboard_type == "condition":
-		_paste_conditions_from_clipboard()
-	elif clipboard_type == "group":
-		_paste_group_from_clipboard()
-	else:
-		_paste_events_from_clipboard()
-
-func _paste_events_from_clipboard() -> void:
-	"""Paste events from clipboard after selected row (or at end)."""
-	if clipboard_events.is_empty():
-		return
-	
-	# Push undo state before pasting
-	_push_undo_state()
-	
-	# Check if we're pasting into a group
-	var target_group = null
-	if selected_row and is_instance_valid(selected_row):
-		# Check if selected_row is a group
-		if selected_row.has_method("get_group_data"):
-			target_group = selected_row
-		# Check if selected_row is inside a group
-		elif selected_row.has_method("get_event_data"):
-			var parent = selected_row.get_parent()
-			while parent:
-				if parent.has_method("get_group_data"):
-					target_group = parent
-					break
-				parent = parent.get_parent()
-	
-	# If pasting into a group
-	if target_group:
-		for event_data_dict in clipboard_events:
-			# Generate new block_id for pasted events
-			var data = FKEventBlock.new("", event_data_dict["event_id"], event_data_dict["target_node"])
-			data.inputs = event_data_dict["inputs"].duplicate()
-			data.conditions = [] as Array[FKEventCondition]
-			data.actions = [] as Array[FKEventAction]
-			
-			# Restore conditions
-			for cond_dict in event_data_dict["conditions"]:
-				var cond = FKEventCondition.new()
-				cond.condition_id = cond_dict["condition_id"]
-				cond.target_node = cond_dict["target_node"]
-				cond.inputs = cond_dict["inputs"].duplicate()
-				cond.negated = cond_dict["negated"]
-				data.conditions.append(cond)
-			
-			# Restore actions
-			for act_dict in event_data_dict["actions"]:
-				var act = FKEventAction.new()
-				act.action_id = act_dict["action_id"]
-				act.target_node = act_dict["target_node"]
-				act.inputs = act_dict["inputs"].duplicate()
-				data.actions.append(act)
-			
-			# Add to group via the group's method
-			if target_group.has_method("add_event_to_group"):
-				target_group.add_event_to_group(data)
-		
-		_save_sheet()
-		# Keep group selected after paste so subsequent pastes work correctly
-		_on_row_selected(target_group)
-		print("Pasted %d event(s) into group" % clipboard_events.size())
-		return
-	
-	# Otherwise, paste into main blocks_container
-	# Calculate insert position
-	var insert_idx = blocks_container.get_child_count()
-	if selected_row and is_instance_valid(selected_row):
-		insert_idx = selected_row.get_index() + 1
-	
-	# Create and insert event rows
-	var first_new_row = null
-	for event_data_dict in clipboard_events:
-		# Generate new block_id for pasted events (pass empty string to auto-generate)
-		var data = FKEventBlock.new("", event_data_dict["event_id"], event_data_dict["target_node"])
-		data.inputs = event_data_dict["inputs"].duplicate()
-		data.conditions = [] as Array[FKEventCondition]
-		data.actions = [] as Array[FKEventAction]
-		
-		# Restore conditions
-		for cond_dict in event_data_dict["conditions"]:
-			var cond = FKEventCondition.new()
-			cond.condition_id = cond_dict["condition_id"]
-			cond.target_node = cond_dict["target_node"]
-			cond.inputs = cond_dict["inputs"].duplicate()
-			cond.negated = cond_dict["negated"]
-			data.conditions.append(cond)
-		
-		# Restore actions
-		for act_dict in event_data_dict["actions"]:
-			var act = FKEventAction.new()
-			act.action_id = act_dict["action_id"]
-			act.target_node = act_dict["target_node"]
-			act.inputs = act_dict["inputs"].duplicate()
-			data.actions.append(act)
-		
-		var new_row = _create_event_row(data)
-		blocks_container.add_child(new_row)
-		blocks_container.move_child(new_row, insert_idx)
-		insert_idx += 1
-		if not first_new_row:
-			first_new_row = new_row
-	
-	_show_content_state()
-	_save_sheet()
-	
-	# Select the first pasted row
-	if first_new_row:
-		_on_row_selected(first_new_row)
-	
-	print("Pasted %d event(s) from clipboard" % clipboard_events.size())
-
-func _paste_actions_from_clipboard() -> void:
-	"""Paste actions from clipboard into the selected event row or parent of selected item."""
-	if clipboard_actions.is_empty():
-		return
-	
-	# Determine target event row and branch
-	var target_row = selected_row
-	var target_branch = null
-	
-	# If an item is selected, check if it's inside a branch
-	if selected_item and is_instance_valid(selected_item):
-		target_branch = _find_parent_branch(selected_item)
-		if not target_row or not is_instance_valid(target_row):
-			target_row = _find_parent_event_row(selected_item)
-	
-	# If no row selected but an item is selected, find its parent row
-	if (not target_row or not is_instance_valid(target_row)) and selected_item and is_instance_valid(selected_item):
-		target_row = _find_parent_event_row(selected_item)
-	
-	# Still no row? Try hovering
-	if not target_row or not is_instance_valid(target_row):
-		target_row = _find_event_row_at_mouse()
-	
-	if not target_row or not is_instance_valid(target_row):
-		print("Cannot paste actions: no event row found")
-		return
-	
-	# Push undo state before pasting
-	_push_undo_state()
-	
-	# Paste into branch if selected item is inside one
-	if target_branch:
-		var branch_data = target_branch.get_action_data()
-		if branch_data:
-			for action_dict in clipboard_actions:
-				var action = FKEventAction.new()
-				action.action_id = action_dict["action_id"]
-				action.target_node = action_dict["target_node"]
-				action.inputs = action_dict["inputs"].duplicate()
-				branch_data.branch_actions.append(action)
-			
-			target_row.update_display()
-			_save_sheet()
-			print("Pasted %d action(s) into branch" % clipboard_actions.size())
-			return
-	
-	var event_data = target_row.get_event_data()
-	if not event_data:
-		return
-	
-	# Paste each action
-	for action_dict in clipboard_actions:
-		var action = FKEventAction.new()
-		action.action_id = action_dict["action_id"]
-		action.target_node = action_dict["target_node"]
-		action.inputs = action_dict["inputs"].duplicate()
-		
-		event_data.actions.append(action)
-	
-	# Update the display
-	target_row.update_display()
-	_save_sheet()
-	
-	print("Pasted %d action(s) from clipboard" % clipboard_actions.size())
-
-func _paste_conditions_from_clipboard() -> void:
-	"""Paste conditions from clipboard into the selected event row or parent of selected item."""
-	if clipboard_conditions.is_empty():
-		return
-	
-	# Determine target event row
-	var target_row = selected_row
-	
-	# If no row selected but an item is selected, find its parent row
-	if (not target_row or not is_instance_valid(target_row)) and selected_item and is_instance_valid(selected_item):
-		target_row = _find_parent_event_row(selected_item)
-	
-	# Still no row? Try hovering
-	if not target_row or not is_instance_valid(target_row):
-		target_row = _find_event_row_at_mouse()
-	
-	if not target_row or not is_instance_valid(target_row):
-		print("Cannot paste conditions: no event row found")
-		return
-	
-	# Push undo state before pasting
-	_push_undo_state()
-	
-	var event_data = target_row.get_event_data()
-	if not event_data:
-		return
-	
-	# Paste each condition
-	for condition_dict in clipboard_conditions:
-		var condition = FKEventCondition.new()
-		condition.condition_id = condition_dict["condition_id"]
-		condition.target_node = condition_dict["target_node"]
-		condition.inputs = condition_dict["inputs"].duplicate()
-		condition.negated = condition_dict["negated"]
-		condition.actions = [] as Array[FKEventAction]
-		
-		event_data.conditions.append(condition)
-	
-	# Update the display
-	target_row.update_display()
-	_save_sheet()
-	
-	print("Pasted %d condition(s) from clipboard" % clipboard_conditions.size())
-
-func _paste_group_from_clipboard() -> void:
-	"""Paste group from clipboard as a nested group inside the selected group, or at top level."""
-	if clipboard_group.is_empty():
-		return
-	
-	_push_undo_state()
-	
-	# Check if we're pasting into a group
-	var target_group = null
-	if selected_row and is_instance_valid(selected_row):
-		# Check if selected_row is a group
-		if selected_row.has_method("get_group_data"):
-			target_group = selected_row
-		# Check if selected_row is inside a group (event or child of group)
-		else:
-			var parent = selected_row.get_parent()
-			while parent:
-				if parent.has_method("get_group_data"):
-					target_group = parent
-					break
-				parent = parent.get_parent()
-	
-	# Deserialize the group
-	var group_data = _deserialize_group_block(clipboard_group)
-	
-	# If pasting into a group, add as nested group
-	if target_group:
-		var target_group_data = target_group.get_group_data()
-		if target_group_data:
-			target_group_data.children.append({"type": "group", "data": group_data})
-			# Trigger rebuild
-			if target_group.has_method("_rebuild_child_nodes"):
-				target_group._rebuild_child_nodes()
-			_save_sheet()
-			print("Pasted group as nested group")
-			return
-	
-	# Otherwise paste at top level
-	var group = _create_group_block(group_data)
-	
-	# Calculate insert position
-	var insert_idx = blocks_container.get_child_count()
-	if selected_row and is_instance_valid(selected_row):
-		insert_idx = selected_row.get_index() + 1
-	
-	blocks_container.add_child(group)
-	blocks_container.move_child(group, insert_idx)
-	_save_sheet()
-	print("Pasted group at top level")
 
 func _find_event_row_at_mouse() -> Control:
 	"""Find event row at mouse position."""
@@ -1027,20 +512,8 @@ func _process(delta: float) -> void:
 
 # === Block Management ===
 
-func _get_blocks() -> Array:
-	"""Get all block nodes (excluding empty label and nodes queued for deletion)."""
-	var blocks = []
-	for child in blocks_container.get_children():
-		if child != empty_label and is_instance_valid(child) and not child.is_queued_for_deletion():
-			blocks.append(child)
-	return blocks
-
 func _clear_all_blocks() -> void:
-	"""Remove all blocks from the container."""
-	for child in blocks_container.get_children():
-		if child != empty_label:
-			blocks_container.remove_child(child)
-			child.queue_free()
+	block_controller.clear_all()
 
 func _show_empty_state() -> void:
 	"""Show empty state UI (no scene loaded)."""
@@ -1091,19 +564,19 @@ func _populate_from_sheet(sheet: FKEventSheet) -> void:
 			var item_index = item.get("index", 0)
 			
 			if item_type == "event" and item_index < sheet.events.size():
-				var event_row = _create_event_row(sheet.events[item_index])
-				blocks_container.add_child(event_row)
+				var event_row = block_controller.add_event_block(sheet.events[item_index])
+				_connect_event_row_signals(event_row)
+
 			elif item_type == "comment" and item_index < sheet.comments.size():
-				var comment = _create_comment_block(sheet.comments[item_index])
-				blocks_container.add_child(comment)
+				var comment = block_controller.add_comment_block(sheet.comments[item_index])
 			elif item_type == "group" and item_index < sheet.groups.size():
-				var group = _create_group_block(sheet.groups[item_index])
-				blocks_container.add_child(group)
+				var group = block_controller.add_group_block(sheet.groups[item_index])
 	else:
 		# Fallback: load events only (backwards compatibility)
 		for event_data in sheet.events:
-			var event_row = _create_event_row(event_data)
-			blocks_container.add_child(event_row)
+			var event_row = block_controller.add_event_block(event_data)
+			_connect_event_row_signals(event_row)
+
 
 func _save_sheet() -> void:
 	"""Generate and save event sheet from current blocks."""
@@ -1252,28 +725,6 @@ func _new_sheet() -> void:
 
 # === Event Row Creation ===
 
-func _create_event_row(data: FKEventBlock) -> Control:
-	"""Create event row node from data (GDevelop-style)."""
-	var row = EVENT_ROW_SCENE.instantiate()
-	
-	var copy = _copy_event_block(data)
-	
-	row.set_event_data(copy)
-	row.set_registry(registry)
-	_connect_event_row_signals(row)
-	return row
-
-func _create_comment_block(data: FKCommentBlock) -> Control:
-	"""Create comment block node from data."""
-	var comment = COMMENT_SCENE.instantiate()
-	
-	var copy = FKCommentBlock.new()
-	copy.text = data.text
-	
-	comment.set_comment_data(copy)
-	_connect_comment_signals(comment)
-	return comment
-
 func _connect_comment_signals(comment) -> void:
 	comment.selected.connect(_on_comment_selected)
 	comment.delete_requested.connect(_on_comment_delete.bind(comment))
@@ -1283,40 +734,11 @@ func _connect_comment_signals(comment) -> void:
 	comment.insert_event_above_requested.connect(_on_comment_insert_event_above.bind(comment))
 	comment.insert_event_below_requested.connect(_on_comment_insert_event_below.bind(comment))
 
-func _create_group_block(data: FKGroupBlock) -> Control:
-	"""Create group block node from data."""
-	var group = GROUP_SCENE.instantiate()
-	
-	var copy = FKGroupBlock.new()
-	copy.title = data.title
-	copy.collapsed = data.collapsed
-	copy.color = data.color
-	copy.children = []
-	
-	# Deep copy children
-	for child_dict in data.children:
-		var child_type = child_dict.get("type", "")
-		var child_data = child_dict.get("data")
-		
-		if child_type == "event" and child_data is FKEventBlock:
-			copy.children.append({"type": "event", "data": _copy_event_block(child_data)})
-		elif child_type == "comment" and child_data is FKCommentBlock:
-			var comment_copy = FKCommentBlock.new()
-			comment_copy.text = child_data.text
-			copy.children.append({"type": "comment", "data": comment_copy})
-		elif child_type == "group" and child_data is FKGroupBlock:
-			copy.children.append({"type": "group", "data": _copy_group_block(child_data)})
-	
-	group.set_group_data(copy)
-	group.set_registry(registry)
-	_connect_group_signals(group)
-	return group
-
 func _connect_group_signals(group) -> void:
 	group.selected.connect(_on_group_selected)
 	group.delete_requested.connect(_on_group_delete.bind(group))
 	group.data_changed.connect(_save_sheet)
-	group.before_data_changed.connect(_push_undo_state)
+	group.before_data_changed.connect(undo_manager.push_state)
 	group.add_event_requested.connect(_on_group_add_event_requested)
 	group.add_comment_requested.connect(_on_group_add_comment_requested)
 	# Connect edit signals from children inside groups
@@ -1390,7 +812,7 @@ func _on_group_selected(node) -> void:
 
 func _on_group_delete(group) -> void:
 	"""Delete a group block."""
-	_push_undo_state()
+	undo_manager.push_state()
 	
 	if selected_row == group:
 		selected_row = null
@@ -1403,7 +825,7 @@ func _on_group_delete(group) -> void:
 
 func _on_add_group_button_pressed() -> void:
 	"""Add a new group block."""
-	_push_undo_state()
+	undo_manager.push_state()
 	
 	var data = FKGroupBlock.new()
 	data.title = "New Group"
@@ -1411,8 +833,7 @@ func _on_add_group_button_pressed() -> void:
 	data.color = Color(0.25, 0.22, 0.35, 1.0)
 	data.children = []
 	
-	var group = _create_group_block(data)
-	blocks_container.add_child(group)
+	var group = block_controller.add_group_block(data)
 	
 	_show_content_state()
 	_save_sheet()
@@ -1435,7 +856,7 @@ func _connect_event_row_signals(row) -> void:
 	row.condition_dropped.connect(_on_condition_dropped)
 	row.action_dropped.connect(_on_action_dropped)
 	row.data_changed.connect(_save_sheet)
-	row.before_data_changed.connect(_push_undo_state)
+	row.before_data_changed.connect(undo_manager.push_state)
 	# Branch signals
 	row.add_branch_requested.connect(_on_row_add_branch.bind(row))
 	row.add_elseif_requested.connect(_on_branch_add_elseif)
@@ -1543,13 +964,12 @@ func _on_add_event_button_pressed() -> void:
 
 func _on_add_comment_button_pressed() -> void:
 	"""Add a new comment block."""
-	_push_undo_state()
+	undo_manager.push_state()
 	
 	var data = FKCommentBlock.new()
 	data.text = ""
 	
-	var comment = _create_comment_block(data)
-	blocks_container.add_child(comment)
+	var comment = block_controller.add_comment_block(data)
 	
 	_show_content_state()
 	_save_sheet()
@@ -1581,7 +1001,7 @@ func _on_comment_selected(comment_node) -> void:
 
 func _on_comment_delete(comment) -> void:
 	"""Delete a comment block."""
-	_push_undo_state()
+	undo_manager.push_state()
 	
 	if selected_row == comment:
 		selected_row = null
@@ -1614,13 +1034,12 @@ func _on_row_insert_comment_below(signal_row, bound_row) -> void:
 
 func _insert_comment_relative_to(target_block, offset: int) -> void:
 	"""Insert a new comment relative to a target block (0 = above, 1 = below)."""
-	_push_undo_state()
+	undo_manager.push_state()
 	
 	var data = FKCommentBlock.new()
 	data.text = ""
 	
-	var comment = _create_comment_block(data)
-	blocks_container.add_child(comment)
+	var comment = block_controller.add_comment_block(data)
 	
 	# Calculate insert position
 	var insert_idx = target_block.get_index() + offset
@@ -1802,7 +1221,7 @@ func _on_expressions_confirmed(_node_path: String, _id: String, expressions: Dic
 func _finalize_event_creation(inputs: Dictionary) -> void:
 	"""Create and add event row (GDevelop-style)."""
 	# Push undo state before adding event
-	_push_undo_state()
+	undo_manager.push_state()
 	
 	# Generate new block_id for new events (pass empty string to auto-generate)
 	var data = FKEventBlock.new("", pending_id, pending_node_path)
@@ -1810,7 +1229,9 @@ func _finalize_event_creation(inputs: Dictionary) -> void:
 	data.conditions = [] as Array[FKEventCondition]
 	data.actions = [] as Array[FKEventAction]
 	
-	var row = _create_event_row(data)
+	var row = block_controller.add_event_block(data)
+	_connect_event_row_signals(row)
+
 	
 	if pending_target_row:
 		var insert_idx = pending_target_row.get_index() + 1
@@ -1827,7 +1248,7 @@ func _finalize_event_creation(inputs: Dictionary) -> void:
 func _finalize_event_above_target(inputs: Dictionary) -> void:
 	"""Create and add event row above the target (GDevelop-style)."""
 	# Push undo state before adding event
-	_push_undo_state()
+	undo_manager.push_state()
 	
 	# Generate new block_id for new events (pass empty string to auto-generate)
 	var data = FKEventBlock.new("", pending_id, pending_node_path)
@@ -1835,8 +1256,9 @@ func _finalize_event_above_target(inputs: Dictionary) -> void:
 	data.conditions = [] as Array[FKEventCondition]
 	data.actions = [] as Array[FKEventAction]
 	
-	var row = _create_event_row(data)
-	
+	var row = block_controller.add_event_block(data)
+	_connect_event_row_signals(row)
+
 	if pending_target_row:
 		var insert_idx = pending_target_row.get_index()  # Insert at same position (above)
 		blocks_container.add_child(row)
@@ -1856,7 +1278,7 @@ func _finalize_event_in_group(inputs: Dictionary) -> void:
 		return
 	
 	# Push undo state before adding event
-	_push_undo_state()
+	undo_manager.push_state()
 	
 	# Generate new block_id for new events (pass empty string to auto-generate)
 	var data = FKEventBlock.new("", pending_id, pending_node_path)
@@ -1875,7 +1297,7 @@ func _finalize_event_in_group(inputs: Dictionary) -> void:
 func _finalize_condition_creation(inputs: Dictionary) -> void:
 	"""Add condition to the current event row."""
 	# Push undo state before adding condition
-	_push_undo_state()
+	undo_manager.push_state()
 	
 	var data = FKEventCondition.new()
 	data.condition_id = pending_id
@@ -1894,7 +1316,7 @@ func _finalize_condition_creation(inputs: Dictionary) -> void:
 func _finalize_action_creation(inputs: Dictionary) -> void:
 	"""Add action to the current event row."""
 	# Push undo state before adding action
-	_push_undo_state()
+	undo_manager.push_state()
 	
 	var data = FKEventAction.new()
 	data.action_id = pending_id
@@ -1911,7 +1333,7 @@ func _finalize_action_creation(inputs: Dictionary) -> void:
 func _update_event_inputs(expressions: Dictionary) -> void:
 	"""Update existing event row with new inputs."""
 	# Push undo state before editing event
-	_push_undo_state()
+	undo_manager.push_state()
 	
 	if pending_target_row:
 		var data = pending_target_row.get_event_data()
@@ -1924,7 +1346,7 @@ func _update_event_inputs(expressions: Dictionary) -> void:
 func _update_condition_inputs(expressions: Dictionary) -> void:
 	"""Update existing condition item with new inputs."""
 	# Push undo state before editing condition
-	_push_undo_state()
+	undo_manager.push_state()
 	
 	if pending_target_item:
 		var data = pending_target_item.get_condition_data()
@@ -1937,7 +1359,7 @@ func _update_condition_inputs(expressions: Dictionary) -> void:
 func _update_action_inputs(expressions: Dictionary) -> void:
 	"""Update existing action item with new inputs."""
 	# Push undo state before editing action
-	_push_undo_state()
+	undo_manager.push_state()
 	
 	if pending_target_item:
 		var data = pending_target_item.get_action_data()
@@ -1954,7 +1376,7 @@ func _replace_event(expressions: Dictionary) -> void:
 		return
 	
 	# Push undo state before replacing event
-	_push_undo_state()
+	undo_manager.push_state()
 	
 	# Get old row's position and conditions/actions
 	var old_data = pending_target_row.get_event_data()
@@ -1969,8 +1391,9 @@ func _replace_event(expressions: Dictionary) -> void:
 	new_data.actions = old_data.actions if old_data else ([] as Array[FKEventAction])
 	
 	# Create new row
-	var new_row = _create_event_row(new_data)
-	
+	var new_row = block_controller.add_event_block(new_data)
+	_connect_event_row_signals(new_row)
+
 	# Remove old row and insert new one at same position
 	if old_parent:
 		old_parent.remove_child(pending_target_row)
@@ -2042,7 +1465,7 @@ func _on_row_replace(signal_row, bound_row) -> void:
 
 func _on_row_delete(signal_row, bound_row) -> void:
 	# Push undo state before deleting row
-	_push_undo_state()
+	undo_manager.push_state()
 	
 	# Only delete if this row is a direct child of blocks_container
 	# (event rows inside groups are handled by the group itself)
@@ -2110,7 +1533,7 @@ func _on_nested_branch_add(branch_item, event_row) -> void:
 
 func _on_branch_add_else(branch_item, event_row) -> void:
 	"""Add an Else branch below an existing branch."""
-	_push_undo_state()
+	undo_manager.push_state()
 
 	var branch_data = branch_item.get_action_data()
 	if not branch_data or not event_row:
@@ -2206,7 +1629,7 @@ func _on_branch_action_edit(action_item, branch_item, event_row) -> void:
 
 func _finalize_branch_creation(inputs: Dictionary) -> void:
 	"""Create an IF branch and add it to the target's actions."""
-	_push_undo_state()
+	undo_manager.push_state()
 
 	var cond = FKEventCondition.new()
 	cond.condition_id = pending_id
@@ -2232,7 +1655,7 @@ func _finalize_branch_creation(inputs: Dictionary) -> void:
 
 func _finalize_elseif_creation(inputs: Dictionary) -> void:
 	"""Create an ELSE IF branch and insert it after the current branch."""
-	_push_undo_state()
+	undo_manager.push_state()
 
 	var cond = FKEventCondition.new()
 	cond.condition_id = pending_id
@@ -2272,7 +1695,7 @@ func _finalize_elseif_creation(inputs: Dictionary) -> void:
 
 func _update_branch_condition(expressions: Dictionary) -> void:
 	"""Update an existing branch's condition inputs."""
-	_push_undo_state()
+	undo_manager.push_state()
 
 	if pending_target_branch:
 		var act_data = pending_target_branch.get_action_data()
@@ -2285,7 +1708,7 @@ func _update_branch_condition(expressions: Dictionary) -> void:
 
 func _finalize_branch_action_creation(inputs: Dictionary) -> void:
 	"""Add an action inside a branch."""
-	_push_undo_state()
+	undo_manager.push_state()
 
 	var data = FKEventAction.new()
 	data.action_id = pending_id
