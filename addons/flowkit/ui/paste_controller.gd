@@ -13,7 +13,6 @@ func _init(editor: Node, block_controller: FKBlockController, serializer: FKEven
 	_serializer = serializer
 	_undo = undo
 
-
 # ---------------------------------------------------------
 # PUBLIC API
 # ---------------------------------------------------------

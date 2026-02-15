@@ -239,7 +239,6 @@ func _restore_sheet_state(state: Array) -> void:
 	for data in data_blocks:
 		if data is FKEventBlock:
 			var row := block_controller.add_event_block(data)
-			_connect_event_row_signals(row)
 
 		elif data is FKCommentBlock:
 			block_controller.add_comment_block(data)
@@ -565,7 +564,6 @@ func _populate_from_sheet(sheet: FKEventSheet) -> void:
 			
 			if item_type == "event" and item_index < sheet.events.size():
 				var event_row = block_controller.add_event_block(sheet.events[item_index])
-				_connect_event_row_signals(event_row)
 
 			elif item_type == "comment" and item_index < sheet.comments.size():
 				var comment = block_controller.add_comment_block(sheet.comments[item_index])
@@ -575,7 +573,6 @@ func _populate_from_sheet(sheet: FKEventSheet) -> void:
 		# Fallback: load events only (backwards compatibility)
 		for event_data in sheet.events:
 			var event_row = block_controller.add_event_block(event_data)
-			_connect_event_row_signals(event_row)
 
 
 func _save_sheet() -> void:
@@ -1230,9 +1227,7 @@ func _finalize_event_creation(inputs: Dictionary) -> void:
 	data.actions = [] as Array[FKEventAction]
 	
 	var row = block_controller.add_event_block(data)
-	_connect_event_row_signals(row)
 
-	
 	if pending_target_row:
 		var insert_idx = pending_target_row.get_index() + 1
 		blocks_container.add_child(row)
@@ -1257,7 +1252,6 @@ func _finalize_event_above_target(inputs: Dictionary) -> void:
 	data.actions = [] as Array[FKEventAction]
 	
 	var row = block_controller.add_event_block(data)
-	_connect_event_row_signals(row)
 
 	if pending_target_row:
 		var insert_idx = pending_target_row.get_index()  # Insert at same position (above)
@@ -1392,7 +1386,6 @@ func _replace_event(expressions: Dictionary) -> void:
 	
 	# Create new row
 	var new_row = block_controller.add_event_block(new_data)
-	_connect_event_row_signals(new_row)
 
 	# Remove old row and insert new one at same position
 	if old_parent:

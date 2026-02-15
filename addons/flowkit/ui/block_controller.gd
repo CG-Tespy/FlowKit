@@ -11,6 +11,25 @@ func _init(editor: Node, container: Node, factory: FKBlockFactory) -> void:
 	_container = container
 	_factory = factory
 
+func _wire_signals(block: Node) -> void:
+	if not block or not is_instance_valid(block):
+		return
+
+	# Event row
+	if block.has_method("get_event_data"):
+		_editor._connect_event_row_signals(block)
+		return
+
+	# Comment
+	if block.has_method("get_comment_data"):
+		_editor._connect_comment_signals(block)
+		return
+
+	# Group
+	if block.has_method("get_group_data"):
+		_editor._connect_group_signals(block)
+		return
+		
 # ---------------------------------------------------------
 # PUBLIC API
 # ---------------------------------------------------------
@@ -32,17 +51,20 @@ func clear_all() -> void:
 func add_event_block(data: FKEventBlock, index: int = -1) -> Node:
 	var row = _factory.create_event_row(data)
 	_add_block(row, index)
+	_wire_signals(row)
 	return row
 
 func add_comment_block(data: FKCommentBlock, index: int = -1) -> Node:
 	var comment = _factory.create_comment_block(data)
 	_add_block(comment, index)
+	_wire_signals(comment)
 	return comment
 
 
 func add_group_block(data: FKGroupBlock, index: int = -1) -> Node:
 	var group = _factory.create_group_block(data)
 	_add_block(group, index)
+	_wire_signals(group)
 	return group
 
 
