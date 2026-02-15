@@ -4,7 +4,6 @@ extends Control
 var editor_interface: EditorInterface
 var registry: Node
 var generator
-var current_scene_uid: int = 0
 
 var undo_manager: FKUndoManager
 
@@ -48,6 +47,7 @@ var serializer: FKEventSheetSerializer
 var block_factory: FKBlockFactory
 var block_controller: FKBlockController
 var paste_controller: FKPasteController
+var sheet_controller: FKSheetController
 
 func _ready() -> void:
 	clipboard_manager = FKClipboardManager.new(self)
@@ -56,11 +56,12 @@ func _ready() -> void:
 	block_factory = FKBlockFactory.new(EVENT_ROW_SCENE, COMMENT_SCENE, GROUP_SCENE)
 	block_controller = FKBlockController.new(self, blocks_container, block_factory)
 	paste_controller = FKPasteController.new(self, block_controller, serializer, undo_manager)
+	sheet_controller = FKSheetController.new(self, serializer, block_controller)
 	
 	_setup_ui()
 	# Connect block_moved signals for autosave and undo state on drag-and-drop reorder
 	blocks_container.before_block_moved.connect(undo_manager.push_state)
-	blocks_container.block_moved.connect(_save_and_reload_sheet)
+	blocks_container.block_moved.connect(sheet_controller.reload_sheet)
 
 func _setup_ui() -> void:
 	"""Initialize UI state."""
@@ -366,7 +367,7 @@ func _delete_selected_item() -> void:
 	
 	# Update display and save
 	parent_row.update_display()
-	_save_sheet()
+	sheet_controller.save_sheet_from_blocks()
 
 func _recursive_remove_action_from_list(actions: Array, target_action) -> bool:
 	"""Recursively search and remove an action from actions array and branch sub-actions."""
@@ -485,29 +486,8 @@ func _process(delta: float) -> void:
 	if not editor_interface:
 		return
 
-	var scene_root = editor_interface.get_edited_scene_root()
-	if not scene_root:
-		if current_scene_uid != 0:
-			current_scene_uid = 0
-			_clear_all_blocks()
-			_clear_undo_history()
-			_show_empty_state()
-		return
+	sheet_controller.update_scene_state(editor_interface)
 
-	var scene_path = scene_root.scene_file_path
-	if scene_path == "":
-		if current_scene_uid != 0:
-			current_scene_uid = 0
-			_clear_all_blocks()
-			_clear_undo_history()
-			_show_empty_state()
-		return
-
-	var scene_uid = ResourceLoader.get_resource_uid(scene_path)
-	if scene_uid != current_scene_uid:
-		current_scene_uid = scene_uid
-		_clear_undo_history()
-		_load_scene_sheet()
 
 # === Block Management ===
 
@@ -529,203 +509,12 @@ func _show_content_state() -> void:
 	empty_label.visible = false
 	add_event_btn.visible = true
 
-# === File Operations ===
-
-func _get_sheet_path() -> String:
-	"""Get the file path for current scene's event sheet."""
-	if current_scene_uid == 0:
-		return ""
-	return "res://addons/flowkit/saved/event_sheet/%d.tres" % current_scene_uid
-
-func _load_scene_sheet() -> void:
-	"""Load event sheet for current scene."""
-	_clear_all_blocks()
-	
-	var sheet_path = _get_sheet_path()
-	if sheet_path == "" or not FileAccess.file_exists(sheet_path):
-		_show_empty_blocks_state()
-		return
-	
-	var sheet = ResourceLoader.load(sheet_path)
-	if not (sheet is FKEventSheet):
-		_show_empty_blocks_state()
-		return
-	
-	_populate_from_sheet(sheet)
-	_show_content_state()
-
-func _populate_from_sheet(sheet: FKEventSheet) -> void:
-	"""Create event rows and comments from event sheet data (GDevelop-style)."""
-	# If we have item_order, use it to restore the correct order
-	if sheet.item_order.size() > 0:
-		for item in sheet.item_order:
-			var item_type = item.get("type", "")
-			var item_index = item.get("index", 0)
-			
-			if item_type == "event" and item_index < sheet.events.size():
-				var event_row = block_controller.add_event_block(sheet.events[item_index])
-
-			elif item_type == "comment" and item_index < sheet.comments.size():
-				var comment = block_controller.add_comment_block(sheet.comments[item_index])
-			elif item_type == "group" and item_index < sheet.groups.size():
-				var group = block_controller.add_group_block(sheet.groups[item_index])
-	else:
-		# Fallback: load events only (backwards compatibility)
-		for event_data in sheet.events:
-			var event_row = block_controller.add_event_block(event_data)
-
-
-func _save_sheet() -> void:
-	"""Generate and save event sheet from current blocks."""
-	if current_scene_uid == 0:
-		push_warning("No scene open to save event sheet.")
-		return
-	
-	var sheet = _generate_sheet_from_blocks()
-	
-	var dir_path = "res://addons/flowkit/saved/event_sheet"
-	DirAccess.make_dir_recursive_absolute(dir_path)
-	
-	var sheet_path = _get_sheet_path()
-	var error = ResourceSaver.save(sheet, sheet_path)
-	
-	if error == OK:
-		print("✓ Event sheet saved: ", sheet_path)
-	else:
-		push_error("Failed to save event sheet: ", error)
-
-func _save_and_reload_sheet() -> void:
-	"""Save sheet and reload UI to ensure visual/data sync (for drag-drop operations)."""
-	_save_sheet()
-	_load_scene_sheet()
-
-func _generate_sheet_from_blocks() -> FKEventSheet:
-	"""Build event sheet from event rows, comments, and groups (GDevelop-style)."""
-	var sheet = FKEventSheet.new()
-	var events: Array[FKEventBlock] = []
-	var comments: Array[FKCommentBlock] = []
-	var groups: Array[FKGroupBlock] = []
-	var item_order: Array[Dictionary] = []
-	var standalone_conditions: Array[FKEventCondition] = []
-	
-	for block in _get_blocks():
-		# Skip invalid or deleted blocks
-		if not is_instance_valid(block) or block.is_queued_for_deletion():
-			continue
-		
-		if block.has_method("get_event_data"):
-			var data = block.get_event_data()
-			if data:
-				var event_copy = _copy_event_block(data)
-				item_order.append({"type": "event", "index": events.size()})
-				events.append(event_copy)
-		
-		elif block.has_method("get_comment_data"):
-			var data = block.get_comment_data()
-			if data:
-				var comment_copy = FKCommentBlock.new()
-				comment_copy.text = data.text
-				item_order.append({"type": "comment", "index": comments.size()})
-				comments.append(comment_copy)
-		
-		elif block.has_method("get_group_data"):
-			var data = block.get_group_data()
-			if data:
-				var group_copy = _copy_group_block(data)
-				item_order.append({"type": "group", "index": groups.size()})
-				groups.append(group_copy)
-	
-	sheet.events = events
-	sheet.comments = comments
-	sheet.groups = groups
-	sheet.item_order = item_order
-	sheet.standalone_conditions = standalone_conditions
-	return sheet
-
-func _copy_event_block(data: FKEventBlock) -> FKEventBlock:
-	"""Create a clean copy of an event block."""
-	var event_copy = FKEventBlock.new(data.block_id, data.event_id, data.target_node)
-	event_copy.inputs = data.inputs.duplicate()
-	event_copy.conditions = [] as Array[FKEventCondition]
-	event_copy.actions = [] as Array[FKEventAction]
-	
-	for cond in data.conditions:
-		var cond_copy = FKEventCondition.new()
-		cond_copy.condition_id = cond.condition_id
-		cond_copy.target_node = cond.target_node
-		cond_copy.inputs = cond.inputs.duplicate()
-		cond_copy.negated = cond.negated
-		cond_copy.actions = [] as Array[FKEventAction]
-		event_copy.conditions.append(cond_copy)
-	
-	for act in data.actions:
-		var act_copy = _copy_action(act)
-		event_copy.actions.append(act_copy)
-	
-	return event_copy
-
-func _copy_action(act: FKEventAction) -> FKEventAction:
-	"""Create a clean copy of an action, including branch data."""
-	var act_copy = FKEventAction.new()
-	act_copy.action_id = act.action_id
-	act_copy.target_node = act.target_node
-	act_copy.inputs = act.inputs.duplicate()
-	act_copy.is_branch = act.is_branch
-	act_copy.branch_type = act.branch_type
-	
-	if act.branch_condition:
-		var cond_copy = FKEventCondition.new()
-		cond_copy.condition_id = act.branch_condition.condition_id
-		cond_copy.target_node = act.branch_condition.target_node
-		cond_copy.inputs = act.branch_condition.inputs.duplicate()
-		cond_copy.negated = act.branch_condition.negated
-		cond_copy.actions = [] as Array[FKEventAction]
-		act_copy.branch_condition = cond_copy
-	
-	act_copy.branch_actions = [] as Array[FKEventAction]
-	for sub_act in act.branch_actions:
-		act_copy.branch_actions.append(_copy_action(sub_act))
-	
-	return act_copy
-
-func _copy_group_block(data: FKGroupBlock) -> FKGroupBlock:
-	"""Create a clean copy of a group block with all children."""
-	var group_copy = FKGroupBlock.new()
-	group_copy.title = data.title
-	group_copy.collapsed = data.collapsed
-	group_copy.color = data.color
-	group_copy.children = []
-	
-	for child_dict in data.children:
-		var child_type = child_dict.get("type", "")
-		var child_data = child_dict.get("data")
-		
-		if child_type == "event" and child_data is FKEventBlock:
-			group_copy.children.append({"type": "event", "data": _copy_event_block(child_data)})
-		elif child_type == "comment" and child_data is FKCommentBlock:
-			var comment_copy = FKCommentBlock.new()
-			comment_copy.text = child_data.text
-			group_copy.children.append({"type": "comment", "data": comment_copy})
-		elif child_type == "group" and child_data is FKGroupBlock:
-			group_copy.children.append({"type": "group", "data": _copy_group_block(child_data)})
-	
-	return group_copy
-
-func _new_sheet() -> void:
-	"""Create new empty sheet."""
-	if current_scene_uid == 0:
-		push_warning("No scene open to create event sheet.")
-		return
-	
-	_clear_all_blocks()
-	_show_content_state()
-
 # === Event Row Creation ===
 
 func _connect_comment_signals(comment) -> void:
 	comment.selected.connect(_on_comment_selected)
 	comment.delete_requested.connect(_on_comment_delete.bind(comment))
-	comment.data_changed.connect(_save_sheet)
+	comment.data_changed.connect(sheet_controller.save_sheet_from_blocks_from_blocks)
 	comment.insert_comment_above_requested.connect(_on_comment_insert_above.bind(comment))
 	comment.insert_comment_below_requested.connect(_on_comment_insert_below.bind(comment))
 	comment.insert_event_above_requested.connect(_on_comment_insert_event_above.bind(comment))
@@ -734,7 +523,7 @@ func _connect_comment_signals(comment) -> void:
 func _connect_group_signals(group) -> void:
 	group.selected.connect(_on_group_selected)
 	group.delete_requested.connect(_on_group_delete.bind(group))
-	group.data_changed.connect(_save_sheet)
+	group.data_changed.connect(sheet_controller.save_sheet_from_blocks_from_blocks)
 	group.before_data_changed.connect(undo_manager.push_state)
 	group.add_event_requested.connect(_on_group_add_event_requested)
 	group.add_comment_requested.connect(_on_group_add_comment_requested)
@@ -816,7 +605,7 @@ func _on_group_delete(group) -> void:
 	
 	blocks_container.remove_child(group)
 	group.queue_free()
-	_save_sheet()
+	sheet_controller.save_sheet_from_blocks_from_blocks()
 
 
 
@@ -833,7 +622,7 @@ func _on_add_group_button_pressed() -> void:
 	var group = block_controller.add_group_block(data)
 	
 	_show_content_state()
-	_save_sheet()
+	sheet_controller.save_sheet_from_blocks_from_blocks()
 
 # === Signal Connections ===
 
@@ -852,7 +641,7 @@ func _connect_event_row_signals(row) -> void:
 	row.action_edit_requested.connect(_on_action_edit_requested.bind(row))
 	row.condition_dropped.connect(_on_condition_dropped)
 	row.action_dropped.connect(_on_action_dropped)
-	row.data_changed.connect(_save_sheet)
+	row.data_changed.connect(sheet_controller.save_sheet_from_blocks)
 	row.before_data_changed.connect(undo_manager.push_state)
 	# Branch signals
 	row.add_branch_requested.connect(_on_row_add_branch.bind(row))
@@ -866,10 +655,10 @@ func _connect_event_row_signals(row) -> void:
 # === Menu Button Handlers ===
 
 func _on_new_sheet() -> void:
-	_new_sheet()
+	sheet_controller.new_sheet()
 
 func _on_save_sheet() -> void:
-	_save_sheet()
+	sheet_controller.save_sheet_from_blocks()
 
 func _on_generate_providers() -> void:
 	if not generator:
@@ -969,7 +758,7 @@ func _on_add_comment_button_pressed() -> void:
 	var comment = block_controller.add_comment_block(data)
 	
 	_show_content_state()
-	_save_sheet()
+	sheet_controller.save_sheet_from_blocks()
 
 func _on_row_selected(row) -> void:
 	"""Handle row selection with visual feedback."""
@@ -1005,7 +794,7 @@ func _on_comment_delete(comment) -> void:
 	
 	blocks_container.remove_child(comment)
 	comment.queue_free()
-	_save_sheet()
+	sheet_controller.save_sheet_from_blocks()
 
 func _on_comment_insert_above(signal_node, bound_comment) -> void:
 	"""Insert a new comment above the specified comment."""
@@ -1043,7 +832,7 @@ func _insert_comment_relative_to(target_block, offset: int) -> void:
 	blocks_container.move_child(comment, insert_idx)
 	
 	_show_content_state()
-	_save_sheet()
+	sheet_controller.save_sheet_from_blocks()
 
 func _on_condition_selected_in_row(condition_node) -> void:
 	"""Handle condition item selection."""
@@ -1237,7 +1026,7 @@ func _finalize_event_creation(inputs: Dictionary) -> void:
 	
 	_show_content_state()
 	_reset_workflow()
-	_save_sheet()
+	sheet_controller.save_sheet_from_blocks()
 
 
 func _finalize_event_above_target(inputs: Dictionary) -> void:
@@ -1262,7 +1051,7 @@ func _finalize_event_above_target(inputs: Dictionary) -> void:
 	
 	_show_content_state()
 	_reset_workflow()
-	_save_sheet()
+	sheet_controller.save_sheet_from_blocks()
 
 
 func _finalize_event_in_group(inputs: Dictionary) -> void:
@@ -1286,7 +1075,7 @@ func _finalize_event_in_group(inputs: Dictionary) -> void:
 	
 	_show_content_state()
 	_reset_workflow()
-	_save_sheet()
+	sheet_controller.save_sheet_from_blocks()
 
 func _finalize_condition_creation(inputs: Dictionary) -> void:
 	"""Add condition to the current event row."""
@@ -1305,7 +1094,7 @@ func _finalize_condition_creation(inputs: Dictionary) -> void:
 	
 	_show_content_state()
 	_reset_workflow()
-	_save_sheet()
+	sheet_controller.save_sheet_from_blocks()
 
 func _finalize_action_creation(inputs: Dictionary) -> void:
 	"""Add action to the current event row."""
@@ -1322,7 +1111,7 @@ func _finalize_action_creation(inputs: Dictionary) -> void:
 	
 	_show_content_state()
 	_reset_workflow()
-	_save_sheet()
+	sheet_controller.save_sheet_from_blocks()
 
 func _update_event_inputs(expressions: Dictionary) -> void:
 	"""Update existing event row with new inputs."""
@@ -1335,7 +1124,7 @@ func _update_event_inputs(expressions: Dictionary) -> void:
 			data.inputs = expressions
 			pending_target_row.update_display()
 	_reset_workflow()
-	_save_sheet()
+	sheet_controller.save_sheet_from_blocks()
 
 func _update_condition_inputs(expressions: Dictionary) -> void:
 	"""Update existing condition item with new inputs."""
@@ -1348,7 +1137,7 @@ func _update_condition_inputs(expressions: Dictionary) -> void:
 			data.inputs = expressions
 			pending_target_item.update_display()
 	_reset_workflow()
-	_save_sheet()
+	sheet_controller.save_sheet_from_blocks()
 
 func _update_action_inputs(expressions: Dictionary) -> void:
 	"""Update existing action item with new inputs."""
@@ -1361,7 +1150,7 @@ func _update_action_inputs(expressions: Dictionary) -> void:
 			data.inputs = expressions
 			pending_target_item.update_display()
 	_reset_workflow()
-	_save_sheet()
+	sheet_controller.save_sheet_from_blocks()
 
 func _replace_event(expressions: Dictionary) -> void:
 	"""Replace existing event row with new type."""
@@ -1412,7 +1201,7 @@ func _replace_event(expressions: Dictionary) -> void:
 			parent_to_sync._sync_children_to_data()
 	
 	_reset_workflow()
-	_save_sheet()
+	sheet_controller.save_sheet_from_blocks()
 
 func _replace_condition(expressions: Dictionary) -> void:
 	"""Replace condition is not used in GDevelop-style layout."""
@@ -1465,7 +1254,7 @@ func _on_row_delete(signal_row, bound_row) -> void:
 	if bound_row.get_parent() == blocks_container:
 		blocks_container.remove_child(bound_row)
 		bound_row.queue_free()
-		_save_sheet()
+		sheet_controller.save_sheet_from_blocks()
 
 func _on_row_edit(signal_row, bound_row) -> void:
 	var data = bound_row.get_event_data()
@@ -1557,7 +1346,7 @@ func _on_branch_add_else(branch_item, event_row) -> void:
 		actions_array.append(else_data)
 
 	event_row.update_display()
-	_save_sheet()
+	sheet_controller.save_sheet_from_blocks()
 
 func _on_branch_condition_edit(branch_item, event_row) -> void:
 	"""Edit the condition of a branch."""
@@ -1644,7 +1433,7 @@ func _finalize_branch_creation(inputs: Dictionary) -> void:
 
 	_show_content_state()
 	_reset_workflow()
-	_save_sheet()
+	sheet_controller.save_sheet_from_blocks()
 
 func _finalize_elseif_creation(inputs: Dictionary) -> void:
 	"""Create an ELSE IF branch and insert it after the current branch."""
@@ -1684,7 +1473,7 @@ func _finalize_elseif_creation(inputs: Dictionary) -> void:
 
 	_show_content_state()
 	_reset_workflow()
-	_save_sheet()
+	sheet_controller.save_sheet_from_blocks()
 
 func _update_branch_condition(expressions: Dictionary) -> void:
 	"""Update an existing branch's condition inputs."""
@@ -1697,7 +1486,7 @@ func _update_branch_condition(expressions: Dictionary) -> void:
 			pending_target_branch.update_display()
 
 	_reset_workflow()
-	_save_sheet()
+	sheet_controller.save_sheet_from_blocks()
 
 func _finalize_branch_action_creation(inputs: Dictionary) -> void:
 	"""Add an action inside a branch."""
@@ -1713,7 +1502,7 @@ func _finalize_branch_action_creation(inputs: Dictionary) -> void:
 
 	_show_content_state()
 	_reset_workflow()
-	_save_sheet()
+	sheet_controller.save_sheet_from_blocks()
 
 # === Condition/Action Edit Handlers ===
 
@@ -1800,7 +1589,7 @@ func _on_condition_dropped(source_row, condition_data: FKEventCondition, target_
 		target_data.conditions.append(cond_copy)
 		target_row.update_display()
 	
-	_save_sheet()
+	sheet_controller.save_sheet_from_blocks()
 
 func _on_action_dropped(source_row, action_data: FKEventAction, target_row) -> void:
 	"""Handle action dropped from one event row to another."""
@@ -1829,7 +1618,7 @@ func _on_action_dropped(source_row, action_data: FKEventAction, target_row) -> v
 		target_data.actions.append(act_copy)
 		target_row.update_display()
 	
-	_save_sheet()
+	sheet_controller.save_sheet_from_blocks()
 
 func _generate_unique_block_id(event_id: String) -> String:
 	"""Generate a unique ID for an event block."""

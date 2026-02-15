@@ -44,9 +44,14 @@ func get_blocks() -> Array:
 
 func clear_all() -> void:
 	for child in _container.get_children():
-		if is_instance_valid(child):
-			child.queue_free()
+		if not is_instance_valid(child):
+			continue
 
+		# Skip UI nodes that are not event/comment/group blocks
+		if child.has_method("get_event_data") \
+		or child.has_method("get_comment_data") \
+		or child.has_method("get_group_data"):
+			child.queue_free()
 
 func add_event_block(data: FKEventBlock, index: int = -1) -> Node:
 	var row = _factory.create_event_row(data)
