@@ -25,7 +25,7 @@ func _ready() -> void:
 		recent_item_list.item_activated.connect(_on_recent_item_activated)
 	
 	# Load recent items manager
-	_recent_items_manager = load("res://addons/flowkit/ui/modals/recent_items_manager.gd").new()
+	_recent_items_manager = FKCommon.recent_items_manager_script().new()
 	
 	# Load all available events to check compatibility
 	_load_available_events()
@@ -34,8 +34,7 @@ func _ready() -> void:
 func _load_available_events() -> void:
 	"""Load all event scripts from the events folder."""
 	available_events.clear()
-	var events_path: String = "res://addons/flowkit/events"
-	_scan_directory_recursive(events_path)
+	_scan_directory_recursive(FKCommon.path_to_events_folder)
 
 func _scan_directory_recursive(path: String) -> void:
 	"""Recursively scan directories for event scripts."""
@@ -74,7 +73,8 @@ func populate_from_scene(scene_root: Node) -> void:
 	# Add System option at the top
 	var system_icon = null
 	if editor_interface:
-		system_icon = editor_interface.get_base_control().get_theme_icon("Node", "EditorIcons")
+		var base_control = editor_interface.get_base_control()
+		system_icon = base_control.get_theme_icon("Node", "EditorIcons")
 		
 	_all_items_cache.append({
 		"display_name": "System",

@@ -39,8 +39,6 @@ var pending_target_row = null  # The event row being modified
 var pending_target_item = null  # The specific condition/action item being edited
 var pending_target_group = null  # The group to add content to (for event_in_group workflow)
 var pending_target_branch = null  # The branch item for branch sub-action workflows
-var selected_row = null  # Currently selected event row
-var selected_item = null  # Currently selected condition/action item
 
 var clipboard_manager: FKClipboardManager
 var serializer: FKEventSheetSerializer
@@ -48,6 +46,7 @@ var block_factory: FKBlockFactory
 var block_controller: FKBlockController
 var paste_controller: FKPasteController
 var sheet_controller: FKSheetController
+var selection_controller: FKSelectionController
 
 func _ready() -> void:
 	clipboard_manager = FKClipboardManager.new(self)
@@ -57,6 +56,7 @@ func _ready() -> void:
 	block_controller = FKBlockController.new(self, blocks_container, block_factory)
 	paste_controller = FKPasteController.new(self, block_controller, serializer, undo_manager)
 	sheet_controller = FKSheetController.new(self, serializer, block_controller)
+	selection_controller = FKSelectionController.new(self, block_controller, blocks_container)
 	
 	_setup_ui()
 	# Connect block_moved signals for autosave and undo state on drag-and-drop reorder
@@ -140,9 +140,7 @@ func _input(event: InputEvent) -> void:
 		
 		# Check if we have any selection (row or item)
 		if selected_row or selected_item:
-			# Deselect if click is outside all event rows
-			if not _is_click_on_event_row(mouse_pos):
-				_deselect_all()
+			selection_controller.handle_click(mouse_pos)
 	
 	# Only handle key press (not echo/repeat)
 	if not (event is InputEventKey and event.pressed and not event.echo):
@@ -150,7 +148,7 @@ func _input(event: InputEvent) -> void:
 	
 	# Handle Ctrl+Z (undo) and Ctrl+Shift+Z / Ctrl+Y (redo) when FlowKit panel is visible
 	# This allows undo/redo to work even when keyboard navigating or mouse is outside
-	if visible and (_is_mouse_in_editor_area() or _has_focus_in_subtree()):
+	if visible and (_is_mouse_in_editor_area() or selection_controller.has_focus_in_subtree()):
 		if event.keycode == KEY_Z and event.ctrl_pressed:
 			if event.shift_pressed:
 				_redo()
@@ -164,7 +162,7 @@ func _input(event: InputEvent) -> void:
 			return
 	
 	# Safety: Only act if mouse is within our blocks area for other shortcuts
-	if not _is_mouse_in_blocks_area():
+	if not selection_controller.is_mouse_in_blocks_area(get_global_mouse_position()):
 		return
 	
 	# Check if a text editing control has focus - if so, don't intercept copy/paste
@@ -174,7 +172,7 @@ func _input(event: InputEvent) -> void:
 	# Handle Delete key
 	if event.keycode == KEY_DELETE:
 		if selected_item and is_instance_valid(selected_item):
-			_delete_selected_item()
+			selection_controller.handle_delete()
 			get_viewport().set_input_as_handled()
 		elif selected_row and is_instance_valid(selected_row):
 			block_controller.remove_block(selected_row)
@@ -199,30 +197,12 @@ func _is_click_on_event_row(mouse_pos: Vector2) -> bool:
 			return true
 	return false
 
-func _is_mouse_in_blocks_area() -> bool:
-	"""Check if mouse is hovering over the blocks container."""
-	var mouse_pos = get_global_mouse_position()
-	return blocks_container.get_global_rect().has_point(mouse_pos)
-
 func _is_mouse_in_editor_area() -> bool:
 	"""Check if mouse is hovering over the FlowKit editor panel."""
 	var mouse_pos = get_global_mouse_position()
 	return get_global_rect().has_point(mouse_pos)
 
-func _has_focus_in_subtree() -> bool:
-	"""Check if any child control has focus."""
-	var focused = get_viewport().gui_get_focus_owner()
-	if focused == null:
-		return false
-	return focused == self or is_ancestor_of(focused)
-
 # === Undo/Redo System ===
-
-
-
-
-
-
 func _clear_undo_history() -> void:
 	undo_manager.clear_history()
 
@@ -328,47 +308,6 @@ func _deserialize_group_block(dict: Dictionary) -> FKGroupBlock:
 	
 	return data
 
-func _delete_selected_item() -> void:
-	"""Delete the currently selected condition or action item."""
-	if not selected_item or not is_instance_valid(selected_item):
-		return
-	
-	var item_to_delete = selected_item
-	
-	# Find the parent event_row
-	var parent_row = block_controller.find_parent_event_row(item_to_delete)
-	if not parent_row:
-		return
-	
-	# Push undo state before deleting
-	undo_manager.push_state()
-	
-	# Check if it's a condition or action
-	if item_to_delete.has_method("get_condition_data"):
-		var cond_data = item_to_delete.get_condition_data()
-		var event_data = parent_row.get_event_data()
-		if cond_data and event_data:
-			var idx = event_data.conditions.find(cond_data)
-			if idx >= 0:
-				event_data.conditions.remove_at(idx)
-	elif item_to_delete.has_method("get_action_data"):
-		var act_data = item_to_delete.get_action_data()
-		var event_data = parent_row.get_event_data()
-		if act_data and event_data:
-			var idx = event_data.actions.find(act_data)
-			if idx >= 0:
-				event_data.actions.remove_at(idx)
-			else:
-				# Action might be inside a branch - search recursively
-				_recursive_remove_action_from_list(event_data.actions, act_data)
-	
-	# Clear selection
-	_deselect_item()
-	
-	# Update display and save
-	parent_row.update_display()
-	sheet_controller.save_sheet_from_blocks()
-
 func _recursive_remove_action_from_list(actions: Array, target_action) -> bool:
 	"""Recursively search and remove an action from actions array and branch sub-actions."""
 	var idx = actions.find(target_action)
@@ -424,13 +363,6 @@ func _duplicate_actions(actions: Array) -> Array:
 		result.append(act_dict)
 	return result
 
-func _find_event_row_at_mouse() -> Control:
-	"""Find event row at mouse position."""
-	var mouse_pos = get_global_mouse_position()
-	for row in _get_blocks():
-		if row.get_global_rect().has_point(mouse_pos):
-			return row
-	return null
 func _set_expression_interface(interface: EditorInterface) -> void:
 	if expression_modal:
 		expression_modal.set_editor_interface(interface)
@@ -523,7 +455,7 @@ func _connect_comment_signals(comment) -> void:
 func _connect_group_signals(group) -> void:
 	group.selected.connect(_on_group_selected)
 	group.delete_requested.connect(_on_group_delete.bind(group))
-	group.data_changed.connect(sheet_controller.save_sheet_from_blocks_from_blocks)
+	group.data_changed.connect(sheet_controller.save_sheet_from_blocks)
 	group.before_data_changed.connect(undo_manager.push_state)
 	group.add_event_requested.connect(_on_group_add_event_requested)
 	group.add_comment_requested.connect(_on_group_add_comment_requested)
@@ -573,12 +505,12 @@ func _on_group_selected(node) -> void:
 		return
 	
 	if node.has_method("get_action_data"):
-		_on_action_selected_in_row(node)
+		selection_controller.select_item(node)
 		return
 	
 	# Check if it's an event_row inside the group
 	if node.has_method("get_event_data"):
-		_on_row_selected(node)
+		selection_controller.select_row(node)
 		return
 	
 	# Check if it's a comment inside the group
@@ -588,7 +520,6 @@ func _on_group_selected(node) -> void:
 	
 	# It's a group (or nested group)
 	_deselect_item()
-	
 	if selected_row and is_instance_valid(selected_row) and selected_row.has_method("set_selected"):
 		selected_row.set_selected(false)
 	
@@ -596,6 +527,14 @@ func _on_group_selected(node) -> void:
 	if selected_row and selected_row.has_method("set_selected"):
 		selected_row.set_selected(true)
 
+var selected_row: Control:
+	get:
+		return selection_controller.get_selected_row()
+		
+var selected_item: Control:
+	get:
+		return selection_controller.get_selected_item()
+		
 func _on_group_delete(group) -> void:
 	"""Delete a group block."""
 	undo_manager.push_state()
@@ -606,8 +545,6 @@ func _on_group_delete(group) -> void:
 	blocks_container.remove_child(group)
 	group.queue_free()
 	sheet_controller.save_sheet_from_blocks_from_blocks()
-
-
 
 func _on_add_group_button_pressed() -> void:
 	"""Add a new group block."""
@@ -634,9 +571,9 @@ func _connect_event_row_signals(row) -> void:
 	row.edit_event_requested.connect(_on_row_edit.bind(row))
 	row.add_condition_requested.connect(_on_row_add_condition.bind(row))
 	row.add_action_requested.connect(_on_row_add_action.bind(row))
-	row.selected.connect(_on_row_selected)
+	row.selected.connect(selection_controller.select_row)
 	row.condition_selected.connect(_on_condition_selected_in_row)
-	row.action_selected.connect(_on_action_selected_in_row)
+	row.action_selected.connect(selection_controller.select_item)
 	row.condition_edit_requested.connect(_on_condition_edit_requested.bind(row))
 	row.action_edit_requested.connect(_on_action_edit_requested.bind(row))
 	row.condition_dropped.connect(_on_condition_dropped)
@@ -760,20 +697,6 @@ func _on_add_comment_button_pressed() -> void:
 	_show_content_state()
 	sheet_controller.save_sheet_from_blocks()
 
-func _on_row_selected(row) -> void:
-	"""Handle row selection with visual feedback."""
-	# Deselect previous item (condition/action)
-	_deselect_item()
-	
-	# Deselect previous row
-	if selected_row and is_instance_valid(selected_row) and selected_row.has_method("set_selected"):
-		selected_row.set_selected(false)
-	
-	# Select new row
-	selected_row = row
-	if selected_row and selected_row.has_method("set_selected"):
-		selected_row.set_selected(true)
-
 func _on_comment_selected(comment_node) -> void:
 	"""Handle comment block selection."""
 	_deselect_item()
@@ -849,33 +772,11 @@ func _on_condition_selected_in_row(condition_node) -> void:
 	if selected_item and selected_item.has_method("set_selected"):
 		selected_item.set_selected(true)
 
-func _on_action_selected_in_row(action_node) -> void:
-	"""Handle action item selection."""
-	# Deselect previous row
-	if selected_row and is_instance_valid(selected_row) and selected_row.has_method("set_selected"):
-		selected_row.set_selected(false)
-	selected_row = null
-	
-	# Deselect previous item
-	_deselect_item()
-	
-	# Select new item
-	selected_item = action_node
-	if selected_item and selected_item.has_method("set_selected"):
-		selected_item.set_selected(true)
-
 func _deselect_item() -> void:
 	"""Deselect current condition/action item."""
 	if selected_item and is_instance_valid(selected_item) and selected_item.has_method("set_selected"):
 		selected_item.set_selected(false)
 	selected_item = null
-
-func _deselect_all() -> void:
-	"""Deselect all rows and items."""
-	if selected_row and is_instance_valid(selected_row) and selected_row.has_method("set_selected"):
-		selected_row.set_selected(false)
-	selected_row = null
-	_deselect_item()
 
 # === Workflow System ===
 
