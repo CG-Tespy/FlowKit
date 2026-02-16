@@ -55,14 +55,14 @@ func load_sheet_for_current_scene() -> void:
 
 func save_sheet_from_blocks() -> void:
 	if current_scene_uid == 0:
-		editor.push_warning("No scene open to save event sheet.")
+		print_rich("[color=yellow][FlowKit] No scene open to save event sheet.[/color]")
 		return
 
 	sheet = _generate_sheet_from_blocks()
 	DirAccess.make_dir_recursive_absolute(_event_sheet_folder_path)
 	var error = ResourceSaver.save(sheet, sheet_path)
 	if error != OK:
-		editor.push_error("Failed to save event sheet: " + str(error))
+		printerr("Failed to save event sheet: " + str(error))
 	else:
 		print("✓ Event sheet saved: ", sheet_path)
 
@@ -74,7 +74,7 @@ func reload_sheet() -> void:
 
 func new_sheet() -> void:
 	if current_scene_uid == 0:
-		editor.push_warning("No scene open to create event sheet.")
+		print_rich("[color=yellow][FlowKit]No scene open to create event sheet.[/color]")
 		return
 
 	block_controller.clear_all()
@@ -153,15 +153,15 @@ func _generate_sheet_from_blocks() -> FKEventSheet:
 	sheet.comments = comments
 	sheet.groups = groups
 	sheet.item_order = item_order
-	sheet.standalone_conditions = []
+	sheet.standalone_conditions.clear()
 
 	return sheet
 
 func _copy_event_block(data: FKEventBlock) -> FKEventBlock:
 	var e = FKEventBlock.new(data.block_id, data.event_id, data.target_node)
 	e.inputs = data.inputs.duplicate()
-	e.conditions = []
-	e.actions = []
+	e.conditions = [] as Array[FKEventCondition]
+	e.actions = [] as Array[FKEventAction]
 
 	for cond in data.conditions:
 		var c = FKEventCondition.new()
@@ -169,7 +169,7 @@ func _copy_event_block(data: FKEventBlock) -> FKEventBlock:
 		c.target_node = cond.target_node
 		c.inputs = cond.inputs.duplicate()
 		c.negated = cond.negated
-		c.actions = []
+		c.actions = [] as Array[FKEventAction]
 		e.conditions.append(c)
 
 	for act in data.actions:
@@ -191,10 +191,10 @@ func _copy_action(act: FKEventAction) -> FKEventAction:
 		bc.target_node = act.branch_condition.target_node
 		bc.inputs = act.branch_condition.inputs.duplicate()
 		bc.negated = act.branch_condition.negated
-		bc.actions = []
+		bc.actions = [] as Array[FKEventAction]
 		a.branch_condition = bc
 
-	a.branch_actions = []
+	a.branch_actions = [] as Array[FKEventAction]
 	for sub in act.branch_actions:
 		a.branch_actions.append(_copy_action(sub))
 

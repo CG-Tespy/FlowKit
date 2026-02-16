@@ -133,6 +133,51 @@ func _popup_centered_on_editor(popup: Window) -> void:
 	popup.position = centered_pos
 	popup.popup()
 
+
+func _delete_selected_item() -> void:
+	"""Delete the currently selected condition or action item."""
+	if not selected_item or not is_instance_valid(selected_item):
+		return
+	
+	var item_to_delete = selected_item
+	
+	# Find the parent event_row
+	var parent_row = block_controller.find_parent_event_row(item_to_delete)
+	if not parent_row:
+		return
+	
+	# Push undo state before deleting
+	undo_manager.push_state()
+	
+	# Check if it's a condition or action
+	var is_condition := item_to_delete.has_method("get_condition_data")
+	var is_action := item_to_delete.has_method("get_action_data")
+	if is_condition:
+		var cond_data = item_to_delete.get_condition_data()
+		var event_data = parent_row.get_event_data()
+		if cond_data and event_data:
+			var idx = event_data.conditions.find(cond_data)
+			if idx >= 0:
+				event_data.conditions.remove_at(idx)
+	elif is_action:
+		var act_data = item_to_delete.get_action_data()
+		var event_data = parent_row.get_event_data()
+		if act_data and event_data:
+			var idx = event_data.actions.find(act_data)
+			if idx >= 0:
+				event_data.actions.remove_at(idx)
+			else:
+				# Action might be inside a branch - search recursively
+				_recursive_remove_action_from_list(event_data.actions, act_data)
+	
+	# Clear selection
+	_deselect_item()
+	
+	# Update display and save
+	parent_row.update_display()
+	sheet_controller.save_sheet_from_blocks()
+
+
 func _input(event: InputEvent) -> void:
 	# Handle mouse click to deselect when clicking outside selected elements
 	if event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT:
@@ -230,83 +275,6 @@ func _restore_sheet_state(state: Array) -> void:
 		_show_content_state()
 	else:
 		_show_empty_blocks_state()
-
-
-func _deserialize_comment_block(dict: Dictionary) -> FKCommentBlock:
-	"""Deserialize a dictionary to a comment block."""
-	var data = FKCommentBlock.new()
-	data.text = dict.get("text", "")
-	return data
-
-func _deserialize_event_block(dict: Dictionary) -> FKEventBlock:
-	"""Deserialize a dictionary to an event block."""
-	var block_id = dict.get("block_id", "")
-	var event_id = dict.get("event_id", "")
-	var target_node = NodePath(dict.get("target_node", ""))
-	var data = FKEventBlock.new(block_id, event_id, target_node)
-	data.inputs = dict.get("inputs", {}).duplicate()
-	data.conditions = [] as Array[FKEventCondition]
-	data.actions = [] as Array[FKEventAction]
-	
-	for cond_dict in dict.get("conditions", []):
-		var cond = FKEventCondition.new()
-		cond.condition_id = cond_dict.get("condition_id", "")
-		cond.target_node = NodePath(cond_dict.get("target_node", ""))
-		cond.inputs = cond_dict.get("inputs", {}).duplicate()
-		cond.negated = cond_dict.get("negated", false)
-		cond.actions = [] as Array[FKEventAction]
-		data.conditions.append(cond)
-	
-	for act_dict in dict.get("actions", []):
-		var act = _deserialize_action(act_dict)
-		data.actions.append(act)
-	
-	return data
-
-func _deserialize_action(act_dict: Dictionary) -> FKEventAction:
-	"""Deserialize a dictionary to an action (including branch data)."""
-	var act = FKEventAction.new()
-	act.action_id = act_dict.get("action_id", "")
-	act.target_node = NodePath(act_dict.get("target_node", ""))
-	act.inputs = act_dict.get("inputs", {}).duplicate()
-	act.is_branch = act_dict.get("is_branch", false)
-	act.branch_type = act_dict.get("branch_type", "")
-	if act.is_branch:
-		var cond_dict = act_dict.get("branch_condition", null)
-		if cond_dict:
-			var cond = FKEventCondition.new()
-			cond.condition_id = cond_dict.get("condition_id", "")
-			cond.target_node = NodePath(cond_dict.get("target_node", ""))
-			cond.inputs = cond_dict.get("inputs", {}).duplicate()
-			cond.negated = cond_dict.get("negated", false)
-			cond.actions = [] as Array[FKEventAction]
-			act.branch_condition = cond
-		act.branch_actions = [] as Array[FKEventAction]
-		for sub_dict in act_dict.get("branch_actions", []):
-			act.branch_actions.append(_deserialize_action(sub_dict))
-	return act
-
-func _deserialize_group_block(dict: Dictionary) -> FKGroupBlock:
-	"""Deserialize a dictionary to a group block."""
-	var data = FKGroupBlock.new()
-	data.title = dict.get("title", "Group")
-	data.collapsed = dict.get("collapsed", false)
-	data.color = dict.get("color", Color(0.25, 0.22, 0.35, 1.0))
-	data.children = []
-	
-	for child_dict in dict.get("children", []):
-		var child_type = child_dict.get("type", "event")
-		if child_type == "event":
-			var child_data = _deserialize_event_block(child_dict)
-			data.children.append({"type": "event", "data": child_data})
-		elif child_type == "comment":
-			var child_data = _deserialize_comment_block(child_dict)
-			data.children.append({"type": "comment", "data": child_data})
-		elif child_type == "group":
-			var child_data = _deserialize_group_block(child_dict)
-			data.children.append({"type": "group", "data": child_data})
-	
-	return data
 
 func _recursive_remove_action_from_list(actions: Array, target_action) -> bool:
 	"""Recursively search and remove an action from actions array and branch sub-actions."""
@@ -563,7 +531,7 @@ func _on_add_group_button_pressed() -> void:
 
 # === Signal Connections ===
 
-func _connect_event_row_signals(row) -> void:
+func _connect_event_row_signals(row: Node) -> void:
 	row.insert_event_below_requested.connect(_on_row_insert_below.bind(row))
 	row.insert_comment_below_requested.connect(_on_row_insert_comment_below.bind(row))
 	row.replace_event_requested.connect(_on_row_replace.bind(row))
@@ -775,6 +743,7 @@ func _on_condition_selected_in_row(condition_node) -> void:
 func _deselect_item() -> void:
 	"""Deselect current condition/action item."""
 	if selected_item and is_instance_valid(selected_item) and selected_item.has_method("set_selected"):
+		print("Deselecting " + str(selected_item))
 		selected_item.set_selected(false)
 	selected_item = null
 
