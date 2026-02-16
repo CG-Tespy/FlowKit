@@ -22,7 +22,7 @@ func _process(delta: float) -> void:
 	# Regularly check if the current_scene changed (robust against timing issues).
 	_check_for_scene_change()
 	# Store delta on FlowKitSystem so expressions can read it
-	var system = get_node_or_null("/root/FlowKitSystem")
+	var system = get_node_or_null(FKCommon.system_node_path)
 	if system:
 		system.delta = delta
 	_is_physics_frame = false
@@ -34,7 +34,7 @@ func _process(delta: float) -> void:
 
 func _physics_process(delta: float) -> void:
 	# Store delta on FlowKitSystem so expressions can read it
-	var system = get_node_or_null("/root/FlowKitSystem")
+	var system = get_node_or_null(FKCommon.system_node_path)
 	if system:
 		system.delta = delta
 	_is_physics_frame = true
@@ -78,7 +78,7 @@ func _on_scene_changed(scene_root: Node) -> void:
 	print("[FlowKit] Scene detected:", scene_name, " (", scene_root.name, ") UID:", scene_uid)
 
 	# Sync node variables from metadata to FlowKitSystem
-	var system: Node = get_tree().root.get_node_or_null("/root/FlowKitSystem")
+	var system: Node = get_tree().root.get_node_or_null(FKCommon.system_node_path)
 	if system and system.has_method("sync_scene_node_variables"):
 		system.sync_scene_node_variables(scene_root)
 
@@ -87,8 +87,6 @@ func _on_scene_changed(scene_root: Node) -> void:
 
 	# Load event sheets for the scene root and any instanced child scenes
 	_load_sheets_for_scene(scene_root)
-
-
 
 func _load_sheets_for_scene(scene_root: Node) -> void:
 	# Clear previous sheets
@@ -105,7 +103,7 @@ func _load_sheets_for_scene(scene_root: Node) -> void:
 		var node_root: Node = uid_to_node[uid]
 		var scene_path: String = node_root.scene_file_path
 		var scene_name: String = scene_path.get_file().get_basename()
-		var sheet_path: String = "res://addons/flowkit/saved/event_sheet/%d.tres" % uid
+		var sheet_path: String = FKCommon.sheet_path_format % uid
 
 		if ResourceLoader.exists(sheet_path):
 			var sheet: FKEventSheet = load(sheet_path)
@@ -163,8 +161,8 @@ func _run_sheet(entry: Dictionary) -> void:
 	# Process standalone conditions (run every frame)
 	for standalone_cond in sheet.standalone_conditions:
 		var cnode: Node = null
-		if str(standalone_cond.target_node) == "System":
-			cnode = get_node("/root/FlowKitSystem")
+		if str(standalone_cond.target_node) == FKCommon.sys_node_name:
+			cnode = get_node(FKCommon.system_node_path)
 		else:
 			cnode = current_root.get_node_or_null(standalone_cond.target_node)
 			if not cnode:
@@ -175,15 +173,14 @@ func _run_sheet(entry: Dictionary) -> void:
 			# Execute actions associated with this standalone condition
 			for act in standalone_cond.actions:
 				var anode: Node = null
-				if str(act.target_node) == "System":
-					anode = get_node("/root/FlowKitSystem")
+				if str(act.target_node) == FKCommon.sys_node_name:
+					anode = get_node(FKCommon.system_node_path)
 				else:
 					anode = current_root.get_node_or_null(act.target_node)
 					if not anode:
 						print("[FlowKit] Standalone condition action target node not found: ", act.target_node)
 						continue
 				var provider: Variant = await registry.execute_action(act.action_id, anode, act.inputs, current_root, "")
-
 
 	# Collect all events from the sheet (both top-level and nested in groups)
 	var all_events: Array = []
@@ -194,8 +191,8 @@ func _run_sheet(entry: Dictionary) -> void:
 	for block in all_events:
 		# Resolve target node for polling
 		var node: Node = null
-		if str(block.target_node) == "System":
-			node = get_node("/root/FlowKitSystem")
+		if str(block.target_node) == FKCommon.sys_node_name:
+			node = get_node(FKCommon.system_node_path)
 		else:
 			node = current_root.get_node_or_null(block.target_node)
 			if not node:
@@ -238,8 +235,8 @@ func _setup_signal_events(entry: Dictionary) -> void:
 
 	for block in all_events:
 		var node: Node = null
-		if str(block.target_node) == "System":
-			node = get_node("/root/FlowKitSystem")
+		if str(block.target_node) == FKCommon.sys_node_name:
+			node = get_node(FKCommon.system_node_path)
 		else:
 			node = root_node.get_node_or_null(block.target_node)
 			if not node:
@@ -263,8 +260,8 @@ func _teardown_all_signal_events() -> void:
 
 		for block in all_events:
 			var node: Node = null
-			if str(block.target_node) == "System":
-				node = get_node_or_null("/root/FlowKitSystem")
+			if str(block.target_node) == FKCommon.sys_node_name:
+				node = get_node_or_null(FKCommon.system_node_path)
 			else:
 				node = root_node.get_node_or_null(block.target_node)
 				if not node:
@@ -286,8 +283,8 @@ func _execute_block(block: FKEventBlock, current_root: Node) -> void:
 	var passed: bool = true
 	for cond in block.conditions:
 		var cnode: Node = null
-		if str(cond.target_node) == "System":
-			cnode = get_node("/root/FlowKitSystem")
+		if str(cond.target_node) == FKCommon.sys_node_name:
+			cnode = get_node(FKCommon.system_node_path)
 		else:
 			cnode = current_root.get_node_or_null(cond.target_node)
 			if not cnode:
@@ -312,8 +309,8 @@ func _evaluate_branch_condition(act: FKEventAction, current_root: Node, block_id
 
 	var cond = act.branch_condition
 	var cnode: Node = null
-	if str(cond.target_node) == "System":
-		cnode = get_node("/root/FlowKitSystem")
+	if str(cond.target_node) == FKCommon.sys_node_name:
+		cnode = get_node(FKCommon.system_node_path)
 	else:
 		cnode = current_root.get_node_or_null(cond.target_node)
 		if not cnode:
@@ -353,8 +350,8 @@ func _execute_actions_list(actions: Array, current_root: Node, block_id: String)
 			branch_taken = false
 
 			var anode: Node = null
-			if str(act.target_node) == "System":
-				anode = get_node("/root/FlowKitSystem")
+			if str(act.target_node) == FKCommon.sys_node_name:
+				anode = get_node(FKCommon.system_node_path)
 			else:
 				anode = current_root.get_node_or_null(act.target_node)
 				if not anode:
