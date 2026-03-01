@@ -152,7 +152,7 @@ func _get_drag_data(at_position: Vector2) -> FKDragData:
 	var drag_preview := _create_drag_preview()
 	set_drag_preview(drag_preview)
 	
-	var drag_data: FKDragData = FKDragData.new(DragTargetType.condition_item, self, condition_data)
+	var drag_data: FKDragData = FKDragData.new(DragTarget.Type.condition_item, self, condition_data)
 	return drag_data
 
 func _create_drag_preview() -> Control:
@@ -175,14 +175,12 @@ func _can_drop_data(at_position: Vector2, data) -> bool:
 		_hide_drop_indicator()
 		return false
 	
-	if drag_data.type != DragTargetType.condition_item:
-		print("Not cond item")
+	if drag_data.type != DragTarget.Type.condition_item:
 		_hide_drop_indicator()
 		return false
 	
 	var source_node = drag_data.node
 	if source_node == self:
-		print("Source is self")
 		_hide_drop_indicator()
 		return false
 	
@@ -228,7 +226,7 @@ func _drop_data(at_position: Vector2, data) -> void:
 	if not drag_data:
 		return
 	
-	if drag_data.type != DragTargetType.condition_item:
+	if drag_data.type != DragTarget.Type.condition_item:
 		return
 	
 	var source_node = drag_data.node

@@ -1,12 +1,12 @@
 extends RefCounted
 class_name FKDragData
 
-func _init(init_type := DragTargetType.none, init_node: Node = null, init_data: Variant = null):
+func _init(init_type := DragTarget.Type.none, init_node: Node = null, init_data: Variant = null):
 	type = init_type
 	node = init_node
 	data = init_data
 	
-var type: int = DragTargetType.none
+var type: int = DragTarget.Type.none
 var node: Node = null
 var data: Variant = null
 

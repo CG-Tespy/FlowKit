@@ -119,7 +119,7 @@ func _get_drag_data(_at_position: Vector2) -> FKDragData:
 	var preview := _create_drag_preview()
 	set_drag_preview(preview)
 	
-	var drag_data := FKDragData.new(DragTargetType.comment, self)
+	var drag_data := FKDragData.new(DragTarget.Type.comment, self)
 	return drag_data
 
 func _create_drag_preview() -> Control:
@@ -130,26 +130,34 @@ func _create_drag_preview() -> Control:
 	return preview
 	
 func _can_drop_data(at_position: Vector2, data) -> bool:
-	var drag_data = data as FKDragData
-	if not drag_data:
+	if data is not FKDragData:
+		printerr("CommentUi _can_drop_data was not given an FKDragData. It got: " \
+		+ str(data))
 		return false
-	
+		
+	var drag_data = data as FKDragData
 	# For event_row, comment, or group drags, forward to parent (blocks_container or group)
-	if drag_data.type in ["event_row", "comment", "group"]:
+	if drag_data.type in [DragTarget.Type.event_row, DragTarget.Type.comment, \
+	DragTarget.Type.group]:
 		var parent = get_parent()
 		if parent and parent.has_method("_can_drop_data"):
 			var parent_pos = at_position + position
+			print("Comment passing job to parent _can_drop_data")
 			return parent._can_drop_data(parent_pos, data)
 	
 	return false
 
 func _drop_data(at_position: Vector2, data) -> void:
-	var drag_data = data as FKDragData
-	if not drag_data:
+	if data is not FKDragData:
+		printerr("CommentUi _drop_data was not given an FKDragData. It got: " \
+		+ str(data))
 		return
+		
+	var drag_data = data as FKDragData
 	
 	# For event_row, comment, or group drags, forward to parent
-	if drag_data.type in ["event_row", "comment", "group"]:
+	if drag_data.type in [DragTarget.Type.event_row, DragTarget.Type.comment, \
+	DragTarget.Type.group]:
 		var parent = get_parent()
 		if parent and parent.has_method("_drop_data"):
 			var parent_pos = at_position + position

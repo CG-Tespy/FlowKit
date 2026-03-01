@@ -144,7 +144,7 @@ func _get_drag_data(at_position: Vector2) -> FKDragData:
 	var preview_margin := _create_drag_preview()
 	set_drag_preview(preview_margin)
 	
-	var drag_data := FKDragData.new(DragTargetType.action_item, self, action_data)
+	var drag_data := FKDragData.new(DragTarget.Type.action_item, self, action_data)
 	return drag_data
 
 func _create_drag_preview() -> Control:
@@ -165,11 +165,13 @@ func _can_drop_data(at_position: Vector2, data) -> bool:
 	# This func gets executed every frame during drag when the pointer is within
 	# the panel's rect
 	if not data is FKDragData:
+		printerr("ActionItemUi _can_drop_data was not given an FKDragData. It was given: " \
+		+ str(data))
 		_hide_drop_indicator()
 		return false
 	
 	var drag_data := data as FKDragData
-	if drag_data.type != DragTargetType.action_item:
+	if drag_data.type != DragTarget.Type.action_item:
 		_hide_drop_indicator()
 		return false
 	
@@ -232,10 +234,12 @@ func _drop_data(at_position: Vector2, data) -> void:
 	_hide_drop_indicator()
 	
 	if not data is FKDragData:
+		printerr("ActionItemUi _drop_data was not given an FKDragData. It was given: " \
+		+ str(data))
 		return
 		
 	var drag_data := data as FKDragData
-	if drag_data.type != DragTargetType.action_item:
+	if drag_data.type != DragTarget.Type.action_item:
 		return
 	
 	var source_node = drag_data.node
