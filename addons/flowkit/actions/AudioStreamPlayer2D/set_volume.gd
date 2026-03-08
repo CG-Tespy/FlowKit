@@ -12,9 +12,10 @@ func get_name() -> String:
 func get_inputs() -> Array[FKActionInput]:
 	return [_volume_input]
 
-static var _volume_input := FKActionInput.new("Volume (dB)", 
-"Float", 
-"The volume in decibels to set the audio player to.")
+static var _volume_input: FKActionInput:
+	get: 
+		return FKActionInput.new("Volume (dB)", "Float", 
+		"The volume in decibels to set the audio player to.")
 
 func get_supported_types() -> Array[String]:
 	return ["AudioStreamPlayer2D"]

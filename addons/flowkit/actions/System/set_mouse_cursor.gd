@@ -15,11 +15,11 @@ func get_supported_types() -> Array[String]:
 func get_inputs() -> Array[FKActionInput]:
 	return [_path_input, _x_input, _y_input]
 
-static var _path_input := FKActionInput.new("Cursor Path", "String",
+var _path_input := FKActionInput.new("Cursor Path", "String",
 "Path to the cursor texture (e.g., 'res://assets/cursor.png'). Leave empty to reset to default.")
-static var _x_input := FKActionInput.new("Hotspot X", "int", 
+var _x_input := FKActionInput.new("Hotspot X", "int", 
 "The X coordinate of the cursor hotspot.")
-static var _y_input := FKActionInput.new("Hotspot Y", "int", 
+var _y_input := FKActionInput.new("Hotspot Y", "int", 
 "The Y coordinate of the cursor hotspot.")
 
 func execute(node: Node, inputs: Dictionary, block_id: String = "") -> void:

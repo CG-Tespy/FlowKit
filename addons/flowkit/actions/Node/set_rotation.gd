@@ -12,8 +12,10 @@ func get_name() -> String:
 func get_inputs() -> Array[FKActionInput]:
 	return [_rot_input]
 
-static var _rot_input := FKActionInput.new("Rotation", "Float",
-"The rotation in radians to set the node to.")
+static var _rot_input: FKActionInput:
+	get:
+		return FKActionInput.new("Rotation", "Float",
+		"The rotation in radians to set the node to.")
 
 func get_supported_types() -> Array[String]:
 	return ["Node2D"]

@@ -12,7 +12,7 @@ func get_name() -> String:
 func get_inputs() -> Array[FKActionInput]:
 	return [_wait_time_input]
 
-static var _wait_time_input := FKActionInput.new("Wait Time", "float", 
+var _wait_time_input := FKActionInput.new("Wait Time", "float", 
 "The wait time in seconds to set for the timer.")
 
 func get_supported_types() -> Array[String]:

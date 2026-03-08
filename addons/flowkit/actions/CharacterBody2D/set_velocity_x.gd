@@ -12,11 +12,11 @@ func get_name() -> String:
 func get_inputs() -> Array[FKActionInput]:
 	return [_value_input]
 
-static var _value_input := FKActionInput.new(
-	"Value",
-	"Float",
-	"What to set the X component of the velocity to."
-)
+static var _value_input: FKActionInput:
+	get:
+		return FKActionInput.new("Value", "Float",
+		"What to set the X component of the velocity to.")
+
 
 func get_supported_types() -> Array[String]:
 	return ["CharacterBody2D"]

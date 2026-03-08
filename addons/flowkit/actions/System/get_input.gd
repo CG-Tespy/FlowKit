@@ -12,12 +12,18 @@ func get_name() -> String:
 func get_inputs() -> Array[FKActionInput]:
 	return [_neg_action_input, _pos_action_input, _store_input]
 
-static var _neg_action_input := FKActionInput.new("Negative Action", "String",
-"The input action for negative axis (e.g., 'move_left').")
-static var _pos_action_input := FKActionInput.new("Positive Action", "String",
-"The input action for positive axis (e.g., 'move_right').")
-static var _store_input := FKActionInput.new("Store In", "String",
-"The system variable name to store the result in.")
+static var _neg_action_input: FKActionInput:
+	get:
+		return FKActionInput.new("Negative Action", "String",
+		"The input action for negative axis (e.g., 'move_left').")
+static var _pos_action_input: FKActionInput:
+	get:
+		return FKActionInput.new("Positive Action", "String",
+		"The input action for positive axis (e.g., 'move_right').")
+static var _store_input: FKActionInput:
+	get:
+		return FKActionInput.new("Store In", "String",
+		"The system variable name to store the result in.")
 
 func get_supported_types() -> Array[String]:
 	return ["System"]

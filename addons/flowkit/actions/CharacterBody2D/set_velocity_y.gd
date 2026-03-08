@@ -12,11 +12,9 @@ func get_name() -> String:
 func get_inputs() -> Array[FKActionInput]:
 	return [_value_input]
 
-static var _value_input := FKActionInput.new(
-	"Value",
-	"Float",
-	"What to set the Y component of the velocity to."
-)
+var _value_input: FKActionInput = FKActionInput.new("Value", "Float",
+		"What to set the Y component of the velocity to.")
+
 func get_supported_types() -> Array[String]:
 	return ["CharacterBody2D"]
 
@@ -28,3 +26,6 @@ func execute(node: Node, inputs: Dictionary, block_id: String = "") -> void:
 	var y: float = float(inputs.get("Y", 0))
 	
 	body.velocity.y = y
+
+func get_class() -> String:
+	return "Set Velocity Y"

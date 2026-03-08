@@ -15,7 +15,7 @@ func get_supported_types() -> Array[String]:
 func get_inputs() -> Array[FKActionInput]:
 	return [_mode_input]
 
-static var _mode_input := FKActionInput.new("Mode", "String",
+var _mode_input := FKActionInput.new("Mode", "String",
 "Window mode: 'windowed', 'fullscreen', 'borderless', 'minimized', or 'maximized'.")
 
 func execute(node: Node, inputs: Dictionary, block_id: String = "") -> void:

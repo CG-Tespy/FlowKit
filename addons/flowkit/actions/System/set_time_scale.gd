@@ -15,7 +15,7 @@ func get_supported_types() -> Array[String]:
 func get_inputs() -> Array[FKActionInput]:
 	return [_scale_input]
 	
-static var _scale_input := FKActionInput.new("Scale", "float",
+var _scale_input := FKActionInput.new("Scale", "float",
 "The time scale multiplier (1.0 = normal speed).")
 
 func execute(node: Node, inputs: Dictionary, block_id: String = "") -> void:

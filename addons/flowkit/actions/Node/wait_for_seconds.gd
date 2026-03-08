@@ -18,7 +18,9 @@ func requires_multi_frames() -> bool:
 func get_inputs() -> Array[FKActionInput]:
 	return [_duration_input]
 
-static var _duration_input := FKActionInput.new("Duration", "Float", "What you'd expect.")
+static var _duration_input: FKActionInput:
+	get:
+		return FKActionInput.new("Duration", "Float", "What you'd expect.")
 
 func execute(target_node: Node, inputs: Dictionary, _str := "") -> void:
 	var duration: float = inputs.get("Duration", 0)

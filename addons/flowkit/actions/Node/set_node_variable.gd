@@ -12,11 +12,15 @@ func get_name() -> String:
 func get_inputs() -> Array[FKActionInput]:
 	return [_name_input, _value_input]
 
-static var _name_input := FKActionInput.new("Variable Name", "String", 
-"The name of the variable to set.")
+static var _name_input: FKActionInput:
+	get:
+		return FKActionInput.new("Variable Name", "String", 
+		"The name of the variable to set.")
 
-static var _value_input := FKActionInput.new("Value", "String", 
-"The value to assign to the variable.")
+static var _value_input: FKActionInput:
+	get:
+		return FKActionInput.new("Value", "String", 
+		"The value to assign to the variable.")
 
 func get_supported_types() -> Array[String]:
 	return ["Node"]

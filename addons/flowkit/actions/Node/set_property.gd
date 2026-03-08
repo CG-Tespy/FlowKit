@@ -12,8 +12,12 @@ func get_description() -> String:
 func get_inputs() -> Array[FKActionInput]:
 	return [_prop_input, _val_input]
 
-static var _prop_input := FKActionInput.new("Property", "String")
-static var _val_input := FKActionInput.new("Value", "Variant")
+static var _prop_input: FKActionInput:
+	get:
+		return FKActionInput.new("Property", "String")
+static var _val_input: FKActionInput:
+	get:
+		return FKActionInput.new("Value", "Variant")
 
 func get_supported_types() -> Array[String]:
 	return ["Node"]

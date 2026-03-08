@@ -15,8 +15,10 @@ func get_supported_types() -> Array[String]:
 func get_inputs() -> Array[FKActionInput]:
 	return [_action_input]
 	
-static var _action_input := FKActionInput.new("Action", "String",
-"The name of the input action to simulate releasing.")
+static var _action_input: FKActionInput:
+	get:
+		return FKActionInput.new("Action", "String",
+		"The name of the input action to simulate releasing.")
 
 func execute(node: Node, inputs: Dictionary, block_id: String = "") -> void:
 	var action_name: String = str(inputs.get("Action", ""))

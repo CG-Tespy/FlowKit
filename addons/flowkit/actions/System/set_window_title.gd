@@ -15,7 +15,7 @@ func get_supported_types() -> Array[String]:
 func get_inputs() -> Array[FKActionInput]:
 	return [_title_input]
 	
-static var _title_input := FKActionInput.new("Title", "String", "The title to set for the window.")
+var _title_input := FKActionInput.new("Title", "String", "The title to set for the window.")
 
 func execute(node: Node, inputs: Dictionary, block_id: String = "") -> void:
 	var title: String = str(inputs.get("Title", ""))

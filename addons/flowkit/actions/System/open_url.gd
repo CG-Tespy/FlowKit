@@ -15,7 +15,7 @@ func get_supported_types() -> Array[String]:
 func get_inputs() -> Array[FKActionInput]:
 	return [_url_input]
 
-static var _url_input := FKActionInput.new("URL", "String", "The URL to open in the web browser.")
+var _url_input := FKActionInput.new("URL", "String", "The URL to open in the web browser.")
 
 func execute(node: Node, inputs: Dictionary, block_id: String = "") -> void:
 	var url: String = str(inputs.get("URL", ""))

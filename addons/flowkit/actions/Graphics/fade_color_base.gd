@@ -8,32 +8,36 @@ func get_inputs() -> Array[FKActionInput]:
 	return [_targ_color_input, _alpha_input, _alpha_only_input, \
 	_duration_input, _wait_for_finish_input]
 	
-static var _targ_color_input := FKActionInput.new(
-	"Target Color", 
-	"String", 
-	"The color in RGB coordinates. For example, \"(255, 255, 255)\" (include the quotes) " + \
-	"for white. If empty, defaults to that color.")
+static var _targ_color_input: FKActionInput:
+	get:
+		return FKActionInput.new("Target Color", "String",
+		"The color in RGB coordinates. For example, \"(255, 255, 255)\" (include the quotes) " + \
+		"for white. If empty, defaults to that color.")
 
-static var _alpha_input := FKActionInput.new(
-	"Alpha",
-	"float",
-	"How transparent the color should be. 0 for completely transparent, 100 for opaque. " +\
-	"Default: " + str(default_alpha) + "."
+static var _alpha_input: FKActionInput:
+	get:
+		return FKActionInput.new("Alpha", "float",
+		"How transparent the color should be. 0 for completely transparent, 100 for opaque. " +\
+		"Default: " + str(default_alpha) + "."
 )
 
-static var _alpha_only_input := FKActionInput.new(
-	"Alpha Only",
-	"bool",
-	"If true, only the transparency will be changed. Default: " + str(default_alpha_only)
+static var _alpha_only_input: FKActionInput:
+	get:
+		return FKActionInput.new("Alpha Only","bool",
+		"If true, only the transparency will be changed. Default: " + str(default_alpha_only)
 )
 
-static var _duration_input := FKActionInput.new(
+static var _duration_input: FKActionInput:
+	get:
+		return FKActionInput.new(
 	"Duration",
 	"float",
 	"How long (in seconds) the fade should take. Defaults to " + str(default_duration) + "."
 )
 
-static var _wait_for_finish_input := FKActionInput.new(
+static var _wait_for_finish_input: FKActionInput:
+	get:
+		return FKActionInput.new(
 	"Wait For Finish",
 	"bool",
 	"Whether or not this pauses the Action list until the fade's done running. Default: " \

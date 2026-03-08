@@ -16,11 +16,15 @@ func get_supported_types() -> Array:
 func get_inputs() -> Array[FKActionInput]:
 	return [_color_input, _message_input]
 
-static var _color_input := FKActionInput.new("Color",
+static var _color_input: FKActionInput:
+	get:
+		return FKActionInput.new("Color",
 	"String",
 	"Decides what BBCode color the message is wrapped in. Default: white.")
 
-static var _message_input := FKActionInput.new("Message",
+static var _message_input: FKActionInput:
+	get:
+		return FKActionInput.new("Message",
 	"String",
 	"The message to print. BBCode tags are supported.")
 

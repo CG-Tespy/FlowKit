@@ -48,7 +48,7 @@ current_values: Dictionary = {}) -> void:
 	action_inputs = inputs
 	current_param_index = 0
 	param_values = current_values.duplicate()
-	
+
 	_show_current_parameter()
 	
 	# Setup node tree if editor interface is available
@@ -97,13 +97,30 @@ func _add_node_children(node: Node, tree_item: TreeItem) -> void:
 			_add_node_children(child, child_item)
 
 func _show_current_parameter() -> void:
+	print("In show current param")
 	if action_inputs.is_empty():
+		print("Action inputs are empty. Doing nothing.")
 		return
 	
-	var param_data: Dictionary = action_inputs[current_param_index]
-	var param_name: String = param_data.get("name", "Unknown")
-	var param_type: String = param_data.get("type", "Variant")
-	var param_description: String = param_data.get("description", "")
+	print("Action inputs:\n" + str(action_inputs))
+	var current_input = action_inputs[current_param_index]
+	var param_name: String; var param_type: String; var param_description: String;
+	var fk_action_input: FKActionInput
+	if current_input is Dictionary:
+		print("Current input is dict")
+		var param_dict: Dictionary = action_inputs[current_param_index]
+		param_name = param_dict.get("name", "Unknown")
+		param_type = param_dict.get("type", "Variant")
+		param_description = param_dict.get("description", "")
+		
+	elif current_input is FKActionInput:
+		print("Current input is FKActionInput")
+		fk_action_input = current_input
+		param_name = fk_action_input.name
+		param_type = fk_action_input.type
+		param_description = fk_action_input.description
+		
+	
 	param_label.text = "%s (%s)" % [param_name, param_type]
 	# ^For some reason, this doesn't work when we assign the format to a var...
 	_update_desc(param_description)

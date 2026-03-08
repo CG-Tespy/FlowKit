@@ -15,7 +15,7 @@ func get_supported_types() -> Array[String]:
 func get_inputs() -> Array[FKActionInput]:
 	return [_duration_input]
 
-static var _duration_input := FKActionInput.new("Duration (Ms)", "int", 
+var _duration_input := FKActionInput.new("Duration (Ms)", "int", 
 "Duration of vibration in milliseconds.")
 
 func execute(node: Node, inputs: Dictionary, block_id: String = "") -> void:

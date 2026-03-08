@@ -12,8 +12,10 @@ func get_name() -> String:
 func get_inputs() -> Array[FKActionInput]:
 	return [_val_input]
 
-static var _val_input := FKActionInput.new("Y", "Float",
-"The Y coordinate to set the node's position to.")
+static var _val_input: FKActionInput:
+	get:
+		return FKActionInput.new("Y", "Float",
+		"The Y coordinate to set the node's position to.")
 
 func get_supported_types() -> Array[String]:
 	return ["Node2D"]

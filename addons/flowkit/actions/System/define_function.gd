@@ -15,7 +15,9 @@ func get_supported_types() -> Array[String]:
 func get_inputs() -> Array[FKActionInput]:
 	return [_name_input]
 
-static var _name_input := FKActionInput.new("Name", "String", "The name of the function to define.")
+static var _name_input: FKActionInput:
+	get:
+		return FKActionInput.new("Name", "String", "The name of the function to define.")
 
 func execute(node: Node, inputs: Dictionary, block_id: String = "") -> void:
 	var function_name: String = str(inputs.get("Name", ""))

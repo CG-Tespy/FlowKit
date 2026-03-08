@@ -15,8 +15,10 @@ func get_supported_types() -> Array[String]:
 func get_inputs() -> Array[FKActionInput]:
 	return [_path_input]
 
-static var _path_input := FKActionInput.new("Scene Path", "String",
-"The path to the scene file (e.g., 'res://scenes/level2.tscn').")
+static var _path_input: FKActionInput:
+	get:
+		return FKActionInput.new("Scene Path", "String",
+		"The path to the scene file (e.g., 'res://scenes/level2.tscn').")
 
 func execute(node: Node, inputs: Dictionary, block_id: String = "") -> void:
 	if not node or not node.is_inside_tree():

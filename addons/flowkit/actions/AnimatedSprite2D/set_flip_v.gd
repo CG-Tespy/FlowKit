@@ -12,7 +12,8 @@ func get_description() -> String:
 func get_inputs() -> Array[FKActionInput]:
 	return [_value_input]
 
-static var _value_input := FKActionInput.new("Value", "Bool")
+static var _value_input: FKActionInput:
+	get: return FKActionInput.new("Value", "Bool")
 
 func get_supported_types() -> Array[String]:
 	return ["AnimatedSprite2D"]
