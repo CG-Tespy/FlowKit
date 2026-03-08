@@ -9,10 +9,14 @@ func get_id() -> String:
 func get_name() -> String:
 	return "Set X Velocity"
 
-func get_inputs() -> Array[Dictionary]:
-	return [
-		{"name": "X", "type": "Float", "description": "The X component of the velocity to set."}
-	]
+func get_inputs() -> Array[FKActionInput]:
+	return [_value_input]
+
+static var _value_input := FKActionInput.new(
+	"Value",
+	"Float",
+	"What to set the X component of the velocity to."
+)
 
 func get_supported_types() -> Array[String]:
 	return ["CharacterBody2D"]

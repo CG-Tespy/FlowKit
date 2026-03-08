@@ -9,10 +9,12 @@ func get_id() -> String:
 func get_name() -> String:
 	return "Set Volume"
 
-func get_inputs() -> Array[Dictionary]:
-	return [
-		{"name": "Volume (dB)", "type": "float", "description": "The volume in decibels to set the audio player to."}
-	]
+func get_inputs() -> Array[FKActionInput]:
+	return [_volume_input]
+
+static var _volume_input := FKActionInput.new("Volume (dB)", 
+"Float", 
+"The volume in decibels to set the audio player to.")
 
 func get_supported_types() -> Array[String]:
 	return ["AudioStreamPlayer2D"]

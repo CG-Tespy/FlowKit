@@ -9,11 +9,14 @@ func get_id() -> String:
 func get_name() -> String:
 	return "Set Node Variable"
 
-func get_inputs() -> Array[Dictionary]:
-	return [
-		{"name": "Variable Name", "type": "String", "description": "The name of the variable to set."},
-		{"name": "Value", "type": "String", "description": "The value to assign to the variable."},
-	]
+func get_inputs() -> Array[FKActionInput]:
+	return [_name_input, _value_input]
+
+static var _name_input := FKActionInput.new("Variable Name", "String", 
+"The name of the variable to set.")
+
+static var _value_input := FKActionInput.new("Value", "String", 
+"The value to assign to the variable.")
 
 func get_supported_types() -> Array[String]:
 	return ["Node"]

@@ -9,10 +9,10 @@ func get_id() -> String:
 func get_name() -> String:
 	return "Set Title"
 
-func get_inputs() -> Array[Dictionary]:
-	return [
-		{"name": "Title", "type": "String", "description": "The title to set for the window."}
-	]
+func get_inputs() -> Array[FKActionInput]:
+	return [_title_input]
+
+static var _title_input := FKActionInput.new("Title", "String", "The title to set for the window.")
 
 func get_supported_types() -> Array[String]:
 	return ["Window"]

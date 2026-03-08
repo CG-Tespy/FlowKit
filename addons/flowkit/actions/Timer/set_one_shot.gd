@@ -9,10 +9,11 @@ func get_id() -> String:
 func get_name() -> String:
 	return "Set One Shot"
 
-func get_inputs() -> Array[Dictionary]:
-	return [
-		{"name": "One Shot", "type": "bool", "description": "If true, the timer will only run once and then stop."}
-	]
+func get_inputs() -> Array[FKActionInput]:
+	return [_one_shot_input]
+	
+static var _one_shot_input := FKActionInput.new("One Shot", "bool",
+"If true, the timer will only run once and then stop.")
 
 func get_supported_types() -> Array[String]:
 	return ["Timer"]

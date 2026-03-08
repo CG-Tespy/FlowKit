@@ -12,10 +12,10 @@ func get_name() -> String:
 func get_supported_types() -> Array[String]:
 	return ["System"]
 
-func get_inputs() -> Array[Dictionary]:
-	return [
-		{"name": "URL", "type": "String", "description": "The URL to open in the web browser."},
-	]
+func get_inputs() -> Array[FKActionInput]:
+	return [_url_input]
+
+static var _url_input := FKActionInput.new("URL", "String", "The URL to open in the web browser.")
 
 func execute(node: Node, inputs: Dictionary, block_id: String = "") -> void:
 	var url: String = str(inputs.get("URL", ""))

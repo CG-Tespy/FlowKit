@@ -9,11 +9,13 @@ func get_id() -> String:
 func get_name() -> String:
 	return "Get Project Setting"
 
-func get_inputs() -> Array[Dictionary]:
-	return [
-		{"name": "Path", "type": "String", "description": "The setting path (e.g., 'application/config/name', 'display/window/size/viewport_width')."},
-		{"name": "Store In", "type": "String", "description": "The system variable name to store the result in."},
-	]
+func get_inputs() -> Array[FKActionInput]:
+	return [_path_input, _store_input]
+
+static var _path_input := FKActionInput.new("Path", "String",
+"The setting path (e.g., 'application/config/name', 'display/window/size/viewport_width').")
+static var _store_input := FKActionInput.new("Store In", "String",
+"The system variable name to store the result in.")
 
 func get_supported_types() -> Array[String]:
 	return ["System"]

@@ -12,10 +12,11 @@ func get_name() -> String:
 func get_supported_types() -> Array[String]:
 	return ["System"]
 
-func get_inputs() -> Array[Dictionary]:
-	return [
-		{"name": "Mode", "type": "String", "description": "Window mode: 'windowed', 'fullscreen', 'borderless', 'minimized', or 'maximized'."},
-	]
+func get_inputs() -> Array[FKActionInput]:
+	return [_mode_input]
+
+static var _mode_input := FKActionInput.new("Mode", "String",
+"Window mode: 'windowed', 'fullscreen', 'borderless', 'minimized', or 'maximized'.")
 
 func execute(node: Node, inputs: Dictionary, block_id: String = "") -> void:
 	var mode_str: String = str(inputs.get("Mode", "windowed")).to_lower()

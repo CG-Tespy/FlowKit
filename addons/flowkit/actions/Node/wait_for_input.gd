@@ -15,14 +15,11 @@ func get_supported_types() -> Array:
 func requires_multi_frames() -> bool:
 	return true
 	
-func get_inputs() -> Array:
-	return [
-		{
-			"name": "Input Binding Name",
-			"type": "String",
-			"description": "You can find the binding names in Project->Input Map. Careful not to leave this empty!"
-		},
-	]
+func get_inputs() -> Array[FKActionInput]:
+	return [_name_input]
+	
+static var _name_input := FKActionInput.new("Input Binding Name", "String",
+"You can find the binding names in Project->Input Map. Careful not to leave this empty!")
 
 func execute(target_node: Node, inputs: Dictionary, _str := "") -> void:
 	var binding := inputs.get("Input Binding Name", "")

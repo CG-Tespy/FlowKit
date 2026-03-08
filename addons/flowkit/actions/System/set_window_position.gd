@@ -12,11 +12,11 @@ func get_name() -> String:
 func get_supported_types() -> Array[String]:
 	return ["System"]
 
-func get_inputs() -> Array[Dictionary]:
-	return [
-		{"name": "X", "type": "int", "description": "The X position of the window in pixels."},
-		{"name": "Y", "type": "int", "description": "The Y position of the window in pixels."},
-	]
+func get_inputs() -> Array[FKActionInput]:
+	return [_x_input, _y_input]
+	
+static var _x_input := FKActionInput.new("X", "int", "The X position of the window in pixels.")
+static var _y_input := FKActionInput.new("Y", "int", "The Y position of the window in pixels.")
 
 func execute(node: Node, inputs: Dictionary, block_id: String = "") -> void:
 	var x: int = int(inputs.get("X", 0))

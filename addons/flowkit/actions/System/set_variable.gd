@@ -9,11 +9,11 @@ func get_id() -> String:
 func get_name() -> String:
 	return "Set Variable"
 
-func get_inputs() -> Array[Dictionary]:
-	return [
-		{"name": "Name", "type": "String", "description": "The name of the variable to set."},
-        {"name": "Value", "type": "Variant", "description": "The value to assign to the variable."},
-	]
+func get_inputs() -> Array[FKActionInput]:
+	return [_name_input, _val_input]
+
+static var _name_input := FKActionInput.new("Name", "String", "The name of the variable to set.")
+static var _val_input := FKActionInput.new("Value", "Variant", "The value to assign to the variable.")
 
 func get_supported_types() -> Array[String]:
 	return ["System"]

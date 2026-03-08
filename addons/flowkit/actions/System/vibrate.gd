@@ -12,10 +12,11 @@ func get_name() -> String:
 func get_supported_types() -> Array[String]:
 	return ["System"]
 
-func get_inputs() -> Array[Dictionary]:
-	return [
-		{"name": "DurationMs", "type": "int", "description": "Duration of vibration in milliseconds."},
-	]
+func get_inputs() -> Array[FKActionInput]:
+	return [_duration_input]
+
+static var _duration_input := FKActionInput.new("Duration (Ms)", "int", 
+"Duration of vibration in milliseconds.")
 
 func execute(node: Node, inputs: Dictionary, block_id: String = "") -> void:
 	var duration_ms: int = int(inputs.get("DurationMs", 200))

@@ -13,19 +13,16 @@ func get_name() -> String:
 func get_supported_types() -> Array:
 	return ["Node"]
 
-func get_inputs() -> Array:
-	return [
-		{
-			"name": "color",
-			"type": "String", 
-			"description": "Decides what BBCode color the message is wrapped in. Default: white."
-		},
-		{
-			"name": "message",
-			"type": "String",
-			"description": "The message to print. BBCode tags are supported."
-		}
-	]
+func get_inputs() -> Array[FKActionInput]:
+	return [_color_input, _message_input]
+
+static var _color_input := FKActionInput.new("Color",
+	"String",
+	"Decides what BBCode color the message is wrapped in. Default: white.")
+
+static var _message_input := FKActionInput.new("Message",
+	"String",
+	"The message to print. BBCode tags are supported.")
 
 func execute(_node: Node, inputs: Dictionary, _str: String = "") -> void:
 	var color_input = inputs.get("color", default_color)

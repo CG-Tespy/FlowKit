@@ -9,10 +9,11 @@ func get_id() -> String:
 func get_name() -> String:
 	return "Set Y Position"
 
-func get_inputs() -> Array[Dictionary]:
-	return [
-		{"name": "Y", "type": "Float", "description": "The Y coordinate to set the node's position to."},
-	]
+func get_inputs() -> Array[FKActionInput]:
+	return [_val_input]
+
+static var _val_input := FKActionInput.new("Y", "Float",
+"The Y coordinate to set the node's position to.")
 
 func get_supported_types() -> Array[String]:
 	return ["Node2D"]

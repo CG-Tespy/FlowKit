@@ -9,11 +9,11 @@ func get_name() -> String:
 func get_description() -> String:
 	return "Sets a property on the node."
 
-func get_inputs() -> Array[Dictionary]:
-	return [
-		{"name": "Property", "type": "String"},
-		{"name": "Value", "type": "Variant"}
-	]
+func get_inputs() -> Array[FKActionInput]:
+	return [_prop_input, _val_input]
+
+static var _prop_input := FKActionInput.new("Property", "String")
+static var _val_input := FKActionInput.new("Value", "Variant")
 
 func get_supported_types() -> Array[String]:
 	return ["Node"]

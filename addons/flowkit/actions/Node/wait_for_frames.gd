@@ -15,14 +15,10 @@ func get_supported_types() -> Array:
 func requires_multi_frames() -> bool:
 	return true
 	
-func get_inputs() -> Array:
-	return [
-		{
-			"name": "Frame Count",
-			"type": "int",
-			"description": "What you'd expect."
-		},
-	]
+func get_inputs() -> Array[FKActionInput]:
+	return [_frame_input]
+
+static var _frame_input := FKActionInput.new("Frame Count", "int", "What you'd expect")
 
 func execute(target_node: Node, inputs: Dictionary, _str := "") -> void:
 	var frame_count: float = inputs.get("Frame Count", 0)

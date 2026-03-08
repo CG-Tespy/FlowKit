@@ -12,10 +12,10 @@ func get_name() -> String:
 func get_supported_types() -> Array[String]:
 	return ["System"]
 
-func get_inputs() -> Array[Dictionary]:
-	return [
-		{"name": "MaxFPS", "type": "int", "description": "The maximum FPS limit (0 = unlimited)."},
-	]
+func get_inputs() -> Array[FKActionInput]:
+	return [_fps_input]
+	
+static var _fps_input := FKActionInput.new("Max FPS", "int", "The maximum FPS limit (0 = unlimited).")
 
 func execute(node: Node, inputs: Dictionary, block_id: String = "") -> void:
 	var max_fps: int = int(inputs.get("MaxFPS", 0))

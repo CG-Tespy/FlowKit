@@ -9,10 +9,10 @@ func get_name() -> String:
 func get_description() -> String:
 	return "Flips the sprite vertically when set to true."
 
-func get_inputs() -> Array[Dictionary]:
-	return [
-		{"name": "Value", "type": "Bool"}
-	]
+func get_inputs() -> Array[FKActionInput]:
+	return [_value_input]
+
+static var _value_input := FKActionInput.new("Value", "Bool")
 
 func get_supported_types() -> Array[String]:
 	return ["AnimatedSprite2D"]

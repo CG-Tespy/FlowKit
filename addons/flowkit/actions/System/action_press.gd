@@ -12,11 +12,13 @@ func get_name() -> String:
 func get_supported_types() -> Array[String]:
 	return ["System"]
 
-func get_inputs() -> Array[Dictionary]:
-	return [
-		{"name": "Action", "type": "String", "description": "The name of the input action to simulate pressing."},
-		{"name": "Strength", "type": "float", "description": "The strength of the action press (0.0 to 1.0)."},
-	]
+func get_inputs() -> Array[FKActionInput]:
+	return [_action_input, _strength_input]
+
+static var _action_input := FKActionInput.new("Action", "String",
+"The name of the input action to simulate pressing.")
+static var _strength_input := FKActionInput.new("Strength", "Float", 
+"The strength of the action press (0.0 to 1.0).")
 
 func execute(node: Node, inputs: Dictionary, block_id: String = "") -> void:
 	var action_name: String = str(inputs.get("Action", ""))

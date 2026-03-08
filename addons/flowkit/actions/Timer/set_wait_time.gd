@@ -9,10 +9,11 @@ func get_id() -> String:
 func get_name() -> String:
 	return "Set Wait Time"
 
-func get_inputs() -> Array[Dictionary]:
-	return [
-		{"name": "Wait Time", "type": "float", "description": "The wait time in seconds to set for the timer."}
-	]
+func get_inputs() -> Array[FKActionInput]:
+	return [_wait_time_input]
+
+static var _wait_time_input := FKActionInput.new("Wait Time", "float", 
+"The wait time in seconds to set for the timer.")
 
 func get_supported_types() -> Array[String]:
 	return ["Timer"]

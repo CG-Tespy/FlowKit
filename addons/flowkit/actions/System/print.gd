@@ -9,10 +9,11 @@ func get_id() -> String:
 func get_name() -> String:
 	return "Print"
 
-func get_inputs() -> Array[Dictionary]:
-	return [
-		{"name": "Message", "type": "String", "description": "The message to print to the console."},
-	]
+func get_inputs() -> Array[FKActionInput]:
+	return [_message_input]
+
+static var _message_input := FKActionInput.new("Message", "String", 
+"The message to print to the console.")
 
 func get_supported_types() -> Array[String]:
 	return ["System"]

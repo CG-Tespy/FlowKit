@@ -4,40 +4,47 @@ class_name FadeColorBase
 func requires_multi_frames() -> bool:
 	return true
 	
-func get_inputs() -> Array:
-	return [
-		{
-			"name": "Target Color",
-			"type": "String",
-			"description": "The color in RGB coordinates. For example, \"(255, 255, 255)\" (include the quotes) for white. If empty, defaults to that color."
-		},
-		{
-			"name": "Alpha",
-			"type": "float",
-			"description": "How transparent the color should be. 0 for completely transparent, 100 for opaque. Default: " + str(default_alpha) + "."
-		},
-		{
-			"name": "Alpha Only",
-			"type": "bool",
-			"description": "If true, only the transparency will be changed. Default: " + str(default_alpha_only)
-		},
-		{
-			"name": "Duration",
-			"type": "float",
-			"description": "How long (in seconds) the fade should take. Defaults to " + str(default_duration) + "."
-		},
-		{
-			"name": "Wait For Finish",
-			"type": "bool",
-			"description": "Whether or not this pauses the Action list until the fade's done running. Default: " + str(default_wait_for_finish)
-		}
-	]
+func get_inputs() -> Array[FKActionInput]:
+	return [_targ_color_input, _alpha_input, _alpha_only_input, \
+	_duration_input, _wait_for_finish_input]
+	
+static var _targ_color_input := FKActionInput.new(
+	"Target Color", 
+	"String", 
+	"The color in RGB coordinates. For example, \"(255, 255, 255)\" (include the quotes) " + \
+	"for white. If empty, defaults to that color.")
 
-var default_color_raw := "\"(255, 255, 255)\""
-var default_alpha := 100
-var default_alpha_only := false
-var default_duration := 1.0
-var default_wait_for_finish := true
+static var _alpha_input := FKActionInput.new(
+	"Alpha",
+	"float",
+	"How transparent the color should be. 0 for completely transparent, 100 for opaque. " +\
+	"Default: " + str(default_alpha) + "."
+)
+
+static var _alpha_only_input := FKActionInput.new(
+	"Alpha Only",
+	"bool",
+	"If true, only the transparency will be changed. Default: " + str(default_alpha_only)
+)
+
+static var _duration_input := FKActionInput.new(
+	"Duration",
+	"float",
+	"How long (in seconds) the fade should take. Defaults to " + str(default_duration) + "."
+)
+
+static var _wait_for_finish_input := FKActionInput.new(
+	"Wait For Finish",
+	"bool",
+	"Whether or not this pauses the Action list until the fade's done running. Default: " \
+	+ str(default_wait_for_finish)
+)
+
+static var default_color_raw := "\"(255, 255, 255)\""
+static var default_alpha := 100
+static var default_alpha_only := false
+static var default_duration := 1.0
+static var default_wait_for_finish := true
 
 var tween: Tween = null
 
