@@ -12,22 +12,22 @@ func get_name() -> String:
 func get_inputs() -> Array[FKActionInput]:
 	return [_name_input, _value_input]
 
-static var _name_input: FKActionInput:
+static var _name_input: FKStringActionInput:
 	get:
-		return FKActionInput.new("Variable Name", "String", 
+		return FKStringActionInput.new("Variable Name", 
 		"The name of the variable to set.")
 
 static var _value_input: FKActionInput:
 	get:
-		return FKActionInput.new("Value", "String", 
+		return FKActionInput.new("Value", "Variant",
 		"The value to assign to the variable.")
 
 func get_supported_types() -> Array[String]:
 	return ["Node"]
 
 func execute(node: Node, inputs: Dictionary, block_id: String = "") -> void:
-	var var_name: String = inputs.get("Variable Name", "")
-	var value: Variant = inputs.get("Value", "")
+	var var_name: String = _name_input.get_val(inputs)
+	var value: Variant = _value_input.get_val(inputs)
 	
 	if var_name.is_empty():
 		push_error("[FlowKit] Set Node Variable: Variable name is empty")

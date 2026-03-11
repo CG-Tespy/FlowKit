@@ -15,10 +15,10 @@ func get_supported_types() -> Array[String]:
 func get_inputs() -> Array[FKActionInput]:
 	return [_fps_input]
 	
-static var _fps_input: FKActionInput:
+static var _fps_input: FKIntActionInput:
 	get:
-		return FKActionInput.new("Max FPS", "int", "The maximum FPS limit (0 = unlimited).")
+		return FKIntActionInput.new("Max FPS", "The maximum FPS limit (0 = unlimited).")
 
 func execute(node: Node, inputs: Dictionary, block_id: String = "") -> void:
-	var max_fps: int = int(inputs.get("MaxFPS", 0))
+	var max_fps: int = _fps_input.get_val(inputs)
 	Engine.max_fps = max_fps

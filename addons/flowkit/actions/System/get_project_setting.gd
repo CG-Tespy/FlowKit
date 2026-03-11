@@ -12,21 +12,21 @@ func get_name() -> String:
 func get_inputs() -> Array[FKActionInput]:
 	return [_path_input, _store_input]
 
-static var _path_input: FKActionInput:
+static var _path_input: FKStringActionInput:
 	get:
-		return FKActionInput.new("Path", "String",
+		return FKStringActionInput.new("Path", 
 		"The setting path (e.g., 'application/config/name', 'display/window/size/viewport_width').")
-static var _store_input: FKActionInput:
+static var _store_input: FKStringActionInput:
 	get:
-		return FKActionInput.new("Store In", "String",
+		return FKStringActionInput.new("Store In", 
 		"The system variable name to store the result in.")
 
 func get_supported_types() -> Array[String]:
 	return ["System"]
 
 func execute(node: Node, inputs: Dictionary, block_id: String = "") -> void:
-	var path: String = str(inputs.get("Path", ""))
-	var store_in: String = str(inputs.get("Store In", ""))
+	var path: String = _path_input.get_val(inputs)
+	var store_in: String = _store_input.get_val(inputs)
 
 	if path.is_empty() or store_in.is_empty():
 		return

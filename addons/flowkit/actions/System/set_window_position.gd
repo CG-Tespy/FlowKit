@@ -15,14 +15,14 @@ func get_supported_types() -> Array[String]:
 func get_inputs() -> Array[FKActionInput]:
 	return [_x_input, _y_input]
 	
-static var _x_input: FKActionInput:
+static var _x_input: FKIntActionInput:
 	get:
-		return FKActionInput.new("X", "int", "The X position of the window in pixels.")
-static var _y_input: FKActionInput:
+		return FKIntActionInput.new("X", "The X position of the window in pixels.")
+static var _y_input: FKIntActionInput:
 	get:
-		return FKActionInput.new("Y", "int", "The Y position of the window in pixels.")
+		return FKIntActionInput.new("Y", "The Y position of the window in pixels.")
 
 func execute(node: Node, inputs: Dictionary, block_id: String = "") -> void:
-	var x: int = int(inputs.get("X", 0))
-	var y: int = int(inputs.get("Y", 0))
+	var x: int = _x_input.get_val(inputs)
+	var y: int = _y_input.get_val(inputs)
 	DisplayServer.window_set_position(Vector2i(x, y))

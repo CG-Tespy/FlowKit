@@ -12,12 +12,12 @@ func get_description() -> String:
 func get_inputs() -> Array[FKActionInput]:
 	return [_prop_input, _val_input]
 
-static var _prop_input: FKActionInput:
+static var _prop_input: FKStringActionInput:
 	get:
-		return FKActionInput.new("Property", "String")
+		return FKStringActionInput.new("Property")
 static var _val_input: FKActionInput:
 	get:
-		return FKActionInput.new("Value", "Variant")
+		return FKActionInput.new("Value", "Variant", "", null)
 
 func get_supported_types() -> Array[String]:
 	return ["Node"]
@@ -26,7 +26,7 @@ func execute(node: Node, inputs: Dictionary, block_id: String = "") -> void:
 	if not node is Node:
 		return
 	
-	var property_name = inputs.get("Property", "")
-	var value = inputs.get("Value", null)
+	var property_name = _prop_input.get_val(inputs)
+	var value = _val_input.get_val(inputs)
 	if property_name != "":
 		node.set(property_name, value)

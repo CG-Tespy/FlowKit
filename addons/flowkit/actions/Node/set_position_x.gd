@@ -12,9 +12,9 @@ func get_name() -> String:
 func get_inputs() -> Array[FKActionInput]:
 	return [_val_input]
 
-static var _val_input: FKActionInput:
+static var _val_input: FKFloatActionInput:
 	get:
-		return FKActionInput.new("X", "Float",
+		return FKFloatActionInput.new("X", 
 		"The X coordinate to set the node's position to.")
 
 func get_supported_types() -> Array[String]:
@@ -25,4 +25,4 @@ func execute(node: Node, inputs: Dictionary, block_id: String = "") -> void:
 		return
 	
 	var node2d: Node2D = node as Node2D
-	node2d.position.x = inputs.get("X", 0.0)
+	node2d.position.x = _val_input.get_val(inputs)

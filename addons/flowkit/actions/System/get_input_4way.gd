@@ -12,43 +12,43 @@ func get_name() -> String:
 func get_inputs() -> Array[FKActionInput]:
 	return [_neg_x_input, _pos_x_input, _neg_y_input, _pos_y_input, _store_x_input, _store_y_input]
 	
-static var _neg_x_input: FKActionInput:
+static var _neg_x_input: FKStringActionInput:
 	get:
-		return FKActionInput.new("Negative X Action", "String",
+		return FKStringActionInput.new("Negative X Action", 
 		"The input action for negative horizontal axis (e.g., 'move_left').")
-static var _pos_x_input: FKActionInput:
+static var _pos_x_input: FKStringActionInput:
 	get:
-		return FKActionInput.new("Positive X Action", "String",
+		return FKStringActionInput.new("Positive X Action", 
 		"The input action for positive horizontal axis (e.g., 'move_right').")
 
-static var _neg_y_input: FKActionInput:
+static var _neg_y_input: FKStringActionInput:
 	get:
-		return FKActionInput.new("Negative Y Action", "String",
+		return FKStringActionInput.new("Negative Y Action", 
 		"The input action for negative vertical axis (e.g., 'move_up').")
-static var _pos_y_input: FKActionInput:
+static var _pos_y_input: FKStringActionInput:
 	get:
-		return FKActionInput.new("Positive Y Action", "String",
+		return FKStringActionInput.new("Positive Y Action", 
 		"The input action for positive vertical axis (e.g., 'move_down').")
 
-static var _store_x_input: FKActionInput:
+static var _store_x_input: FKStringActionInput:
 	get:
-		return FKActionInput.new("Store X In", "String",
+		return FKStringActionInput.new("Store X In", 
 		"The system variable name to store the horizontal result in.")
-static var _store_y_input: FKActionInput:
+static var _store_y_input: FKStringActionInput:
 	get:
-		return FKActionInput.new("Store Y In", "String",
+		return FKStringActionInput.new("Store Y In", 
 		"The system variable name to store the vertical result in.")
 
 func get_supported_types() -> Array[String]:
 	return ["System"]
 
 func execute(node: Node, inputs: Dictionary, block_id: String = "") -> void:
-	var negative_x_action: String = str(inputs.get("Negative X Action", ""))
-	var positive_x_action: String = str(inputs.get("Positive X Action", ""))
-	var negative_y_action: String = str(inputs.get("Negative Y Action", ""))
-	var positive_y_action: String = str(inputs.get("Positive Y Action", ""))
-	var store_x_in: String = str(inputs.get("Store X In", ""))
-	var store_y_in: String = str(inputs.get("Store Y In", ""))
+	var negative_x_action: String = _neg_x_input.get_val(inputs)
+	var positive_x_action: String = _pos_x_input.get_val(inputs)
+	var negative_y_action: String = _neg_y_input.get_val(inputs)
+	var positive_y_action: String = _pos_y_input.get_val(inputs)
+	var store_x_in: String = _store_x_input.get_val(inputs)
+	var store_y_in: String = _store_y_input.get_val(inputs)
 
 	if negative_x_action.is_empty() or positive_x_action.is_empty() or store_x_in.is_empty():
 		return

@@ -15,13 +15,14 @@ func get_supported_types() -> Array[String]:
 func get_inputs() -> Array[FKActionInput]:
 	return [_vis_input]
 
-static var _vis_input: FKActionInput:
+static var _vis_input: FKBoolActionInput:
 	get:
-		return FKActionInput.new("Visible", "bool",
-		"Whether the mouse cursor should be visible.")
+		return FKBoolActionInput.new("Visible", 
+		"Whether the mouse cursor should be visible.",
+		true)
 
 func execute(node: Node, inputs: Dictionary, block_id: String = "") -> void:
-	var visible: bool = bool(inputs.get("Visible", true))
+	var visible: bool = _vis_input.get_val(inputs)
 	if visible:
 		Input.set_mouse_mode(Input.MOUSE_MODE_VISIBLE)
 	else:

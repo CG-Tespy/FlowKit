@@ -15,13 +15,15 @@ func get_supported_types() -> Array[String]:
 func get_inputs() -> Array[FKActionInput]:
 	return [_mode_input]
 
-static var _mode_input: FKActionInput:
+static var _mode_input: FKStringActionInput:
 	get:
-		return FKActionInput.new("Mode", "String",
-		"Window mode: 'windowed', 'fullscreen', 'borderless', 'minimized', or 'maximized'.")
+		return FKStringActionInput.new("Mode", 
+		"Window mode: 'windowed', 'fullscreen', 'borderless', 'minimized', or 'maximized'.",
+		"windowed")
 
 func execute(node: Node, inputs: Dictionary, block_id: String = "") -> void:
-	var mode_str: String = str(inputs.get("Mode", "windowed")).to_lower()
+	var mode_str: String = _mode_input.get_val(inputs)
+	mode_str = mode_str.to_lower()
 	var mode: DisplayServer.WindowMode = DisplayServer.WINDOW_MODE_WINDOWED
 	
 	match mode_str:

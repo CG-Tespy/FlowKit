@@ -15,14 +15,15 @@ func get_supported_types() -> Array[String]:
 func get_inputs() -> Array[FKActionInput]:
 	return [_width_input, _height_input]
 
-static var _width_input: FKActionInput:
+static var _width_input: FKIntActionInput:
 	get:
-		return FKActionInput.new("Width", "int", "The width of the window in pixels.")
-static var _height_input: FKActionInput:
+		return FKIntActionInput.new("Width", "The width of the window in pixels.", 1280)
+static var _height_input: FKIntActionInput:
 	get:
-		return FKActionInput.new("Height", "int", "The height of the window in pixels.")
+		return FKIntActionInput.new("Height", "The height of the window in pixels.", 720)
 
 func execute(node: Node, inputs: Dictionary, block_id: String = "") -> void:
-	var width: int = int(inputs.get("Width", 1280))
-	var height: int = int(inputs.get("Height", 720))
-	DisplayServer.window_set_size(Vector2i(width, height))
+	var width: int = _width_input.get_val(inputs)
+	var height: int = _height_input.get_val(inputs)
+	var size: Vector2i = Vector2i(width, height)
+	DisplayServer.window_set_size(size)

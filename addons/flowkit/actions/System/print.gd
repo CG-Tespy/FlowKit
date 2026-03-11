@@ -12,13 +12,13 @@ func get_name() -> String:
 func get_inputs() -> Array[FKActionInput]:
 	return [_message_input]
 
-static var _message_input: FKActionInput:
+static var _message_input: FKStringActionInput:
 	get:
-		return FKActionInput.new("Message", "String", "The message to print to the console.")
+		return FKStringActionInput.new("Message", "The message to print to the console.")
 
 func get_supported_types() -> Array[String]:
 	return ["System"]
 
 func execute(node: Node, inputs: Dictionary, block_id: String = "") -> void:
-	var message: Variant = inputs.get("Message", "")
+	var message: Variant = _message_input.get_val(inputs)
 	print(message)

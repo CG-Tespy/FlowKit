@@ -12,26 +12,26 @@ func get_name() -> String:
 func get_inputs() -> Array[FKActionInput]:
 	return [_neg_action_input, _pos_action_input, _store_input]
 
-static var _neg_action_input: FKActionInput:
+static var _neg_action_input: FKStringActionInput:
 	get:
-		return FKActionInput.new("Negative Action", "String",
+		return FKStringActionInput.new("Negative Action",
 		"The input action for negative axis (e.g., 'move_left').")
-static var _pos_action_input: FKActionInput:
+static var _pos_action_input: FKStringActionInput:
 	get:
-		return FKActionInput.new("Positive Action", "String",
+		return FKStringActionInput.new("Positive Action", 
 		"The input action for positive axis (e.g., 'move_right').")
-static var _store_input: FKActionInput:
+static var _store_input: FKStringActionInput:
 	get:
-		return FKActionInput.new("Store In", "String",
+		return FKStringActionInput.new("Store In",
 		"The system variable name to store the result in.")
 
 func get_supported_types() -> Array[String]:
 	return ["System"]
 
 func execute(node: Node, inputs: Dictionary, block_id: String = "") -> void:
-	var negative_action: String = str(inputs.get("Negative Action", ""))
-	var positive_action: String = str(inputs.get("Positive Action", ""))
-	var store_in: String = str(inputs.get("Store In", ""))
+	var negative_action: String = _neg_action_input.get_val(inputs)
+	var positive_action: String = _pos_action_input.get_val(inputs)
+	var store_in: String = _store_input.get_val(inputs)
 
 	if negative_action.is_empty() or positive_action.is_empty() or store_in.is_empty():
 		return

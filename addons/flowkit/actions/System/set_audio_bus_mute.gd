@@ -15,17 +15,17 @@ func get_supported_types() -> Array[String]:
 func get_inputs() -> Array[FKActionInput]:
 	return [_bus_name_input, _muted_input]
 
-static var _bus_name_input: FKActionInput:
+static var _bus_name_input: FKStringActionInput:
 	get:
-		return FKActionInput.new("Bus Name", "String",
-		"The name of the audio bus (e.g., 'Master', 'Music', 'SFX').")
-static var _muted_input: FKActionInput:
+		return FKStringActionInput.new("Bus Name",
+		"The name of the audio bus (e.g., 'Master', 'Music', 'SFX').", "Master")
+static var _muted_input: FKBoolActionInput:
 	get:
-		return FKActionInput.new("Muted", "bool", "Whether the audio bus should be muted.")
+		return FKBoolActionInput.new("Muted", "Whether the audio bus should be muted.", true)
 
 func execute(node: Node, inputs: Dictionary, block_id: String = "") -> void:
-	var bus_name: String = str(inputs.get("BusName", "Master"))
-	var muted: bool = bool(inputs.get("Muted", true))
+	var bus_name: String = _bus_name_input.get_val(inputs)
+	var muted: bool = _muted_input.get_val(inputs)
 	
 	var bus_idx: int = AudioServer.get_bus_index(bus_name)
 	if bus_idx >= 0:

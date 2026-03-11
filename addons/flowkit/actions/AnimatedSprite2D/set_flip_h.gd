@@ -12,8 +12,8 @@ func get_description() -> String:
 func get_inputs() -> Array[FKActionInput]:
 	return [_value_input]
 
-static var _value_input: FKActionInput:
-	get: return FKActionInput.new("Value", "Bool")
+static var _value_input: FKBoolActionInput:
+	get: return FKBoolActionInput.new("Value")
 
 func get_supported_types() -> Array[String]:
 	return ["AnimatedSprite2D"]
@@ -22,5 +22,5 @@ func execute(node: Node, inputs: Dictionary, block_id: String = "") -> void:
 	if not node is AnimatedSprite2D:
 		return
 	
-	var value = inputs.get("Value", false)
+	var value = _value_input.get_val(inputs)
 	node.flip_h = value

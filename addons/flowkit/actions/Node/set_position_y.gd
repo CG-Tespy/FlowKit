@@ -25,4 +25,4 @@ func execute(node: Node, inputs: Dictionary, block_id: String = "") -> void:
 		return
 	
 	var node2d: Node2D = node as Node2D
-	node2d.position.y = inputs.get("Y", 0.0)
+	node2d.position.y = _val_input.get_val(inputs)

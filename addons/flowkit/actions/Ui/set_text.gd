@@ -12,16 +12,16 @@ func get_name() -> String:
 func get_inputs() -> Array[FKActionInput]:
 	return [_new_text_input]
 	
-static var _new_text_input: FKActionInput:
+static var _new_text_input: FKStringActionInput:
 	get:
-		return FKActionInput.new("New Text", "String",
+		return FKStringActionInput.new("New Text", 
 		"The text that the target will hold.")
 	
 func get_supported_types() -> Array:
 	return ["Label", "RichTextLabel", "Button", "TextEdit", "LineEdit"]
 
 func execute(target_node: Node, inputs: Dictionary, _str := "") -> void:
-	var new_text: String = inputs.get("New Text", "")
+	var new_text: String = _new_text_input.get_val(inputs)
 	var has_text: Variant = target_node
 	var prev_text: String = has_text.text
 	has_text.text = new_text

@@ -12,15 +12,16 @@ func get_name() -> String:
 func get_inputs() -> Array[FKActionInput]:
 	return [_wait_time_input]
 
-static var _wait_time_input: FKActionInput:
+static var _wait_time_input: FKFloatActionInput:
 	get:
-		return FKActionInput.new("Wait Time", "float",
-		"The wait time in seconds to set for the timer.")
+		return FKFloatActionInput.new("Wait Time",
+		"The wait time in seconds to set for the timer.",
+		1.0)
 
 func get_supported_types() -> Array[String]:
 	return ["Timer"]
 
 func execute(node: Node, inputs: Dictionary, block_id: String = "") -> void:
 	if node and node is Timer:
-		var wait_time: float = inputs.get("Wait Time", 1.0)
+		var wait_time: float = _wait_time_input.get_val(inputs)
 		node.wait_time = wait_time
