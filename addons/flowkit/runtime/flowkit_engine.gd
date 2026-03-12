@@ -130,7 +130,7 @@ func _load_sheets_for_scene(scene_root: Node) -> void:
 						block.ensure_block_id()
 				# Also ensure block IDs for events inside groups
 				_ensure_block_ids_in_groups(sheet.groups)
-				var entry := {"sheet": sheet, "root": node_root, "scene_name": scene_name, "uid": uid}
+				var entry := FKSheetEntry.new(sheet, node_root, scene_name, uid)
 				active_sheets.append(entry)
 				# Create per-block event provider instances (each block gets its own)
 				_event_providers.create_providers(entry)
@@ -162,10 +162,10 @@ func _collect_node_paths(node: Node, uid_to_node: Dictionary) -> void:
 	for child in node.get_children():
 		_collect_node_paths(child, uid_to_node)
 
-func _run_sheet(entry: Dictionary) -> void:
+func _run_sheet(entry: FKSheetEntry) -> void:
 	# Entry is a dictionary with keys: "sheet" and "root"
-	var sheet: FKEventSheet = entry.get("sheet", null)
-	var root_node: Node = entry.get("root", null)
+	var sheet: FKEventSheet = entry.sheet
+	var root_node: Node = entry.root
 
 	if not sheet:
 		return
@@ -236,8 +236,6 @@ func _run_sheet(entry: Dictionary) -> void:
 		# Execute the block's conditions and actions
 		_execute_block(block, current_root)
 # --- Signal event lifecycle -------------------------------------------------
-
-
 
 ## Execute a single event block: check all conditions, then run all actions.
 ## Shared by both the poll loop and signal-based trigger callbacks.

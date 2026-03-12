@@ -1,15 +1,12 @@
 extends RefCounted
 class_name FKBranchExecutor
 
-var registry: FKRegistry
-var fk_engine: FlowKitEngine
-
 func initialize(owner: FlowKitEngine):
-	fk_engine = owner
-	registry = owner.registry
+	_fk_engine = owner
+	_registry = owner.registry
 	
-func _resolve_target(target: String, root: Node) -> Node:
-	return fk_engine._resolve_target(target, root)
+var _fk_engine: FlowKitEngine
+var _registry: FKRegistry
 
 ## Evaluate a branch's condition. Returns true if the condition passes.
 func _evaluate_condition(act: FKEventAction, current_root: Node, block_id: String) -> bool:
@@ -22,7 +19,7 @@ func _evaluate_condition(act: FKEventAction, current_root: Node, block_id: Strin
 	if not cnode:
 		return false
 
-	return registry.check_condition(cond.condition_id, cnode, cond.inputs, cond.negated, current_root, block_id)
+	return _registry.check_condition(cond.condition_id, cnode, cond.inputs, cond.negated, current_root, block_id)
 
 ## Execute a list of actions, handling branch chains via providers.
 ## Used by both _execute_block (top-level actions) and nested branches.
@@ -32,8 +29,8 @@ func _execute_actions(actions: Array, current_root: Node, block_id: String) -> v
 
 	for act in actions:
 		if act.is_branch:
-			var branch_id: String = registry.resolve_branch_id(act.branch_id, act.branch_type)
-			var provider = registry.get_branch_provider(branch_id)
+			var branch_id: String = _registry.resolve_branch_id(act.branch_id, act.branch_type)
+			var provider = _registry.get_branch_provider(branch_id)
 
 			if not provider:
 				# Unknown branch provider — skip
@@ -83,25 +80,29 @@ func _execute_actions(actions: Array, current_root: Node, block_id: String) -> v
 			if not anode:
 				print("[FlowKit] Action target node not found: ", act.target_node)
 				continue
-			var provider: Variant = await registry.execute_action(act.action_id, anode, act.inputs, current_root, block_id)
+			var provider: Variant = await _registry.execute_action(act.action_id, anode, act.inputs, current_root, block_id)
 
+func _resolve_target(target: String, root: Node) -> Node:
+	return _fk_engine._resolve_target(target, root)
+	
 ## Determine whether a branch should execute, delegating to the branch provider.
 ## Handles both condition-type and evaluation-type branches.
 func _should_execute_branch(act: FKEventAction, provider: Variant, 
-current_root: Node, block_id: String) -> bool:
+							current_root: Node, block_id: String) -> bool:
 	if not provider:
 		return false
 
-	var input_type: String = provider.get_input_type() if provider.has_method("get_input_type") else "condition"
+	var input_type: String = provider.get_input_type() \
+	if provider.has_method("get_input_type") else "condition"
 
 	if input_type == "condition":
 		var cond_result: bool = _evaluate_condition(act, current_root, block_id)
 		return provider.should_execute(cond_result, {}, block_id)
 	else:
 		# Evaluation type: evaluate branch_inputs and let the provider decide
-		var evaluated_inputs: Dictionary = registry.evaluate_branch_inputs(act.branch_inputs, current_root)
+		var evaluated_inputs: Dictionary = _registry.evaluate_branch_inputs(act.branch_inputs, current_root)
 		return provider.should_execute(false, evaluated_inputs, block_id)
 
 ## Get evaluated branch inputs for execution-count queries.
 func _get_branch_inputs(act: FKEventAction, current_root: Node) -> Dictionary:
-	return registry.evaluate_branch_inputs(act.branch_inputs, current_root)
+	return _registry.evaluate_branch_inputs(act.branch_inputs, current_root)
