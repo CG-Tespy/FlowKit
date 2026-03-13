@@ -13,11 +13,11 @@ const COMMENT_SCENE = preload("res://addons/flowkit/ui/workspace/comment_ui.tscn
 const GROUP_SCENE = preload("res://addons/flowkit/ui/workspace/group_ui.tscn")
 
 # UI References
-@onready var scroll_container: ScrollContainer = $OuterVBox/ScrollContainer
-@onready var blocks_container: BlockContainerUi = $OuterVBox/ScrollContainer/MarginContainer/BlocksContainer
-@onready var empty_label: Label = $OuterVBox/ScrollContainer/MarginContainer/BlocksContainer/EmptyLabel
-@onready var add_event_btn: Button = $OuterVBox/BottomMargin/ButtonContainer/AddEventButton
-@onready var menu_bar: FKMenuBar = $"OuterVBox/TopMargin/TopBar/MenuBar"
+@export var scroll_container: ScrollContainer
+@export var blocks_container: BlockContainerUi
+@export var empty_label: Label
+@export var add_event_btn: Button
+@export var menu_bar: FKMenuBar
 
 # Drag spacer state
 var drag_spacer_top: Control = null  # Temporary spacer at top during drag
@@ -46,18 +46,32 @@ var selected_item = null  # Currently selected condition/action item
 var undo_manager: FKUndoManager = FKUndoManager.new()
 var clipboard := FKClipboardManager.new()
 var input_manager: FKMainEditorInputHandler = FKMainEditorInputHandler.new()
+var sheet_io : FKSheetIO = FKSheetIO.new()
 
-func _ready() -> void:
+func _enter_tree() -> void:
 	input_manager.initialize(self)
-	
-	_setup_ui()
-	# Connect block_moved signals for autosave and undo state on drag-and-drop reorder
-	blocks_container.before_block_moved.connect(_push_undo_state)
-	blocks_container.block_moved.connect(_save_and_reload_sheet)
+	_toggle_subs(true)
 
+func _toggle_subs(on: bool):
+	if on:
+		# For autosave and undo state on drag-and-drop reorder
+		blocks_container.before_block_moved.connect(_push_undo_state)
+		blocks_container.block_moved.connect(_save_and_reload_sheet)
+	else:
+		blocks_container.before_block_moved.disconnect(_push_undo_state)
+		blocks_container.block_moved.disconnect(_save_and_reload_sheet)
+	
 func _setup_ui() -> void:
 	"""Initialize UI state."""
 	_show_empty_state()
+	
+func _show_empty_state() -> void:
+	"""Show empty state UI (no scene loaded)."""
+	empty_label.visible = true
+	add_event_btn.visible = false
+	
+func _exit_tree() -> void:
+	_toggle_subs(false)
 
 func set_editor_interface(interface: EditorInterface) -> void:
 	editor_interface = interface
@@ -715,11 +729,6 @@ func _clear_all_blocks() -> void:
 			blocks_container.remove_child(child)
 			child.queue_free()
 
-func _show_empty_state() -> void:
-	"""Show empty state UI (no scene loaded)."""
-	empty_label.visible = true
-	add_event_btn.visible = false
-
 func _show_empty_blocks_state() -> void:
 	"""Show state when scene is loaded but has no blocks."""
 	empty_label.visible = false
@@ -732,17 +741,12 @@ func _show_content_state() -> void:
 
 # === File Operations ===
 
-func _get_sheet_path() -> String:
-	"""Get the file path for current scene's event sheet."""
-	if current_scene_uid == 0:
-		return ""
-	return "res://addons/flowkit/saved/event_sheet/%d.tres" % current_scene_uid
-
 func _load_scene_sheet() -> void:
 	"""Load event sheet for current scene."""
 	_clear_all_blocks()
-	
-	var sheet_path = _get_sheet_path()
+	if sheet_io == null:
+		printerr("Sheet io is null for some reason")
+	var sheet_path = sheet_io.get_sheet_path(current_scene_uid)
 	if sheet_path == "" or not FileAccess.file_exists(sheet_path):
 		_show_empty_blocks_state()
 		return
@@ -779,23 +783,19 @@ func _populate_from_sheet(sheet: FKEventSheet) -> void:
 			blocks_container.add_child(event_row)
 
 func _save_sheet() -> void:
-	"""Generate and save event sheet from current blocks."""
-	if current_scene_uid == 0:
+	var is_scene_open := current_scene_uid != 0
+	if not is_scene_open:
 		push_warning("No scene open to save event sheet.")
 		return
-	
-	var sheet = _generate_sheet_from_blocks()
-	
-	var dir_path = "res://addons/flowkit/saved/event_sheet"
-	DirAccess.make_dir_recursive_absolute(dir_path)
-	
-	var sheet_path = _get_sheet_path()
-	var error = ResourceSaver.save(sheet, sheet_path)
-	
-	if error == OK:
-		print("✓ Event sheet saved: ", sheet_path)
+
+	var sheet := _generate_sheet_from_blocks()
+	var err := sheet_io.save_sheet(current_scene_uid, sheet)
+
+	if err == OK:
+		print("✓ Event sheet saved")
 	else:
-		push_error("Failed to save event sheet: ", error)
+		push_error("Failed to save event sheet: ", err)
+	
 
 func _save_and_reload_sheet() -> void:
 	"""Save sheet and reload UI to ensure visual/data sync (for drag-drop operations)."""
@@ -819,7 +819,7 @@ func _generate_sheet_from_blocks() -> FKEventSheet:
 		if block.has_method("get_event_data"):
 			var data = block.get_event_data()
 			if data:
-				var event_copy = _copy_event_block(data)
+				var event_copy = sheet_io.copy_event_block(data)
 				item_order.append({"type": "event", "index": events.size()})
 				events.append(event_copy)
 		
@@ -834,7 +834,7 @@ func _generate_sheet_from_blocks() -> FKEventSheet:
 		elif block.has_method("get_group_data"):
 			var data = block.get_group_data()
 			if data:
-				var group_copy = _copy_group_block(data)
+				var group_copy = sheet_io.copy_group_block(data)
 				item_order.append({"type": "group", "index": groups.size()})
 				groups.append(group_copy)
 	
@@ -844,75 +844,6 @@ func _generate_sheet_from_blocks() -> FKEventSheet:
 	sheet.item_order = item_order
 	sheet.standalone_conditions = standalone_conditions
 	return sheet
-
-func _copy_event_block(data: FKEventBlock) -> FKEventBlock:
-	"""Create a clean copy of an event block."""
-	var event_copy = FKEventBlock.new(data.block_id, data.event_id, data.target_node)
-	event_copy.inputs = data.inputs.duplicate()
-	event_copy.conditions = [] as Array[FKEventCondition]
-	event_copy.actions = [] as Array[FKEventAction]
-	
-	for cond in data.conditions:
-		var cond_copy = FKEventCondition.new()
-		cond_copy.condition_id = cond.condition_id
-		cond_copy.target_node = cond.target_node
-		cond_copy.inputs = cond.inputs.duplicate()
-		cond_copy.negated = cond.negated
-		cond_copy.actions = [] as Array[FKEventAction]
-		event_copy.conditions.append(cond_copy)
-	
-	for act in data.actions:
-		var act_copy = _copy_action(act)
-		event_copy.actions.append(act_copy)
-	
-	return event_copy
-
-func _copy_action(act: FKEventAction) -> FKEventAction:
-	"""Create a clean copy of an action, including branch data."""
-	var act_copy = FKEventAction.new()
-	act_copy.action_id = act.action_id
-	act_copy.target_node = act.target_node
-	act_copy.inputs = act.inputs.duplicate()
-	act_copy.is_branch = act.is_branch
-	act_copy.branch_type = act.branch_type
-	act_copy.branch_id = act.branch_id
-	act_copy.branch_inputs = act.branch_inputs.duplicate()
-	if act.branch_condition:
-		var cond_copy = FKEventCondition.new()
-		cond_copy.condition_id = act.branch_condition.condition_id
-		cond_copy.target_node = act.branch_condition.target_node
-		cond_copy.inputs = act.branch_condition.inputs.duplicate()
-		cond_copy.negated = act.branch_condition.negated
-		act_copy.branch_condition = cond_copy
-	
-	act_copy.branch_actions = [] as Array[FKEventAction]
-	for sub_act in act.branch_actions:
-		act_copy.branch_actions.append(_copy_action(sub_act))
-	
-	return act_copy
-
-func _copy_group_block(data: FKGroupBlock) -> FKGroupBlock:
-	"""Create a clean copy of a group block with all children."""
-	var group_copy = FKGroupBlock.new()
-	group_copy.title = data.title
-	group_copy.collapsed = data.collapsed
-	group_copy.color = data.color
-	group_copy.children = []
-	
-	for child_dict in data.children:
-		var child_type = child_dict.get("type", "")
-		var child_data = child_dict.get("data")
-		
-		if child_type == "event" and child_data is FKEventBlock:
-			group_copy.children.append({"type": "event", "data": _copy_event_block(child_data)})
-		elif child_type == "comment" and child_data is FKCommentBlock:
-			var comment_copy = FKCommentBlock.new()
-			comment_copy.text = child_data.text
-			group_copy.children.append({"type": "comment", "data": comment_copy})
-		elif child_type == "group" and child_data is FKGroupBlock:
-			group_copy.children.append({"type": "group", "data": _copy_group_block(child_data)})
-	
-	return group_copy
 
 func _new_sheet() -> void:
 	"""Create new empty sheet."""
@@ -929,7 +860,7 @@ func _create_event_row(data: FKEventBlock) -> Control:
 	"""Create event row node from data (GDevelop-style)."""
 	var row = EVENT_ROW_SCENE.instantiate()
 	
-	var copy = _copy_event_block(data)
+	var copy = sheet_io.copy_event_block(data)
 	
 	row.set_event_data(copy)
 	row.set_registry(registry)
@@ -972,13 +903,13 @@ func _create_group_block(data: FKGroupBlock) -> Control:
 		var child_data = child_dict.get("data")
 		
 		if child_type == "event" and child_data is FKEventBlock:
-			copy.children.append({"type": "event", "data": _copy_event_block(child_data)})
+			copy.children.append({"type": "event", "data": sheet_io.copy_event_block(child_data)})
 		elif child_type == "comment" and child_data is FKCommentBlock:
 			var comment_copy = FKCommentBlock.new()
 			comment_copy.text = child_data.text
 			copy.children.append({"type": "comment", "data": comment_copy})
 		elif child_type == "group" and child_data is FKGroupBlock:
-			copy.children.append({"type": "group", "data": _copy_group_block(child_data)})
+			copy.children.append({"type": "group", "data": sheet_io.copy_group_block(child_data)})
 	
 	group.set_group_data(copy)
 	group.set_registry(registry)
