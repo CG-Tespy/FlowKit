@@ -53,14 +53,19 @@ func _enter_tree() -> void:
 	_toggle_subs(true)
 
 func _toggle_subs(on: bool):
-	if on:
+	if on && !subs_active:
+		subs_active = true
 		# For autosave and undo state on drag-and-drop reorder
 		blocks_container.before_block_moved.connect(_push_undo_state)
 		blocks_container.block_moved.connect(_save_and_reload_sheet)
-	else:
+	elif subs_active:
 		blocks_container.before_block_moved.disconnect(_push_undo_state)
 		blocks_container.block_moved.disconnect(_save_and_reload_sheet)
-	
+		subs_active = false
+
+var subs_active := false
+#^ Need this due to how finicky Godot can be about unsubs
+
 func _setup_ui() -> void:
 	"""Initialize UI state."""
 	_show_empty_state()
