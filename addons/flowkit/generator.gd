@@ -207,6 +207,7 @@ func _create_setter_action(node_type: String, prop: Dictionary) -> void:
 	
 	var type_name = _get_type_name(prop.type)
 	var description = _get_property_description(node_type, prop_name, true)
+	var input_constructor = _get_action_input_constructor(prop.type, "Value", description)
 	var code = """extends FKAction
 
 func get_id() -> String:
@@ -218,10 +219,8 @@ func get_name() -> String:
 func get_description() -> String:
 	return "%s"
 
-func get_inputs() -> Array[Dictionary]:
-	return [
-		{"name": "Value", "type": "%s"}
-	]
+func get_inputs() -> Array[FKActionInput]:
+	return [%s]
 
 func get_supported_types() -> Array[String]:
 	return ["%s"]
@@ -236,7 +235,7 @@ func execute(node: Node, inputs: Dictionary, block_id: String = "") -> void:
 		action_id,
 		action_name,
 		description,
-		type_name,
+		input_constructor,
 		node_type,
 		node_type,
 		_get_default_value(prop.type),
@@ -265,8 +264,7 @@ func _create_method_action(node_type: String, method: Dictionary) -> void:
 	for i in range(method.args.size()):
 		var arg = method.args[i]
 		var arg_name = arg.name if arg.name != "" else "Arg" + str(i)
-		var type_name = _get_type_name(arg.type)
-		inputs.append('{"name": "%s", "type": "%s"}' % [_humanize_name(arg_name), type_name])
+		inputs.append(_get_action_input_constructor(arg.type, _humanize_name(arg_name), ""))
 		call_args.append('inputs.get("%s", %s)' % [_humanize_name(arg_name), _get_default_value(arg.type)])
 	
 	var inputs_str = "[" + ", ".join(inputs) + "]" if inputs.size() > 0 else "[]"
@@ -284,7 +282,7 @@ func get_name() -> String:
 func get_description() -> String:
 	return "%s"
 
-func get_inputs() -> Array[Dictionary]:
+func get_inputs() -> Array[FKActionInput]:
 	return %s
 
 func get_supported_types() -> Array[String]:
@@ -602,6 +600,20 @@ func _get_default_value(type: int) -> String:
 		TYPE_RECT2: return "Rect2()"
 		TYPE_QUATERNION: return "Quaternion.IDENTITY"
 		_: return "null"
+
+func _get_action_input_constructor(type: int, input_name: String, desc: String) -> String:
+	match type:
+		TYPE_STRING:
+			return 'FKStringActionInput.new("%s", "%s")' % [input_name, desc]
+		TYPE_FLOAT:
+			return 'FKFloatActionInput.new("%s", "%s")' % [input_name, desc]
+		TYPE_INT:
+			return 'FKIntActionInput.new("%s", "%s")' % [input_name, desc]
+		TYPE_BOOL:
+			return 'FKBoolActionInput.new("%s", "%s")' % [input_name, desc]
+		_:
+			var type_name = _get_type_name(type)
+			return 'FKActionInput.new("%s", "%s", "%s")' % [input_name, type_name, desc]
 
 func _ensure_directory_exists(path: String) -> void:
 	if not DirAccess.dir_exists_absolute(path):
