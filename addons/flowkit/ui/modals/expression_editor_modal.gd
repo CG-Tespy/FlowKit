@@ -34,6 +34,9 @@ func _toggle_subs(on: bool):
 		item_list.item_activated.connect(_on_item_activated)
 		if editor_interface:
 			call_deferred("_setup_node_tree")
+	else:
+		node_tree.item_selected.disconnect(_on_node_selected)
+		item_list.item_activated.disconnect(_on_item_activated)
 	
 func set_editor_interface(interface: EditorInterface) -> void:
 	editor_interface = interface

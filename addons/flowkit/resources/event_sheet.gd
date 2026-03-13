@@ -85,3 +85,4 @@ func rebuild_order_from_items(ordered_items: Array) -> void:
 				if data is FKGroupBlock:
 					item_order.append({"type": "group", "index": groups.size()})
 					groups.append(data)
+			

@@ -198,19 +198,19 @@ func _rebuild_child_nodes() -> void:
 	
 	# Create new children from data
 	for child_dict in group_data.children:
-		var child_type: String = child_dict.get("type", "")
-		var child_data = child_dict.get("data")
+		var child_type := child_dict.type
+		var child_data := child_dict.data
 		
 		match child_type:
-			"event":
+			FKGroupChild.ChildType.EVENT:
 				if child_data is FKEventBlock:
 					var row = _instantiate_event_row(child_data)
 					children_container.add_child(row)
-			"comment":
+			FKGroupChild.ChildType.COMMENT:
 				if child_data is FKCommentBlock:
 					var comment = _instantiate_comment(child_data)
 					children_container.add_child(comment)
-			"group":
+			FKGroupChild.ChildType.GROUP:
 				if child_data is FKGroupBlock:
 					var nested = _instantiate_group(child_data)
 					children_container.add_child(nested)

@@ -371,14 +371,14 @@ func _serialize_group_block(data: FKGroupBlock) -> Dictionary:
 	}
 	
 	for child_dict in data.children:
-		var child_type = child_dict.get("type", "")
-		var child_data = child_dict.get("data")
+		var child_type := child_dict.type
+		var child_data := child_dict.data
 		var children = result["children"]
-		if child_type == "event" and child_data is FKEventBlock:
+		if child_type == FKGroupChild.ChildType.EVENT and child_data is FKEventBlock:
 			children.append(_serialize_event_block(child_data))
-		elif child_type == "comment" and child_data is FKCommentBlock:
+		elif child_type == FKGroupChild.ChildType.COMMENT and child_data is FKCommentBlock:
 			children.append(_serialize_comment_block(child_data))
-		elif child_type == "group" and child_data is FKGroupBlock:
+		elif child_type == FKGroupChild.ChildType.GROUP and child_data is FKGroupBlock:
 			children.append(_serialize_group_block(child_data))
 	
 	return result
@@ -740,14 +740,18 @@ func _get_sheet_path() -> String:
 
 func _load_scene_sheet() -> void:
 	"""Load event sheet for current scene."""
+	print("At start of _load_scene_sheet")
 	_clear_all_blocks()
+	print("Right after _clear_all_blocks")
 	
 	var sheet_path = _get_sheet_path()
 	if sheet_path == "" or not FileAccess.file_exists(sheet_path):
 		_show_empty_blocks_state()
 		return
 	
+	print("Right before loading sheet")
 	var sheet = ResourceLoader.load(sheet_path)
+	print("Right after loading sheet")
 	if not (sheet is FKEventSheet):
 		_show_empty_blocks_state()
 		return
@@ -758,6 +762,7 @@ func _load_scene_sheet() -> void:
 func _populate_from_sheet(sheet: FKEventSheet) -> void:
 	"""Create event rows and comments from event sheet data (GDevelop-style)."""
 	# If we have item_order, use it to restore the correct order
+	print("At start of _populate_from_sheet")
 	if sheet.item_order.size() > 0:
 		for item in sheet.item_order:
 			var item_type = item.get("type", "")
@@ -770,6 +775,7 @@ func _populate_from_sheet(sheet: FKEventSheet) -> void:
 				var comment = _create_comment_block(sheet.comments[item_index])
 				blocks_container.add_child(comment)
 			elif item_type == "group" and item_index < sheet.groups.size():
+				print("About to create a group block in _populate_from_sheet")
 				var group = _create_group_block(sheet.groups[item_index])
 				blocks_container.add_child(group)
 	else:
@@ -900,17 +906,23 @@ func _copy_group_block(data: FKGroupBlock) -> FKGroupBlock:
 	group_copy.children = []
 	
 	for child_dict in data.children:
-		var child_type = child_dict.get("type", "")
-		var child_data = child_dict.get("data")
+		var child_type := child_dict.type
+		var child_data := child_dict.data
 		
-		if child_type == "event" and child_data is FKEventBlock:
-			group_copy.children.append({"type": "event", "data": _copy_event_block(child_data)})
-		elif child_type == "comment" and child_data is FKCommentBlock:
+		var new_child: FKGroupChild
+		if child_type == FKGroupChild.ChildType.EVENT and child_data is FKEventBlock:
+			var event_copy := _copy_event_block(child_data)
+			new_child = FKGroupChild.new(FKGroupChild.ChildType.EVENT, event_copy)
+			group_copy.children.append(new_child)
+		elif child_type == FKGroupChild.ChildType.COMMENT and child_data is FKCommentBlock:
 			var comment_copy = FKCommentBlock.new()
 			comment_copy.text = child_data.text
-			group_copy.children.append({"type": "comment", "data": comment_copy})
-		elif child_type == "group" and child_data is FKGroupBlock:
-			group_copy.children.append({"type": "group", "data": _copy_group_block(child_data)})
+			new_child = FKGroupChild.new(FKGroupChild.ChildType.COMMENT, comment_copy)
+			group_copy.children.append(new_child)
+		elif child_type == FKGroupChild.ChildType.GROUP and child_data is FKGroupBlock:
+			var group_block_copy := _copy_group_block(child_data)
+			new_child = FKGroupChild.new(FKGroupChild.ChildType.GROUP, group_block_copy)
+			group_copy.children.append(new_child)
 	
 	return group_copy
 
@@ -958,27 +970,33 @@ func _connect_comment_signals(comment) -> void:
 
 func _create_group_block(data: FKGroupBlock) -> Control:
 	"""Create group block node from data."""
+	print("Right BEFORE instantiating group scene")
 	var group = GROUP_SCENE.instantiate()
-	
+	print("Right after instantiating group scene")
 	var copy = FKGroupBlock.new()
 	copy.title = data.title
 	copy.collapsed = data.collapsed
 	copy.color = data.color
-	copy.children = []
-	
+	print("Right after creating group block")
 	# Deep copy children
 	for child_dict in data.children:
-		var child_type = child_dict.get("type", "")
-		var child_data = child_dict.get("data")
-		
-		if child_type == "event" and child_data is FKEventBlock:
-			copy.children.append({"type": "event", "data": _copy_event_block(child_data)})
-		elif child_type == "comment" and child_data is FKCommentBlock:
+		var child_type := child_dict.type
+		var child_data := child_dict.data
+		var new_child: FKGroupChild
+		print("Right before evaluating child type")
+		if child_type == FKGroupChild.ChildType.EVENT and child_data is FKEventBlock:
+			var event_copy := _copy_event_block(child_data)
+			new_child = FKGroupChild.new(FKGroupChild.ChildType.EVENT, event_copy)
+			copy.children.append(new_child)
+		elif child_type == FKGroupChild.ChildType.COMMENT and child_data is FKCommentBlock:
 			var comment_copy = FKCommentBlock.new()
 			comment_copy.text = child_data.text
-			copy.children.append({"type": "comment", "data": comment_copy})
-		elif child_type == "group" and child_data is FKGroupBlock:
-			copy.children.append({"type": "group", "data": _copy_group_block(child_data)})
+			new_child = FKGroupChild.new(FKGroupChild.ChildType.COMMENT, comment_copy)
+			copy.children.append(new_child)
+		elif child_type == FKGroupChild.ChildType.GROUP and child_data is FKGroupBlock:
+			var group_copy := _copy_group_block(child_data)
+			new_child = FKGroupChild.new(FKGroupChild.ChildType.GROUP, group_copy)
+			copy.children.append(new_child)
 	
 	group.set_group_data(copy)
 	group.set_registry(registry)

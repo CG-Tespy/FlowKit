@@ -10,7 +10,7 @@ class_name FKGroupBlock
 @export var color: Color = Color(0.25, 0.22, 0.35, 1.0)
 
 ## Child items stored as: [{"type": "event"|"comment"|"group", "data": Resource}, ...]
-@export var children: Array = []
+@export var children: Array[FKGroupChild] = []
 
 
 func add_child_item(type: String, data: Resource) -> void:
@@ -32,7 +32,7 @@ func get_child_count() -> int:
 func get_child_type(index: int) -> String:
 	"""Get the type of child at index."""
 	if index >= 0 and index < children.size():
-		return children[index].get("type", "")
+		return str(children[index].type).to_lower()
 	return ""
 
 
@@ -60,14 +60,64 @@ func copy_deep() -> FKGroupBlock:
 	copy.children = []
 	
 	for child_dict in children:
-		var child_type = child_dict.get("type", "")
-		var child_data = child_dict.get("data")
+		var child_type := child_dict.type
+		var child_data := child_dict.data
 		
 		if child_data and child_data.has_method("duplicate"):
 			var child_copy = child_data.duplicate()
 			# Deep copy for nested groups
-			if child_type == "group" and child_data is FKGroupBlock:
+			if child_type == FKGroupChild.ChildType.GROUP and child_data is FKGroupBlock:
 				child_copy = child_data.copy_deep()
-			copy.children.append({"type": child_type, "data": child_copy})
+			
+			var new_child := FKGroupChild.new(child_type, child_copy)
+			copy.children.append(new_child)
 	
 	return copy
+	
+func _set(property: StringName, value) -> bool:
+	print("Calling _set from FKGroupBlock")
+	if property == "children":
+		# Godot is assigning the raw serialized array
+		var new_children: Array = []
+
+		for child in value:
+			if child is Dictionary:
+				# Convert old format → FKGroupChild
+				var type_str: String = child.get("type", "")
+				var data_dict: Dictionary = child.get("data", {})
+
+				var fk_child: FKGroupChild = null
+
+				match type_str:
+					"event":
+						var ev = FKClipboardManager.S._deserialize_event_block_static(data_dict)
+						fk_child = FKGroupChild.new(FKGroupChild.ChildType.EVENT, ev)
+
+					"comment":
+						var comment = FKClipboardManager.S._deserialize_comment_block_static(data_dict)
+						fk_child = FKGroupChild.new(FKGroupChild.ChildType.COMMENT, comment)
+
+					"group":
+						var nested_group = FKClipboardManager.S._deserialize_group_block_static(data_dict)
+						fk_child = FKGroupChild.new(FKGroupChild.ChildType.GROUP, nested_group)
+
+				if fk_child:
+					new_children.append(fk_child)
+
+			elif child is FKGroupChild:
+				# Already in new format
+				new_children.append(child)
+
+		children = new_children
+		return true
+
+	return false
+	
+func _get_property_list() -> Array:
+	return [
+		{
+			"name": "children",
+			"type": TYPE_ARRAY,
+			"usage": PROPERTY_USAGE_STORAGE | PROPERTY_USAGE_EDITOR
+		}
+	]

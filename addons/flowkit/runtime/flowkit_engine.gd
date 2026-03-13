@@ -71,7 +71,6 @@ func _check_for_scene_change() -> void:
 		# Scene changed (including from null -> scene)
 		_on_scene_changed(cs)
 
-
 func _on_scene_changed(scene_root: Node) -> void:
 	last_scene = scene_root
 	active_behavior_nodes.clear()  # Clear behavior tracking on scene change
@@ -142,7 +141,6 @@ func _load_sheets_for_scene(scene_root: Node) -> void:
 				print("[FlowKit] Failed to load sheet resource at: ", sheet_path)
 		else:
 			print("[FlowKit] No sheet found for scene: ", scene_name, " (expected at ", sheet_path, ")")
-
 
 # Helper method moved outside
 func _collect_node_paths(node: Node, uid_to_node: Dictionary) -> void:
@@ -270,16 +268,19 @@ func _is_multi_frame_provider(provider: Variant) -> bool:
 
 func _ensure_block_ids_in_groups(groups: Array) -> void:
 	"""Recursively ensure all event blocks inside groups have unique IDs."""
-	for group in groups:
-		if group is FKGroupBlock:
-			for child_item in group.children:
-				var child_type: String = child_item.get("type", "")
-				var child_data: Variant = child_item.get("data", null)
-				
-				if child_type == "event" and child_data is FKEventBlock:
-					child_data.ensure_block_id()
-				elif child_type == "group" and child_data is FKGroupBlock:
-					_ensure_block_ids_in_groups([child_data])
+	for group_el in groups:
+		if group_el is not FKGroupBlock:
+			continue
+		
+		var group_block := group_el as FKGroupBlock
+		for child_item in group_block.children:
+			match child_item.type:
+				FKGroupChild.ChildType.EVENT:
+					var block: FKEventBlock = child_item.data as FKEventBlock
+					block.ensure_block_id()
+				FKGroupChild.ChildType.GROUP:
+					var child_block: FKGroupBlock = child_item.data as FKGroupBlock
+					_ensure_block_ids_in_groups(child_block.children)
 
 # --- Behavior processing ---------------------------------------------------
 func _scan_and_activate_behaviors(scene_root: Node) -> void:

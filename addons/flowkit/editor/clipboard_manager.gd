@@ -10,6 +10,18 @@ var _action_data: Array = []
 var _condition_data: Array = []
 var _group_data: Dictionary = {}
 
+func _init() -> void:
+	if (_s != null && _s != self):
+		printerr("Cannot have two FKClipboardManagers active at the same time.")
+		return
+		
+	_s = self
+	
+static var S: FKClipboardManager:
+	get:
+		return _s
+static var _s: FKClipboardManager
+
 # ===========================
 # PUBLIC API
 # ===========================
@@ -149,29 +161,33 @@ func _serialize_group_block(data: FKGroupBlock) -> Dictionary:
 		"children": []
 	}
 
+	var children: Array = result["children"]
+	var type_keys := FKGroupChild.ChildType.keys()
+	
 	for child in data.children:
-		var type = child.get("type", "")
-		var dataChild = child.get("data")
-		var to_append: Variant = null
-		var children: Array = result["children"]
+		var child_type := child.type
+		var child_data: Resource = child.data
+		var to_append: Dictionary = {}
 		
-		if type == "event":
-			to_append = 	{
-								"type": "event",
-								"data": _serialize_event_block(dataChild)
-							}
-		elif type == "comment":
-			to_append = 	{
-								"type": "comment",
-								"data": _serialize_comment_block(dataChild)
-							}
-		elif type == "group":
-			to_append = 	{
-								"type": "group",
-								"data": _serialize_group_block(dataChild)
-							}
+		match child_type:
+			FKGroupChild.ChildType.EVENT:
+				to_append = {
+					"type": type_keys[child_type],
+					"data": _serialize_event_block(child_data as FKEventBlock)
+				}
+			FKGroupChild.ChildType.COMMENT:
+				to_append = {
+					"type": type_keys[child_type],
+					"data": _serialize_comment_block(child_data as FKCommentBlock)
+				}
+			FKGroupChild.ChildType.GROUP:
+				to_append = {
+					"type": type_keys[child_type],
+					"data": _serialize_group_block(child_data as FKGroupBlock)
+				}
 		
-		if to_append != null:
+		if not to_append.is_empty():
+			to_append["type"] = to_append["type"].to_lower()
 			children.append(to_append)
 
 	return result
@@ -245,23 +261,26 @@ func _deserialize_group_block(dict: Dictionary) -> FKGroupBlock:
 	data.children = []
 
 	for child_dict in dict.get("children", []):
-		var child_type = child_dict.get("type", "")
-		var child_data = child_dict.get("data")
-		var children: Array = data.children
-		var to_append: Variant = null
+		var child_type_str: String = child_dict.get("type", "")
+		var child_data_dict: Dictionary = child_dict.get("data", {})
 
-		if child_type == "event":
-			to_append = {"type": "event", "data": _deserialize_event_block(child_data)}
-		elif child_type == "comment":
-			to_append = {"type": "comment", "data": _deserialize_comment_block(child_data)}
-		elif child_type == "group":
-			to_append = {"type": "group", "data": _deserialize_group_block(child_data)}
+		var child: FKGroupChild = null
 
-		if to_append != null:
-			children.append(to_append)
+		match child_type_str:
+			"event":
+				var ev: FKEventBlock = _deserialize_event_block(child_data_dict)
+				child = FKGroupChild.new(FKGroupChild.ChildType.EVENT, ev)
+			"comment":
+				var comment: FKCommentBlock = _deserialize_comment_block(child_data_dict)
+				child = FKGroupChild.new(FKGroupChild.ChildType.COMMENT, comment)
+			"group":
+				var group: FKGroupBlock = _deserialize_group_block(child_data_dict)
+				child = FKGroupChild.new(FKGroupChild.ChildType.GROUP, group)
+
+		if child != null:
+			data.children.append(child)
 
 	return data
-
 
 func _deserialize_comment_block(dict: Dictionary) -> FKCommentBlock:
 	var data = FKCommentBlock.new()
