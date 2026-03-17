@@ -196,8 +196,11 @@ func _rebuild_child_nodes() -> void:
 			children_container.remove_child(child)
 			child.queue_free()
 	
+	group_data.exec_child_normalization()
+	var as_group_children: Array[FKGroupChild] = group_data.normalized_children
+		
 	# Create new children from data
-	for child_dict in group_data.children:
+	for child_dict in as_group_children:
 		var child_type := child_dict.type
 		var child_data := child_dict.data
 		

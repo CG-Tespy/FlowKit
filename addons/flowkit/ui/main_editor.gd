@@ -370,7 +370,9 @@ func _serialize_group_block(data: FKGroupBlock) -> Dictionary:
 		"children": []
 	}
 	
-	for child_dict in data.children:
+	var as_group_children := data.normalized_children
+		
+	for child_dict in as_group_children:
 		var child_type := child_dict.type
 		var child_data := child_dict.data
 		var children = result["children"]
@@ -755,7 +757,12 @@ func _load_scene_sheet() -> void:
 	if not (sheet is FKEventSheet):
 		_show_empty_blocks_state()
 		return
-	
+		
+	if sheet is FKEventSheet:
+		for group in sheet.groups:
+			if group is FKGroupBlock:
+				group.exec_child_normalization()
+				
 	_populate_from_sheet(sheet)
 	_show_content_state()
 
@@ -905,7 +912,9 @@ func _copy_group_block(data: FKGroupBlock) -> FKGroupBlock:
 	group_copy.color = data.color
 	group_copy.children = []
 	
-	for child_dict in data.children:
+	var as_group_children := data.normalized_children
+	
+	for child_dict in as_group_children:
 		var child_type := child_dict.type
 		var child_data := child_dict.data
 		
@@ -979,7 +988,10 @@ func _create_group_block(data: FKGroupBlock) -> Control:
 	copy.color = data.color
 	print("Right after creating group block")
 	# Deep copy children
-	for child_dict in data.children:
+	
+	var as_group_children := data.normalized_children
+	
+	for child_dict in as_group_children:
 		var child_type := child_dict.type
 		var child_data := child_dict.data
 		var new_child: FKGroupChild

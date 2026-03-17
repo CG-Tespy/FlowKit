@@ -17,23 +17,45 @@ class_name FKEventSheet
 func get_all_events() -> Array:
 	var events := []
 	events.append_array(self.events)
+	_normalize_group_children()
 	_collect_events_from_groups(self.groups, events)
+
 	return events
+
+func _normalize_group_children():
+	for group in self.groups:
+		_normalize_group_recursive(group)
+
+func _normalize_group_recursive(group: FKGroupBlock):
+	group.exec_child_normalization()
+
+	for child in group.children:
+		if child is FKGroupChild and child.type == FKGroupChild.ChildType.GROUP:
+			_normalize_group_recursive(child.data)
 
 func _collect_events_from_groups(groups: Array, out_events: Array) -> void:
 	for group in groups:
 		if group is not FKGroupBlock:
 			continue
 			
-		for child_item in group.children:
-			var child_type: String = child_item.get("type", "")
-			var child_data: Variant = child_item.get("data", null)
-			
-			if child_type == "event" and child_data is FKEventBlock:
-				out_events.append(child_data)
-			elif child_type == "group" and child_data is FKGroupBlock:
-				# Recursively collect from nested groups
-				_collect_events_from_groups([child_data], out_events)
+		if (group.children_are_normalized):
+			if group.children.size() > 0 && group.children[0] is not FKGroupChild:
+				printerr("Main group children array should be normalized, but it ain't")
+			_collect_events_from_group_children(group.normalized_children, out_events)
+		else:
+			printerr("The group children aren't normalized even though they should")
+		
+
+func _collect_events_from_group_children(group_children: Array[FKGroupChild], out_events: Array):
+	for child_item in group_children:
+		var child_type := ""
+		var enum_type := child_item.type
+		var child_data = child_item.data
+		
+		if enum_type == FKGroupChild.ChildType.EVENT && child_data is FKEventBlock:
+			out_events.append(child_data)
+		elif enum_type == FKGroupChild.ChildType.GROUP && child_data is FKGroupBlock:
+			_collect_events_from_groups([child_data], out_events)
 
 func get_ordered_items() -> Array:
 	"""Get all items in display order as an array of dictionaries with type and data."""

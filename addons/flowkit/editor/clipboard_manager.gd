@@ -160,11 +160,14 @@ func _serialize_group_block(data: FKGroupBlock) -> Dictionary:
 		"color": data.color,
 		"children": []
 	}
-
+	
+	data.exec_child_normalization()
+	
 	var children: Array = result["children"]
 	var type_keys := FKGroupChild.ChildType.keys()
+	var as_group_children: Array[FKGroupChild] = data.normalized_children
 	
-	for child in data.children:
+	for child in as_group_children:
 		var child_type := child.type
 		var child_data: Resource = child.data
 		var to_append: Dictionary = {}

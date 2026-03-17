@@ -801,10 +801,11 @@ func _extract_ids_from_sheet(sheet: FKEventSheet, used: Dictionary) -> void:
 	for group in sheet.groups:
 		_extract_ids_from_group(group, used)
 
-
 ## Extract IDs from a group block (which can contain events, nested groups, etc.)
 func _extract_ids_from_group(group: FKGroupBlock, used: Dictionary) -> void:
-	for child in group.children:
+	var as_group_children := group.normalized_children
+	
+	for child in as_group_children:
 		var child_type := child.type
 		var child_data := child.data
 		if not child_data:
