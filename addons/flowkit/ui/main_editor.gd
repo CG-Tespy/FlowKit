@@ -370,9 +370,7 @@ func _serialize_group_block(data: FKGroupBlock) -> Dictionary:
 		"children": []
 	}
 	
-	var as_group_children := data.normalized_children
-		
-	for child_dict in as_group_children:
+	for child_dict in data.normalized_children:
 		var child_type := child_dict.type
 		var child_data := child_dict.data
 		var children = result["children"]
@@ -757,31 +755,40 @@ func _load_scene_sheet() -> void:
 		return
 		
 	if sheet is FKEventSheet:
-		for group in sheet.groups:
-			if group is FKGroupBlock:
-				group.exec_child_normalization()
+		sheet.on_loaded()
 				
 	_populate_from_sheet(sheet)
 	_show_content_state()
 
 func _populate_from_sheet(sheet: FKEventSheet) -> void:
 	"""Create event rows and comments from event sheet data (GDevelop-style)."""
+	sheet.normalize()
+	
 	# If we have item_order, use it to restore the correct order
-	if sheet.item_order.size() > 0:
-		for item in sheet.item_order:
-			var item_type = item.get("type", "")
-			var item_index = item.get("index", 0)
+	if sheet.normalized_item_order.size() > 0:
+		for item in sheet.normalized_item_order:
+			var item_index := item.index
+			var block_to_add: Node = null
 			
-			if item_type == "event" and item_index < sheet.events.size():
-				var event_row = _create_event_row(sheet.events[item_index])
-				blocks_container.add_child(event_row)
-			elif item_type == "comment" and item_index < sheet.comments.size():
-				var comment = _create_comment_block(sheet.comments[item_index])
-				blocks_container.add_child(comment)
-			elif item_type == "group" and item_index < sheet.groups.size():
-				print("About to create a group block in _populate_from_sheet")
-				var group = _create_group_block(sheet.groups[item_index])
-				blocks_container.add_child(group)
+			match item.type:
+				FKSheetOrderEntry.Category.EVENT:
+					if item_index < sheet.events.size():
+						block_to_add = _create_event_row(sheet.events[item_index])
+						pass
+					pass
+				FKSheetOrderEntry.Category.COMMENT:
+					if item_index < sheet.comments.size():
+						block_to_add = _create_comment_block(sheet.comments[item_index])
+						pass
+					pass
+				FKSheetOrderEntry.Category.GROUP:
+					if item_index < sheet.groups.size():
+						block_to_add = _create_group_block(sheet.groups[item_index])
+						pass
+					pass
+				
+			if block_to_add != null:
+				blocks_container.add_child(block_to_add)
 	else:
 		# Fallback: load events only (backwards compatibility)
 		for event_data in sheet.events:
@@ -818,7 +825,7 @@ func _generate_sheet_from_blocks() -> FKEventSheet:
 	var events: Array[FKEventBlock] = []
 	var comments: Array[FKCommentBlock] = []
 	var groups: Array[FKGroupBlock] = []
-	var item_order: Array[Dictionary] = []
+	var item_order: Array[FKSheetOrderEntry] = []
 	var standalone_conditions: Array[FKEventCondition] = []
 	
 	for block in _get_blocks():
@@ -826,11 +833,14 @@ func _generate_sheet_from_blocks() -> FKEventSheet:
 		if not is_instance_valid(block) or block.is_queued_for_deletion():
 			continue
 		
+		var order_entry := FKSheetOrderEntry.new()
+		
 		if block.has_method("get_event_data"):
 			var data = block.get_event_data()
 			if data:
-				var event_copy = _copy_event_block(data)
-				item_order.append({"type": "event", "index": events.size()})
+				var event_copy := _copy_event_block(data)
+				order_entry.type = FKSheetOrderEntry.Category.EVENT
+				order_entry.index = events.size()
 				events.append(event_copy)
 		
 		elif block.has_method("get_comment_data"):
@@ -838,21 +848,33 @@ func _generate_sheet_from_blocks() -> FKEventSheet:
 			if data:
 				var comment_copy = FKCommentBlock.new()
 				comment_copy.text = data.text
-				item_order.append({"type": "comment", "index": comments.size()})
+				order_entry.type = FKSheetOrderEntry.Category.COMMENT
+				order_entry.index = comments.size()
 				comments.append(comment_copy)
 		
 		elif block.has_method("get_group_data"):
 			var data = block.get_group_data()
 			if data:
 				var group_copy = _copy_group_block(data)
-				item_order.append({"type": "group", "index": groups.size()})
+				order_entry.type = FKSheetOrderEntry.Category.GROUP
+				order_entry.index = groups.size()
 				groups.append(group_copy)
-	
+		
+		var valid_entry: bool = order_entry.type != FKSheetOrderEntry.Category.NULL and \
+		order_entry.index >= 0
+		if valid_entry:
+			item_order.append(order_entry)
+		else:
+			var error_message := "[FKMainEditor]: Found an invalid Block when generating a " + \
+			"sheet from Blocks."
+			printerr(error_message)
+			
 	sheet.events = events
 	sheet.comments = comments
 	sheet.groups = groups
 	sheet.item_order = item_order
 	sheet.standalone_conditions = standalone_conditions
+
 	return sheet
 
 func _copy_event_block(data: FKEventBlock) -> FKEventBlock:
@@ -909,9 +931,7 @@ func _copy_group_block(data: FKGroupBlock) -> FKGroupBlock:
 	group_copy.color = data.color
 	group_copy.children = []
 	
-	var as_group_children := data.normalized_children
-	
-	for child_dict in as_group_children:
+	for child_dict in data.normalized_children:
 		var child_type := child_dict.type
 		var child_data := child_dict.data
 		
@@ -986,9 +1006,7 @@ func _create_group_block(data: FKGroupBlock) -> Control:
 	print("Right after creating group block")
 	# Deep copy children
 	
-	var as_group_children := data.normalized_children
-	
-	for child_dict in as_group_children:
+	for child_dict in data.normalized_children:
 		var child_type := child_dict.type
 		var child_data := child_dict.data
 		var new_child: FKGroupEntry

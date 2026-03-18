@@ -1,3 +1,4 @@
+@tool
 extends Resource
 class_name FKEventSheet
 ## The main event sheet resource that stores all events, comments, and groups for a scene.
@@ -18,6 +19,9 @@ var normalized_item_order: Array[FKSheetOrderEntry] = []
 
 
 func on_loaded():
+	normalize()
+	
+func normalize():
 	normalize_group_children()
 	normalize_item_order()
 	
@@ -25,12 +29,14 @@ func normalize_group_children():
 	for group in self.groups:
 		_normalize_group_recursive(group)
 
+
 func _normalize_group_recursive(group: FKGroupBlock):
 	group.exec_child_normalization()
 
 	for child in group.children:
 		if child is FKGroupEntry and child.type == FKGroupEntry.Category.GROUP:
 			_normalize_group_recursive(child.data)
+			
 			
 func normalize_item_order() -> void:
 	if item_order_is_normalized:
@@ -45,6 +51,7 @@ func normalize_item_order() -> void:
 	_set_item_order_cache(new_entries)
 	item_order_is_normalized = true
 
+
 func _get_as_order_entry(item) -> FKSheetOrderEntry:
 	var result: FKSheetOrderEntry = null
 	
@@ -55,11 +62,13 @@ func _get_as_order_entry(item) -> FKSheetOrderEntry:
 		
 	return result
 
+
 func _set_item_order_cache(new_entries: Array[FKSheetOrderEntry]):
 	item_order.clear()
 	normalized_item_order.clear()
 	item_order.append_array(new_entries)
 	normalized_item_order.append_array(new_entries)
+	
 	
 func get_all_events() -> Array:
 	var events := []
@@ -94,16 +103,15 @@ func _collect_events_from_group_children(group_children: Array[FKGroupEntry], ou
 		elif enum_type == FKGroupEntry.Category.GROUP && child_data is FKGroupBlock:
 			_collect_events_from_groups([child_data], out_events)
 
+
 func get_ordered_items() -> Array:
 	"""Get all items in display order as an array of dictionaries with type and data."""
 	var items = []
 	
 	for entry in normalized_item_order:
-		
 		var data = null
 			
 		match entry.type:
-			
 			FKSheetOrderEntry.Category.EVENT:
 				if entry.index < events.size():
 					data = events[entry.index]
@@ -131,7 +139,6 @@ func get_ordered_items() -> Array:
 			items.append(old_format_item)
 	
 	return items
-
 
 func rebuild_order_from_items(ordered_items: Array) -> void:
 	"""Rebuild the events, comments, groups arrays and item_order from an ordered list."""
