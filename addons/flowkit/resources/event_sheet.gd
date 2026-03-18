@@ -4,7 +4,7 @@ class_name FKEventSheet
 ## The main event sheet resource that stores all events, comments, and groups for a scene.
 ##
 ## The item_order array maintains the visual ordering of all items in the editor.
-## Each entry is: {"type": "event"|"comment"|"group", "index": int}
+## Each entry is an instance of FKSheetOrderEntry.
 ## The index refers to the position within that type's array (events, comments, or groups).
 
 @export var events: Array[FKEventBlock] = []
@@ -12,7 +12,9 @@ class_name FKEventSheet
 @export var comments: Array[FKCommentBlock] = []
 @export var groups: Array[FKGroupBlock] = []
 
-## Stores the display order: [{"type": "event"|"comment"|"group", "index": int}, ...]
+## Stores the display order (originally as [{"type": "event"|"comment"|"group", "index": int}, ...])
+## Now it's stored as FKSheetOrderEntries, though is untyped now for backwards compatibility.
+## Use normalized_item_order to get the typed version of this array.
 @export var item_order: Array = []
 var normalized_item_order: Array[FKSheetOrderEntry] = []
 @export var item_order_is_normalized := false
@@ -20,10 +22,13 @@ var normalized_item_order: Array[FKSheetOrderEntry] = []
 
 func on_loaded():
 	normalize()
+	var thing: FKEventSheet
+	
 	
 func normalize():
 	normalize_group_children()
 	normalize_item_order()
+	
 	
 func normalize_group_children():
 	for group in self.groups:
@@ -102,92 +107,3 @@ func _collect_events_from_group_children(group_children: Array[FKGroupEntry], ou
 			out_events.append(child_data)
 		elif enum_type == FKGroupEntry.Category.GROUP && child_data is FKGroupBlock:
 			_collect_events_from_groups([child_data], out_events)
-
-
-func get_ordered_items() -> Array:
-	"""Get all items in display order as an array of dictionaries with type and data."""
-	var items = []
-	
-	for entry in normalized_item_order:
-		var data = null
-			
-		match entry.type:
-			FKSheetOrderEntry.Category.EVENT:
-				if entry.index < events.size():
-					data = events[entry.index]
-			FKSheetOrderEntry.Category.COMMENT:
-				if entry.index < comments.size():
-					data = comments[entry.index]
-			FKSheetOrderEntry.Category.GROUP:
-				if entry.index < groups.size():
-					data = groups[entry.index]
-		
-		if data:
-			var type_str := ""
-			match entry.type:
-				FKSheetOrderEntry.Category.EVENT:
-					type_str = "event"
-				FKSheetOrderEntry.Category.COMMENT:
-					type_str = "comment"
-				FKSheetOrderEntry.Category.GROUP:
-					type_str = "group"
-		
-			var old_format_item = {
-				"type": type_str,
-				"data": data
-			}
-			items.append(old_format_item)
-	
-	return items
-
-func rebuild_order_from_items(ordered_items: Array) -> void:
-	"""Rebuild the events, comments, groups arrays and item_order from an ordered list."""
-	events = [] as Array[FKEventBlock]
-	comments = [] as Array[FKCommentBlock]
-	groups = [] as Array[FKGroupBlock]
-	item_order.clear()
-	normalized_item_order.clear()
-	item_order_is_normalized = true
-
-	for item in ordered_items:
-		var item_type: String = item.get("type", "")
-		var data: Variant = item.get("data")
-
-		match item_type:
-			"event":
-				if data is FKEventBlock:
-					var idx := events.size()
-					events.append(data)
-
-					var entry := FKSheetOrderEntry.new(
-						FKSheetOrderEntry.Category.EVENT,
-						idx
-					)
-
-					normalized_item_order.append(entry)
-					item_order.append(entry.to_dict())
-
-			"comment":
-				if data is FKCommentBlock:
-					var idx := comments.size()
-					comments.append(data)
-
-					var entry := FKSheetOrderEntry.new(FKSheetOrderEntry.Category.COMMENT,
-						idx)
-
-					normalized_item_order.append(entry)
-					item_order.append(entry.to_dict())
-
-			"group":
-				if data is FKGroupBlock:
-					var idx := groups.size()
-					groups.append(data)
-
-					var entry := FKSheetOrderEntry.new(FKSheetOrderEntry.Category.GROUP,
-						idx)
-
-					normalized_item_order.append(entry)
-					item_order.append(entry.to_dict())
-
-func _rebuild_order_from_typed_items(ordered_items: FKSheetOrderEntry):
-	pass
