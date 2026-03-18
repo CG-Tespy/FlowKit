@@ -12,19 +12,15 @@ class_name FKEventSheet
 @export var groups: Array[FKGroupBlock] = []
 
 ## Stores the display order: [{"type": "event"|"comment"|"group", "index": int}, ...]
-@export var item_order: Array[Dictionary] = []
+@export var item_order: Array = []
+var normalized_item_order: Array[FKSheetOrderEntry] = []
+@export var item_order_is_normalized := false
+
 
 func on_loaded():
 	normalize_group_children()
+	normalize_item_order()
 	
-func get_all_events() -> Array:
-	var events := []
-	events.append_array(self.events)
-	normalize_group_children()
-	_collect_events_from_groups(self.groups, events)
-
-	return events
-
 func normalize_group_children():
 	for group in self.groups:
 		_normalize_group_recursive(group)
@@ -35,6 +31,44 @@ func _normalize_group_recursive(group: FKGroupBlock):
 	for child in group.children:
 		if child is FKGroupEntry and child.type == FKGroupEntry.Category.GROUP:
 			_normalize_group_recursive(child.data)
+			
+func normalize_item_order() -> void:
+	if item_order_is_normalized:
+		return
+
+	var new_entries: Array[FKSheetOrderEntry] = []
+
+	for entry in item_order:
+		var typed := _get_as_order_entry(entry)
+		new_entries.append(typed)
+	
+	_set_item_order_cache(new_entries)
+	item_order_is_normalized = true
+
+func _get_as_order_entry(item) -> FKSheetOrderEntry:
+	var result: FKSheetOrderEntry = null
+	
+	if item is FKSheetOrderEntry:
+		result = item
+	else: # Assume Dictionary
+		result = FKSheetOrderEntry.from_dict(item)
+		
+	return result
+
+func _set_item_order_cache(new_entries: Array[FKSheetOrderEntry]):
+	item_order.clear()
+	normalized_item_order.clear()
+	item_order.append_array(new_entries)
+	normalized_item_order.append_array(new_entries)
+	
+func get_all_events() -> Array:
+	var events := []
+	events.append_array(self.events)
+	normalize_group_children()
+	normalize_item_order()
+	_collect_events_from_groups(self.groups, events)
+	return events
+
 
 func _collect_events_from_groups(groups: Array, out_events: Array) -> void:
 	for group in groups:
@@ -64,24 +98,37 @@ func get_ordered_items() -> Array:
 	"""Get all items in display order as an array of dictionaries with type and data."""
 	var items = []
 	
-	for order_entry in item_order:
-		var item_type = order_entry.get("type", "")
-		var item_index = order_entry.get("index", 0)
-		var data = null
+	for entry in normalized_item_order:
 		
-		match item_type:
-			"event":
-				if item_index < events.size():
-					data = events[item_index]
-			"comment":
-				if item_index < comments.size():
-					data = comments[item_index]
-			"group":
-				if item_index < groups.size():
-					data = groups[item_index]
+		var data = null
+			
+		match entry.type:
+			
+			FKSheetOrderEntry.Category.EVENT:
+				if entry.index < events.size():
+					data = events[entry.index]
+			FKSheetOrderEntry.Category.COMMENT:
+				if entry.index < comments.size():
+					data = comments[entry.index]
+			FKSheetOrderEntry.Category.GROUP:
+				if entry.index < groups.size():
+					data = groups[entry.index]
 		
 		if data:
-			items.append({"type": item_type, "data": data})
+			var type_str := ""
+			match entry.type:
+				FKSheetOrderEntry.Category.EVENT:
+					type_str = "event"
+				FKSheetOrderEntry.Category.COMMENT:
+					type_str = "comment"
+				FKSheetOrderEntry.Category.GROUP:
+					type_str = "group"
+		
+			var old_format_item = {
+				"type": type_str,
+				"data": data
+			}
+			items.append(old_format_item)
 	
 	return items
 
@@ -91,23 +138,49 @@ func rebuild_order_from_items(ordered_items: Array) -> void:
 	events = [] as Array[FKEventBlock]
 	comments = [] as Array[FKCommentBlock]
 	groups = [] as Array[FKGroupBlock]
-	item_order = [] as Array[Dictionary]
-	
+	item_order.clear()
+	normalized_item_order.clear()
+	item_order_is_normalized = true
+
 	for item in ordered_items:
-		var item_type = item.get("type", "")
-		var data = item.get("data")
-		
+		var item_type: String = item.get("type", "")
+		var data: Variant = item.get("data")
+
 		match item_type:
 			"event":
 				if data is FKEventBlock:
-					item_order.append({"type": "event", "index": events.size()})
+					var idx := events.size()
 					events.append(data)
+
+					var entry := FKSheetOrderEntry.new(
+						FKSheetOrderEntry.Category.EVENT,
+						idx
+					)
+
+					normalized_item_order.append(entry)
+					item_order.append(entry.to_dict())
+
 			"comment":
 				if data is FKCommentBlock:
-					item_order.append({"type": "comment", "index": comments.size()})
+					var idx := comments.size()
 					comments.append(data)
+
+					var entry := FKSheetOrderEntry.new(FKSheetOrderEntry.Category.COMMENT,
+						idx)
+
+					normalized_item_order.append(entry)
+					item_order.append(entry.to_dict())
+
 			"group":
 				if data is FKGroupBlock:
-					item_order.append({"type": "group", "index": groups.size()})
+					var idx := groups.size()
 					groups.append(data)
-			
+
+					var entry := FKSheetOrderEntry.new(FKSheetOrderEntry.Category.GROUP,
+						idx)
+
+					normalized_item_order.append(entry)
+					item_order.append(entry.to_dict())
+
+func _rebuild_order_from_typed_items(ordered_items: FKSheetOrderEntry):
+	pass
