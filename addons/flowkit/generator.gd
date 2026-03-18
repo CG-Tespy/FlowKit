@@ -811,10 +811,10 @@ func _extract_ids_from_group(group: FKGroupBlock, used: Dictionary) -> void:
 		if not child_data:
 			continue
 		match child_type:
-			FKGroupChild.ChildType.EVENT:
+			FKGroupEntry.Category.EVENT:
 				if child_data is FKEventBlock:
 					_extract_ids_from_event_block(child_data, used)
-			FKGroupChild.ChildType.GROUP:
+			FKGroupEntry.Category.GROUP:
 				if child_data is FKGroupBlock:
 					_extract_ids_from_group(child_data, used)
 

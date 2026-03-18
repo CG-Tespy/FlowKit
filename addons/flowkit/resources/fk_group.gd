@@ -12,16 +12,27 @@ class_name FKGroupBlock
 
 ## Child items stored as: [{"type": "event"|"comment"|"group", "data": Resource}, ...]
 @export var children: Array = []
+var normalized_children: Array[FKGroupEntry] = []
+# ^For the sake of backwards compatibility, we have two separate arrays of 
+# different types (yet basically the same contents)
 
-
+## The old func for adding child items. Best use the typed version instead.
 func add_child_item(type: String, data: Resource) -> void:
 	"""Add a child item to this group."""
-	children.append({"type": type, "data": data})
+	var dict_child := {"type": type, "data": data}
+	var typed_child := FKGroupEntry.from_dict(dict_child)
+	add_typed_child_item(typed_child)
 
 
+func add_typed_child_item(to_add: FKGroupEntry) -> void:
+	children.append(to_add)
+	normalized_children.append(to_add)
+
+	
 func remove_child_at(index: int) -> void:
 	"""Remove child at the specified index."""
-	if index >= 0 and index < children.size():
+	var valid_index: bool = index >= 0 and index < children.size()
+	if valid_index:
 		children.remove_at(index)
 
 
@@ -31,57 +42,78 @@ func get_child_count() -> int:
 
 
 func get_child_type(index: int) -> String:
-	if index >= 0 and index < children.size():
+	var result := ""
+	var valid_index: bool = index >= 0 and index < children.size()
+	
+	if valid_index:
 		var child = children[index]
-		if child is FKGroupChild:
-			return FKGroupChild.ChildType.keys()[child.type].to_lower()
-		elif child is Dictionary:
-			return child.get("type", "")
-	return ""
+		if child is not FKGroupEntry:
+			_print_children_non_normalized_error("get_child_type")
+		else:
+			result = FKGroupEntry.Category.keys()[child.type].to_lower()
+			
+	return result
 
-
+func _print_children_non_normalized_error(caller_func_name: String):
+	var message_template := "FKGroupBlock %s: children not all " \
+			+ "normalized even though they should"
+	var error_message := message_template % [caller_func_name]
+	printerr(error_message)
 
 func get_child_data(index: int) -> Resource:
-	if index >= 0 and index < children.size():
+	var result: Resource = null
+	var valid_index: bool = index >= 0 and index < children.size()
+	
+	if valid_index:
 		var child = children[index]
-		if child is FKGroupChild:
-			return child.data
-		elif child is Dictionary:
-			return child.get("data")
-	return null
+		if child is not FKGroupEntry:
+			_print_children_non_normalized_error("get_child_data")
+		else:
+			result = child.data
+			
+	return result
 
 func find_child_index(data: Resource) -> int:
 	"""Find the index of a child by its data resource."""
+	var result: int = -1
+	
 	for i in range(children.size()):
-		if children[i].get("data") == data:
-			return i
-	return -1
+		var current_child = children[i]
+		if current_child is not FKGroupEntry:
+			_print_children_non_normalized_error("find_child_index")
+			
+		var typed_child := normalized_children[i]
+		if typed_child.data == data:
+			result = i
+			break
+			
+	return result
 
 func copy_deep() -> FKGroupBlock:
 	"""Create a deep copy of this group and all its children."""
-	var copy = FKGroupBlock.new()
-	copy.title = title
-	copy.collapsed = collapsed
-	copy.color = color
-	copy.children = []
-	var as_group_children : Array[FKGroupChild] = children as Array[FKGroupChild]
-	for child_dict in as_group_children:
-		if child_dict is FKGroupChild:
-			var child_type := child_dict.type
-			var child_data := child_dict.data
-			
-			if child_data and child_data.has_method("duplicate"):
-				var child_copy = child_data.duplicate()
-				# Deep copy for nested groups
-				if child_type == FKGroupChild.ChildType.GROUP and child_data is FKGroupBlock:
-					child_copy = child_data.copy_deep()
-				
-				var new_child := FKGroupChild.new(child_type, child_copy)
-				copy.children.append(new_child)
+	var result = FKGroupBlock.new()
+	result.title = title
+	result.collapsed = collapsed
+	result.color = color
+	result.children = []
 	
-	return copy
+	for child in normalized_children:
+		var data_copy: Resource = null
+		
+		if child.data:
+			var data_is_nested_group: bool = child.type == FKGroupEntry.Category.GROUP and \
+			child.data is FKGroupBlock
 
-var normalized_children: Array[FKGroupChild] = []
+			if data_is_nested_group:
+				data_copy = child.data.copy_deep()
+			else:
+				data_copy = child.data.duplicate()
+			
+			var new_child := FKGroupEntry.new(child.type, data_copy)
+			result.add_typed_child_item(new_child)
+	
+	return result
+
 
 func exec_child_normalization() -> void:
 	if self.children_are_normalized:
@@ -90,11 +122,11 @@ func exec_child_normalization() -> void:
 	var new_children: Array = []
 
 	for child in self.children:
-		var fk_child: FKGroupChild
-		if child is FKGroupChild:
+		var fk_child: FKGroupEntry
+		if child is FKGroupEntry:
 			fk_child = child
 		elif child is Dictionary:
-			fk_child = FKGroupChild.from_dict(child)
+			fk_child = FKGroupEntry.from_dict(child)
 			
 		new_children.append(fk_child)
 	
@@ -102,7 +134,7 @@ func exec_child_normalization() -> void:
 	
 	# Recurse into nested groups
 	for child in self.children:
-		if child is FKGroupChild and child.type == FKGroupChild.ChildType.GROUP and \
+		if child is FKGroupEntry and child.type == FKGroupEntry.Category.GROUP and \
 		child.data is FKGroupBlock:
 			var group_block: FKGroupBlock = child.data as FKGroupBlock
 			group_block.exec_child_normalization()

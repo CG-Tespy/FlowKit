@@ -164,8 +164,8 @@ func _serialize_group_block(data: FKGroupBlock) -> Dictionary:
 	data.exec_child_normalization()
 	
 	var children: Array = result["children"]
-	var type_keys := FKGroupChild.ChildType.keys()
-	var as_group_children: Array[FKGroupChild] = data.normalized_children
+	var type_keys := FKGroupEntry.Category.keys()
+	var as_group_children: Array[FKGroupEntry] = data.normalized_children
 	
 	for child in as_group_children:
 		var child_type := child.type
@@ -173,17 +173,17 @@ func _serialize_group_block(data: FKGroupBlock) -> Dictionary:
 		var to_append: Dictionary = {}
 		
 		match child_type:
-			FKGroupChild.ChildType.EVENT:
+			FKGroupEntry.Category.EVENT:
 				to_append = {
 					"type": type_keys[child_type],
 					"data": _serialize_event_block(child_data as FKEventBlock)
 				}
-			FKGroupChild.ChildType.COMMENT:
+			FKGroupEntry.Category.COMMENT:
 				to_append = {
 					"type": type_keys[child_type],
 					"data": _serialize_comment_block(child_data as FKCommentBlock)
 				}
-			FKGroupChild.ChildType.GROUP:
+			FKGroupEntry.Category.GROUP:
 				to_append = {
 					"type": type_keys[child_type],
 					"data": _serialize_group_block(child_data as FKGroupBlock)
@@ -267,18 +267,18 @@ func _deserialize_group_block(dict: Dictionary) -> FKGroupBlock:
 		var child_type_str: String = child_dict.get("type", "")
 		var child_data_dict: Dictionary = child_dict.get("data", {})
 
-		var child: FKGroupChild = null
+		var child: FKGroupEntry = null
 
 		match child_type_str:
 			"event":
 				var ev: FKEventBlock = _deserialize_event_block(child_data_dict)
-				child = FKGroupChild.new(FKGroupChild.ChildType.EVENT, ev)
+				child = FKGroupEntry.new(FKGroupEntry.Category.EVENT, ev)
 			"comment":
 				var comment: FKCommentBlock = _deserialize_comment_block(child_data_dict)
-				child = FKGroupChild.new(FKGroupChild.ChildType.COMMENT, comment)
+				child = FKGroupEntry.new(FKGroupEntry.Category.COMMENT, comment)
 			"group":
 				var group: FKGroupBlock = _deserialize_group_block(child_data_dict)
-				child = FKGroupChild.new(FKGroupChild.ChildType.GROUP, group)
+				child = FKGroupEntry.new(FKGroupEntry.Category.GROUP, group)
 
 		if child != null:
 			data.children.append(child)

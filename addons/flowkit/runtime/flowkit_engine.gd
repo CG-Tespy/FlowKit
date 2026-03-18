@@ -123,6 +123,8 @@ func _load_sheets_for_scene(scene_root: Node) -> void:
 		if ResourceLoader.exists(sheet_path):
 			var sheet: FKEventSheet = load(sheet_path)
 			if sheet:
+				sheet.on_loaded()
+				
 				# Ensure all blocks have unique IDs (for backward compatibility with old saved sheets)
 				for block in sheet.events:
 					if block:
@@ -275,10 +277,10 @@ func _ensure_block_ids_in_groups(groups: Array) -> void:
 		var group_block := group_el as FKGroupBlock
 		for child_item in group_block.children:
 			match child_item.type:
-				FKGroupChild.ChildType.EVENT:
+				FKGroupEntry.Category.EVENT:
 					var block: FKEventBlock = child_item.data as FKEventBlock
 					block.ensure_block_id()
-				FKGroupChild.ChildType.GROUP:
+				FKGroupEntry.Category.GROUP:
 					var child_block: FKGroupBlock = child_item.data as FKGroupBlock
 					_ensure_block_ids_in_groups(child_block.children)
 

@@ -376,11 +376,11 @@ func _serialize_group_block(data: FKGroupBlock) -> Dictionary:
 		var child_type := child_dict.type
 		var child_data := child_dict.data
 		var children = result["children"]
-		if child_type == FKGroupChild.ChildType.EVENT and child_data is FKEventBlock:
+		if child_type == FKGroupEntry.Category.EVENT and child_data is FKEventBlock:
 			children.append(_serialize_event_block(child_data))
-		elif child_type == FKGroupChild.ChildType.COMMENT and child_data is FKCommentBlock:
+		elif child_type == FKGroupEntry.Category.COMMENT and child_data is FKCommentBlock:
 			children.append(_serialize_comment_block(child_data))
-		elif child_type == FKGroupChild.ChildType.GROUP and child_data is FKGroupBlock:
+		elif child_type == FKGroupEntry.Category.GROUP and child_data is FKGroupBlock:
 			children.append(_serialize_group_block(child_data))
 	
 	return result
@@ -915,19 +915,19 @@ func _copy_group_block(data: FKGroupBlock) -> FKGroupBlock:
 		var child_type := child_dict.type
 		var child_data := child_dict.data
 		
-		var new_child: FKGroupChild
-		if child_type == FKGroupChild.ChildType.EVENT and child_data is FKEventBlock:
+		var new_child: FKGroupEntry
+		if child_type == FKGroupEntry.Category.EVENT and child_data is FKEventBlock:
 			var event_copy := _copy_event_block(child_data)
-			new_child = FKGroupChild.new(FKGroupChild.ChildType.EVENT, event_copy)
+			new_child = FKGroupEntry.new(FKGroupEntry.Category.EVENT, event_copy)
 			group_copy.children.append(new_child)
-		elif child_type == FKGroupChild.ChildType.COMMENT and child_data is FKCommentBlock:
+		elif child_type == FKGroupEntry.Category.COMMENT and child_data is FKCommentBlock:
 			var comment_copy = FKCommentBlock.new()
 			comment_copy.text = child_data.text
-			new_child = FKGroupChild.new(FKGroupChild.ChildType.COMMENT, comment_copy)
+			new_child = FKGroupEntry.new(FKGroupEntry.Category.COMMENT, comment_copy)
 			group_copy.children.append(new_child)
-		elif child_type == FKGroupChild.ChildType.GROUP and child_data is FKGroupBlock:
+		elif child_type == FKGroupEntry.Category.GROUP and child_data is FKGroupBlock:
 			var group_block_copy := _copy_group_block(child_data)
-			new_child = FKGroupChild.new(FKGroupChild.ChildType.GROUP, group_block_copy)
+			new_child = FKGroupEntry.new(FKGroupEntry.Category.GROUP, group_block_copy)
 			group_copy.children.append(new_child)
 	
 	return group_copy
@@ -991,20 +991,20 @@ func _create_group_block(data: FKGroupBlock) -> Control:
 	for child_dict in as_group_children:
 		var child_type := child_dict.type
 		var child_data := child_dict.data
-		var new_child: FKGroupChild
+		var new_child: FKGroupEntry
 		print("Right before evaluating child type")
-		if child_type == FKGroupChild.ChildType.EVENT and child_data is FKEventBlock:
+		if child_type == FKGroupEntry.Category.EVENT and child_data is FKEventBlock:
 			var event_copy := _copy_event_block(child_data)
-			new_child = FKGroupChild.new(FKGroupChild.ChildType.EVENT, event_copy)
+			new_child = FKGroupEntry.new(FKGroupEntry.Category.EVENT, event_copy)
 			copy.children.append(new_child)
-		elif child_type == FKGroupChild.ChildType.COMMENT and child_data is FKCommentBlock:
+		elif child_type == FKGroupEntry.Category.COMMENT and child_data is FKCommentBlock:
 			var comment_copy = FKCommentBlock.new()
 			comment_copy.text = child_data.text
-			new_child = FKGroupChild.new(FKGroupChild.ChildType.COMMENT, comment_copy)
+			new_child = FKGroupEntry.new(FKGroupEntry.Category.COMMENT, comment_copy)
 			copy.children.append(new_child)
-		elif child_type == FKGroupChild.ChildType.GROUP and child_data is FKGroupBlock:
+		elif child_type == FKGroupEntry.Category.GROUP and child_data is FKGroupBlock:
 			var group_copy := _copy_group_block(child_data)
-			new_child = FKGroupChild.new(FKGroupChild.ChildType.GROUP, group_copy)
+			new_child = FKGroupEntry.new(FKGroupEntry.Category.GROUP, group_copy)
 			copy.children.append(new_child)
 	
 	group.set_group_data(copy)

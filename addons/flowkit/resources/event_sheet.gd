@@ -14,15 +14,18 @@ class_name FKEventSheet
 ## Stores the display order: [{"type": "event"|"comment"|"group", "index": int}, ...]
 @export var item_order: Array[Dictionary] = []
 
+func on_loaded():
+	normalize_group_children()
+	
 func get_all_events() -> Array:
 	var events := []
 	events.append_array(self.events)
-	_normalize_group_children()
+	normalize_group_children()
 	_collect_events_from_groups(self.groups, events)
 
 	return events
 
-func _normalize_group_children():
+func normalize_group_children():
 	for group in self.groups:
 		_normalize_group_recursive(group)
 
@@ -30,7 +33,7 @@ func _normalize_group_recursive(group: FKGroupBlock):
 	group.exec_child_normalization()
 
 	for child in group.children:
-		if child is FKGroupChild and child.type == FKGroupChild.ChildType.GROUP:
+		if child is FKGroupEntry and child.type == FKGroupEntry.Category.GROUP:
 			_normalize_group_recursive(child.data)
 
 func _collect_events_from_groups(groups: Array, out_events: Array) -> void:
@@ -39,22 +42,22 @@ func _collect_events_from_groups(groups: Array, out_events: Array) -> void:
 			continue
 			
 		if (group.children_are_normalized):
-			if group.children.size() > 0 && group.children[0] is not FKGroupChild:
+			if group.children.size() > 0 && group.children[0] is not FKGroupEntry:
 				printerr("Main group children array should be normalized, but it ain't")
 			_collect_events_from_group_children(group.normalized_children, out_events)
 		else:
 			printerr("The group children aren't normalized even though they should")
 		
 
-func _collect_events_from_group_children(group_children: Array[FKGroupChild], out_events: Array):
+func _collect_events_from_group_children(group_children: Array[FKGroupEntry], out_events: Array):
 	for child_item in group_children:
 		var child_type := ""
 		var enum_type := child_item.type
 		var child_data = child_item.data
 		
-		if enum_type == FKGroupChild.ChildType.EVENT && child_data is FKEventBlock:
+		if enum_type == FKGroupEntry.Category.EVENT && child_data is FKEventBlock:
 			out_events.append(child_data)
-		elif enum_type == FKGroupChild.ChildType.GROUP && child_data is FKGroupBlock:
+		elif enum_type == FKGroupEntry.Category.GROUP && child_data is FKGroupBlock:
 			_collect_events_from_groups([child_data], out_events)
 
 func get_ordered_items() -> Array:

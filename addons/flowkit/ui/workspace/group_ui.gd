@@ -197,7 +197,7 @@ func _rebuild_child_nodes() -> void:
 			child.queue_free()
 	
 	group_data.exec_child_normalization()
-	var as_group_children: Array[FKGroupChild] = group_data.normalized_children
+	var as_group_children: Array[FKGroupEntry] = group_data.normalized_children
 		
 	# Create new children from data
 	for child_dict in as_group_children:
@@ -205,15 +205,15 @@ func _rebuild_child_nodes() -> void:
 		var child_data := child_dict.data
 		
 		match child_type:
-			FKGroupChild.ChildType.EVENT:
+			FKGroupEntry.Category.EVENT:
 				if child_data is FKEventBlock:
 					var row = _instantiate_event_row(child_data)
 					children_container.add_child(row)
-			FKGroupChild.ChildType.COMMENT:
+			FKGroupEntry.Category.COMMENT:
 				if child_data is FKCommentBlock:
 					var comment = _instantiate_comment(child_data)
 					children_container.add_child(comment)
-			FKGroupChild.ChildType.GROUP:
+			FKGroupEntry.Category.GROUP:
 				if child_data is FKGroupBlock:
 					var nested = _instantiate_group(child_data)
 					children_container.add_child(nested)
