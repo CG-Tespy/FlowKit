@@ -5,11 +5,11 @@
 [ext_resource type="Script" path="res://addons/flowkit/runtime/Blocks/group_block.gd" id="3_ehuoq"]
 [ext_resource type="Script" uid="uid://bwbi0utcwmxwf" path="res://addons/flowkit/resources/event_action.gd" id="4_at6cs"]
 [ext_resource type="Script" uid="uid://bumsyiqkp46l1" path="res://addons/flowkit/resources/event_sheet.gd" id="4_ehuxe"]
-[ext_resource type="Script" uid="uid://bmaxurgrsv4ct" path="res://addons/flowkit/resources/event_condition.gd" id="5_1wrk8"]
+[ext_resource type="Script" uid="uid://bmaxurgrsv4ct" path="res://addons/flowkit/runtime/Blocks/event_condition.gd" id="5_1wrk8"]
 
 [sub_resource type="Resource" id="Resource_at6cs"]
 script = ExtResource("1_opms0")
-text = "If player falls below the ground, they will teleport back to the spawn."
+text = "If player falls below the groe5vue5i  k7rir78tyjstyrjuvesuj"
 block_type = "comment"
 
 [sub_resource type="Resource" id="Resource_ehuoq"]

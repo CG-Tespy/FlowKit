@@ -3,7 +3,7 @@
 [ext_resource type="Script" uid="uid://b1y3c8rnt2rcg" path="res://addons/flowkit/runtime/Blocks/comment_block.gd" id="1_6310v"]
 [ext_resource type="Script" uid="uid://bxdhylwvr4osy" path="res://addons/flowkit/runtime/Blocks/event_block.gd" id="1_iqjwq"]
 [ext_resource type="Script" uid="uid://bwbi0utcwmxwf" path="res://addons/flowkit/resources/event_action.gd" id="2_e5301"]
-[ext_resource type="Script" uid="uid://bmaxurgrsv4ct" path="res://addons/flowkit/resources/event_condition.gd" id="3_6310v"]
+[ext_resource type="Script" uid="uid://bmaxurgrsv4ct" path="res://addons/flowkit/runtime/Blocks/event_condition.gd" id="3_6310v"]
 [ext_resource type="Script" uid="uid://bumsyiqkp46l1" path="res://addons/flowkit/resources/event_sheet.gd" id="4_1iq3u"]
 [ext_resource type="Script" path="res://addons/flowkit/runtime/Blocks/group_block.gd" id="5_1iq3u"]
 
@@ -55,6 +55,7 @@ script = ExtResource("3_6310v")
 condition_id = "is_on_floor"
 target_node = NodePath(".")
 negated = true
+block_type = "condition"
 
 [sub_resource type="Resource" id="Resource_lifsa"]
 script = ExtResource("2_e5301")
@@ -80,6 +81,7 @@ target_node = NodePath("Jump")
 script = ExtResource("3_6310v")
 condition_id = "is_on_floor"
 target_node = NodePath(".")
+block_type = "condition"
 
 [sub_resource type="Resource" id="Resource_1tvq8"]
 script = ExtResource("2_e5301")
@@ -95,6 +97,7 @@ target_node = NodePath("System")
 inputs = {
 "Key": "Space"
 }
+block_type = "condition"
 
 [sub_resource type="Resource" id="Resource_ercbp"]
 script = ExtResource("2_e5301")
@@ -130,6 +133,7 @@ inputs = {
 "Property": "direction",
 "Value": "0"
 }
+block_type = "condition"
 
 [sub_resource type="Resource" id="Resource_iv7s5"]
 script = ExtResource("2_e5301")
@@ -195,6 +199,7 @@ inputs = {
 "Property": "velocity.x",
 "Value": "0"
 }
+block_type = "condition"
 
 [sub_resource type="Resource" id="Resource_g1hr8"]
 script = ExtResource("1_iqjwq")
@@ -222,6 +227,7 @@ inputs = {
 "Property": "velocity.x",
 "Value": "0"
 }
+block_type = "condition"
 
 [sub_resource type="Resource" id="Resource_0864s"]
 script = ExtResource("1_iqjwq")
@@ -235,7 +241,6 @@ block_type = "event"
 [sub_resource type="Resource" id="Resource_ja7sq"]
 script = ExtResource("5_1iq3u")
 title = "Sets the direction of the player sprite to flip the sprite horizontally based on if the player is moving left or right."
-collapsed = true
 color = Color(0.16839236, 0.07305908, 0.4453125, 1)
 children = [{
 "data": SubResource("Resource_g1hr8"),
@@ -270,11 +275,13 @@ inputs = {
 "Property": "node.velocity.x",
 "Value": "0"
 }
+block_type = "condition"
 
 [sub_resource type="Resource" id="Resource_1lc76"]
 script = ExtResource("3_6310v")
 condition_id = "only_once_when_looped"
 target_node = NodePath("System")
+block_type = "condition"
 
 [sub_resource type="Resource" id="Resource_7ahgf"]
 script = ExtResource("1_iqjwq")
@@ -309,11 +316,13 @@ inputs = {
 "Property": "node.velocity.x",
 "Value": "0"
 }
+block_type = "condition"
 
 [sub_resource type="Resource" id="Resource_a558m"]
 script = ExtResource("3_6310v")
 condition_id = "only_once_when_looped"
 target_node = NodePath("System")
+block_type = "condition"
 
 [sub_resource type="Resource" id="Resource_8cdef"]
 script = ExtResource("1_iqjwq")
@@ -327,7 +336,6 @@ block_type = "event"
 [sub_resource type="Resource" id="Resource_vco3e"]
 script = ExtResource("5_1iq3u")
 title = "Control animations"
-collapsed = true
 color = Color(0.38236463, 0.2642212, 0.7515625, 1)
 children = [{
 "data": SubResource("Resource_rcr8d"),

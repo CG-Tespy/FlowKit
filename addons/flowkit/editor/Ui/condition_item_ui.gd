@@ -27,6 +27,7 @@ var is_drop_target: bool = false
 var drop_above: bool = true
 
 func _ready() -> void:
+	print("Condition item ui ready")
 	_toggle_subs(true)
 	call_deferred("_setup_context_menu")
 
@@ -50,6 +51,7 @@ func _setup_context_menu() -> void:
 func _on_gui_input(event: InputEvent) -> void:
 	if event is InputEventMouseButton and event.pressed:
 		if event.button_index == MOUSE_BUTTON_LEFT:
+			print("Condition item ui left-clicked")
 			if event.double_click:
 				edit_requested.emit(self)
 			else:

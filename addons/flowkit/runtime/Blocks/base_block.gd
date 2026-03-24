@@ -16,7 +16,6 @@ func serialize() -> Dictionary:
 ##
 ##
 func deserialize(dict: Dictionary) -> void:
-
 	push_error("deserialize() not implemented for %s" % block_type)
 
 # Deep-copy contract for undo/redo and clipboard.

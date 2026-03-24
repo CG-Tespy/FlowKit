@@ -66,6 +66,8 @@ func _instantiate_block(block_type: String) -> FKBaseBlock:
 			return FKCommentBlock.new()
 		"group":
 			return FKGroupBlock.new()
+		"condition": 
+			return FKEventCondition.new()
 		_:
 			return null
 
