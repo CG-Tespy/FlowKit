@@ -6,15 +6,29 @@ signal block_changed(node)
 signal block_contents_changed()
 signal selected(node)
 
+func _enter_tree() -> void:
+	_toggle_subs(true)
+
+## When overriding, make sure to call the super class version last.
+func _toggle_subs(on: bool):
+	_is_subbed = on
+	
+var _is_subbed := false
+
+func _ready() -> void:
+	# Ensure we receive mouse events
+	mouse_filter = Control.MOUSE_FILTER_STOP
+	update_display.call_deferred()
+	
 func get_block() -> FKBaseBlock:
-	return block
+	return _block
 
 ## The Block that this Node represents.
-var block: FKBaseBlock:
-	get:
-		return _block
-
 var _block: FKBaseBlock
+
+func has_block() -> bool:
+	return _block != null
+
 
 func set_block(to_set: FKBaseBlock) -> void:
 	var valid := _validate_block(to_set)
@@ -32,9 +46,6 @@ func _validate_block(to_set: FKBaseBlock) -> bool:
 	return false
 	
 func _on_block_changed() -> void:
-	update_display()
-
-func _on_block_contents_changed():
 	update_display()
 	
 func _alert_need_for_override(func_name: String):
@@ -77,3 +88,6 @@ func show_context_menu(global_pos: Vector2) -> void:
 func _get_drag_data(_pos): return null
 func _can_drop_data(_pos, _data): return false
 func _drop_data(_pos, _data): pass
+
+func _exit_tree() -> void:
+	_toggle_subs(false)

@@ -20,60 +20,39 @@ signal insert_event_below_requested(comment_node)
 @export_category("Styles")
 @export var normal_style: StyleBoxFlat
 @export var selected_style: StyleBoxFlat
-
 # ^Different styles for different modes
-func _enter_tree() -> void:
-	_toggle_subs(true)
-	
+
 func _toggle_subs(on: bool):
 	if on && !_is_subbed:
-		text_edit.focus_entered.connect(_on_text_edit_focus_entered)
-		text_edit.text_changed.connect(_on_text_edit_text_changed)
 		text_edit.focus_exited.connect(_on_text_edit_focus_exited)
 		
 	elif !on && _is_subbed:
-		text_edit.focus_entered.disconnect(_on_text_edit_focus_entered)
-		text_edit.text_changed.disconnect(_on_text_edit_text_changed)
 		text_edit.focus_exited.disconnect(_on_text_edit_focus_exited)
 		
 	_is_subbed = on
 
-func _on_text_edit_focus_entered():
-	_committed_text = text_edit.text	
-	
-var _committed_text := ""
-
-func _on_text_edit_text_changed():
-	_committed_text = text_edit.text
-
 func _on_text_edit_focus_exited():
-	var we_have_block: bool = _block is FKCommentBlock
 	_update_block_text()
 		
-var _is_subbed := false
-
 func _update_block_text():
 	if not _comment_block:
-		print("FKCommentBlockUi: I got no block to work with, so I can't update the text")
+		printerr("FKCommentBlockUi: I got no block to work with, so I can't update the text")
 		return
-		
-	var new_text = _committed_text
+	
+	var new_text = text_edit.text
 	if _comment_block.text != new_text:
 		_comment_block.text = new_text
+		update_display()
 		block_contents_changed.emit()
-		_on_block_contents_changed()
+		
 
 var _comment_block: FKCommentBlock:
 	get:
-		if block is FKCommentBlock:
-			return block as FKCommentBlock
+		if _block is FKCommentBlock:
+			return _block as FKCommentBlock
 		else:
 			return null
-			
-func _ready() -> void:
-	# Ensure we receive mouse events
-	mouse_filter = Control.MOUSE_FILTER_STOP
-	update_display.call_deferred()
+
 	
 func update_display() -> void:
 	_update_text_edit()
@@ -109,29 +88,32 @@ func _input(event: InputEvent) -> void:
 	# Note that this is triggered _before_ gui-specific handling
 	var left_click = event is InputEventMouseButton and event.pressed and \
 	event.button_index == MOUSE_BUTTON_LEFT
-	if edit_mode_on and left_click:
+	if _edit_mode_on and left_click:
 		_on_left_click_while_editing()
 		
-
 func _on_left_click_while_editing():
 	var mouse_pos = get_global_mouse_position()
 	var clicked_within_this_comment = get_global_rect().has_point(mouse_pos)
-	edit_mode_on = clicked_within_this_comment
+	_set_edit_mode(clicked_within_this_comment)
 
+func _set_edit_mode(on: bool):
+	if _edit_mode_on == on:
+		return
+		
+	_edit_mode_on = on
+	if !on:
+		text_edit.release_focus() 
+		# ^This makes sure that we update the block meta with text_edit's contents
+		# in time. Without this, our changes to text_edit just get reverted.
+		
+	update_display()
+	if edit_mode_on:
+		_focus_end_of_text_edit()
+	
 var edit_mode_on: bool:
 	get:
 		return _edit_mode_on
-	set(val):
-		if _edit_mode_on == val:
-			return
-		_edit_mode_on = val
-		_on_mode_change()
-		
-func _on_mode_change():
-	update_display()
 	
-	if edit_mode_on:
-		_focus_end_of_text_edit()
 
 func _focus_end_of_text_edit():
 	text_edit.grab_focus()
@@ -149,19 +131,15 @@ func _gui_input(event: InputEvent) -> void:
 		return
 		
 	if event.button_index == MOUSE_BUTTON_LEFT:
-		_on_left_mouse_button_on_us(event)
+		_on_left_click(event)
 	elif event.button_index == MOUSE_BUTTON_RIGHT:
-		_on_right_mouse_button_on_us(event)
+		_on_right_click(event)
 		
-func _on_left_mouse_button_on_us(event: InputEventMouseButton):
+func _on_left_click(event: InputEventMouseButton):
 	set_selected(true)
-	if event.double_click and not edit_mode_on:
-		_set_to_edit_mode()
+	if event.double_click and not _edit_mode_on:
+		_set_edit_mode(true)
 	accept_event()
-
-func _set_to_edit_mode() -> void:
-	edit_mode_on = true
-	_on_mode_change()
 	
 func _validate_block(to_set: FKBaseBlock):
 	var is_valid: bool = to_set == null || to_set is FKCommentBlock
@@ -229,7 +207,7 @@ func _drop_data(at_position: Vector2, data) -> void:
 			var parent_pos = at_position + position
 			parent._drop_data(parent_pos, data)
 
-func _on_right_mouse_button_on_us(event: InputEventMouseButton):
+func _on_right_click(event: InputEventMouseButton):
 	_show_context_menu(event.global_position)
 	accept_event()
 	
@@ -262,7 +240,7 @@ func _on_context_menu_id_pressed(id: int):
 		_delete_choice:
 			delete_requested.emit()
 		_edit_choice:
-			_set_to_edit_mode()
+			_set_edit_mode(true)
 		_insert_event_above_choice:
 			insert_event_above_requested.emit(self)
 		_insert_event_below_choice:
@@ -287,7 +265,4 @@ const _insert_comment_above_choice: int = 12
 const _insert_comment_below_choice: int = 13
 
 func get_block() -> FKCommentBlock:
-	return block
-
-func _exit_tree() -> void:
-	_toggle_subs(false)
+	return _block
