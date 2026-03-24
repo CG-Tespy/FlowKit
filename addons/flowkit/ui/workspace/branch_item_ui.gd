@@ -27,8 +27,10 @@ var registry: Node
 var is_selected: bool = false
 var parent_branch = null  # Reference to parent branch_item for nested branches
 
-const ACTION_ITEM_SCENE = preload("res://addons/flowkit/ui/workspace/action_item_ui.tscn")
-
+var ACTION_ITEM_SCENE: PackedScene:
+	get:
+		return FKEditorGlobals.ACTION_ITEM_SCENE
+		
 # UI References
 @export_category("Controls")
 @export var panel: PanelContainer
@@ -72,7 +74,6 @@ func _toggle_subs(on: bool):
 		add_action_context_menu.id_pressed.connect(_on_add_action_context_menu_id_pressed)
 		
 		mouse_exited.connect(_on_mouse_exited)
-		_is_subbed = true
 	elif !on && _is_subbed:
 		gui_input.disconnect(_on_gui_input)
 		context_menu.id_pressed.disconnect(_on_context_menu_id_pressed)
@@ -84,7 +85,8 @@ func _toggle_subs(on: bool):
 		add_action_context_menu.id_pressed.disconnect(_on_add_action_context_menu_id_pressed)
 		
 		mouse_exited.disconnect(_on_mouse_exited)
-		_is_subbed = false
+		
+	_is_subbed = on
 		
 var _is_subbed := false
 
@@ -94,6 +96,7 @@ func _on_gui_input(event: InputEvent) -> void:
 		return
 		
 	if event.button_index == MOUSE_BUTTON_LEFT:
+		print("Branch item ui clicked")
 		_on_left_mouse_button(event)
 	elif event.button_index == MOUSE_BUTTON_RIGHT:
 		_on_right_mouse_button()
@@ -238,7 +241,7 @@ func set_registry(reg: Node) -> void:
 	registry = reg
 	call_deferred("_update_display")
 
-func get_action_data() -> FKEventAction:
+func get_block() -> FKEventAction:
 	return action_data
 
 func _update_display() -> void:
@@ -346,20 +349,25 @@ func _update_branch_actions() -> void:
 	# Add action items for branch_actions (handles both regular and nested branches)
 	for sub_action in action_data.branch_actions:
 		if sub_action.is_branch:
-			var branch_scene = load("res://addons/flowkit/ui/workspace/branch_item_ui.tscn")
-			var nested = branch_scene.instantiate()
+			var scene: PackedScene = load(BRANCH_ITEM_SCENE_PATH)
+			# ^Can't use the scene from FKEditorGlobals for this one. Cyclic refs and all.
+			var nested: BranchItemUi = scene.instantiate()
 			nested.set_action_data(sub_action)
 			nested.set_registry(registry)
 			nested.parent_branch = self
 			_connect_nested_branch_signals(nested)
 			actions_container.add_child(nested)
 		else:
-			var item = ACTION_ITEM_SCENE.instantiate()
-			item.set_action_data(sub_action)
+			var item: FKActionBlockNode = ACTION_ITEM_SCENE.instantiate()
+			item.set_block(sub_action)
 			item.set_registry(registry)
 			_connect_sub_action_signals(item)
 			actions_container.add_child(item)
 
+static var BRANCH_ITEM_SCENE_PATH: String:
+	get:
+		return FKEditorGlobals.BRANCH_ITEM_SCENE_PATH
+		
 func _connect_sub_action_signals(item) -> void:
 	if item.has_signal("selected"):
 		item.selected.connect(func(node): branch_action_selected.emit(node))
@@ -403,7 +411,7 @@ func _connect_nested_branch_signals(nested) -> void:
 
 func _on_sub_action_delete(item) -> void:
 	before_data_changed.emit()
-	var act_data = item.get_action_data()
+	var act_data = item.get_block()
 	if act_data and action_data:
 		var idx = action_data.branch_actions.find(act_data)
 		if idx >= 0:
@@ -416,8 +424,8 @@ func _on_sub_action_reorder(source_item, target_item, is_drop_above: bool) -> vo
 	if not action_data:
 		return
 
-	var source_data = source_item.get_action_data()
-	var target_data = target_item.get_action_data()
+	var source_data = source_item.get_block()
+	var target_data = target_item.get_block()
 
 	if not source_data or not target_data:
 		return

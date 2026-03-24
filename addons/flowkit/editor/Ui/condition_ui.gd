@@ -24,17 +24,20 @@ var is_selected: bool = false
 
 func _enter_tree() -> void:
 	# Connect gui_input for click detection
+	print("Condition ui on enable")
 	_toggle_subs(true)
 	_update_negation_checkmark()
 
 func _toggle_subs(on: bool):
-	if on:
+	if on && !_is_subbed:
 		gui_input.connect(_on_gui_input)
 		context_menu.id_pressed.connect(_on_context_menu_id_pressed)
-	else:
+	elif !on && _is_subbed:
 		gui_input.disconnect(_on_gui_input)
 		context_menu.id_pressed.disconnect(_on_context_menu_id_pressed)
-		
+
+var _is_subbed := false
+
 func _update_negation_checkmark() -> void:
 	var is_cond_negated: bool = condition_data.negated if condition_data else false
 	context_menu.set_item_checked(4, is_cond_negated)

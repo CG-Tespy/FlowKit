@@ -42,6 +42,7 @@ func _on_gui_input(event: InputEvent) -> void:
 		return
 	
 	if event.button_index == MOUSE_BUTTON_LEFT:
+		print("Action Ui clicked")
 		selected.emit(self)
 	elif event.button_index == MOUSE_BUTTON_RIGHT:
 		selected.emit(self)

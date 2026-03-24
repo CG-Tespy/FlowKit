@@ -3,20 +3,11 @@
 [ext_resource type="Script" uid="uid://b1y3c8rnt2rcg" path="res://addons/flowkit/runtime/Blocks/comment_block.gd" id="1_6310v"]
 [ext_resource type="Script" uid="uid://bxdhylwvr4osy" path="res://addons/flowkit/runtime/Blocks/event_block.gd" id="1_iqjwq"]
 [ext_resource type="Script" uid="uid://bwbi0utcwmxwf" path="res://addons/flowkit/resources/event_action.gd" id="2_e5301"]
-[ext_resource type="Script" uid="uid://bmaxurgrsv4ct" path="res://addons/flowkit/resources/event_condition.gd" id="3_6310v"]
+[ext_resource type="Script" uid="uid://bmaxurgrsv4ct" path="res://addons/flowkit/runtime/Blocks/event_condition.gd" id="3_6310v"]
 [ext_resource type="Script" uid="uid://bumsyiqkp46l1" path="res://addons/flowkit/resources/event_sheet.gd" id="4_1iq3u"]
 [ext_resource type="Script" path="res://addons/flowkit/runtime/Blocks/group_block.gd" id="5_1iq3u"]
 
 [sub_resource type="Resource" id="Resource_6310v"]
-script = ExtResource("2_e5301")
-action_id = "get_project_setting"
-target_node = NodePath("System")
-inputs = {
-"Path": "physics/2d/default_gravity",
-"Store In": "gravity"
-}
-
-[sub_resource type="Resource" id="Resource_1iq3u"]
 script = ExtResource("2_e5301")
 action_id = "set_node_variable"
 target_node = NodePath(".")
@@ -24,6 +15,17 @@ inputs = {
 "Value": "-400.0",
 "Variable Name": "jump_force"
 }
+block_type = "action"
+
+[sub_resource type="Resource" id="Resource_1iq3u"]
+script = ExtResource("2_e5301")
+action_id = "get_project_setting"
+target_node = NodePath("System")
+inputs = {
+"Path": "physics/2d/default_gravity",
+"Store In": "gravity"
+}
+block_type = "action"
 
 [sub_resource type="Resource" id="Resource_cbhwn"]
 script = ExtResource("2_e5301")
@@ -33,6 +35,7 @@ inputs = {
 "Value": "200.0",
 "Variable Name": "speed"
 }
+block_type = "action"
 
 [sub_resource type="Resource" id="Resource_jqahe"]
 script = ExtResource("1_iqjwq")
@@ -49,12 +52,14 @@ target_node = NodePath(".")
 inputs = {
 "Y": "node.velocity.y+system.get_var(\"gravity\") * delta"
 }
+block_type = "action"
 
 [sub_resource type="Resource" id="Resource_8fi06"]
 script = ExtResource("3_6310v")
 condition_id = "is_on_floor"
 target_node = NodePath(".")
 negated = true
+block_type = "condition"
 
 [sub_resource type="Resource" id="Resource_lifsa"]
 script = ExtResource("2_e5301")
@@ -62,6 +67,7 @@ is_branch = true
 branch_type = "if"
 branch_condition = SubResource("Resource_8fi06")
 branch_actions = Array[ExtResource("2_e5301")]([SubResource("Resource_qhwv1")])
+block_type = "action"
 
 [sub_resource type="Resource" id="Resource_4pupr"]
 script = ExtResource("2_e5301")
@@ -70,16 +76,19 @@ target_node = NodePath(".")
 inputs = {
 "Y": "n_jump_force"
 }
+block_type = "action"
 
 [sub_resource type="Resource" id="Resource_rqf3r"]
 script = ExtResource("2_e5301")
 action_id = "play"
 target_node = NodePath("Jump")
+block_type = "action"
 
 [sub_resource type="Resource" id="Resource_smre5"]
 script = ExtResource("3_6310v")
 condition_id = "is_on_floor"
 target_node = NodePath(".")
+block_type = "condition"
 
 [sub_resource type="Resource" id="Resource_1tvq8"]
 script = ExtResource("2_e5301")
@@ -87,6 +96,7 @@ is_branch = true
 branch_type = "if"
 branch_condition = SubResource("Resource_smre5")
 branch_actions = Array[ExtResource("2_e5301")]([SubResource("Resource_4pupr"), SubResource("Resource_rqf3r")])
+block_type = "action"
 
 [sub_resource type="Resource" id="Resource_rd6mx"]
 script = ExtResource("3_6310v")
@@ -95,6 +105,7 @@ target_node = NodePath("System")
 inputs = {
 "Key": "Space"
 }
+block_type = "condition"
 
 [sub_resource type="Resource" id="Resource_ercbp"]
 script = ExtResource("2_e5301")
@@ -102,6 +113,7 @@ is_branch = true
 branch_type = "if"
 branch_condition = SubResource("Resource_rd6mx")
 branch_actions = Array[ExtResource("2_e5301")]([SubResource("Resource_1tvq8")])
+block_type = "action"
 
 [sub_resource type="Resource" id="Resource_1geuf"]
 script = ExtResource("2_e5301")
@@ -112,6 +124,7 @@ inputs = {
 "Positive Action": "ui_right",
 "Store In": "direction"
 }
+block_type = "action"
 
 [sub_resource type="Resource" id="Resource_ftren"]
 script = ExtResource("2_e5301")
@@ -120,6 +133,7 @@ target_node = NodePath(".")
 inputs = {
 "X": "direction * n_speed"
 }
+block_type = "action"
 
 [sub_resource type="Resource" id="Resource_ogks2"]
 script = ExtResource("3_6310v")
@@ -130,6 +144,7 @@ inputs = {
 "Property": "direction",
 "Value": "0"
 }
+block_type = "condition"
 
 [sub_resource type="Resource" id="Resource_iv7s5"]
 script = ExtResource("2_e5301")
@@ -137,35 +152,29 @@ is_branch = true
 branch_type = "if"
 branch_condition = SubResource("Resource_ogks2")
 branch_actions = Array[ExtResource("2_e5301")]([SubResource("Resource_ftren")])
+block_type = "action"
 
 [sub_resource type="Resource" id="Resource_iqbv7"]
 script = ExtResource("2_e5301")
-action_id = "set_velocity_x"
-target_node = NodePath(".")
-inputs = {
-"X": "move_toward(node.velocity.x,0,n_speed)"
-}
+is_branch = true
+branch_type = "else"
+block_type = "action"
 
 [sub_resource type="Resource" id="Resource_01p3u"]
 script = ExtResource("2_e5301")
-is_branch = true
-branch_type = "else"
-branch_actions = Array[ExtResource("2_e5301")]([SubResource("Resource_iqbv7")])
-
-[sub_resource type="Resource" id="Resource_jtk1k"]
-script = ExtResource("2_e5301")
 action_id = "move_and_slide"
 target_node = NodePath(".")
+block_type = "action"
 
-[sub_resource type="Resource" id="Resource_7khp5"]
+[sub_resource type="Resource" id="Resource_jtk1k"]
 script = ExtResource("1_iqjwq")
 block_id = "event_1770855273_2148236877"
 event_id = "on_process_physics"
 target_node = NodePath(".")
-actions = Array[ExtResource("2_e5301")]([SubResource("Resource_lifsa"), SubResource("Resource_ercbp"), SubResource("Resource_1geuf"), SubResource("Resource_iv7s5"), SubResource("Resource_01p3u"), SubResource("Resource_jtk1k")])
+actions = Array[ExtResource("2_e5301")]([SubResource("Resource_lifsa"), SubResource("Resource_ercbp"), SubResource("Resource_1geuf"), SubResource("Resource_iv7s5"), SubResource("Resource_iqbv7"), SubResource("Resource_01p3u")])
 block_type = "event"
 
-[sub_resource type="Resource" id="Resource_w3432"]
+[sub_resource type="Resource" id="Resource_7khp5"]
 script = ExtResource("5_1iq3u")
 title = "Movement"
 color = Color(0.4105078, 0.58125, 0, 1)
@@ -173,20 +182,21 @@ children = [{
 "data": SubResource("Resource_jqahe"),
 "type": "event"
 }, {
-"data": SubResource("Resource_7khp5"),
+"data": SubResource("Resource_jtk1k"),
 "type": "event"
 }]
 block_type = "group"
 
-[sub_resource type="Resource" id="Resource_fwgt7"]
+[sub_resource type="Resource" id="Resource_w3432"]
 script = ExtResource("2_e5301")
 action_id = "set_flip_h"
 target_node = NodePath("AnimatedSprite2D")
 inputs = {
 "Value": "true"
 }
+block_type = "action"
 
-[sub_resource type="Resource" id="Resource_toik8"]
+[sub_resource type="Resource" id="Resource_fwgt7"]
 script = ExtResource("3_6310v")
 condition_id = "compare_node_variable"
 target_node = NodePath(".")
@@ -195,25 +205,27 @@ inputs = {
 "Property": "velocity.x",
 "Value": "0"
 }
+block_type = "condition"
 
-[sub_resource type="Resource" id="Resource_g1hr8"]
+[sub_resource type="Resource" id="Resource_toik8"]
 script = ExtResource("1_iqjwq")
 block_id = "event_1764627242_1978017420"
 event_id = "on_process_physics"
 target_node = NodePath(".")
-conditions = Array[ExtResource("3_6310v")]([SubResource("Resource_toik8")])
-actions = Array[ExtResource("2_e5301")]([SubResource("Resource_fwgt7")])
+conditions = Array[ExtResource("3_6310v")]([SubResource("Resource_fwgt7")])
+actions = Array[ExtResource("2_e5301")]([SubResource("Resource_w3432")])
 block_type = "event"
 
-[sub_resource type="Resource" id="Resource_i8xgt"]
+[sub_resource type="Resource" id="Resource_g1hr8"]
 script = ExtResource("2_e5301")
 action_id = "set_flip_h"
 target_node = NodePath("AnimatedSprite2D")
 inputs = {
 "Value": "false"
 }
+block_type = "action"
 
-[sub_resource type="Resource" id="Resource_dkghy"]
+[sub_resource type="Resource" id="Resource_i8xgt"]
 script = ExtResource("3_6310v")
 condition_id = "compare_node_variable"
 target_node = NodePath(".")
@@ -222,36 +234,36 @@ inputs = {
 "Property": "velocity.x",
 "Value": "0"
 }
+block_type = "condition"
 
-[sub_resource type="Resource" id="Resource_0864s"]
+[sub_resource type="Resource" id="Resource_dkghy"]
 script = ExtResource("1_iqjwq")
 block_id = "on_key_pressed_1734183459_0987654321"
 event_id = "on_process_physics"
 target_node = NodePath(".")
-conditions = Array[ExtResource("3_6310v")]([SubResource("Resource_dkghy")])
-actions = Array[ExtResource("2_e5301")]([SubResource("Resource_i8xgt")])
+conditions = Array[ExtResource("3_6310v")]([SubResource("Resource_i8xgt")])
+actions = Array[ExtResource("2_e5301")]([SubResource("Resource_g1hr8")])
 block_type = "event"
 
-[sub_resource type="Resource" id="Resource_ja7sq"]
+[sub_resource type="Resource" id="Resource_0864s"]
 script = ExtResource("5_1iq3u")
 title = "Sets the direction of the player sprite to flip the sprite horizontally based on if the player is moving left or right."
-collapsed = true
 color = Color(0.16839236, 0.07305908, 0.4453125, 1)
 children = [{
-"data": SubResource("Resource_g1hr8"),
+"data": SubResource("Resource_toik8"),
 "type": "event"
 }, {
-"data": SubResource("Resource_0864s"),
+"data": SubResource("Resource_dkghy"),
 "type": "event"
 }]
 block_type = "group"
 
-[sub_resource type="Resource" id="Resource_rcr8d"]
+[sub_resource type="Resource" id="Resource_ja7sq"]
 script = ExtResource("1_6310v")
 text = "Player is not moving"
 block_type = "comment"
 
-[sub_resource type="Resource" id="Resource_y2uhx"]
+[sub_resource type="Resource" id="Resource_rcr8d"]
 script = ExtResource("2_e5301")
 action_id = "animatedsprite2d_play"
 target_node = NodePath("AnimatedSprite2D")
@@ -260,8 +272,9 @@ inputs = {
 "From End": "false",
 "Name": "default"
 }
+block_type = "action"
 
-[sub_resource type="Resource" id="Resource_lvjr6"]
+[sub_resource type="Resource" id="Resource_y2uhx"]
 script = ExtResource("3_6310v")
 condition_id = "compare_node_variable"
 target_node = NodePath(".")
@@ -270,27 +283,29 @@ inputs = {
 "Property": "node.velocity.x",
 "Value": "0"
 }
+block_type = "condition"
 
-[sub_resource type="Resource" id="Resource_1lc76"]
+[sub_resource type="Resource" id="Resource_lvjr6"]
 script = ExtResource("3_6310v")
 condition_id = "only_once_when_looped"
 target_node = NodePath("System")
+block_type = "condition"
 
-[sub_resource type="Resource" id="Resource_7ahgf"]
+[sub_resource type="Resource" id="Resource_1lc76"]
 script = ExtResource("1_iqjwq")
 block_id = "event_1764826324_3494989596"
 event_id = "on_process_physics"
 target_node = NodePath(".")
-conditions = Array[ExtResource("3_6310v")]([SubResource("Resource_lvjr6"), SubResource("Resource_1lc76")])
-actions = Array[ExtResource("2_e5301")]([SubResource("Resource_y2uhx")])
+conditions = Array[ExtResource("3_6310v")]([SubResource("Resource_y2uhx"), SubResource("Resource_lvjr6")])
+actions = Array[ExtResource("2_e5301")]([SubResource("Resource_rcr8d")])
 block_type = "event"
 
-[sub_resource type="Resource" id="Resource_rfu3m"]
+[sub_resource type="Resource" id="Resource_7ahgf"]
 script = ExtResource("1_6310v")
 text = "Player is moving"
 block_type = "comment"
 
-[sub_resource type="Resource" id="Resource_hklvi"]
+[sub_resource type="Resource" id="Resource_rfu3m"]
 script = ExtResource("2_e5301")
 action_id = "animatedsprite2d_play"
 target_node = NodePath("AnimatedSprite2D")
@@ -299,8 +314,9 @@ inputs = {
 "From End": "false",
 "Name": "run"
 }
+block_type = "action"
 
-[sub_resource type="Resource" id="Resource_olurx"]
+[sub_resource type="Resource" id="Resource_hklvi"]
 script = ExtResource("3_6310v")
 condition_id = "compare_node_variable"
 target_node = NodePath(".")
@@ -309,44 +325,45 @@ inputs = {
 "Property": "node.velocity.x",
 "Value": "0"
 }
+block_type = "condition"
 
-[sub_resource type="Resource" id="Resource_a558m"]
+[sub_resource type="Resource" id="Resource_olurx"]
 script = ExtResource("3_6310v")
 condition_id = "only_once_when_looped"
 target_node = NodePath("System")
+block_type = "condition"
 
-[sub_resource type="Resource" id="Resource_8cdef"]
+[sub_resource type="Resource" id="Resource_a558m"]
 script = ExtResource("1_iqjwq")
 block_id = "event_1764826452_1205836981"
 event_id = "on_process_physics"
 target_node = NodePath(".")
-conditions = Array[ExtResource("3_6310v")]([SubResource("Resource_olurx"), SubResource("Resource_a558m")])
-actions = Array[ExtResource("2_e5301")]([SubResource("Resource_hklvi")])
+conditions = Array[ExtResource("3_6310v")]([SubResource("Resource_hklvi"), SubResource("Resource_olurx")])
+actions = Array[ExtResource("2_e5301")]([SubResource("Resource_rfu3m")])
 block_type = "event"
 
-[sub_resource type="Resource" id="Resource_vco3e"]
+[sub_resource type="Resource" id="Resource_8cdef"]
 script = ExtResource("5_1iq3u")
 title = "Control animations"
-collapsed = true
 color = Color(0.38236463, 0.2642212, 0.7515625, 1)
 children = [{
-"data": SubResource("Resource_rcr8d"),
+"data": SubResource("Resource_ja7sq"),
 "type": "comment"
 }, {
-"data": SubResource("Resource_7ahgf"),
+"data": SubResource("Resource_1lc76"),
 "type": "event"
 }, {
-"data": SubResource("Resource_rfu3m"),
+"data": SubResource("Resource_7ahgf"),
 "type": "comment"
 }, {
-"data": SubResource("Resource_8cdef"),
+"data": SubResource("Resource_a558m"),
 "type": "event"
 }]
 block_type = "group"
 
 [resource]
 script = ExtResource("4_1iq3u")
-groups = Array[ExtResource("5_1iq3u")]([SubResource("Resource_w3432"), SubResource("Resource_ja7sq"), SubResource("Resource_vco3e")])
+groups = Array[ExtResource("5_1iq3u")]([SubResource("Resource_7khp5"), SubResource("Resource_0864s"), SubResource("Resource_8cdef")])
 item_order = Array[Dictionary]([{
 "index": 0,
 "type": "group"
