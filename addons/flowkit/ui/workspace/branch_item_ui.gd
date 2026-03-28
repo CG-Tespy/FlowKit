@@ -94,31 +94,32 @@ func _on_gui_input(event: InputEvent) -> void:
 	var mouse_click: bool = event is InputEventMouseButton and event.pressed
 	if not mouse_click:
 		return
-		
-	if event.button_index == MOUSE_BUTTON_LEFT:
+	
+	var left_click: bool = event.button_index == MOUSE_BUTTON_LEFT
+	var right_click: bool = event.button_index == MOUSE_BUTTON_RIGHT
+	if left_click:
 		print("Branch item ui clicked")
 		_on_left_mouse_button(event)
-	elif event.button_index == MOUSE_BUTTON_RIGHT:
+	elif right_click:
 		_on_right_mouse_button()
+		
+	if left_click or right_click:
+		selected.emit(self)
+		_viewport.set_input_as_handled()
 
 func _on_left_mouse_button(event: InputEventMouseButton):
 	if not event.double_click:
 		return
 		
-	if action_data and action_data.branch_type != "else":
+	if action_data != null and action_data.branch_type != "else":
 		edit_condition_requested.emit(self)
-	else:
-		selected.emit(self)
-	_viewport.set_input_as_handled()
 
 var _viewport: Viewport:
 	get:
 		return get_viewport()
 		
 func _on_right_mouse_button():
-	selected.emit(self)
 	_prep_and_show_context_menu()
-	_viewport.set_input_as_handled()
 	
 func _prep_and_show_context_menu() -> void:
 	context_menu.clear()
