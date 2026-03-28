@@ -411,7 +411,7 @@ func _delete_selected_item() -> void:
 	_push_undo_state()
 	
 	# Check if it's a condition or action
-	if item_to_delete is FKConditionBlockNode:
+	if item_to_delete is FKConditionBlockUi:
 		var cond_data := item_to_delete.get_block() as FKEventCondition
 		var event_data = parent_row.get_event_data()
 		if cond_data and event_data:
@@ -797,7 +797,7 @@ func _on_group_add_comment_requested(group_node) -> void:
 func _on_group_selected(node) -> void:
 	"""Handle selection from group (could be the group itself or a child)."""
 	# Check if it's a condition or action item
-	if node is FKConditionBlockNode:
+	if node is FKConditionBlockUi:
 		_on_condition_selected_in_row(node)
 		return
 	

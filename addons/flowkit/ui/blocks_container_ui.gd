@@ -83,7 +83,7 @@ func _get_drag_node(data) -> Control:
 		
 	var drag_data := data as FKDragData
 	var drag_type := drag_data.type
-	if drag_type not in [DragTarget.Type.event_row, DragTarget.Type.comment, DragTarget.Type.group]:
+	if drag_type not in [DragTarget.Type.EVENT_ROW, DragTarget.Type.COMMENT, DragTarget.Type.GROUP]:
 		return null
 		
 	return drag_data.node

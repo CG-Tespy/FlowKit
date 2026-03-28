@@ -133,7 +133,7 @@ func _get_drag_data(at_position: Vector2) -> FKDragData:
 	var drag_preview := _create_drag_preview()
 	set_drag_preview(drag_preview)
 	
-	var drag_data := FKDragData.new(DragTarget.Type.condition, self)
+	var drag_data := FKDragData.new(DragTarget.Type.CONDITION, self)
 	return drag_data
 
 func _create_drag_preview() -> Control:

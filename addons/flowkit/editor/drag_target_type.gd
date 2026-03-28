@@ -4,36 +4,38 @@ class_name DragTarget
 
 enum Type
 {
-	none, 
-	action, action_item,
-	comment,
-	condition, condition_item,
-	event, event_row,
-	group
+	NONE, 
+	ACTION, ACTION_ITEM,
+	COMMENT,
+	CONDITION, CONDITION_ITEM,
+	EVENT, EVENT_ROW,
+	GROUP
 }
 
 static func get_name_for(val: int) -> String:
 	var result := ""
+	
 	match val:
-		Type.none:
+		Type.NONE:
 			result = "none"
-		Type.action_item:
+		Type.ACTION_ITEM:
 			result = "action_item"
-		Type.action:
+		Type.ACTION:
 			result = "action"
-		Type.comment:
+		Type.COMMENT:
 			result = "comment"
-		Type.condition:
+		Type.CONDITION:
 			result = "condition"
-		Type.condition_item:
+		Type.CONDITION_ITEM:
 			result = "condition_item"
-		Type.event_row:
+		Type.EVENT_ROW:
 			result = "event_row"
-		Type.event:
+		Type.EVENT:
 			result = "event"
-		Type.group:
+		Type.GROUP:
 			result = "group"
 		_:
 			printerr("Something went wrong in DragTargetType get_name_for. Passed valid val: " \
 			+ str(val))
+			
 	return result

@@ -1,6 +1,6 @@
 @tool
 extends FKBaseBlockNode
-class_name FKConditionBlockNode
+class_name FKConditionBlockUi
 
 @export_category("Controls")
 @export var panel: PanelContainer
@@ -113,7 +113,7 @@ func show_context_menu(global_pos: Vector2) -> void:
 	if not context_menu:
 		return
 	
-	print("Showing context menu in FKConditionBlockNode")
+	print("Showing context menu in FKConditionBlockUi")
 	var c := get_block()
 	if c:
 		context_menu.set_item_checked(2, c.negated)
@@ -163,10 +163,10 @@ func _on_gui_input(event: InputEvent) -> void:
 
 func _on_left_click(event: InputEventMouseButton):
 	if event.double_click:
-		print("FKConditionBlockNode edit requested")
+		print("FKConditionBlockUi edit requested")
 		edit_requested.emit(self)
 	else:
-		print("FKConditionBlockNode selected")
+		print("FKConditionBlockUi selected")
 		set_selected(true)
 	
 func _on_right_click():
@@ -188,7 +188,7 @@ func _get_drag_data(at_position: Vector2) -> FKDragData:
 	var preview := _create_drag_preview()
 	set_drag_preview(preview)
 
-	return FKDragData.new(DragTarget.Type.condition_item, self, _block)
+	return FKDragData.new(DragTarget.Type.CONDITION_ITEM, self, _block)
 
 func _create_drag_preview() -> Control:
 	var preview_label := Label.new()
@@ -206,7 +206,7 @@ func _create_drag_preview() -> Control:
 
 func _can_drop_data(at_position: Vector2, data) -> bool:
 	var drag_data := data as FKDragData
-	if not drag_data or drag_data.type != DragTarget.Type.condition_item:
+	if not drag_data or drag_data.type != DragTarget.Type.CONDITION_ITEM:
 		_hide_drop_indicator()
 		return false
 
@@ -245,7 +245,7 @@ func _drop_data(at_position: Vector2, data) -> void:
 	_hide_drop_indicator()
 
 	var drag_data := data as FKDragData
-	if not drag_data or drag_data.type != DragTarget.Type.condition_item:
+	if not drag_data or drag_data.type != DragTarget.Type.CONDITION_ITEM:
 		print("FKConditionBlock not dropped due to wrong drag data type")
 		return
 
@@ -254,7 +254,7 @@ func _drop_data(at_position: Vector2, data) -> void:
 		print("FKConditionBlock not dropped due to source node being self")
 		return
 	
-	print("Dropping FKConditionBlockNode")
+	print("Dropping FKConditionBlockUi")
 	var above := at_position.y < size.y / 2.0
 	reorder_requested.emit(source_node, self, above)
 

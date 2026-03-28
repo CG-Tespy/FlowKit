@@ -94,31 +94,31 @@ func _on_gui_input(event: InputEvent) -> void:
 	var mouse_click: bool = event is InputEventMouseButton and event.pressed
 	if not mouse_click:
 		return
-		
-	if event.button_index == MOUSE_BUTTON_LEFT:
-		print("Branch item ui clicked")
+	
+	var left_click: bool = event.button_index == MOUSE_BUTTON_LEFT
+	var right_click: bool = event.button_index == MOUSE_BUTTON_RIGHT
+	if left_click:
 		_on_left_mouse_button(event)
-	elif event.button_index == MOUSE_BUTTON_RIGHT:
+	elif right_click:
 		_on_right_mouse_button()
+		
+	if left_click or right_click:
+		selected.emit(self)
+		_viewport.set_input_as_handled()
 
 func _on_left_mouse_button(event: InputEventMouseButton):
 	if not event.double_click:
 		return
 		
-	if action_data and action_data.branch_type != "else":
+	if action_data != null and action_data.branch_type != "else":
 		edit_condition_requested.emit(self)
-	else:
-		selected.emit(self)
-	_viewport.set_input_as_handled()
 
 var _viewport: Viewport:
 	get:
 		return get_viewport()
 		
 func _on_right_mouse_button():
-	selected.emit(self)
 	_prep_and_show_context_menu()
-	_viewport.set_input_as_handled()
 	
 func _prep_and_show_context_menu() -> void:
 	context_menu.clear()
@@ -501,7 +501,7 @@ func _get_drag_data(at_position: Vector2) -> FKDragData:
 	var drag_preview := _create_drag_preview()
 	set_drag_preview(drag_preview)
 	
-	var drag_data := FKDragData.new(DragTarget.Type.action_item, self, action_data)
+	var drag_data := FKDragData.new(DragTarget.Type.ACTION_ITEM, self, action_data)
 	return drag_data
 
 func _create_drag_preview() -> Control:
@@ -549,7 +549,7 @@ func _can_drop_data(at_position: Vector2, data) -> bool:
 		
 	var drag_data := data as FKDragData	
 
-	if drag_data.type != DragTarget.Type.action_item:
+	if drag_data.type != DragTarget.Type.ACTION_ITEM:
 		_hide_drop_indicator()
 		_hide_body_highlight()
 		return false
@@ -600,7 +600,7 @@ func _drop_data(at_position: Vector2, data) -> void:
 		return
 		
 	var drag_data := data as FKDragData
-	if drag_data.type != DragTarget.Type	.action_item:
+	if drag_data.type != DragTarget.Type.ACTION_ITEM:
 		return
 
 	var source_node = drag_data.node
