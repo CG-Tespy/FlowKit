@@ -1,5 +1,5 @@
 extends FKBaseBlock
-class_name FKEventAction
+class_name FKActionBlock
 
 @export var action_id: String = ""
 @export var target_node: NodePath
@@ -11,7 +11,7 @@ class_name FKEventAction
 @export var branch_id: String = ""                # Branch provider ID
 @export var branch_condition: FKEventCondition = null
 @export var branch_inputs: Dictionary = {}
-@export var branch_actions: Array[FKEventAction] = []
+@export var branch_actions: Array[FKActionBlock] = []
 
 func _init() -> void:
 	block_type = "action"
@@ -65,7 +65,7 @@ func _deserialize_branch_conds_and_actions(dict: Dictionary):
 
 	branch_actions.clear()
 	for act_dict in dict.get("branch_actions", []):
-		var act := FKEventAction.new()
+		var act := FKActionBlock.new()
 		act.deserialize(act_dict)
 		branch_actions.append(act)
 	

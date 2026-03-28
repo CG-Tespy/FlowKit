@@ -25,10 +25,10 @@ var drop_above := true
 # ---------------------------------------------------------
 
 func _validate_block(to_set: FKBaseBlock) -> bool:
-	return to_set == null or to_set is FKEventAction
+	return to_set == null or to_set is FKActionBlock
 
-func get_action() -> FKEventAction:
-	return _block as FKEventAction
+func get_action() -> FKActionBlock:
+	return _block as FKActionBlock
 
 func _on_block_changed() -> void:
 	update_display()
@@ -66,10 +66,10 @@ func _update_label() -> void:
 	label.text = "%s on %s%s" % [display_name, node_name, params_text]
 	name = "%s on %s" % [display_name, node_name]
 
-var _action: FKEventAction:
+var _action: FKActionBlock:
 	get:
-		if _block is FKEventAction:
-			return _block as FKEventAction
+		if _block is FKActionBlock:
+			return _block as FKActionBlock
 		else:
 			return null
 

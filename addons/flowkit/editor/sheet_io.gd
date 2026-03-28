@@ -41,7 +41,7 @@ func copy_event_block(data: FKEventBlock) -> FKEventBlock:
 	var event_copy := FKEventBlock.new(data.block_id, data.event_id, data.target_node)
 	event_copy.inputs = data.inputs.duplicate()
 	event_copy.conditions = [] as Array[FKEventCondition]
-	event_copy.actions = [] as Array[FKEventAction]
+	event_copy.actions = [] as Array[FKActionBlock]
 
 	for cond in data.conditions:
 		var cond_copy := FKEventCondition.new()
@@ -49,7 +49,7 @@ func copy_event_block(data: FKEventBlock) -> FKEventBlock:
 		cond_copy.target_node = cond.target_node
 		cond_copy.inputs = cond.inputs.duplicate()
 		cond_copy.negated = cond.negated
-		cond_copy.actions = [] as Array[FKEventAction]
+		cond_copy.actions = [] as Array[FKActionBlock]
 		event_copy.conditions.append(cond_copy)
 
 	for act in data.actions:
@@ -59,11 +59,11 @@ func copy_event_block(data: FKEventBlock) -> FKEventBlock:
 	return event_copy
 
 
-func copy_action(act: FKEventAction) -> FKEventAction:
+func copy_action(act: FKActionBlock) -> FKActionBlock:
 	if act == null:
 		return null
 
-	var act_copy := FKEventAction.new()
+	var act_copy := FKActionBlock.new()
 	act_copy.action_id = act.action_id
 	act_copy.target_node = act.target_node
 	act_copy.inputs = act.inputs.duplicate()
@@ -78,10 +78,10 @@ func copy_action(act: FKEventAction) -> FKEventAction:
 		cond_copy.target_node = act.branch_condition.target_node
 		cond_copy.inputs = act.branch_condition.inputs.duplicate()
 		cond_copy.negated = act.branch_condition.negated
-		cond_copy.actions = [] as Array[FKEventAction]
+		cond_copy.actions = [] as Array[FKActionBlock]
 		act_copy.branch_condition = cond_copy
 
-	act_copy.branch_actions = [] as Array[FKEventAction]
+	act_copy.branch_actions = [] as Array[FKActionBlock]
 	for sub_act in act.branch_actions:
 		act_copy.branch_actions.append(copy_action(sub_act))
 
