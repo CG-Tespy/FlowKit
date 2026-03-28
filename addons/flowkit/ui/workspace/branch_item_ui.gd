@@ -98,7 +98,6 @@ func _on_gui_input(event: InputEvent) -> void:
 	var left_click: bool = event.button_index == MOUSE_BUTTON_LEFT
 	var right_click: bool = event.button_index == MOUSE_BUTTON_RIGHT
 	if left_click:
-		print("Branch item ui clicked")
 		_on_left_mouse_button(event)
 	elif right_click:
 		_on_right_mouse_button()
@@ -502,7 +501,7 @@ func _get_drag_data(at_position: Vector2) -> FKDragData:
 	var drag_preview := _create_drag_preview()
 	set_drag_preview(drag_preview)
 	
-	var drag_data := FKDragData.new(DragTarget.Type.action_item, self, action_data)
+	var drag_data := FKDragData.new(DragTarget.Type.ACTION_ITEM, self, action_data)
 	return drag_data
 
 func _create_drag_preview() -> Control:
@@ -550,7 +549,7 @@ func _can_drop_data(at_position: Vector2, data) -> bool:
 		
 	var drag_data := data as FKDragData	
 
-	if drag_data.type != DragTarget.Type.action_item:
+	if drag_data.type != DragTarget.Type.ACTION_ITEM:
 		_hide_drop_indicator()
 		_hide_body_highlight()
 		return false
@@ -601,7 +600,7 @@ func _drop_data(at_position: Vector2, data) -> void:
 		return
 		
 	var drag_data := data as FKDragData
-	if drag_data.type != DragTarget.Type	.action_item:
+	if drag_data.type != DragTarget.Type.ACTION_ITEM:
 		return
 
 	var source_node = drag_data.node

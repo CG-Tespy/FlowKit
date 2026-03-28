@@ -56,79 +56,108 @@ func _update_styling() -> void:
 	panel.add_theme_stylebox_override("panel", style)
 
 func _update_label() -> void:
-	var a := get_action()
-	if not a or not label:
+	if not _action:
 		return
 
-	# Resolve display name from registry
-	var display_name := a.action_id
-	if registry:
-		for provider in registry.action_providers:
-			if provider.has_method("get_id") and provider.get_id() == a.action_id:
-				if provider.has_method("get_name"):
-					display_name = provider.get_name()
-				break
-
-	# Node name
-	var node_name := String(a.target_node).get_file()
-
-	# Parameters
-	var params_text := ""
-	if not a.inputs.is_empty():
-		var param_pairs := []
-		for key in a.inputs:
-			param_pairs.append(str(a.inputs[key]))
-		params_text = ": " + ", ".join(param_pairs)
+	var display_name := _get_display_name_from_registry()
+	var node_name := String(_action.target_node).get_file()
+	var params_text := _get_params_text()
 
 	label.text = "%s on %s%s" % [display_name, node_name, params_text]
 	name = "%s on %s" % [display_name, node_name]
 
+var _action: FKEventAction:
+	get:
+		if _block is FKEventAction:
+			return _block as FKEventAction
+		else:
+			return null
+
+## If none is found, this returns the action id
+func _get_display_name_from_registry() -> String:
+	var id := _action.get_id()
+	var display_name := id
+	
+	if registry:
+		for provider in registry.action_providers:
+			if provider.has_method("get_id") and provider.get_id() == id:
+				if provider.has_method("get_name"):
+					display_name = provider.get_name()
+				break
+				
+	return display_name
+	
+func _get_params_text() -> String:
+	var params_text := ""
+	
+	if not _action.inputs.is_empty():
+		var param_pairs := []
+		for key in _action.inputs:
+			var input = _action.inputs[key]
+			var pair = str(input)
+			param_pairs.append(pair)
+		params_text = ": " + ", ".join(param_pairs)
+		
+	return params_text
 # ---------------------------------------------------------
 # Context Menu
 # ---------------------------------------------------------
 
 func show_context_menu(global_pos: Vector2) -> void:
-	if not context_menu:
-		return
-
 	context_menu.position = global_pos
 	context_menu.popup()
 
 func _on_context_menu_id_pressed(id: int) -> void:
 	match id:
-		0: edit_requested.emit(self)
-		1: delete_requested.emit(self)
+		_edit_requested_choice: edit_requested.emit(self)
+		_delete_requested_choice: delete_requested.emit(self)
+
+const _edit_requested_choice := 0
+const _delete_requested_choice := 1
 
 # ---------------------------------------------------------
 # Input Handling
 # ---------------------------------------------------------
 
 func _toggle_subs(on: bool) -> void:
-	super._toggle_subs(on)
-
-	if on:
+	if on && !_is_subbed:
 		gui_input.connect(_on_gui_input)
 		mouse_exited.connect(_on_mouse_exited)
 		context_menu.id_pressed.connect(_on_context_menu_id_pressed)
-	else:
+	elif !on && _is_subbed:
 		gui_input.disconnect(_on_gui_input)
 		mouse_exited.disconnect(_on_mouse_exited)
 		context_menu.id_pressed.disconnect(_on_context_menu_id_pressed)
+		
+	super._toggle_subs(on)
 
 func _on_gui_input(event: InputEvent) -> void:
-	if event is InputEventMouseButton and event.pressed:
-		if event.button_index == MOUSE_BUTTON_LEFT:
-			if event.double_click:
-				edit_requested.emit(self)
-			else:
-				set_selected(true)
-			get_viewport().set_input_as_handled()
+	if event is not InputEventMouseButton or not event.pressed:
+		return
+	
+	var left_click: bool = event.button_index == MOUSE_BUTTON_LEFT
+	var right_click: bool = event.button_index == MOUSE_BUTTON_RIGHT
+	if left_click:
+		_on_left_click(event)
+	elif right_click:
+		_on_right_click()
+		
+	if left_click or right_click:
+		_on_either_click()
 
-		elif event.button_index == MOUSE_BUTTON_RIGHT:
-			set_selected(true)
-			show_context_menu(DisplayServer.mouse_get_position())
-			get_viewport().set_input_as_handled()
-
+func _on_left_click(event: InputEventMouseButton):
+	if event.double_click:
+		edit_requested.emit(self)
+	
+func _on_right_click():
+	var mouse_pos := DisplayServer.mouse_get_position()
+	show_context_menu(mouse_pos)
+	
+## Should be called after the specific left and right click callbacks
+func _on_either_click():
+	set_selected(true)
+	get_viewport().set_input_as_handled()
+	
 func _on_mouse_exited() -> void:
 	_hide_drop_indicator()
 
@@ -137,14 +166,13 @@ func _on_mouse_exited() -> void:
 # ---------------------------------------------------------
 
 func _get_drag_data(at_position: Vector2) -> FKDragData:
-	var a := get_action()
-	if not a:
+	if not _action:
 		return null
 
 	var preview := _create_drag_preview()
 	set_drag_preview(preview)
 
-	return FKDragData.new(DragTarget.Type.action_item, self, a)
+	return FKDragData.new(DragTarget.Type.ACTION_ITEM, self, _action)
 
 func _create_drag_preview() -> Control:
 	var margin := MarginContainer.new()
@@ -155,14 +183,16 @@ func _create_drag_preview() -> Control:
 
 	var preview_label := Label.new()
 	preview_label.text = label.text if label else "Action"
-	preview_label.add_theme_color_override("font_color", Color(0.5, 0.7, 1.0, 0.9))
+	preview_label.add_theme_color_override("font_color", _preview_label_color)
 
 	margin.add_child(preview_label)
 	return margin
 
+static var _preview_label_color := Color(0.5, 0.7, 1.0, 0.9)
+
 func _can_drop_data(at_position: Vector2, data) -> bool:
 	var drag_data := data as FKDragData
-	if not drag_data or drag_data.type != DragTarget.Type.action_item:
+	if not drag_data or drag_data.type != DragTarget.Type.ACTION_ITEM:
 		_hide_drop_indicator()
 		return false
 
@@ -214,7 +244,7 @@ func _drop_data(at_position: Vector2, data) -> void:
 	_hide_drop_indicator()
 
 	var drag_data := data as FKDragData
-	if not drag_data or drag_data.type != DragTarget.Type.action_item:
+	if not drag_data or drag_data.type != DragTarget.Type.ACTION_ITEM:
 		return
 
 	var source_node := drag_data.node

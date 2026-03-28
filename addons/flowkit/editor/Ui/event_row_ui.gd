@@ -330,7 +330,7 @@ func _update_actions() -> void:
 			_connect_action_item_signals(item)
 			actions_container.add_child(item)
 
-func _connect_condition_item_signals(item: FKConditionBlockNode) -> void:
+func _connect_condition_item_signals(item: FKConditionBlockUi) -> void:
 	item.selected.connect(func(node): condition_selected.emit(node))
 	item.edit_requested.connect(_on_condition_item_edit)
 	item.delete_requested.connect(_on_condition_item_delete)
@@ -387,7 +387,7 @@ func _on_branch_item_delete(item) -> void:
 			_update_actions()
 			data_changed.emit()
 
-func _on_condition_item_edit(item: FKConditionBlockNode) -> void:
+func _on_condition_item_edit(item: FKConditionBlockUi) -> void:
 	condition_edit_requested.emit(item)
 
 func _on_condition_item_delete(item) -> void:
@@ -635,13 +635,13 @@ func _get_drag_data(at_position: Vector2) -> FKDragData:
 	var drag_preview := _create_drag_preview()
 	set_drag_preview(drag_preview)
 	
-	var drag_data := FKDragData.new(DragTarget.Type.event_row, self)
+	var drag_data := FKDragData.new(DragTarget.Type.EVENT_ROW, self)
 	return drag_data
 
 func _create_drag_preview() -> Control:
 	var preview_label := Label.new()
 	preview_label.text = event_header_label.text if event_header_label else "Event"
-	preview_label.add_theme_color_override("font_color", Color(0.9, 0.95, 0.9, 0.7))
+	preview_label.add_theme_color_override("font_color", _preview_label_color)
 	
 	var preview_margin := MarginContainer.new()
 	preview_margin.add_theme_constant_override("margin_left", 8)
@@ -650,7 +650,9 @@ func _create_drag_preview() -> Control:
 	preview_margin.add_theme_constant_override("margin_bottom", 4)
 	preview_margin.add_child(preview_label)
 	return preview_margin
-	
+
+const _preview_label_color := Color(0.9, 0.95, 0.9, 0.7)
+
 func _can_drop_data(at_position: Vector2, data) -> bool:
 	if data is not FKDragData:
 		printerr("EventRowUi's _can_drop_data was not passed an FKDragData. It was given: " \
@@ -661,7 +663,7 @@ func _can_drop_data(at_position: Vector2, data) -> bool:
 	var drag_type := drag_data.type
 	
 	# For event_row, comment, or group drags, let the parent (blocks_container or group) handle it
-	if drag_type in [DragTarget.Type.event_row, DragTarget.Type.comment, DragTarget.Type.group]:
+	if drag_type in [DragTarget.Type.EVENT_ROW, DragTarget.Type.COMMENT, DragTarget.Type.GROUP]:
 		# Forward to parent
 		var parent = get_parent()
 		if parent and parent.has_method("_can_drop_data"):
@@ -669,16 +671,16 @@ func _can_drop_data(at_position: Vector2, data) -> bool:
 			return parent._can_drop_data(parent_pos, data)
 		return false
 	
-	if drag_type != DragTarget.Type.condition_item and drag_type != DragTarget.Type.action_item:
+	if drag_type != DragTarget.Type.CONDITION_ITEM and drag_type != DragTarget.Type.ACTION_ITEM:
 		return false
 	
 	# Use simple half-width check: left half = conditions, right half = actions
 	var half_width = size.x / 2.0
 	var is_left_side = at_position.x < half_width
 	
-	if drag_type == DragTarget.Type.condition_item and is_left_side:
+	if drag_type == DragTarget.Type.CONDITION_ITEM and is_left_side:
 		return true
-	elif drag_type == DragTarget.Type.action_item and not is_left_side:
+	elif drag_type == DragTarget.Type.ACTION_ITEM and not is_left_side:
 		return true
 	
 	return false
@@ -693,7 +695,7 @@ func _drop_data(at_position: Vector2, data) -> void:
 	var drag_type = drag_data.type
 	
 	# For event_row, comment, or group drags, let the parent handle it
-	if drag_type in [DragTarget.Type.event_row, DragTarget.Type.comment, DragTarget.Type.group]:
+	if drag_type in [DragTarget.Type.EVENT_ROW, DragTarget.Type.COMMENT, DragTarget.Type.GROUP]:
 		var parent = get_parent()
 		if parent and parent.has_method("_drop_data"):
 			var parent_pos = at_position + position
@@ -715,7 +717,7 @@ func _drop_data(at_position: Vector2, data) -> void:
 	var is_left_side = at_position.x < half_width
 	
 	match drag_type:
-		DragTarget.Type.condition_item:
+		DragTarget.Type.CONDITION_ITEM:
 			if is_left_side:
 				var cond_data = drag_data.data
 				if cond_data:
@@ -723,7 +725,7 @@ func _drop_data(at_position: Vector2, data) -> void:
 					# Only handle cross-row drops here
 					if source_row != self:
 						condition_dropped.emit(source_row, cond_data, self)
-		DragTarget.Type.action_item:
+		DragTarget.Type.ACTION_ITEM:
 			if not is_left_side:
 				var act_data = drag_data.data
 				if act_data:

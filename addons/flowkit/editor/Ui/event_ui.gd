@@ -123,7 +123,7 @@ func _get_drag_data(at_position: Vector2) -> FKDragData:
 	set_drag_preview(drag_preview)
 	
 	# Return drag data with type information
-	var drag_data := FKDragData.new(DragTarget.Type.event, self)
+	var drag_data := FKDragData.new(DragTarget.Type.EVENT, self)
 	return drag_data
 
 func _create_drag_preview() -> Control:
