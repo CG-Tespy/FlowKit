@@ -253,20 +253,24 @@ func _instantiate_event_row(data: FKEventBlock) -> Control:
 	
 	return row
 
-var EVENT_ROW_SCENE: Variant:
+var EVENT_ROW_SCENE: PackedScene:
 	get:
-		return FKEditorGlobals.event_row_scene
+		return FKEditorGlobals.EVENT_ROW_SCENE
 
-var COMMENT_SCENE: Variant:
+static var COMMENT_SCENE: PackedScene:
 	get:
 		return FKEditorGlobals.COMMENT_SCENE
-		
+
+
 func _instantiate_comment(data: FKCommentBlock) -> Control:
 	"""Create a comment UI node for the given data."""
 	var comment: FKCommentBlockUi = COMMENT_SCENE.instantiate()
 	comment.set_block(data)
 	
-	# Connect comment signals to group handlers
+	_connect_comment_signals_to_group_handlers(comment, data)
+	return comment
+
+func _connect_comment_signals_to_group_handlers(comment: FKCommentBlockUi, data: FKCommentBlock):
 	comment.delete_requested.connect(_on_child_comment_delete_requested.bind(data))
 	comment.selected.connect(func(n): _on_child_selected(data); selected.emit(n))
 	print("GroupBlockUi: Listening for comment block contents changed")
@@ -276,9 +280,6 @@ func _instantiate_comment(data: FKCommentBlock) -> Control:
 	comment.insert_event_above_requested.connect(func(c): insert_event_above_requested.emit(c))
 	comment.insert_event_below_requested.connect(func(c): insert_event_below_requested.emit(c))
 	
-	return comment
-
-
 func _instantiate_group(data: FKGroupBlock) -> Control:
 	"""Create a nested group UI node for the given data."""
 	var group_scene = load("res://addons/flowkit/ui/workspace/group_ui.tscn")

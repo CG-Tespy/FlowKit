@@ -298,7 +298,7 @@ func _update_conditions() -> void:
 	# Add condition items
 	for condition_data in event_data.conditions:
 		var item = CONDITION_ITEM_SCENE.instantiate()
-		item.set_condition_data(condition_data)
+		item.set_block(condition_data)
 		item.set_registry(registry)
 		_connect_condition_item_signals(item)
 		conditions_container.add_child(item)
@@ -329,17 +329,12 @@ func _update_actions() -> void:
 			_connect_action_item_signals(item)
 			actions_container.add_child(item)
 
-func _connect_condition_item_signals(item) -> void:
-	if item.has_signal("selected"):
-		item.selected.connect(func(node): condition_selected.emit(node))
-	if item.has_signal("edit_requested"):
-		item.edit_requested.connect(_on_condition_item_edit)
-	if item.has_signal("delete_requested"):
-		item.delete_requested.connect(_on_condition_item_delete)
-	if item.has_signal("negate_requested"):
-		item.negate_requested.connect(_on_condition_item_negate)
-	if item.has_signal("reorder_requested"):
-		item.reorder_requested.connect(_on_condition_reorder)
+func _connect_condition_item_signals(item: FKConditionBlockNode) -> void:
+	item.selected.connect(func(node): condition_selected.emit(node))
+	item.edit_requested.connect(_on_condition_item_edit)
+	item.delete_requested.connect(_on_condition_item_delete)
+	item.negate_requested.connect(_on_condition_item_negate)
+	item.reorder_requested.connect(_on_condition_reorder)
 
 func _connect_action_item_signals(item) -> void:
 	if item.has_signal("selected"):
@@ -391,12 +386,12 @@ func _on_branch_item_delete(item) -> void:
 			_update_actions()
 			data_changed.emit()
 
-func _on_condition_item_edit(item) -> void:
+func _on_condition_item_edit(item: FKConditionBlockNode) -> void:
 	condition_edit_requested.emit(item)
 
 func _on_condition_item_delete(item) -> void:
 	before_data_changed.emit()  # Signal for undo state capture
-	var cond_data = item.get_condition_data()
+	var cond_data = item.get_block()
 	if cond_data and event_data:
 		var idx = event_data.conditions.find(cond_data)
 		if idx >= 0:
@@ -406,7 +401,7 @@ func _on_condition_item_delete(item) -> void:
 
 func _on_condition_item_negate(item) -> void:
 	before_data_changed.emit()  # Signal for undo state capture
-	var cond_data = item.get_condition_data()
+	var cond_data = item.get_block()
 	if cond_data:
 		cond_data.negated = not cond_data.negated
 		item.update_display()
@@ -428,12 +423,14 @@ func _on_action_item_delete(item) -> void:
 func _on_condition_reorder(source_item, target_item, drop_above: bool) -> void:
 	"""Handle reordering conditions within the same event block."""
 	if not event_data:
+		print("Refusing condition reorder due to lack of event data")
 		return
 	
-	var source_data = source_item.get_condition_data()
-	var target_data = target_item.get_condition_data()
+	var source_data = source_item.get_block()
+	var target_data = target_item.get_block()
 	
 	if not source_data or not target_data:
+		print("Refusing condition reoder due to source or target data being null")
 		return
 	
 	var source_idx = event_data.conditions.find(source_data)

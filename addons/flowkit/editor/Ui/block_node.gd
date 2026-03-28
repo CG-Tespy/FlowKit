@@ -1,3 +1,4 @@
+@tool
 extends MarginContainer
 class_name FKBaseBlockNode
 
@@ -85,9 +86,9 @@ func update_display() -> void:
 func show_context_menu(global_pos: Vector2) -> void:
 	_alert_need_for_override("show_context_menu")
 
-func _get_drag_data(_pos): return null
-func _can_drop_data(_pos, _data): return false
-func _drop_data(_pos, _data): pass
+func _get_drag_data(_pos: Vector2) -> FKDragData: return null
+func _can_drop_data(_pos: Vector2, _data) -> bool: return false
+func _drop_data(_pos: Vector2, _data): pass
 
 func _exit_tree() -> void:
 	_toggle_subs(false)

@@ -9,7 +9,7 @@
 
 [sub_resource type="Resource" id="Resource_at6cs"]
 script = ExtResource("1_opms0")
-text = "If player falls below the groe5vue5i  k7rir78tyjstyrjuvesuj"
+text = "If player falls below the ground, they will teleport back to spawn."
 block_type = "comment"
 
 [sub_resource type="Resource" id="Resource_ehuoq"]
@@ -45,6 +45,7 @@ inputs = {
 "Property": "node.position.y",
 "Value": "n_lowest_y"
 }
+block_type = "condition"
 
 [sub_resource type="Resource" id="Resource_n0pkj"]
 script = ExtResource("2_at6cs")
