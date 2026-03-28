@@ -3,17 +3,17 @@ extends MarginContainer
 class_name FKEventRowUi
 
 # Scene Dependencies
-var CONDITION_ITEM_SCENE: Resource:
+var CONDITION_ITEM_SCENE: PackedScene:
 	get:
-		return FKEditorGlobals.condition_item_scene
+		return FKEditorGlobals.CONDITION_ITEM_SCENE
 		
-var BRANCH_ITEM_SCENE: Resource:
+var BRANCH_ITEM_SCENE: PackedScene:
 	get:
-		return FKEditorGlobals.branch_item_scene
+		return FKEditorGlobals.BRANCH_ITEM_SCENE
 		
-var ACTION_ITEM_SCENE: Resource:
+var ACTION_ITEM_SCENE: PackedScene:
 	get:
-		return FKEditorGlobals.action_item_scene
+		return FKEditorGlobals.ACTION_ITEM_SCENE
 		
 signal insert_event_below_requested(event_row)
 signal insert_comment_below_requested(event_row)
@@ -81,7 +81,7 @@ func _toggle_subs(on: bool):
 			
 	_toggle_label_subs(on)
 	_toggle_drop_zone_signals(on)
-	_is_subbed = !_is_subbed
+	_is_subbed = on
 
 var _is_subbed := false
 
@@ -91,6 +91,7 @@ func _on_gui_input(event: InputEvent) -> void:
 		return
 	
 	if event.button_index == MOUSE_BUTTON_LEFT:
+		print("Event row ui clicked")
 		selected.emit(self)
 	elif event.button_index == MOUSE_BUTTON_RIGHT:
 		selected.emit(self)
@@ -317,14 +318,14 @@ func _update_actions() -> void:
 	# Add action items (handles both regular actions and branches)
 	for act_data in event_data.actions:
 		if act_data.is_branch:
-			var branch = BRANCH_ITEM_SCENE.instantiate()
+			var branch: BranchItemUi = BRANCH_ITEM_SCENE.instantiate()
 			branch.set_action_data(act_data)
 			branch.set_registry(registry)
 			_connect_branch_item_signals(branch)
 			actions_container.add_child(branch)
 		else:
-			var item = ACTION_ITEM_SCENE.instantiate()
-			item.set_action_data(act_data)
+			var item: FKActionBlockNode = ACTION_ITEM_SCENE.instantiate()
+			item.set_block(act_data)
 			item.set_registry(registry)
 			_connect_action_item_signals(item)
 			actions_container.add_child(item)
@@ -378,7 +379,7 @@ func _connect_branch_item_signals(branch) -> void:
 
 func _on_branch_item_delete(item) -> void:
 	before_data_changed.emit()
-	var act_data = item.get_action_data()
+	var act_data = item.get_block()
 	if act_data and event_data:
 		var idx = event_data.actions.find(act_data)
 		if idx >= 0:
@@ -412,7 +413,7 @@ func _on_action_item_edit(item) -> void:
 
 func _on_action_item_delete(item) -> void:
 	before_data_changed.emit()  # Signal for undo state capture
-	var act_data = item.get_action_data()
+	var act_data = item.get_block()
 	if act_data and event_data:
 		var idx = event_data.actions.find(act_data)
 		if idx >= 0:
@@ -512,7 +513,7 @@ func _on_action_dropped_into_branch(source_item, target_branch) -> void:
 	if not event_data:
 		return
 	
-	var source_data = source_item.get_action_data()
+	var source_data = source_item.get_block()
 	if not source_data:
 		return
 	
@@ -527,13 +528,13 @@ func _on_action_dropped_into_branch(source_item, target_branch) -> void:
 	_update_actions()
 	data_changed.emit()
 
-func _on_action_reorder(source_item, target_item, drop_above: bool) -> void:
+func _on_action_reorder(source_item: FKActionBlockNode, target_item: FKActionBlockNode, drop_above: bool) -> void:
 	"""Handle reordering actions within the same event block."""
 	if not event_data:
 		return
 	
-	var source_data = source_item.get_action_data()
-	var target_data = target_item.get_action_data()
+	var source_data = source_item.get_block()
+	var target_data = target_item.get_block()
 	
 	if not source_data or not target_data:
 		return

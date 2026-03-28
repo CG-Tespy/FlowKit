@@ -6,6 +6,7 @@
 
 [node name="ActionItem" type="MarginContainer" unique_id=1211353954 node_paths=PackedStringArray("panel", "label", "icon_label", "context_menu", "drop_indicator")]
 custom_minimum_size = Vector2(0, 24)
+mouse_filter = 0
 script = ExtResource("1_actitem")
 panel = NodePath("Panel")
 label = NodePath("Panel/Margin/HBox/Label")

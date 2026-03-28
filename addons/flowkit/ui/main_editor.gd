@@ -210,7 +210,7 @@ func _paste_actions() -> void:
 		target_branch = _find_parent_branch(selected_item)
 
 	if target_branch:
-		var branch_data = target_branch.get_action_data()
+		var branch_data = target_branch.get_block()
 		for act in new_actions:
 			branch_data.branch_actions.append(act)
 		target_row.update_display()
@@ -411,15 +411,15 @@ func _delete_selected_item() -> void:
 	_push_undo_state()
 	
 	# Check if it's a condition or action
-	if item_to_delete.has_method("get_condition_data"):
-		var cond_data = item_to_delete.get_condition_data()
+	if item_to_delete is FKConditionBlockNode:
+		var cond_data := item_to_delete.get_block() as FKEventCondition
 		var event_data = parent_row.get_event_data()
 		if cond_data and event_data:
 			var idx = event_data.conditions.find(cond_data)
 			if idx >= 0:
 				event_data.conditions.remove_at(idx)
-	elif item_to_delete.has_method("get_action_data"):
-		var act_data = item_to_delete.get_action_data()
+	elif item_to_delete is FKActionBlockNode or item_to_delete is BranchItemUi:
+		var act_data := item_to_delete.get_block() as FKEventAction
 		var event_data = parent_row.get_event_data()
 		if act_data and event_data:
 			var idx = event_data.actions.find(act_data)
@@ -797,11 +797,11 @@ func _on_group_add_comment_requested(group_node) -> void:
 func _on_group_selected(node) -> void:
 	"""Handle selection from group (could be the group itself or a child)."""
 	# Check if it's a condition or action item
-	if node.has_method("get_condition_data"):
+	if node is FKConditionBlockNode:
 		_on_condition_selected_in_row(node)
 		return
 	
-	if node.has_method("get_action_data"):
+	if node is FKActionBlockNode or node is BranchItemUi:
 		_on_action_selected_in_row(node)
 		return
 	
@@ -1384,7 +1384,7 @@ func _update_condition_inputs(expressions: Dictionary) -> void:
 	_push_undo_state()
 	
 	if pending_target_item:
-		var data = pending_target_item.get_condition_data()
+		var data = pending_target_item.get_block()
 		if data:
 			data.inputs = expressions
 			pending_target_item.update_display()
@@ -1397,7 +1397,7 @@ func _update_action_inputs(expressions: Dictionary) -> void:
 	_push_undo_state()
 	
 	if pending_target_item:
-		var data = pending_target_item.get_action_data()
+		var data = pending_target_item.get_block()
 		if data:
 			data.inputs = expressions
 			pending_target_item.update_display()
@@ -1562,7 +1562,7 @@ func _on_branch_add_elseif(branch_item, event_row) -> void:
 	pending_target_branch = branch_item
 
 	# Determine the branch provider to pick the right workflow
-	var act_data = branch_item.get_action_data()
+	var act_data = branch_item.get_block()
 	var bid: String = registry.resolve_branch_id(act_data.branch_id if act_data else "", act_data.branch_type if act_data else "")
 	pending_branch_id = bid
 	var branch_provider = registry.get_branch_provider(bid) if registry else null
@@ -1590,7 +1590,7 @@ func _on_branch_add_else(branch_item, event_row) -> void:
 	"""Add an Else branch below an existing branch."""
 	_push_undo_state()
 
-	var branch_data = branch_item.get_action_data()
+	var branch_data = branch_item.get_block()
 	if not branch_data or not event_row:
 		return
 
@@ -1605,7 +1605,7 @@ func _on_branch_add_else(branch_item, event_row) -> void:
 	# Find the array containing this branch (could be nested)
 	var actions_array: Array
 	if branch_item.parent_branch:
-		actions_array = branch_item.parent_branch.get_action_data().branch_actions
+		actions_array = branch_item.parent_branch.get_block().branch_actions
 	else:
 		var event_data = event_row.get_event_data()
 		if not event_data:
@@ -1624,7 +1624,7 @@ func _on_branch_add_else(branch_item, event_row) -> void:
 
 func _on_branch_condition_edit(branch_item, event_row) -> void:
 	"""Edit the condition or inputs of a branch."""
-	var act_data = branch_item.get_action_data()
+	var act_data = branch_item.get_block()
 	if not act_data:
 		return
 
@@ -1677,7 +1677,7 @@ func _on_branch_action_add(branch_item, event_row) -> void:
 
 func _on_branch_action_edit(action_item, branch_item, event_row) -> void:
 	"""Edit an action inside a branch."""
-	var act_data = action_item.get_action_data()
+	var act_data = action_item.get_block()
 	if not act_data:
 		return
 
@@ -1743,18 +1743,18 @@ func _finalize_elseif_creation(inputs: Dictionary) -> void:
 	elseif_data.is_branch = true
 	elseif_data.branch_type = "elseif"
 	elseif_data.branch_id = registry.resolve_branch_id(
-		pending_target_branch.get_action_data().branch_id if pending_target_branch else "",
-		pending_target_branch.get_action_data().branch_type if pending_target_branch else ""
+		pending_target_branch.get_block().branch_id if pending_target_branch else "",
+		pending_target_branch.get_block().branch_type if pending_target_branch else ""
 	)
 	elseif_data.branch_condition = cond
 	elseif_data.branch_actions = [] as Array[FKEventAction]
 
 	if pending_target_branch and pending_target_row:
-		var branch_act_data = pending_target_branch.get_action_data()
+		var branch_act_data = pending_target_branch.get_block()
 		# Find the array containing this branch (could be nested)
 		var actions_array: Array
 		if pending_target_branch.parent_branch:
-			actions_array = pending_target_branch.parent_branch.get_action_data().branch_actions
+			actions_array = pending_target_branch.parent_branch.get_block().branch_actions
 		else:
 			var event_data = pending_target_row.get_event_data()
 			if not event_data:
@@ -1778,7 +1778,7 @@ func _update_branch_condition(expressions: Dictionary) -> void:
 	_push_undo_state()
 
 	if pending_target_branch:
-		var act_data = pending_target_branch.get_action_data()
+		var act_data = pending_target_branch.get_block()
 		if act_data:
 			# Check input type to update the right field
 			var bid: String = registry.resolve_branch_id(act_data.branch_id, act_data.branch_type)
@@ -1856,7 +1856,7 @@ func _update_branch_evaluation(expressions: Dictionary) -> void:
 	_push_undo_state()
 
 	if pending_target_branch:
-		var act_data = pending_target_branch.get_action_data()
+		var act_data = pending_target_branch.get_block()
 		if act_data:
 			act_data.branch_inputs = expressions
 			pending_target_branch.update_display()
@@ -1876,10 +1876,10 @@ func _finalize_elseif_evaluation_creation(expressions: Dictionary) -> void:
 	elseif_data.branch_actions = [] as Array[FKEventAction]
 
 	if pending_target_branch and pending_target_row:
-		var branch_act_data = pending_target_branch.get_action_data()
+		var branch_act_data = pending_target_branch.get_block()
 		var actions_array: Array
 		if pending_target_branch.parent_branch:
-			actions_array = pending_target_branch.parent_branch.get_action_data().branch_actions
+			actions_array = pending_target_branch.parent_branch.get_block().branch_actions
 		else:
 			var event_data = pending_target_row.get_event_data()
 			if not event_data:
@@ -1902,7 +1902,7 @@ func _finalize_elseif_evaluation_creation(expressions: Dictionary) -> void:
 
 func _on_condition_edit_requested(condition_item, bound_row) -> void:
 	"""Handle double-click on condition to edit its inputs."""
-	var cond_data = condition_item.get_condition_data()
+	var cond_data = condition_item.get_block()
 	if not cond_data:
 		return
 	
@@ -1929,7 +1929,7 @@ func _on_condition_edit_requested(condition_item, bound_row) -> void:
 
 func _on_action_edit_requested(action_item, bound_row) -> void:
 	"""Handle double-click on action to edit its inputs."""
-	var act_data = action_item.get_action_data()
+	var act_data = action_item.get_block()
 	if not act_data:
 		return
 	

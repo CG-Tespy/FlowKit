@@ -22,3 +22,6 @@ func deserialize(dict: Dictionary) -> void:
 func duplicate_block() -> FKBaseBlock:
 	var copy := self.duplicate(true)
 	return copy
+	
+func get_id() -> String:
+	return ""

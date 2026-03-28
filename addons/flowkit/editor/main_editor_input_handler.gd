@@ -151,10 +151,10 @@ func _on_copy_input() -> bool:
 	return copied
 
 func _copy_selected_item():
-	if selected_item.has_method("get_action_data"):
-		clipboard.copy_action(selected_item.get_action_data())
-	elif selected_item.has_method("get_condition_data"):
-		clipboard.copy_condition(selected_item.get_condition_data())
+	if selected_item.has_method("get_block"):
+		clipboard.copy_action(selected_item.get_block())
+	elif selected_item.has_method("get_block"):
+		clipboard.copy_condition(selected_item.get_block())
 
 func _copy_selected_row():
 	if selected_row.has_method("get_event_data"):

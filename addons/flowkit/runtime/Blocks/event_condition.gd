@@ -24,3 +24,6 @@ func deserialize(dict: Dictionary) -> void:
 	target_node = NodePath(dict.get("target_node", ""))
 	inputs = dict.get("inputs", {}).duplicate()
 	negated = dict.get("negated", false)
+
+func get_id() -> String:
+	return condition_id
