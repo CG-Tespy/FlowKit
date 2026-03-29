@@ -1,6 +1,6 @@
 @tool
 extends FKUnitUi
-class_name FKActionBlockNode
+class_name FKActionUnitUi
 
 signal edit_requested(node)
 signal delete_requested(node)
@@ -25,11 +25,17 @@ var drop_above := true
 # ---------------------------------------------------------
 
 func _validate_block(to_set: FKUnit) -> bool:
-	return to_set == null or to_set is FKEventAction
+	return to_set == null or to_set is FKActionUnit
 
-func get_action() -> FKEventAction:
-	return _block as FKEventAction
+func get_action() -> FKActionUnit:
+	return _block as FKActionUnit
 
+func get_block() -> FKActionUnit:
+	if _block is FKActionUnit:
+		return _block as FKActionUnit
+	else:
+		return null
+		
 func _on_block_changed() -> void:
 	update_display()
 
@@ -66,10 +72,10 @@ func _update_label() -> void:
 	label.text = "%s on %s%s" % [display_name, node_name, params_text]
 	name = "%s on %s" % [display_name, node_name]
 
-var _action: FKEventAction:
+var _action: FKActionUnit:
 	get:
-		if _block is FKEventAction:
-			return _block as FKEventAction
+		if _block is FKActionUnit:
+			return _block as FKActionUnit
 		else:
 			return null
 

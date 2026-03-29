@@ -219,12 +219,15 @@ func _rebuild_child_nodes() -> void:
 
 func _instantiate_event_row(data: FKEventBlock) -> Control:
 	"""Create an event row UI node for the given data."""
-	var row = EVENT_ROW_SCENE.instantiate()
+	var row: FKEventRowUi = EVENT_ROW_SCENE.instantiate()
 	
 	# Defer initialization to ensure node is ready
-	row.call_deferred("set_event_data", data)
+	row.call_deferred("set_block", data)
 	row.call_deferred("set_registry", registry)
-	
+	_connect_event_row_signals(row, data)
+	return row
+
+func _connect_event_row_signals(row: FKEventRowUi, data: FKEventBlock):
 	# Connect row signals to group handlers - propagate all signals to parent
 	row.delete_event_requested.connect(_on_child_row_delete_requested.bind(data))
 	row.selected.connect(func(n): _on_child_selected(data); selected.emit(n))
@@ -250,9 +253,8 @@ func _instantiate_event_row(data: FKEventBlock) -> Control:
 	row.nested_branch_add_requested.connect(func(bi, bid, r): nested_branch_add_requested.emit(bi, bid, r))
 	row.data_changed.connect(_on_child_modified)
 	row.before_data_changed.connect(func(): before_data_changed.emit())
+	pass
 	
-	return row
-
 var EVENT_ROW_SCENE: PackedScene:
 	get:
 		return FKEditorGlobals.EVENT_ROW_SCENE

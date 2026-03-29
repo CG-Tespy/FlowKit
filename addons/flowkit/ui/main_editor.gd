@@ -418,8 +418,8 @@ func _delete_selected_item() -> void:
 			var idx = event_data.conditions.find(cond_data)
 			if idx >= 0:
 				event_data.conditions.remove_at(idx)
-	elif item_to_delete is FKActionBlockNode or item_to_delete is BranchItemUi:
-		var act_data := item_to_delete.get_block() as FKEventAction
+	elif item_to_delete is FKActionUnitUi or item_to_delete is BranchItemUi:
+		var act_data := item_to_delete.get_block() as FKActionUnit
 		var event_data = parent_row.get_event_data()
 		if act_data and event_data:
 			var idx = event_data.actions.find(act_data)
@@ -690,11 +690,11 @@ func _new_sheet() -> void:
 
 func _create_event_row(data: FKEventBlock) -> Control:
 	"""Create event row node from data (GDevelop-style)."""
-	var row = EVENT_ROW_SCENE.instantiate()
+	var row: FKEventRowUi = EVENT_ROW_SCENE.instantiate()
 	
-	var copy = sheet_io.copy_event_block(data)
+	var copy := sheet_io.copy_event_block(data)
 	
-	row.set_event_data(copy)
+	row.set_block(copy)
 	row.set_registry(registry)
 	_connect_event_row_signals(row)
 	return row
@@ -801,7 +801,7 @@ func _on_group_selected(node) -> void:
 		_on_condition_selected_in_row(node)
 		return
 	
-	if node is FKActionBlockNode or node is BranchItemUi:
+	if node is FKActionUnitUi or node is BranchItemUi:
 		_on_action_selected_in_row(node)
 		return
 	
@@ -1265,7 +1265,7 @@ func _finalize_event_creation(inputs: Dictionary) -> void:
 	var data = FKEventBlock.new("", pending_id, pending_node_path)
 	data.inputs = inputs
 	data.conditions = [] as Array[FKConditionUnit]
-	data.actions = [] as Array[FKEventAction]
+	data.actions = [] as Array[FKActionUnit]
 	
 	var row = _create_event_row(data)
 	
@@ -1290,7 +1290,7 @@ func _finalize_event_above_target(inputs: Dictionary) -> void:
 	var data = FKEventBlock.new("", pending_id, pending_node_path)
 	data.inputs = inputs
 	data.conditions = [] as Array[FKConditionUnit]
-	data.actions = [] as Array[FKEventAction]
+	data.actions = [] as Array[FKActionUnit]
 	
 	var row = _create_event_row(data)
 	
@@ -1319,7 +1319,7 @@ func _finalize_event_in_group(inputs: Dictionary) -> void:
 	var data = FKEventBlock.new("", pending_id, pending_node_path)
 	data.inputs = inputs
 	data.conditions = [] as Array[FKConditionUnit]
-	data.actions = [] as Array[FKEventAction]
+	data.actions = [] as Array[FKActionUnit]
 	
 	# Add the event data to the group
 	if pending_target_group.has_method("add_event_to_group"):
@@ -1339,7 +1339,7 @@ func _finalize_condition_creation(inputs: Dictionary) -> void:
 	data.target_node = pending_node_path
 	data.inputs = inputs
 	data.negated = false
-	data.actions = [] as Array[FKEventAction]
+	data.actions = [] as Array[FKActionUnit]
 	
 	if pending_target_row and pending_target_row.has_method("add_condition"):
 		pending_target_row.add_condition(data)
@@ -1353,7 +1353,7 @@ func _finalize_action_creation(inputs: Dictionary) -> void:
 	# Push undo state before adding action
 	_push_undo_state()
 	
-	var data = FKEventAction.new()
+	var data = FKActionUnit.new()
 	data.action_id = pending_id
 	data.target_node = pending_node_path
 	data.inputs = inputs
@@ -1423,7 +1423,7 @@ func _replace_event(expressions: Dictionary) -> void:
 	var new_data = FKEventBlock.new(old_block_id, pending_id, pending_node_path)
 	new_data.inputs = expressions
 	new_data.conditions = old_data.conditions if old_data else ([] as Array[FKConditionUnit])
-	new_data.actions = old_data.actions if old_data else ([] as Array[FKEventAction])
+	new_data.actions = old_data.actions if old_data else ([] as Array[FKActionUnit])
 	
 	# Create new row
 	var new_row = _create_event_row(new_data)
@@ -1595,12 +1595,12 @@ func _on_branch_add_else(branch_item, event_row) -> void:
 		return
 
 	# Create an else branch action
-	var else_data = FKEventAction.new()
+	var else_data = FKActionUnit.new()
 	else_data.is_branch = true
 	else_data.branch_type = "else"
 	else_data.branch_id = registry.resolve_branch_id(branch_data.branch_id, branch_data.branch_type)
 	else_data.branch_condition = null
-	else_data.branch_actions = [] as Array[FKEventAction]
+	else_data.branch_actions = [] as Array[FKActionUnit]
 
 	# Find the array containing this branch (could be nested)
 	var actions_array: Array
@@ -1712,12 +1712,12 @@ func _finalize_branch_creation(inputs: Dictionary) -> void:
 	cond.inputs = inputs
 	cond.negated = false
 
-	var branch_data = FKEventAction.new()
+	var branch_data = FKActionUnit.new()
 	branch_data.is_branch = true
 	branch_data.branch_type = "if"
 	branch_data.branch_id = pending_branch_id
 	branch_data.branch_condition = cond
-	branch_data.branch_actions = [] as Array[FKEventAction]
+	branch_data.branch_actions = [] as Array[FKActionUnit]
 
 	# If pending_target_branch is set, add as nested branch
 	if pending_target_branch and pending_target_branch.has_method("add_branch_action"):
@@ -1739,7 +1739,7 @@ func _finalize_elseif_creation(inputs: Dictionary) -> void:
 	cond.inputs = inputs
 	cond.negated = false
 
-	var elseif_data = FKEventAction.new()
+	var elseif_data = FKActionUnit.new()
 	elseif_data.is_branch = true
 	elseif_data.branch_type = "elseif"
 	elseif_data.branch_id = registry.resolve_branch_id(
@@ -1747,7 +1747,7 @@ func _finalize_elseif_creation(inputs: Dictionary) -> void:
 		pending_target_branch.get_block().branch_type if pending_target_branch else ""
 	)
 	elseif_data.branch_condition = cond
-	elseif_data.branch_actions = [] as Array[FKEventAction]
+	elseif_data.branch_actions = [] as Array[FKActionUnit]
 
 	if pending_target_branch and pending_target_row:
 		var branch_act_data = pending_target_branch.get_block()
@@ -1796,7 +1796,7 @@ func _finalize_branch_action_creation(inputs: Dictionary) -> void:
 	"""Add an action inside a branch."""
 	_push_undo_state()
 
-	var data = FKEventAction.new()
+	var data = FKActionUnit.new()
 	data.action_id = pending_id
 	data.target_node = pending_node_path
 	data.inputs = inputs
@@ -1834,12 +1834,12 @@ func _start_branch_workflow(branch_id: String, target_row) -> void:
 func _finalize_branch_evaluation_creation(inputs: Dictionary) -> void:
 	_push_undo_state()
 
-	var branch_data = FKEventAction.new()
+	var branch_data = FKActionUnit.new()
 	branch_data.is_branch = true
 	branch_data.branch_type = "if"
 	branch_data.branch_id = pending_branch_id
 	branch_data.branch_inputs = inputs
-	branch_data.branch_actions = [] as Array[FKEventAction]
+	branch_data.branch_actions = [] as Array[FKActionUnit]
 
 	# If pending_target_branch is set, add as nested branch
 	if pending_target_branch and pending_target_branch.has_method("add_branch_action"):
@@ -1868,12 +1868,12 @@ func _update_branch_evaluation(expressions: Dictionary) -> void:
 func _finalize_elseif_evaluation_creation(expressions: Dictionary) -> void:
 	_push_undo_state()
 
-	var elseif_data = FKEventAction.new()
+	var elseif_data = FKActionUnit.new()
 	elseif_data.is_branch = true
 	elseif_data.branch_type = "elseif"
 	elseif_data.branch_id = pending_branch_id
 	elseif_data.branch_inputs = expressions
-	elseif_data.branch_actions = [] as Array[FKEventAction]
+	elseif_data.branch_actions = [] as Array[FKActionUnit]
 
 	if pending_target_branch and pending_target_row:
 		var branch_act_data = pending_target_branch.get_block()
@@ -1981,14 +1981,14 @@ func _on_condition_dropped(source_row, condition_data: FKConditionUnit, target_r
 		cond_copy.target_node = condition_data.target_node
 		cond_copy.inputs = condition_data.inputs.duplicate()
 		cond_copy.negated = condition_data.negated
-		cond_copy.actions = [] as Array[FKEventAction]
+		cond_copy.actions = [] as Array[FKActionUnit]
 		
 		target_data.conditions.append(cond_copy)
 		target_row.update_display()
 	
 	_save_sheet()
 
-func _on_action_dropped(source_row, action_data: FKEventAction, target_row) -> void:
+func _on_action_dropped(source_row, action_data: FKActionUnit, target_row) -> void:
 	"""Handle action dropped from one event row to another."""
 	if not source_row or not target_row or not action_data:
 		return
@@ -2007,7 +2007,7 @@ func _on_action_dropped(source_row, action_data: FKEventAction, target_row) -> v
 	var target_data = target_row.get_event_data()
 	if target_data:
 		# Create a copy of the action data
-		var act_copy = FKEventAction.new()
+		var act_copy = FKActionUnit.new()
 		act_copy.action_id = action_data.action_id
 		act_copy.target_node = action_data.target_node
 		act_copy.inputs = action_data.inputs.duplicate()

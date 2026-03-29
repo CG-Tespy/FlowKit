@@ -37,7 +37,7 @@ func copy_event(event_data: FKEventBlock) -> void:
 	_type = "event"
 	_event_data.append(_serialize_event_block(event_data))
 
-func copy_action(action_data: FKEventAction) -> void:
+func copy_action(action_data: FKActionUnit) -> void:
 	clear()
 	_type = "action"
 	_action_data.append(_serialize_action(action_data))
@@ -65,10 +65,10 @@ func paste_event() -> Array[FKEventBlock]:
 		result.append(_deserialize_event_block(dict))
 	return result
 
-func paste_action() -> Array[FKEventAction]:
+func paste_action() -> Array[FKActionUnit]:
 	if _type != "action":
 		return []
-	var result: Array[FKEventAction] = []
+	var result: Array[FKActionUnit] = []
 	for dict in _action_data:
 		result.append(_deserialize_action(dict))
 	return result
@@ -120,7 +120,7 @@ func _serialize_condition(cond: FKConditionUnit) -> Dictionary:
 	}
 
 
-func _serialize_action(act: FKEventAction) -> Dictionary:
+func _serialize_action(act: FKActionUnit) -> Dictionary:
 	var dict = {
 		"action_id": act.action_id,
 		"target_node": str(act.target_node),
@@ -196,7 +196,7 @@ func _deserialize_event_block(dict: Dictionary) -> FKEventBlock:
 	var data = FKEventBlock.new(block_id, event_id, target_node)
 	data.inputs = dict.get("inputs", {}).duplicate()
 	data.conditions = [] as Array[FKConditionUnit]
-	data.actions = [] as Array[FKEventAction]
+	data.actions = [] as Array[FKActionUnit]
 
 	for cond_dict in dict.get("conditions", []):
 		data.conditions.append(_deserialize_condition(cond_dict))
@@ -213,12 +213,12 @@ func _deserialize_condition(dict: Dictionary) -> FKConditionUnit:
 	cond.target_node = NodePath(dict.get("target_node", ""))
 	cond.inputs = dict.get("inputs", {}).duplicate()
 	cond.negated = dict.get("negated", false)
-	cond.actions = [] as Array[FKEventAction]  # Always empty for conditions
+	cond.actions = [] as Array[FKActionUnit]  # Always empty for conditions
 	return cond
 
 
-func _deserialize_action(dict: Dictionary) -> FKEventAction:
-	var act = FKEventAction.new()
+func _deserialize_action(dict: Dictionary) -> FKActionUnit:
+	var act = FKActionUnit.new()
 	act.action_id = dict.get("action_id", "")
 	act.target_node = NodePath(dict.get("target_node", ""))
 	act.inputs = dict.get("inputs", {}).duplicate()
@@ -230,7 +230,7 @@ func _deserialize_action(dict: Dictionary) -> FKEventAction:
 		if cond_dict:
 			act.branch_condition = _deserialize_condition(cond_dict)
 
-		act.branch_actions = [] as Array[FKEventAction]
+		act.branch_actions = [] as Array[FKActionUnit]
 		for sub_dict in dict.get("branch_actions", []):
 			act.branch_actions.append(_deserialize_action(sub_dict))
 

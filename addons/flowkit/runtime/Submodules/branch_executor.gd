@@ -13,7 +13,7 @@ const _sys_node_name := "System"
 const _path_to_sys := NodePath("/root/FlowKitSystem")
 
 ## Evaluate a branch's condition. Returns true if the condition passes.
-func _evaluate_condition(act: FKEventAction, current_root: Node, block_id: String) -> bool:
+func _evaluate_condition(act: FKActionUnit, current_root: Node, block_id: String) -> bool:
 	if not act.branch_condition:
 		return false
 
@@ -88,7 +88,7 @@ func _execute_actions(actions: Array, current_root: Node, block_id: String) -> v
 
 ## Determine whether a branch should execute, delegating to the branch provider.
 ## Handles both condition-type and evaluation-type branches.
-func _should_execute_branch(act: FKEventAction, provider: Variant, 
+func _should_execute_branch(act: FKActionUnit, provider: Variant, 
 current_root: Node, block_id: String) -> bool:
 	if not provider:
 		return false
@@ -104,5 +104,5 @@ current_root: Node, block_id: String) -> bool:
 		return provider.should_execute(false, evaluated_inputs, block_id)
 
 ## Get evaluated branch inputs for execution-count queries.
-func _get_branch_inputs(act: FKEventAction, current_root: Node) -> Dictionary:
+func _get_branch_inputs(act: FKActionUnit, current_root: Node) -> Dictionary:
 	return registry.evaluate_branch_inputs(act.branch_inputs, current_root)

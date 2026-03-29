@@ -5,7 +5,7 @@ class_name FKConditionUnit
 @export var target_node: NodePath
 @export var inputs: Dictionary = {}
 @export var negated: bool = false
-@export var actions: Array[FKEventAction] = [] 
+@export var actions: Array[FKActionUnit] = [] 
 
 func _init() -> void:
 	block_type = "condition"
