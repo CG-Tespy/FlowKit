@@ -6,7 +6,7 @@ class_name FKEventBlock
 @export var target_node: NodePath
 @export var inputs: Dictionary = {}
 @export var conditions: Array[FKEventCondition] = []
-@export var actions: Array[FKActionBlock] = []
+@export var actions: Array[FKEventAction] = []
 	
 func _init(p_block_id: String = "", p_event_id: String = "", 
 p_target_node: NodePath = NodePath()) -> void:
@@ -62,7 +62,7 @@ func deserialize(dict: Dictionary) -> void:
 
 	actions = []
 	for act_dict in dict.get("actions", []):
-		var act := FKActionBlock.new()
+		var act := FKEventAction.new()
 		act.deserialize(act_dict)
 		actions.append(act)
 

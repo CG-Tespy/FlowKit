@@ -22,7 +22,7 @@ signal data_changed()
 signal before_data_changed()
 signal add_nested_branch_requested(branch_item, branch_id)  # User wants to add a nested branch
 
-var action_data: FKActionBlock  # The FKActionBlock with is_branch = true
+var action_data: FKEventAction  # The FKEventAction with is_branch = true
 var registry: Node
 var is_selected: bool = false
 var parent_branch = null  # Reference to parent branch_item for nested branches
@@ -233,7 +233,7 @@ func _on_add_action_hover(is_hovering: bool) -> void:
 		else:
 			add_action_label.add_theme_color_override("font_color", Color(0.4, 0.45, 0.42, 1))
 
-func set_action_data(data: FKActionBlock) -> void:
+func set_action_data(data: FKEventAction) -> void:
 	action_data = data
 	call_deferred("_update_display")
 
@@ -241,7 +241,7 @@ func set_registry(reg: Node) -> void:
 	registry = reg
 	call_deferred("_update_display")
 
-func get_block() -> FKActionBlock:
+func get_block() -> FKEventAction:
 	return action_data
 
 func _update_display() -> void:
@@ -457,7 +457,7 @@ func _on_sub_action_reorder(source_item, target_item, is_drop_above: bool) -> vo
 	_update_branch_actions()
 	data_changed.emit()
 
-func add_branch_action(sub_action_data: FKActionBlock) -> void:
+func add_branch_action(sub_action_data: FKEventAction) -> void:
 	"""Add a sub-action to this branch."""
 	if action_data:
 		action_data.branch_actions.append(sub_action_data)

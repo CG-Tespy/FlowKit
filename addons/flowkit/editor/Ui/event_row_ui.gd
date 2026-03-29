@@ -615,7 +615,7 @@ func add_condition(condition_data: FKEventCondition) -> void:
 		event_data.conditions.append(condition_data)
 		_update_conditions()
 
-func add_action(action_data: FKActionBlock) -> void:
+func add_action(action_data: FKEventAction) -> void:
 	if event_data:
 		event_data.actions.append(action_data)
 		_update_actions()

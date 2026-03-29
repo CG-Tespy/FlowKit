@@ -855,7 +855,7 @@ func _extract_ids_from_condition(cond: FKEventCondition, used: Dictionary) -> vo
 
 
 ## Extract IDs from an action (including branch sub-actions).
-func _extract_ids_from_action(action: FKActionBlock, used: Dictionary) -> void:
+func _extract_ids_from_action(action: FKEventAction, used: Dictionary) -> void:
 	if action.action_id and not action.action_id.is_empty():
 		used.action_ids[action.action_id] = true
 

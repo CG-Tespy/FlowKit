@@ -8,7 +8,7 @@ signal delete_action_requested(action_node)
 signal edit_action_requested(action_node)
 signal selected(block_node)
 
-var action_data: FKActionBlock
+var action_data: FKEventAction
 var registry: Node
 var is_selected: bool = false
 
@@ -60,7 +60,7 @@ func _on_context_menu_id_pressed(id: int) -> void:
 		3: # Delete Action
 			delete_action_requested.emit(self)
 
-func set_action_data(data: FKActionBlock) -> void:
+func set_action_data(data: FKEventAction) -> void:
 	action_data = data
 	_update_label()
 
@@ -107,7 +107,7 @@ func set_registry(reg: Node) -> void:
 	registry = reg
 	_update_label()
 
-func get_action_data() -> FKActionBlock:
+func get_action_data() -> FKEventAction:
 	"""Return the internal action data."""
 	return action_data
 
