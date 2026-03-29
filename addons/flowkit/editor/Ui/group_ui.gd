@@ -37,7 +37,7 @@ signal branch_action_edit_requested(action_item, branch_item, row)  ## Emitted w
 signal nested_branch_add_requested(branch_item, branch_id, row)  ## Emitted when adding nested branch
 
 # === State ===
-var group_data: FKGroupBlock
+var group_data: FKGroup
 var is_selected: bool = false
 var registry: Node
 var _last_selected_child_data: Variant = null  # Track which child was last selected for insertion positioning
@@ -121,13 +121,13 @@ func _notification(what: int) -> void:
 
 # === Data Management ===
 
-func set_group_data(data: FKGroupBlock) -> void:
+func set_group_data(data: FKGroup) -> void:
 	"""Set the group's data resource."""
 	group_data = data
 	call_deferred("_refresh_display")
 
 
-func get_group_data() -> FKGroupBlock:
+func get_group_data() -> FKGroup:
 	"""Get the group's data resource."""
 	return group_data
 
@@ -203,11 +203,11 @@ func _rebuild_child_nodes() -> void:
 					var row = _instantiate_event_row(child_data)
 					children_container.add_child(row)
 			"comment":
-				if child_data is FKCommentBlock:
+				if child_data is FKComment:
 					var comment = _instantiate_comment(child_data)
 					children_container.add_child(comment)
 			"group":
-				if child_data is FKGroupBlock:
+				if child_data is FKGroup:
 					var nested = _instantiate_group(child_data)
 					children_container.add_child(nested)
 	
@@ -262,15 +262,15 @@ static var COMMENT_SCENE: PackedScene:
 		return FKEditorGlobals.COMMENT_SCENE
 
 
-func _instantiate_comment(data: FKCommentBlock) -> Control:
+func _instantiate_comment(data: FKComment) -> Control:
 	"""Create a comment UI node for the given data."""
-	var comment: FKCommentBlockUi = COMMENT_SCENE.instantiate()
+	var comment: FKCommentUi = COMMENT_SCENE.instantiate()
 	comment.set_block(data)
 	
 	_connect_comment_signals_to_group_handlers(comment, data)
 	return comment
 
-func _connect_comment_signals_to_group_handlers(comment: FKCommentBlockUi, data: FKCommentBlock):
+func _connect_comment_signals_to_group_handlers(comment: FKCommentUi, data: FKComment):
 	comment.delete_requested.connect(_on_child_comment_delete_requested.bind(data))
 	comment.selected.connect(func(n): _on_child_selected(data); selected.emit(n))
 	print("GroupBlockUi: Listening for comment block contents changed")
@@ -280,7 +280,7 @@ func _connect_comment_signals_to_group_handlers(comment: FKCommentBlockUi, data:
 	comment.insert_event_above_requested.connect(func(c): insert_event_above_requested.emit(c))
 	comment.insert_event_below_requested.connect(func(c): insert_event_below_requested.emit(c))
 	
-func _instantiate_group(data: FKGroupBlock) -> Control:
+func _instantiate_group(data: FKGroup) -> Control:
 	"""Create a nested group UI node for the given data."""
 	var group_scene = load("res://addons/flowkit/ui/workspace/group_ui.tscn")
 	var nested: GroupBlockUi = group_scene.instantiate()
@@ -339,12 +339,12 @@ func _on_child_row_delete_requested(row: Node, data: FKEventBlock) -> void:
 	_remove_child_data(data)
 
 
-func _on_child_comment_delete_requested(data: FKCommentBlock) -> void:
+func _on_child_comment_delete_requested(data: FKComment) -> void:
 	"""Handle deletion of a comment child."""
 	_remove_child_data(data)
 
 
-func _on_child_group_delete_requested(data: FKGroupBlock) -> void:
+func _on_child_group_delete_requested(data: FKGroup) -> void:
 	"""Handle deletion of a nested group child."""
 	_remove_child_data(data)
 
@@ -545,7 +545,7 @@ func _add_comment_to_group() -> void:
 	
 	before_data_changed.emit()
 	
-	var comment = FKCommentBlock.new()
+	var comment = FKComment.new()
 	comment.text = ""
 	
 	# Find the index where to insert the comment

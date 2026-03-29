@@ -19,7 +19,7 @@ FKEventSheet
   └─ events: Array[FKEventBlock]
       ├─ event_id: String (e.g., "on_process")
       ├─ target_node: NodePath (node to poll event from)
-      ├─ conditions: Array[FKEventCondition] (all must pass)
+      ├─ conditions: Array[FKConditionUnit] (all must pass)
       └─ actions: Array[FKEventAction] (executed sequentially)
 ```
 

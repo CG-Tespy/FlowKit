@@ -1,5 +1,5 @@
 extends Resource
-class_name FKBaseBlock
+class_name FKUnit
 
 @export var block_type: String = ""   # "event", "comment", "group"
 
@@ -19,7 +19,7 @@ func deserialize(dict: Dictionary) -> void:
 	push_error("deserialize() not implemented for %s" % block_type)
 
 # Deep-copy contract for undo/redo and clipboard.
-func duplicate_block() -> FKBaseBlock:
+func duplicate_block() -> FKUnit:
 	var copy := self.duplicate(true)
 	return copy
 	

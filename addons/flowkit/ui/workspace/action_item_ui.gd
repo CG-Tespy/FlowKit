@@ -1,5 +1,5 @@
 @tool
-extends FKBaseBlockNode
+extends FKUnitUi
 class_name FKActionBlockNode
 
 signal edit_requested(node)
@@ -24,7 +24,7 @@ var drop_above := true
 # Block Handling
 # ---------------------------------------------------------
 
-func _validate_block(to_set: FKBaseBlock) -> bool:
+func _validate_block(to_set: FKUnit) -> bool:
 	return to_set == null or to_set is FKEventAction
 
 func get_action() -> FKEventAction:

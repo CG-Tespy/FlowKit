@@ -1,5 +1,5 @@
-extends FKBaseBlock
-class_name FKCommentBlock
+extends FKUnit
+class_name FKComment
 
 @export var text: String = ""
 

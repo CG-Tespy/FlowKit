@@ -1,11 +1,11 @@
-extends FKBaseBlock
+extends FKUnit
 class_name FKEventBlock
 
 @export var block_id: String  # Unique identifier for this specific block instance
 @export var event_id: String  # Type of event (e.g., "on_ready", "on_process")
 @export var target_node: NodePath
 @export var inputs: Dictionary = {}
-@export var conditions: Array[FKEventCondition] = []
+@export var conditions: Array[FKConditionUnit] = []
 @export var actions: Array[FKEventAction] = []
 	
 func _init(p_block_id: String = "", p_event_id: String = "", 
@@ -56,7 +56,7 @@ func deserialize(dict: Dictionary) -> void:
 
 	conditions = []
 	for cond_dict in dict.get("conditions", []):
-		var cond := FKEventCondition.new()
+		var cond := FKConditionUnit.new()
 		cond.deserialize(cond_dict)
 		conditions.append(cond)
 

@@ -9,7 +9,7 @@ signal negate_condition_requested(condition_node)
 signal edit_condition_requested(condition_node)
 signal selected(block_node)
 
-var condition_data: FKEventCondition
+var condition_data: FKConditionUnit
 var registry: Node
 var is_selected: bool = false
 
@@ -68,7 +68,7 @@ func _on_context_menu_id_pressed(id: int) -> void:
 			negate_condition_requested.emit(self)
 			print("Negate condition requested for: ", condition_data.condition_id if condition_data else "unknown")
 
-func set_condition_data(data: FKEventCondition) -> void:
+func set_condition_data(data: FKConditionUnit) -> void:
 	condition_data = data
 	_update_label()
 
@@ -76,7 +76,7 @@ func set_registry(reg: Node) -> void:
 	registry = reg
 	_update_label()
 
-func get_condition_data() -> FKEventCondition:
+func get_condition_data() -> FKConditionUnit:
 	"""Return the internal condition data."""
 	return condition_data
 

@@ -1,6 +1,6 @@
 @tool
 extends MarginContainer
-class_name FKBaseBlockNode
+class_name FKUnitUi
 
 signal before_block_changed(node)
 signal block_changed(node)
@@ -21,17 +21,17 @@ func _ready() -> void:
 	mouse_filter = Control.MOUSE_FILTER_STOP
 	update_display.call_deferred()
 	
-func get_block() -> FKBaseBlock:
+func get_block() -> FKUnit:
 	return _block
 
 ## The Block that this Node represents.
-var _block: FKBaseBlock
+var _block: FKUnit
 
 func has_block() -> bool:
 	return _block != null
 
 
-func set_block(to_set: FKBaseBlock) -> void:
+func set_block(to_set: FKUnit) -> void:
 	var valid := _validate_block(to_set)
 	if not valid:
 		return
@@ -42,7 +42,7 @@ func set_block(to_set: FKBaseBlock) -> void:
 	block_changed.emit(self)
 	
 ## Meant to be overridden by subclasses.
-func _validate_block(to_set: FKBaseBlock) -> bool:
+func _validate_block(to_set: FKUnit) -> bool:
 	_alert_need_for_override("_validate_block")
 	return false
 	

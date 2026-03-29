@@ -1,6 +1,6 @@
 @tool
-extends FKBaseBlockNode
-class_name FKConditionBlockUi
+extends FKUnitUi
+class_name FKConditionUnitUi
 
 @export_category("Controls")
 @export var panel: PanelContainer
@@ -20,14 +20,14 @@ var drop_above := true
 # Block Handling
 # ---------------------------------------------------------
 
-func _validate_block(to_set: FKBaseBlock) -> bool:
-	return to_set == null or to_set is FKEventCondition
+func _validate_block(to_set: FKUnit) -> bool:
+	return to_set == null or to_set is FKConditionUnit
 
 func _on_block_changed() -> void:
 	update_display()
 
-func get_block() -> FKEventCondition:
-	return _block as FKEventCondition
+func get_block() -> FKConditionUnit:
+	return _block as FKConditionUnit
 
 # ---------------------------------------------------------
 # Registry Handling
@@ -77,10 +77,10 @@ func _get_display_name_from_registry() -> String:
 				break
 	return display_name
 
-var _cond_block: FKEventCondition:
+var _cond_block: FKConditionUnit:
 	get:
-		if _block is FKEventCondition:
-			return _block as FKEventCondition
+		if _block is FKConditionUnit:
+			return _block as FKConditionUnit
 		else:
 			return null
 			
@@ -113,7 +113,7 @@ func show_context_menu(global_pos: Vector2) -> void:
 	if not context_menu:
 		return
 	
-	print("Showing context menu in FKConditionBlockUi")
+	print("Showing context menu in FKConditionUnitUi")
 	var c := get_block()
 	if c:
 		context_menu.set_item_checked(2, c.negated)
@@ -163,10 +163,10 @@ func _on_gui_input(event: InputEvent) -> void:
 
 func _on_left_click(event: InputEventMouseButton):
 	if event.double_click:
-		print("FKConditionBlockUi edit requested")
+		print("FKConditionUnitUi edit requested")
 		edit_requested.emit(self)
 	else:
-		print("FKConditionBlockUi selected")
+		print("FKConditionUnitUi selected")
 		set_selected(true)
 	
 func _on_right_click():
@@ -254,7 +254,7 @@ func _drop_data(at_position: Vector2, data) -> void:
 		print("FKConditionBlock not dropped due to source node being self")
 		return
 	
-	print("Dropping FKConditionBlockUi")
+	print("Dropping FKConditionUnitUi")
 	var above := at_position.y < size.y / 2.0
 	reorder_requested.emit(source_node, self, above)
 

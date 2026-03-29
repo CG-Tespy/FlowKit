@@ -1,4 +1,4 @@
-extends FKBaseBlock
+extends FKUnit
 class_name FKEventAction
 
 @export var action_id: String = ""
@@ -9,7 +9,7 @@ class_name FKEventAction
 @export var is_branch: bool = false
 @export var branch_type: String = ""              # "if", "elseif", "else", etc.
 @export var branch_id: String = ""                # Branch provider ID
-@export var branch_condition: FKEventCondition = null
+@export var branch_condition: FKConditionUnit = null
 @export var branch_inputs: Dictionary = {}
 @export var branch_actions: Array[FKEventAction] = []
 
@@ -59,7 +59,7 @@ func _deserialize_branch_conds_and_actions(dict: Dictionary):
 	branch_condition = null
 	
 	if dict.has("branch_condition"):
-		var cond := FKEventCondition.new()
+		var cond := FKConditionUnit.new()
 		cond.deserialize(dict["branch_condition"])
 		branch_condition = cond
 

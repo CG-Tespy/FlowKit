@@ -21,7 +21,7 @@ func capture_state(blocks: Array[Node]) -> Array[Dictionary]:
 	
 	
 func serialize_block(block_node: Node) -> Dictionary:
-	var data: FKBaseBlock = null
+	var data: FKUnit = null
 
 	if block_node.has_method("get_event_data"):
 		data = block_node.get_event_data()
@@ -37,8 +37,8 @@ func serialize_block(block_node: Node) -> Dictionary:
 
 
 # Deserialization #
-func restore_state(state: Array[Dictionary]) -> Array[FKBaseBlock]:
-	var result: Array[FKBaseBlock] = []
+func restore_state(state: Array[Dictionary]) -> Array[FKUnit]:
+	var result: Array[FKUnit] = []
 
 	for dict in state:
 		var block := deserialize_block(dict)
@@ -48,7 +48,7 @@ func restore_state(state: Array[Dictionary]) -> Array[FKBaseBlock]:
 	return result
 	
 	
-func deserialize_block(dict: Dictionary) -> FKBaseBlock:
+func deserialize_block(dict: Dictionary) -> FKUnit:
 	var block_type := dict.get("type", "")
 	var block := _instantiate_block(block_type)
 	if block == null:
@@ -58,16 +58,16 @@ func deserialize_block(dict: Dictionary) -> FKBaseBlock:
 	block.deserialize(dict)
 	return block
 
-func _instantiate_block(block_type: String) -> FKBaseBlock:
+func _instantiate_block(block_type: String) -> FKUnit:
 	match block_type:
 		"event":
 			return FKEventBlock.new()
 		"comment":
-			return FKCommentBlock.new()
+			return FKComment.new()
 		"group":
-			return FKGroupBlock.new()
+			return FKGroup.new()
 		"condition": 
-			return FKEventCondition.new()
+			return FKConditionUnit.new()
 		_:
 			return null
 

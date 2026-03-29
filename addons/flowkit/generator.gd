@@ -815,7 +815,7 @@ func _extract_ids_from_sheet(sheet: FKEventSheet, used: Dictionary) -> void:
 
 
 ## Extract IDs from a group block (which can contain events, nested groups, etc.)
-func _extract_ids_from_group(group: FKGroupBlock, used: Dictionary) -> void:
+func _extract_ids_from_group(group: FKGroup, used: Dictionary) -> void:
 	for child in group.children:
 		var child_type: String = child.get("type", "")
 		var child_data = child.get("data", null)
@@ -826,7 +826,7 @@ func _extract_ids_from_group(group: FKGroupBlock, used: Dictionary) -> void:
 				if child_data is FKEventBlock:
 					_extract_ids_from_event_block(child_data, used)
 			"group":
-				if child_data is FKGroupBlock:
+				if child_data is FKGroup:
 					_extract_ids_from_group(child_data, used)
 
 
@@ -846,7 +846,7 @@ func _extract_ids_from_event_block(block: FKEventBlock, used: Dictionary) -> voi
 
 
 ## Extract IDs from a condition (which may itself contain standalone-condition actions).
-func _extract_ids_from_condition(cond: FKEventCondition, used: Dictionary) -> void:
+func _extract_ids_from_condition(cond: FKConditionUnit, used: Dictionary) -> void:
 	if cond.condition_id and not cond.condition_id.is_empty():
 		used.condition_ids[cond.condition_id] = true
 	# Standalone conditions may have nested actions

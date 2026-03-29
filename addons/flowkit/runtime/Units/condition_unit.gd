@@ -1,5 +1,5 @@
-extends FKBaseBlock
-class_name FKEventCondition
+extends FKUnit
+class_name FKConditionUnit
 
 @export var condition_id: String = ""
 @export var target_node: NodePath

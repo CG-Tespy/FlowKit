@@ -330,7 +330,7 @@ func _update_actions() -> void:
 			_connect_action_item_signals(item)
 			actions_container.add_child(item)
 
-func _connect_condition_item_signals(item: FKConditionBlockUi) -> void:
+func _connect_condition_item_signals(item: FKConditionUnitUi) -> void:
 	item.selected.connect(func(node): condition_selected.emit(node))
 	item.edit_requested.connect(_on_condition_item_edit)
 	item.delete_requested.connect(_on_condition_item_delete)
@@ -387,7 +387,7 @@ func _on_branch_item_delete(item) -> void:
 			_update_actions()
 			data_changed.emit()
 
-func _on_condition_item_edit(item: FKConditionBlockUi) -> void:
+func _on_condition_item_edit(item: FKConditionUnitUi) -> void:
 	condition_edit_requested.emit(item)
 
 func _on_condition_item_delete(item) -> void:
@@ -610,7 +610,7 @@ func _pull_action_to_top_level(act_data) -> void:
 		_update_actions()
 		data_changed.emit()
 
-func add_condition(condition_data: FKEventCondition) -> void:
+func add_condition(condition_data: FKConditionUnit) -> void:
 	if event_data:
 		event_data.conditions.append(condition_data)
 		_update_conditions()
