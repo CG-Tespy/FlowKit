@@ -40,16 +40,16 @@ func copy_event_block(data: FKEventBlock) -> FKEventBlock:
 
 	var event_copy := FKEventBlock.new(data.block_id, data.event_id, data.target_node)
 	event_copy.inputs = data.inputs.duplicate()
-	event_copy.conditions = [] as Array[FKEventCondition]
-	event_copy.actions = [] as Array[FKEventAction]
+	event_copy.conditions = [] as Array[FKConditionUnit]
+	event_copy.actions = [] as Array[FKActionUnit]
 
 	for cond in data.conditions:
-		var cond_copy := FKEventCondition.new()
+		var cond_copy := FKConditionUnit.new()
 		cond_copy.condition_id = cond.condition_id
 		cond_copy.target_node = cond.target_node
 		cond_copy.inputs = cond.inputs.duplicate()
 		cond_copy.negated = cond.negated
-		cond_copy.actions = [] as Array[FKEventAction]
+		cond_copy.actions = [] as Array[FKActionUnit]
 		event_copy.conditions.append(cond_copy)
 
 	for act in data.actions:
@@ -59,11 +59,11 @@ func copy_event_block(data: FKEventBlock) -> FKEventBlock:
 	return event_copy
 
 
-func copy_action(act: FKEventAction) -> FKEventAction:
+func copy_action(act: FKActionUnit) -> FKActionUnit:
 	if act == null:
 		return null
 
-	var act_copy := FKEventAction.new()
+	var act_copy := FKActionUnit.new()
 	act_copy.action_id = act.action_id
 	act_copy.target_node = act.target_node
 	act_copy.inputs = act.inputs.duplicate()
@@ -73,26 +73,26 @@ func copy_action(act: FKEventAction) -> FKEventAction:
 	act_copy.branch_inputs = act.branch_inputs.duplicate()
 
 	if act.branch_condition:
-		var cond_copy := FKEventCondition.new()
+		var cond_copy := FKConditionUnit.new()
 		cond_copy.condition_id = act.branch_condition.condition_id
 		cond_copy.target_node = act.branch_condition.target_node
 		cond_copy.inputs = act.branch_condition.inputs.duplicate()
 		cond_copy.negated = act.branch_condition.negated
-		cond_copy.actions = [] as Array[FKEventAction]
+		cond_copy.actions = [] as Array[FKActionUnit]
 		act_copy.branch_condition = cond_copy
 
-	act_copy.branch_actions = [] as Array[FKEventAction]
+	act_copy.branch_actions = [] as Array[FKActionUnit]
 	for sub_act in act.branch_actions:
 		act_copy.branch_actions.append(copy_action(sub_act))
 
 	return act_copy
 
 
-func copy_group_block(data: FKGroupBlock) -> FKGroupBlock:
+func copy_group_block(data: FKGroup) -> FKGroup:
 	if data == null:
 		return null
 
-	var group_copy := FKGroupBlock.new()
+	var group_copy := FKGroup.new()
 	group_copy.title = data.title
 	group_copy.collapsed = data.collapsed
 	group_copy.color = data.color
@@ -110,15 +110,15 @@ func copy_group_block(data: FKGroupBlock) -> FKGroupBlock:
 						"data": copy_event_block(child_data)
 					})
 			"comment":
-				if child_data is FKCommentBlock:
-					var comment_copy := FKCommentBlock.new()
+				if child_data is FKComment:
+					var comment_copy := FKComment.new()
 					comment_copy.text = child_data.text
 					group_copy.children.append({
 						"type": "comment",
 						"data": comment_copy
 					})
 			"group":
-				if child_data is FKGroupBlock:
+				if child_data is FKGroup:
 					group_copy.children.append({
 						"type": "group",
 						"data": copy_group_block(child_data)

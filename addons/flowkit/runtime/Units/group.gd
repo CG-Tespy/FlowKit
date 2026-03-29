@@ -1,5 +1,5 @@
-extends FKBaseBlock
-class_name FKGroupBlock
+extends FKUnit
+class_name FKGroup
 ## A group container for organizing events, comments, and nested groups in FlowKit.
 ##
 ## Groups provide visual organization and can be collapsed/expanded.
@@ -16,7 +16,7 @@ func _init() -> void:
 	block_type = "group"
 
 
-func add_child_item(type: String, data: FKBaseBlock) -> void:
+func add_child_item(type: String, data: FKUnit) -> void:
 	children.append({"type": type, "data": data})
 
 
@@ -37,14 +37,14 @@ func get_child_type(index: int) -> String:
 	return ""
 
 
-func get_child_data(index: int) -> FKBaseBlock:
+func get_child_data(index: int) -> FKUnit:
 	var valid_index: bool = index >= 0 and index < children.size()
 	if valid_index:
 		return children[index].get("data")
 	return null
 
 
-func find_child_index(data: FKBaseBlock) -> int:
+func find_child_index(data: FKUnit) -> int:
 	for i in range(children.size()):
 		if children[i].get("data") == data:
 			return i
@@ -62,12 +62,12 @@ func serialize() -> Dictionary:
 	
 	return result
 
-static func _get_serialized_children(block: FKGroupBlock) -> Array:
+static func _get_serialized_children(block: FKGroup) -> Array:
 	var result: Array = []
 	
 	for child in block.children:
 		var child_type = child.get("type", "")
-		var child_data: FKBaseBlock = child.get("data")
+		var child_data: FKUnit = child.get("data")
 
 		if child_data:
 			var serialized = child_data.serialize()
@@ -90,9 +90,9 @@ func deserialize(dict: Dictionary) -> void:
 			})
 
 
-func copy_deep() -> FKGroupBlock:
+func copy_deep() -> FKGroup:
 	"""Create a deep copy of this group and all its children."""
-	var copy = FKGroupBlock.new()
+	var copy = FKGroup.new()
 	copy.title = title
 	copy.collapsed = collapsed
 	copy.color = color
@@ -105,7 +105,7 @@ func copy_deep() -> FKGroupBlock:
 		if child_data and child_data.has_method("duplicate"):
 			var child_copy = child_data.duplicate()
 			# Deep copy for nested groups
-			if child_type == "group" and child_data is FKGroupBlock:
+			if child_type == "group" and child_data is FKGroup:
 				child_copy = child_data.copy_deep()
 			copy.children.append({"type": child_type, "data": child_copy})
 	

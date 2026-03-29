@@ -1,49 +1,51 @@
+##
+## Represents an Action entry (parented to an Event Block) in the FlowKit editor.
+##
 @tool
-extends MarginContainer
+extends FKUnitUi
 class_name FKEventRowUi
 
 # Scene Dependencies
 var CONDITION_ITEM_SCENE: PackedScene:
 	get:
 		return FKEditorGlobals.CONDITION_ITEM_SCENE
-		
+
 var BRANCH_ITEM_SCENE: PackedScene:
 	get:
 		return FKEditorGlobals.BRANCH_ITEM_SCENE
-		
+
 var ACTION_ITEM_SCENE: PackedScene:
 	get:
 		return FKEditorGlobals.ACTION_ITEM_SCENE
-		
+
 signal insert_event_below_requested(event_row)
 signal insert_comment_below_requested(event_row)
 signal replace_event_requested(event_row)
 signal delete_event_requested(event_row)
 signal edit_event_requested(event_row)
+
 signal add_condition_requested(event_row)
 signal add_action_requested(event_row)
+
 signal condition_selected(condition_node)
 signal action_selected(action_node)
+
 signal condition_edit_requested(condition_item)
 signal action_edit_requested(action_item)
-signal selected(block_node)
+
 signal data_changed()
 signal condition_dropped(source_row, condition_data, target_row)
 signal action_dropped(source_row, action_data, target_row)
-signal before_data_changed()  # Emitted before any data modification for undo state capture
-# Branch signals
-signal add_branch_requested(event_row, branch_id)  # User wants to add a branch
-signal add_elseif_requested(branch_item, event_row)  # Add elseif after a branch
-signal add_else_requested(branch_item, event_row)  # Add else after a branch
-signal branch_condition_edit_requested(branch_item, event_row)  # Edit branch condition/inputs
-signal branch_action_add_requested(branch_item, event_row)  # Add action inside a branch
-signal branch_action_edit_requested(action_item, branch_item, event_row)  # Edit action inside branch
-signal nested_branch_add_requested(branch_item, branch_id, event_row)  # Add nested branch inside a branch
+signal before_data_changed() # Emitted before any data modification for undo state capture
 
-# Data
-var event_data: FKEventBlock
-var registry: Node
-var is_selected: bool = false
+# Branch signals
+signal add_branch_requested(event_row, branch_id)
+signal add_elseif_requested(branch_item, event_row)
+signal add_else_requested(branch_item, event_row)
+signal branch_condition_edit_requested(branch_item, event_row)
+signal branch_action_add_requested(branch_item, event_row)
+signal branch_action_edit_requested(action_item, branch_item, event_row)
+signal nested_branch_add_requested(branch_item, branch_id, event_row)
 
 # Ui and Styling
 @export_category("Controls")
@@ -67,37 +69,68 @@ var is_selected: bool = false
 @export var normal_stylebox: StyleBox
 @export var selected_stylebox: StyleBox
 
-func _enter_tree() -> void:
-	_toggle_subs(true)
+var _header_label_format: String = "⚡ %s (%s)%s"
+const _preview_label_color := Color(0.9, 0.95, 0.9, 0.7)
 
-# Not the only sub-toggler in this class, given the way we need things wired
-func _toggle_subs(on: bool):
-	if on && !_is_subbed:
+# ---------------------------------------------------------
+# FKUnitUi integration
+# ---------------------------------------------------------
+
+func _validate_block(to_set: FKUnit) -> bool:
+	return to_set == null or to_set is FKEventBlock
+
+func _on_block_changed() -> void:
+	update_display()
+
+func _on_registry_set() -> void:
+	_update_display()
+
+func _update_styling() -> void:
+	var style := selected_stylebox if is_selected \
+	else normal_stylebox
+	panel.add_theme_stylebox_override("panel", style)
+
+# Public version since we want to allow other modules to ask this to update
+# its display.
+func update_display() -> void:
+	_update_display()
+
+func _toggle_subs(on: bool) -> void:
+	if is_editor_preview:
+		return
+	if on and not _is_subbed:
 		gui_input.connect(_on_gui_input)
 		context_menu.id_pressed.connect(_on_context_menu_id_pressed)
-	elif !on && _is_subbed:
+		_toggle_label_subs(true)
+		_toggle_drop_zone_signals(true)
+	elif not on and _is_subbed:
 		gui_input.disconnect(_on_gui_input)
 		context_menu.id_pressed.disconnect(_on_context_menu_id_pressed)
-			
-	_toggle_label_subs(on)
-	_toggle_drop_zone_signals(on)
-	_is_subbed = on
+		_toggle_label_subs(false)
+		_toggle_drop_zone_signals(false)
 
-var _is_subbed := false
+	super._toggle_subs(on)
+
+# ---------------------------------------------------------
+# Input & Context Menu
+# ---------------------------------------------------------
 
 func _on_gui_input(event: InputEvent) -> void:
 	var mouse_click: bool = event is InputEventMouseButton and event.pressed
 	if not mouse_click:
 		return
-	
-	if event.button_index == MOUSE_BUTTON_LEFT:
-		print("Event row ui clicked")
-		selected.emit(self)
-	elif event.button_index == MOUSE_BUTTON_RIGHT:
-		selected.emit(self)
-		_prep_then_show_context_menu()
+
+	var right_click: bool = event.button_index == MOUSE_BUTTON_RIGHT
+	if right_click:
+		var mouse_pos := DisplayServer.mouse_get_position()
+		show_context_menu(mouse_pos)
 		
-func _prep_then_show_context_menu():
+	var left_click: bool = event.button_index == MOUSE_BUTTON_LEFT
+	if left_click or right_click:
+		set_selected(true)
+		get_viewport().set_input_as_handled()
+		
+func show_context_menu(global_pos: Vector2) -> void:
 	context_menu.clear()
 	context_menu.add_item("Add Event Below", MenuChoices.ADD_EVENT_BELOW)
 	context_menu.add_item("Add Comment Below", MenuChoices.ADD_COMMENT_BELOW)
@@ -106,8 +139,18 @@ func _prep_then_show_context_menu():
 	context_menu.add_item("Edit Event", MenuChoices.EDIT_EVENT)
 	context_menu.add_separator()
 	context_menu.add_item("Delete Event", MenuChoices.DELETE_EVENT)
-	context_menu.position = DisplayServer.mouse_get_position()
+
+	context_menu.position = global_pos
 	context_menu.popup()
+
+enum MenuChoices {
+	NULL,
+	ADD_EVENT_BELOW = 0,
+	REPLACE_EVENT = 1,
+	EDIT_EVENT = 2,
+	DELETE_EVENT = 3,
+	ADD_COMMENT_BELOW = 4
+}
 
 func _on_context_menu_id_pressed(choice: int) -> void:
 	match choice:
@@ -122,35 +165,105 @@ func _on_context_menu_id_pressed(choice: int) -> void:
 		MenuChoices.ADD_COMMENT_BELOW:
 			insert_comment_below_requested.emit(self)
 
-enum MenuChoices
-{
-	NULL,
-	ADD_EVENT_BELOW = 0,
-	REPLACE_EVENT = 1,
-	EDIT_EVENT = 2,
-	DELETE_EVENT = 3,
-	ADD_COMMENT_BELOW = 4
-}
+# ---------------------------------------------------------
+# Add Condition / Action Labels
+# ---------------------------------------------------------
 
 func _toggle_label_subs(on: bool) -> void:
-	if on && !_is_subbed:
+	if on and !_is_subbed:
 		add_condition_label.gui_input.connect(_on_add_condition_input)
 		add_condition_label.mouse_entered.connect(_on_add_condition_hover.bind(true))
 		add_condition_label.mouse_exited.connect(_on_add_condition_hover.bind(false))
-		
+
 		add_action_label.gui_input.connect(_on_add_action_input)
 		add_action_label.mouse_entered.connect(_on_add_action_hover.bind(true))
 		add_action_label.mouse_exited.connect(_on_add_action_hover.bind(false))
-	elif !on && _is_subbed:
-		add_condition_label.gui_input.disconnect(_on_add_condition_input)
-		add_condition_label.mouse_entered.disconnect(_on_add_condition_hover.bind(true))
-		add_condition_label.mouse_exited.disconnect(_on_add_condition_hover.bind(false))
 		
+	elif !on and _is_subbed:
+		add_condition_label.gui_input.disconnect(_on_add_condition_input)
+		add_condition_label.mouse_entered.disconnect(_on_add_condition_hover)
+		add_condition_label.mouse_exited.disconnect(_on_add_condition_hover)
+
 		add_action_label.gui_input.disconnect(_on_add_action_input)
-		add_action_label.mouse_entered.disconnect(_on_add_action_hover.bind(true))
-		add_action_label.mouse_exited.disconnect(_on_add_action_hover.bind(false))
-				
-func _toggle_drop_zone_signals(on: bool):
+		add_action_label.mouse_entered.disconnect(_on_add_action_hover)
+		add_action_label.mouse_exited.disconnect(_on_add_action_hover)
+
+func _on_add_condition_input(event: InputEvent) -> void:
+	var left_click: bool = event is InputEventMouseButton and \
+		event.button_index == MOUSE_BUTTON_LEFT and event.pressed
+	if not left_click:
+		return
+
+	_flash_label(add_condition_label)
+	add_condition_requested.emit(self)
+
+func _flash_label(label: Label) -> void:
+	label.add_theme_color_override("font_color", Color(0.6, 0.85, 1.0, 1))
+	var tween = create_tween()
+	tween.tween_interval(0.15)
+	tween.tween_callback(func():
+		if is_instance_valid(label):
+			label.add_theme_color_override("font_color", Color(0.5, 0.55, 0.6, 1))
+	)
+
+func _on_add_condition_hover(is_hovering: bool) -> void:
+	var color_to_apply := _hover_color if is_hovering \
+	else _normal_color
+	add_condition_label.add_theme_color_override("font_color", color_to_apply)
+
+static var _hover_color := Color(0.7, 0.75, 0.8, 1)
+static var _normal_color := Color(0.5, 0.55, 0.6, 1)
+# ^For the context menu
+
+func _on_add_action_input(event: InputEvent) -> void:
+	var mouse_input_pressed = event is InputEventMouseButton and event.pressed
+	if not mouse_input_pressed:
+		return
+
+	if event.button_index == MOUSE_BUTTON_LEFT:
+		_flash_label(add_action_label)
+		_show_add_action_context_menu()
+
+func _show_add_action_context_menu() -> void:
+	var popup := PopupMenu.new()
+	popup.add_item("Add Action", 0)
+	popup.add_separator()
+
+	var branches: Array = []
+	if registry:
+		branches = registry.branch_providers
+
+	for i in range(branches.size()):
+		var branch_provider = branches[i]
+		if branch_provider.has_method("get_name"):
+			popup.add_item("Add %s" % branch_provider.get_name(), 100 + i)
+
+	popup.id_pressed.connect(func(id):
+		if id == MenuChoices.ADD_EVENT_BELOW:
+			add_action_requested.emit(self)
+		elif id >= 100:
+			var branch_idx = id - 100
+			if branch_idx < branches.size():
+				var bid = branches[branch_idx].get_id()
+				add_branch_requested.emit(self, bid)
+		popup.queue_free()
+	)
+
+	add_child(popup)
+	popup.position = DisplayServer.mouse_get_position()
+	popup.popup()
+
+func _on_add_action_hover(is_hovering: bool) -> void:
+	var color_to_apply: Color = _hover_color if is_hovering \
+	else _normal_color
+	add_action_label.add_theme_color_override("font_color", color_to_apply)
+
+
+# ---------------------------------------------------------
+# Drop Zones
+# ---------------------------------------------------------
+
+func _toggle_drop_zone_signals(on: bool) -> void:
 	if on && !_is_subbed:
 		if condition_drop_zone.has_signal("item_dropped"):
 			condition_drop_zone.item_dropped.connect(_on_condition_drop_zone_dropped)
@@ -161,176 +274,148 @@ func _toggle_drop_zone_signals(on: bool):
 			condition_drop_zone.item_dropped.disconnect(_on_condition_drop_zone_dropped)
 		if action_drop_zone.has_signal("item_dropped"):
 			action_drop_zone.item_dropped.disconnect(_on_action_drop_zone_dropped)
-		
-func _on_add_condition_input(event: InputEvent) -> void:
-	var left_click: bool = event is InputEventMouseButton and \
-	event.button_index == MOUSE_BUTTON_LEFT and event.pressed
-	if not left_click:
+
+func _on_condition_drop_zone_dropped(drag_data: FKDragData) -> void:
+	var source_node := drag_data.node
+	if not source_node or not is_instance_valid(source_node):
 		return
-		
-	_flash_label(add_condition_label)
-	add_condition_requested.emit(self)
 
-func _flash_label(label: Label) -> void:
-	# Change color to light blue on click
-	label.add_theme_color_override("font_color", Color(0.6, 0.85, 1.0, 1))
-	# Restore color after a short delay
-	var tween = create_tween()
-	tween.tween_interval(0.15)
-	tween.tween_callback(func():
-		if is_instance_valid(label):
-			label.add_theme_color_override("font_color", Color(0.5, 0.55, 0.6, 1))
-	)
-
-func _on_add_condition_hover(is_hovering: bool) -> void:
-	if is_hovering:
-		add_condition_label.add_theme_color_override("font_color", Color(0.7, 0.75, 0.8, 1))
-	else:
-		add_condition_label.add_theme_color_override("font_color", Color(0.5, 0.55, 0.6, 1))
-		
-func _on_add_action_input(event: InputEvent) -> void:
-	var mouse_input_pressed = event is InputEventMouseButton and event.pressed
-	if not mouse_input_pressed:
+	var source_row = _find_parent_event_row(source_node)
+	if not source_row or source_row == self:
 		return
-		
-	if event.button_index == MOUSE_BUTTON_LEFT:
-		_flash_label(add_action_label)
-		
-	_show_add_action_context_menu()
 
-func _show_add_action_context_menu() -> void:
-	var popup := PopupMenu.new()
-	popup.add_item("Add Action", 0)
-	popup.add_separator()
-	# Dynamically list branch providers from registry
-	var branches: Array = []
-	if registry:
-		branches = registry.branch_providers
-	for i in range(branches.size()):
-		var branch_provider = branches[i]
-		if branch_provider.has_method("get_name"):
-			popup.add_item("Add %s" % branch_provider.get_name(), 100 + i)
-	popup.id_pressed.connect(func(id):
-		if id == 0:
-			add_action_requested.emit(self)
-		elif id >= 100:
-			var branch_idx = id - 100
-			if branch_idx < branches.size():
-				var bid = branches[branch_idx].get_id()
-				add_branch_requested.emit(self, bid)
-		popup.queue_free()
-	)
-	add_child(popup)
-	popup.position = DisplayServer.mouse_get_position()
-	popup.popup()
+	var cond_data := drag_data.data
+	if cond_data:
+		condition_dropped.emit(source_row, cond_data, self)
 
-func _on_add_action_hover(is_hovering: bool) -> void:
-	if is_hovering:
-		add_action_label.add_theme_color_override("font_color", Color(0.7, 0.75, 0.8, 1))
-	else:
-		add_action_label.add_theme_color_override("font_color", Color(0.5, 0.55, 0.6, 1))
+func _find_parent_event_row(node: Node):
+	var current = node.get_parent()
+	while current:
+		if current is FKEventRowUi:
+			return current
+		current = current.get_parent()
+	return null
+	
+func _on_action_drop_zone_dropped(drag_data: FKDragData) -> void:
+	var source_node := drag_data.node
+	if not source_node or not is_instance_valid(source_node):
+		return
 
-func set_event_data(data: FKEventBlock) -> void:
-	event_data = data
-	call_deferred("_update_display")
+	var source_row = _find_parent_event_row(source_node)
+	if not source_row:
+		return
 
-func set_registry(reg: Node) -> void:
-	registry = reg
-	call_deferred("_update_display")
-
-func get_event_data() -> FKEventBlock:
-	return event_data
+	var act_data := drag_data.data
+	if act_data:
+		if source_row == self:
+			_pull_action_to_top_level(act_data)
+		else:
+			action_dropped.emit(source_row, act_data, self)
+			
+# ---------------------------------------------------------
+# Display / Rebuild
+# ---------------------------------------------------------
 
 func _update_display() -> void:
+	print("Updating display for " + _to_string())
 	_update_event_header()
 	_update_conditions()
 	_update_actions()
-
-func _update_event_header() -> void:
-	if not event_data:
-		return
-		
-	var display_name = _get_event_header_display_name()
-	var params_text = _get_params_text()
 	
-	var node_name = String(event_data.target_node).get_file()
+func _update_event_header() -> void:
+	var e := _get_event()
+	if not e:
+		printerr("Cannot update event header. Got no event to work with.")
+		return
+
+	var display_name = _get_event_header_display_name(e)
+	var params_text = _get_params_text(e)
+	var node_name = String(e.target_node).get_file()
+
 	event_header_label.text = _header_label_format % [display_name, node_name, params_text]
 
-func _get_event_header_display_name() -> String:
-	var result: String = event_data.event_id
-	var from_registry := _provider_name_from_registry()
+func _get_event() -> FKEventBlock:
+	return get_block() as FKEventBlock
+
+func _update_conditions() -> void:
+	var e := _get_event()
+	if not e:
+		return
+
+	for child in conditions_container.get_children():
+		conditions_container.remove_child(child)
+		child.queue_free()
+
+	for condition_data in e.conditions:
+		var item: FKConditionUnitUi = CONDITION_ITEM_SCENE.instantiate()
+		item.legitimize(condition_data, registry)
+		_connect_condition_item_signals(item)
+		conditions_container.add_child(item)
+
+func _get_event_header_display_name(e: FKEventBlock) -> String:
+	var result: String = e.event_id
+	var from_registry := _provider_name_from_registry(e)
 	if from_registry.length() > 0:
 		result = from_registry
-		
 	return result
 
-func _provider_name_from_registry() -> String:
+func _provider_name_from_registry(e: FKEventBlock) -> String:
 	var result: String = ""
 	if registry:
 		for provider in registry.event_providers:
-			if provider.has_method("get_id") and provider.get_id() == event_data.event_id:
+			if provider.has_method("get_id") and provider.get_id() == e.event_id:
 				if provider.has_method("get_name"):
 					result = provider.get_name()
 				break
 	return result
-	
-func _get_params_text() -> String:
+
+func _get_params_text(e: FKEventBlock) -> String:
 	var params_text = ""
-	
-	if not event_data.inputs.is_empty():
+	if not e.inputs.is_empty():
 		var param_pairs = []
-		for key in event_data.inputs:
-			param_pairs.append("%s" % [event_data.inputs[key]])
+		for key in e.inputs:
+			param_pairs.append("%s" % [e.inputs[key]])
 		params_text = " (" + ", ".join(param_pairs) + ")"
-		
 	return params_text
 
-var _header_label_format: String = "⚡ %s (%s)%s"
-
-func _update_conditions() -> void:
-	if not event_data:
-		return
-	
-	# Clear existing condition items
-	for child in conditions_container.get_children():
-		conditions_container.remove_child(child)
-		child.queue_free()
-	
-	# Add condition items
-	for condition_data in event_data.conditions:
-		var item = CONDITION_ITEM_SCENE.instantiate()
-		item.set_block(condition_data)
-		item.set_registry(registry)
-		_connect_condition_item_signals(item)
-		conditions_container.add_child(item)
-
-
-		
 func _update_actions() -> void:
-	if not event_data:
+	var e := _get_event()
+	if not e:
 		return
 	
-	# Clear existing action items
+	print("Updating actions in Event row ui")
+	_clear_action_container()	
+
+	for act_data in e.actions:
+		if act_data.is_branch:
+			_add_branch_item_based_on(act_data)
+		else:
+			_add_regular_action_item_based_on(act_data)
+
+func _clear_action_container():
 	for child in actions_container.get_children():
 		actions_container.remove_child(child)
 		child.queue_free()
-	
-	# Add action items (handles both regular actions and branches)
-	for act_data in event_data.actions:
-		if act_data.is_branch:
-			var branch: BranchItemUi = BRANCH_ITEM_SCENE.instantiate()
-			branch.set_action_data(act_data)
-			branch.set_registry(registry)
-			_connect_branch_item_signals(branch)
-			actions_container.add_child(branch)
-		else:
-			var item: FKActionBlockNode = ACTION_ITEM_SCENE.instantiate()
-			item.set_block(act_data)
-			item.set_registry(registry)
-			_connect_action_item_signals(item)
-			actions_container.add_child(item)
 
-func _connect_condition_item_signals(item: FKConditionBlockUi) -> void:
+func _add_branch_item_based_on(act_data: FKActionUnit):
+	print("Adding branch action in Event row ui")
+	var branch: FKBranchUnitUi = BRANCH_ITEM_SCENE.instantiate()
+	branch.legitimize(act_data, registry)
+	_connect_branch_item_signals(branch)
+	actions_container.add_child(branch)
+
+func _add_regular_action_item_based_on(act_data: FKActionUnit):
+	print("Adding regular action in Event row ui")
+	var item: FKActionUnitUi = ACTION_ITEM_SCENE.instantiate()
+	item.legitimize(act_data, registry)
+	_connect_action_item_signals(item)
+	actions_container.add_child(item)
+
+# ---------------------------------------------------------
+# Condition / Action / Branch signal wiring
+# ---------------------------------------------------------
+
+func _connect_condition_item_signals(item: FKConditionUnitUi) -> void:
 	item.selected.connect(func(node): condition_selected.emit(node))
 	item.edit_requested.connect(_on_condition_item_edit)
 	item.delete_requested.connect(_on_condition_item_delete)
@@ -350,381 +435,370 @@ func _connect_action_item_signals(item) -> void:
 func _connect_branch_item_signals(branch) -> void:
 	if branch.has_signal("selected"):
 		branch.selected.connect(func(node): action_selected.emit(node))
+
 	if branch.has_signal("edit_condition_requested"):
 		branch.edit_condition_requested.connect(func(item): branch_condition_edit_requested.emit(item, self))
+
 	if branch.has_signal("delete_requested"):
 		branch.delete_requested.connect(_on_branch_item_delete)
+
 	if branch.has_signal("add_elseif_requested"):
 		branch.add_elseif_requested.connect(func(item): add_elseif_requested.emit(item, self))
+
 	if branch.has_signal("add_else_requested"):
 		branch.add_else_requested.connect(func(item): add_else_requested.emit(item, self))
+
 	if branch.has_signal("add_branch_action_requested"):
 		branch.add_branch_action_requested.connect(func(item): branch_action_add_requested.emit(item, self))
+
 	if branch.has_signal("branch_action_edit_requested"):
 		branch.branch_action_edit_requested.connect(func(act_item, br_item): branch_action_edit_requested.emit(act_item, br_item, self))
+
 	if branch.has_signal("branch_action_selected"):
 		branch.branch_action_selected.connect(func(node): action_selected.emit(node))
+
 	if branch.has_signal("reorder_requested"):
 		branch.reorder_requested.connect(_on_action_reorder)
+
 	if branch.has_signal("action_cross_reorder_requested"):
 		branch.action_cross_reorder_requested.connect(_on_action_cross_reorder)
+
 	if branch.has_signal("action_dropped_into_branch"):
 		branch.action_dropped_into_branch.connect(_on_action_dropped_into_branch)
+
 	if branch.has_signal("data_changed"):
 		branch.data_changed.connect(func(): data_changed.emit())
+
 	if branch.has_signal("before_data_changed"):
 		branch.before_data_changed.connect(func(): before_data_changed.emit())
+
 	if branch.has_signal("add_nested_branch_requested"):
 		branch.add_nested_branch_requested.connect(func(item, bid): nested_branch_add_requested.emit(item, bid, self))
+
+# ---------------------------------------------------------
+# Condition handlers
+# ---------------------------------------------------------
 
 func _on_branch_item_delete(item) -> void:
 	before_data_changed.emit()
 	var act_data = item.get_block()
-	if act_data and event_data:
-		var idx = event_data.actions.find(act_data)
+	var e := _get_event()
+	if act_data and e:
+		var idx = e.actions.find(act_data)
 		if idx >= 0:
-			event_data.actions.remove_at(idx)
-			_update_actions()
-			data_changed.emit()
+			e.actions.remove_at(idx)
+		_update_actions()
+		data_changed.emit()
 
-func _on_condition_item_edit(item: FKConditionBlockUi) -> void:
+func _on_condition_item_edit(item: FKConditionUnitUi) -> void:
 	condition_edit_requested.emit(item)
 
 func _on_condition_item_delete(item) -> void:
-	before_data_changed.emit()  # Signal for undo state capture
+	before_data_changed.emit()
 	var cond_data = item.get_block()
-	if cond_data and event_data:
-		var idx = event_data.conditions.find(cond_data)
+	var e := _get_event()
+	if cond_data and e:
+		var idx = e.conditions.find(cond_data)
 		if idx >= 0:
-			event_data.conditions.remove_at(idx)
-			_update_conditions()
-			data_changed.emit()
+			e.conditions.remove_at(idx)
+		_update_conditions()
+		data_changed.emit()
 
 func _on_condition_item_negate(item) -> void:
-	before_data_changed.emit()  # Signal for undo state capture
+	before_data_changed.emit()
 	var cond_data = item.get_block()
 	if cond_data:
 		cond_data.negated = not cond_data.negated
 		item.update_display()
 		data_changed.emit()
 
+# ---------------------------------------------------------
+# Action handlers
+# ---------------------------------------------------------
+
 func _on_action_item_edit(item) -> void:
 	action_edit_requested.emit(item)
 
 func _on_action_item_delete(item) -> void:
-	before_data_changed.emit()  # Signal for undo state capture
+	before_data_changed.emit()
 	var act_data = item.get_block()
-	if act_data and event_data:
-		var idx = event_data.actions.find(act_data)
+	var e := _get_event()
+	if act_data and e:
+		var idx = e.actions.find(act_data)
 		if idx >= 0:
-			event_data.actions.remove_at(idx)
-			_update_actions()
-			data_changed.emit()
+			e.actions.remove_at(idx)
+		_update_actions()
+		data_changed.emit()
 
-func _on_condition_reorder(source_item, target_item, drop_above: bool) -> void:
-	"""Handle reordering conditions within the same event block."""
-	if not event_data:
-		print("Refusing condition reorder due to lack of event data")
+# ---------------------------------------------------------
+# Reordering helpers
+# ---------------------------------------------------------
+
+func _on_condition_reorder(source_item: FKConditionUnitUi, target_item: FKConditionUnitUi, \
+drop_above: bool) -> void:
+	var e := _get_event()
+	if not e:
 		return
-	
-	var source_data = source_item.get_block()
-	var target_data = target_item.get_block()
-	
+
+	var source_data := source_item.get_block()
+	var target_data := target_item.get_block()
 	if not source_data or not target_data:
-		print("Refusing condition reoder due to source or target data being null")
 		return
-	
-	var source_idx = event_data.conditions.find(source_data)
-	var target_idx = event_data.conditions.find(target_data)
-	
-	# Source not in this event block - it's a cross-block drag, let the existing system handle it
-	if source_idx < 0:
+
+	var source_idx = e.conditions.find(source_data)
+	var target_idx = e.conditions.find(target_data)
+
+	if source_idx < 0 or target_idx < 0:
 		return
-	
-	if target_idx < 0:
-		return
-	
-	# Same position, no change needed
 	if source_idx == target_idx:
 		return
-	
-	# Calculate final position
+
 	var final_idx: int
 	if drop_above:
 		final_idx = target_idx if source_idx > target_idx else target_idx - 1
 	else:
 		final_idx = target_idx + 1 if source_idx > target_idx else target_idx
-	
-	# No actual movement needed
+
 	if source_idx == final_idx:
 		return
-	
+
 	before_data_changed.emit()
-	
-	# Remove from source position
-	event_data.conditions.remove_at(source_idx)
-	
-	# Recalculate target index after removal
+
+	e.conditions.remove_at(source_idx)
 	if source_idx < target_idx:
 		target_idx -= 1
-	
-	# Insert at new position
+
 	var insert_idx = target_idx if drop_above else target_idx + 1
-	event_data.conditions.insert(insert_idx, source_data)
-	
+	e.conditions.insert(insert_idx, source_data)
+
 	_update_conditions()
 	data_changed.emit()
 
 func _recursive_remove_action(actions_array: Array, target_action) -> bool:
-	"""Recursively search and remove an action from actions array and branch sub-actions."""
 	var idx = actions_array.find(target_action)
 	if idx >= 0:
 		actions_array.remove_at(idx)
 		return true
+
 	for act in actions_array:
 		if act.is_branch and _recursive_remove_action(act.branch_actions, target_action):
 			return true
+
 	return false
 
-func _on_action_cross_reorder(source_data, target_data, is_drop_above: bool, target_branch) -> void:
-	"""Handle cross-context action reorder (action moved into a different branch)."""
-	if not event_data:
+func _on_action_cross_reorder(source_data, target_data, is_drop_above: bool, target_branch: FKActionUnitUi) -> void:
+	var e := _get_event()
+	if not e:
 		return
-	
+
 	before_data_changed.emit()
-	
-	# Remove source from wherever it is (top-level or any branch)
-	_recursive_remove_action(event_data.actions, source_data)
-	
-	# Insert into target branch at the correct position
-	var target_actions = target_branch.action_data.branch_actions
-	var target_idx = target_actions.find(target_data)
+
+	_recursive_remove_action(e.actions, source_data)
+
+	var action_data: FKActionUnit = target_branch.get_block()
+	var target_actions := action_data.branch_actions
+	var target_idx := target_actions.find(target_data)
+
 	if target_idx >= 0:
 		var insert_idx = target_idx if is_drop_above else target_idx + 1
 		target_actions.insert(insert_idx, source_data)
 	else:
 		target_actions.append(source_data)
-	
+
 	_update_actions()
 	data_changed.emit()
 
-func _on_action_dropped_into_branch(source_item, target_branch) -> void:
-	"""Handle action/branch dropped into a branch's body area."""
-	if not event_data:
+func _on_action_dropped_into_branch(source_item: FKActionUnitUi, target_branch) -> void:
+	var e := _get_event()
+	if not e:
 		return
-	
-	var source_data = source_item.get_block()
+
+	var source_data := source_item.get_block()
 	if not source_data:
 		return
-	
+
 	before_data_changed.emit()
-	
-	# Remove source from wherever it is (top-level or any branch)
-	_recursive_remove_action(event_data.actions, source_data)
-	
-	# Add to target branch's sub-actions
-	target_branch.action_data.branch_actions.append(source_data)
-	
+
+	_recursive_remove_action(e.actions, source_data)
+	var action_data: FKActionUnit = target_branch.get_block()
+	action_data.branch_actions.append(source_data)
+
 	_update_actions()
 	data_changed.emit()
 
-func _on_action_reorder(source_item: FKActionBlockNode, target_item: FKActionBlockNode, drop_above: bool) -> void:
-	"""Handle reordering actions within the same event block."""
-	if not event_data:
+func _on_action_reorder(source_item: FKActionUnitUi, target_item: FKActionUnitUi, drop_above: bool) -> void:
+	var e := _get_event()
+	if not e:
 		return
-	
-	var source_data = source_item.get_block()
-	var target_data = target_item.get_block()
-	
+
+	var source_data := source_item.get_block()
+	var target_data := target_item.get_block()
 	if not source_data or not target_data:
 		return
-	
-	var source_idx = event_data.actions.find(source_data)
-	var target_idx = event_data.actions.find(target_data)
-	
+
+	var source_idx := e.actions.find(source_data)
+	var target_idx := e.actions.find(target_data)
+
 	if target_idx < 0:
 		return
-	
-	# Source not at top level - it's being moved from a branch to top level
+
 	if source_idx < 0:
 		before_data_changed.emit()
-		
-		# Recursively remove source from wherever it is (inside a branch)
-		if not _recursive_remove_action(event_data.actions, source_data):
+
+		if not _recursive_remove_action(e.actions, source_data):
 			return
 		
-		# Recalculate target index after removal (branch removal doesn't shift top-level indices
-		# unless the branch itself was removed, but we're removing an item FROM a branch)
-		target_idx = event_data.actions.find(target_data)
+		target_idx = e.actions.find(target_data)
 		if target_idx < 0:
 			return
-		
-		var insert_idx = target_idx if drop_above else target_idx + 1
-		event_data.actions.insert(insert_idx, source_data)
-		
+
+		var insert_idx := target_idx if drop_above else target_idx + 1
+		e.actions.insert(insert_idx, source_data)
+
 		_update_actions()
 		data_changed.emit()
 		return
-	
-	# Same position, no change needed
+
 	if source_idx == target_idx:
 		return
-	
-	# Calculate final position
+
 	var final_idx: int
 	if drop_above:
 		final_idx = target_idx if source_idx > target_idx else target_idx - 1
 	else:
 		final_idx = target_idx + 1 if source_idx > target_idx else target_idx
-	
-	# No actual movement needed
+
 	if source_idx == final_idx:
 		return
-	
+
 	before_data_changed.emit()
-	
-	# Remove from source position
-	event_data.actions.remove_at(source_idx)
-	
-	# Recalculate target index after removal
+
+	e.actions.remove_at(source_idx)
 	if source_idx < target_idx:
 		target_idx -= 1
-	
-	# Insert at new position
-	var insert_idx = target_idx if drop_above else target_idx + 1
-	event_data.actions.insert(insert_idx, source_data)
-	
+
+	var insert_idx2 := target_idx if drop_above else target_idx + 1
+	e.actions.insert(insert_idx2, source_data)
+
 	_update_actions()
 	data_changed.emit()
 
-func _pull_action_to_top_level(act_data) -> void:
-	"""Remove an action/branch from inside a nested branch and append it to top-level actions."""
-	if not event_data:
+func _pull_action_to_top_level(act_data: FKActionUnit) -> void:
+	var e := _get_event()
+	if not e:
 		return
-	# Only act if it's actually nested (not already top-level)
-	if event_data.actions.has(act_data):
-		return
-	before_data_changed.emit()
-	if _recursive_remove_action(event_data.actions, act_data):
-		event_data.actions.append(act_data)
-		_update_actions()
-		data_changed.emit()
 
-func add_condition(condition_data: FKEventCondition) -> void:
-	if event_data:
-		event_data.conditions.append(condition_data)
+	if e.actions.has(act_data):
+		return
+
+	before_data_changed.emit()
+
+	if _recursive_remove_action(e.actions, act_data):
+		e.actions.append(act_data)
+
+	_update_actions()
+	data_changed.emit()
+
+# ---------------------------------------------------------
+# Add condition / action to data
+# ---------------------------------------------------------
+
+func add_condition(condition_data: FKConditionUnit) -> void:
+	var e := _get_event()
+	if e:
+		e.conditions.append(condition_data)
 		_update_conditions()
 
-func add_action(action_data: FKEventAction) -> void:
-	if event_data:
-		event_data.actions.append(action_data)
+func add_action(action_data: FKActionUnit) -> void:
+	var e := _get_event()
+	if e:
+		e.actions.append(action_data)
 		_update_actions()
 
-func update_display() -> void:
-	_update_display()
-
-func set_selected(value: bool) -> void:
-	is_selected = value
-	var style = normal_stylebox
-	if is_selected:
-		style = selected_stylebox
-		
-	panel.add_theme_stylebox_override("panel", style)
+# ---------------------------------------------------------
+# Drag & Drop
+# ---------------------------------------------------------
 
 func _get_drag_data(at_position: Vector2) -> FKDragData:
 	var drag_preview := _create_drag_preview()
 	set_drag_preview(drag_preview)
-	
-	var drag_data := FKDragData.new(DragTarget.Type.EVENT_ROW, self)
-	return drag_data
+	return FKDragData.new(DragTarget.Type.EVENT_ROW, self)
 
 func _create_drag_preview() -> Control:
 	var preview_label := Label.new()
 	preview_label.text = event_header_label.text if event_header_label else "Event"
 	preview_label.add_theme_color_override("font_color", _preview_label_color)
-	
+
 	var preview_margin := MarginContainer.new()
 	preview_margin.add_theme_constant_override("margin_left", 8)
 	preview_margin.add_theme_constant_override("margin_top", 4)
 	preview_margin.add_theme_constant_override("margin_right", 8)
 	preview_margin.add_theme_constant_override("margin_bottom", 4)
 	preview_margin.add_child(preview_label)
-	return preview_margin
 
-const _preview_label_color := Color(0.9, 0.95, 0.9, 0.7)
+	return preview_margin
 
 func _can_drop_data(at_position: Vector2, data) -> bool:
 	if data is not FKDragData:
-		printerr("EventRowUi's _can_drop_data was not passed an FKDragData. It was given: " \
-		+ str(data))
+		printerr("FKEventUnitUi _can_drop_data was not passed an FKDragData. It was given: " + str(data))
 		return false
-		
+
 	var drag_data := data as FKDragData
 	var drag_type := drag_data.type
-	
-	# For event_row, comment, or group drags, let the parent (blocks_container or group) handle it
+
 	if drag_type in [DragTarget.Type.EVENT_ROW, DragTarget.Type.COMMENT, DragTarget.Type.GROUP]:
-		# Forward to parent
 		var parent = get_parent()
 		if parent and parent.has_method("_can_drop_data"):
 			var parent_pos = at_position + position
 			return parent._can_drop_data(parent_pos, data)
 		return false
-	
+
 	if drag_type != DragTarget.Type.CONDITION_ITEM and drag_type != DragTarget.Type.ACTION_ITEM:
 		return false
-	
-	# Use simple half-width check: left half = conditions, right half = actions
+
 	var half_width = size.x / 2.0
 	var is_left_side = at_position.x < half_width
-	
+
 	if drag_type == DragTarget.Type.CONDITION_ITEM and is_left_side:
 		return true
 	elif drag_type == DragTarget.Type.ACTION_ITEM and not is_left_side:
 		return true
-	
+
 	return false
 
 func _drop_data(at_position: Vector2, data) -> void:
 	if data is not FKDragData:
-		printerr("EventRowUi _drop_data not given an FKDragData. It was given: " \
-		+ str(data))
+		printerr("FKEventUnitUi _drop_data not given an FKDragData. It was given: " + str(data))
 		return
-		
+
 	var drag_data := data as FKDragData
 	var drag_type = drag_data.type
-	
-	# For event_row, comment, or group drags, let the parent handle it
+
 	if drag_type in [DragTarget.Type.EVENT_ROW, DragTarget.Type.COMMENT, DragTarget.Type.GROUP]:
 		var parent = get_parent()
 		if parent and parent.has_method("_drop_data"):
 			var parent_pos = at_position + position
 			parent._drop_data(parent_pos, data)
 		return
-	
-	var source_node = data.get("node")
-	
+
+	var source_node = drag_data.node
 	if not source_node or not is_instance_valid(source_node):
 		return
-	
-	# Find the source event_row
+
 	var source_row = _find_parent_event_row(source_node)
 	if not source_row:
 		return
-	
-	# Use simple half-width check
+
 	var half_width = size.x / 2.0
 	var is_left_side = at_position.x < half_width
-	
+
 	match drag_type:
 		DragTarget.Type.CONDITION_ITEM:
 			if is_left_side:
 				var cond_data = drag_data.data
-				if cond_data:
-					# Allow same-row drops for reordering (handled by condition_item_ui.gd)
-					# Only handle cross-row drops here
-					if source_row != self:
-						condition_dropped.emit(source_row, cond_data, self)
+				if cond_data and source_row != self:
+					condition_dropped.emit(source_row, cond_data, self)
+
 		DragTarget.Type.ACTION_ITEM:
 			if not is_left_side:
 				var act_data = drag_data.data
@@ -732,49 +806,12 @@ func _drop_data(at_position: Vector2, data) -> void:
 					if source_row != self:
 						action_dropped.emit(source_row, act_data, self)
 					else:
-						# Same-row: source is inside a branch — pull it out to top level
 						_pull_action_to_top_level(act_data)
+						
 
-func _find_parent_event_row(node: Node):
-	"""Find the event_row that contains this node."""
-	var current = node.get_parent()
-	while current:
-		if current.has_method("get_event_data"):
-			return current
-		current = current.get_parent()
-	return null
-
-func _on_condition_drop_zone_dropped(drag_data: FKDragData) -> void:
-	"""Handle condition dropped on the condition drop zone."""
-	var source_node := drag_data.node
-	if not source_node or not is_instance_valid(source_node):
-		return
+func _to_string() -> String:
+	var result := "FKEventRowUi"
 	
-	var source_row = _find_parent_event_row(source_node)
-	if not source_row or source_row == self:
-		return
-	
-	var cond_data := drag_data.data
-	if cond_data:
-		condition_dropped.emit(source_row, cond_data, self)
-
-func _on_action_drop_zone_dropped(drag_data: FKDragData) -> void:
-	"""Handle action dropped on the action drop zone."""
-	var source_node := drag_data.node
-	if not source_node or not is_instance_valid(source_node):
-		return
-	
-	var source_row = _find_parent_event_row(source_node)
-	if not source_row:
-		return
-	
-	var act_data := drag_data.data
-	if act_data:
-		if source_row == self:
-			# Same row — pull nested item to top level
-			_pull_action_to_top_level(act_data)
-		else:
-			action_dropped.emit(source_row, act_data, self)
-
-func _exit_tree():
-	_toggle_subs(false)
+	if _block != null:
+		result += "\nhas block: true"
+	return result

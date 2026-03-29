@@ -19,8 +19,8 @@ FKEventSheet
   └─ events: Array[FKEventBlock]
       ├─ event_id: String (e.g., "on_process")
       ├─ target_node: NodePath (node to poll event from)
-      ├─ conditions: Array[FKEventCondition] (all must pass)
-      └─ actions: Array[FKEventAction] (executed sequentially)
+      ├─ conditions: Array[FKConditionUnit] (all must pass)
+      └─ actions: Array[FKActionUnit] (executed sequentially)
 ```
 
 **Provider Pattern**: All events/conditions/actions/branches extend base classes (`FKEvent`, `FKCondition`, `FKAction`, `FKBranch`) implementing:
@@ -45,7 +45,7 @@ Branches control conditional/repeated execution of actions within an event block
 - `should_execute(condition_result: bool, inputs: Dictionary, block_id: String)` → `bool`: For condition-type branches, decides execution based on condition result
 - `get_execution_count(inputs: Dictionary, block_id: String)` → `int`: For evaluation-type branches, returns how many times to execute (0 = skip)
 
-Branch data is stored on `FKEventAction` resources via `branch_id: String` and `branch_inputs: Dictionary`. Legacy `branch_type` values ("if"/"elseif"/"else") are resolved to `"if_branch"` via `registry.resolve_branch_id()` for backward compatibility.
+Branch data is stored on `FKActionUnit` resources via `branch_id: String` and `branch_inputs: Dictionary`. Legacy `branch_type` values ("if"/"elseif"/"else") are resolved to `"if_branch"` via `registry.resolve_branch_id()` for backward compatibility.
 
 ## Critical Workflows
 

@@ -2,8 +2,8 @@
 ## Represents a Comment Block in the editor UI
 ##
 @tool
-extends FKBaseBlockNode
-class_name FKCommentBlockUi
+extends FKUnitUi
+class_name FKCommentUi
 
 signal delete_requested
 signal insert_comment_above_requested(comment_node)
@@ -36,7 +36,7 @@ func _on_text_edit_focus_exited():
 		
 func _update_block_text():
 	if not _comment_block:
-		printerr("FKCommentBlockUi: I got no block to work with, so I can't update the text")
+		printerr("FKCommentUi: I got no block to work with, so I can't update the text")
 		return
 	
 	var new_text = text_edit.text
@@ -46,10 +46,10 @@ func _update_block_text():
 		block_contents_changed.emit()
 		
 
-var _comment_block: FKCommentBlock:
+var _comment_block: FKComment:
 	get:
-		if _block is FKCommentBlock:
-			return _block as FKCommentBlock
+		if _block is FKComment:
+			return _block as FKComment
 		else:
 			return null
 
@@ -141,15 +141,15 @@ func _on_left_click(event: InputEventMouseButton):
 		_set_edit_mode(true)
 	accept_event()
 	
-func _validate_block(to_set: FKBaseBlock):
-	var is_valid: bool = to_set == null || to_set is FKCommentBlock
+func _validate_block(to_set: FKUnit):
+	var is_valid: bool = to_set == null || to_set is FKComment
 	if not is_valid:
-		var error_message = "[FKCommentBlockUi _validate_block]: FKCommentBlockUi instances are meant to only " +\
+		var error_message = "[FKCommentUi _validate_block]: FKCommentUi instances are meant to only " +\
 		"handle Comment Blocks, not %s" % [to_set.get_class()]
 		printerr(error_message)
 	
-	if to_set is not FKCommentBlock:
-		print("FKCommentBlockUi: No longer representing a comment block")
+	if to_set is not FKComment:
+		print("FKCommentUi: No longer representing a comment block")
 	return is_valid
 		
 		
@@ -175,7 +175,7 @@ func _create_drag_preview() -> Control:
 	
 func _can_drop_data(at_position: Vector2, data) -> bool:
 	if data is not FKDragData:
-		printerr("FKCommentBlockUi: _can_drop_data was not given an FKDragData. It got: " \
+		printerr("FKCommentUi: _can_drop_data was not given an FKDragData. It got: " \
 		+ str(data))
 		return false
 		
@@ -186,14 +186,14 @@ func _can_drop_data(at_position: Vector2, data) -> bool:
 		var parent = get_parent()
 		if parent and parent.has_method("_can_drop_data"):
 			var parent_pos = at_position + position
-			print("FKCommentBlockUi: Comment passing job to parent _can_drop_data")
+			print("FKCommentUi: Comment passing job to parent _can_drop_data")
 			return parent._can_drop_data(parent_pos, data)
 	
 	return false
 
 func _drop_data(at_position: Vector2, data) -> void:
 	if data is not FKDragData:
-		printerr("FKCommentBlockUi: _drop_data was not given an FKDragData. It got: " \
+		printerr("FKCommentUi: _drop_data was not given an FKDragData. It got: " \
 		+ str(data))
 		return
 		
@@ -264,5 +264,12 @@ const _insert_event_below_choice: int = 11
 const _insert_comment_above_choice: int = 12
 const _insert_comment_below_choice: int = 13
 
-func get_block() -> FKCommentBlock:
+func get_block() -> FKComment:
 	return _block
+	
+func _to_string() -> String:
+	var result := "FKCommentUi"
+	
+	if _block != null:
+		result += "\nhas block: true"
+	return result

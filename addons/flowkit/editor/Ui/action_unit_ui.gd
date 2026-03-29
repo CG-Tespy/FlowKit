@@ -1,6 +1,10 @@
 @tool
-extends FKBaseBlockNode
-class_name FKConditionBlockUi
+extends FKUnitUi
+class_name FKActionUnitUi
+
+signal edit_requested(node)
+signal delete_requested(node)
+signal reorder_requested(source_item, target_item, drop_above: bool)
 
 @export_category("Controls")
 @export var panel: PanelContainer
@@ -20,14 +24,20 @@ var drop_above := true
 # Block Handling
 # ---------------------------------------------------------
 
-func _validate_block(to_set: FKBaseBlock) -> bool:
-	return to_set == null or to_set is FKEventCondition
+func _validate_block(to_set: FKUnit) -> bool:
+	return to_set == null or to_set is FKActionUnit
 
+func get_action() -> FKActionUnit:
+	return _block as FKActionUnit
+
+func get_block() -> FKActionUnit:
+	if _block is FKActionUnit:
+		return _block as FKActionUnit
+	else:
+		return null
+		
 func _on_block_changed() -> void:
 	update_display()
-
-func get_block() -> FKEventCondition:
-	return _block as FKEventCondition
 
 # ---------------------------------------------------------
 # Registry Handling
@@ -48,88 +58,68 @@ func _update_styling() -> void:
 	if not panel:
 		return
 
-	var style := selected_stylebox if is_selected \
-	else normal_stylebox
+	var style := selected_stylebox if is_selected else normal_stylebox
 	panel.add_theme_stylebox_override("panel", style)
 
 func _update_label() -> void:
-	if not _block:
+	if not _action:
 		return
-	
-	_update_label_text()
-	_update_icon_color()
 
-func _update_label_text():
 	var display_name := _get_display_name_from_registry()
+	var node_name := String(_action.target_node).get_file()
 	var params_text := _get_params_text()
-	var neg_prefix := "NOT " if _cond_block.negated else ""
 
-	label.text = "%s%s%s" % [neg_prefix, display_name, params_text]
-			
-## If none is found from the registry, this returns the condition's id
+	label.text = "%s on %s%s" % [display_name, node_name, params_text]
+	name = "%s on %s" % [display_name, node_name]
+
+var _action: FKActionUnit:
+	get:
+		if _block is FKActionUnit:
+			return _block as FKActionUnit
+		else:
+			return null
+
+## If none is found, this returns the action id
 func _get_display_name_from_registry() -> String:
-	var display_name := _cond_block.condition_id
+	var id := _action.get_id()
+	var display_name := id
+	
 	if registry:
-		for provider in registry.condition_providers:
-			if provider.has_method("get_id") and provider.get_id() == _cond_block.condition_id:
+		for provider in registry.action_providers:
+			if provider.has_method("get_id") and provider.get_id() == id:
 				if provider.has_method("get_name"):
 					display_name = provider.get_name()
 				break
+				
 	return display_name
-
-var _cond_block: FKEventCondition:
-	get:
-		if _block is FKEventCondition:
-			return _block as FKEventCondition
-		else:
-			return null
-			
+	
 func _get_params_text() -> String:
 	var params_text := ""
-	if not _cond_block.inputs.is_empty():
+	
+	if not _action.inputs.is_empty():
 		var param_pairs := []
-		for key in _cond_block.inputs:
-			var current_input = _cond_block.inputs[key]
-			var pair = str(current_input)
+		for key in _action.inputs:
+			var input = _action.inputs[key]
+			var pair = str(input)
 			param_pairs.append(pair)
-			
 		params_text = ": " + ", ".join(param_pairs)
 		
 	return params_text
-
-func _update_icon_color():
-	var color = _negated_color if _cond_block.negated \
-	else _pos_color
-	icon_label.add_theme_color_override("font_color", color)
-
-var _negated_color := Color(1.0, 0.4, 0.4, 1)
-var _pos_color := Color(1.0, 0.7, 0.3, 1)
-
 # ---------------------------------------------------------
 # Context Menu
 # ---------------------------------------------------------
 
 func show_context_menu(global_pos: Vector2) -> void:
-	if not context_menu:
-		return
-	
-	print("Showing context menu in FKConditionBlockUi")
-	var c := get_block()
-	if c:
-		context_menu.set_item_checked(2, c.negated)
-
 	context_menu.position = global_pos
 	context_menu.popup()
 
 func _on_context_menu_id_pressed(id: int) -> void:
 	match id:
-		0: edit_requested.emit(self)
-		1: delete_requested.emit(self)
-		2: negate_requested.emit(self)
+		_edit_requested_choice: edit_requested.emit(self)
+		_delete_requested_choice: delete_requested.emit(self)
 
-signal edit_requested(node)
-signal delete_requested(node)
-signal negate_requested(node)
+const _edit_requested_choice := 0
+const _delete_requested_choice := 1
 
 # ---------------------------------------------------------
 # Input Handling
@@ -150,30 +140,30 @@ func _toggle_subs(on: bool) -> void:
 func _on_gui_input(event: InputEvent) -> void:
 	if event is not InputEventMouseButton or not event.pressed:
 		return
-		
+	
 	var left_click: bool = event.button_index == MOUSE_BUTTON_LEFT
 	var right_click: bool = event.button_index == MOUSE_BUTTON_RIGHT
-	if event.button_index == MOUSE_BUTTON_LEFT:
+	if left_click:
 		_on_left_click(event)
-	elif event.button_index == MOUSE_BUTTON_RIGHT:
+	elif right_click:
 		_on_right_click()
-	
+		
 	if left_click or right_click:
-		get_viewport().set_input_as_handled()
+		_on_either_click()
 
 func _on_left_click(event: InputEventMouseButton):
 	if event.double_click:
-		print("FKConditionBlockUi edit requested")
 		edit_requested.emit(self)
-	else:
-		print("FKConditionBlockUi selected")
-		set_selected(true)
 	
 func _on_right_click():
-	set_selected(true)
 	var mouse_pos := DisplayServer.mouse_get_position()
 	show_context_menu(mouse_pos)
-			
+	
+## Should be called after the specific left and right click callbacks
+func _on_either_click():
+	set_selected(true)
+	get_viewport().set_input_as_handled()
+	
 func _on_mouse_exited() -> void:
 	_hide_drop_indicator()
 
@@ -182,36 +172,43 @@ func _on_mouse_exited() -> void:
 # ---------------------------------------------------------
 
 func _get_drag_data(at_position: Vector2) -> FKDragData:
-	if not _block:
+	if not _action:
 		return null
 
 	var preview := _create_drag_preview()
 	set_drag_preview(preview)
 
-	return FKDragData.new(DragTarget.Type.CONDITION_ITEM, self, _block)
+	return FKDragData.new(DragTarget.Type.ACTION_ITEM, self, _action)
 
 func _create_drag_preview() -> Control:
-	var preview_label := Label.new()
-	preview_label.text = label.text if label else "Condition"
-	preview_label.add_theme_color_override("font_color", Color(1.0, 0.8, 0.4, 0.9))
-
 	var margin := MarginContainer.new()
 	margin.add_theme_constant_override("margin_left", 8)
 	margin.add_theme_constant_override("margin_top", 4)
 	margin.add_theme_constant_override("margin_right", 8)
 	margin.add_theme_constant_override("margin_bottom", 4)
-	margin.add_child(preview_label)
 
+	var preview_label := Label.new()
+	preview_label.text = label.text if label else "Action"
+	preview_label.add_theme_color_override("font_color", _preview_label_color)
+
+	margin.add_child(preview_label)
 	return margin
+
+static var _preview_label_color := Color(0.5, 0.7, 1.0, 0.9)
 
 func _can_drop_data(at_position: Vector2, data) -> bool:
 	var drag_data := data as FKDragData
-	if not drag_data or drag_data.type != DragTarget.Type.CONDITION_ITEM:
+	if not drag_data or drag_data.type != DragTarget.Type.ACTION_ITEM:
 		_hide_drop_indicator()
 		return false
 
 	var source_node := drag_data.node
 	if source_node == self:
+		_hide_drop_indicator()
+		return false
+
+	# Prevent dropping a parent onto its own descendant
+	if _is_descendant_of(source_node):
 		_hide_drop_indicator()
 		return false
 
@@ -222,6 +219,14 @@ func _can_drop_data(at_position: Vector2, data) -> bool:
 
 	_show_drop_indicator(above)
 	return true
+
+func _is_descendant_of(node: Node) -> bool:
+	var current := get_parent()
+	while current:
+		if current == node:
+			return true
+		current = current.get_parent()
+	return false
 
 func _is_adjacent_to_source(source_node: Node, drop_above: bool) -> bool:
 	var parent := get_parent()
@@ -245,20 +250,15 @@ func _drop_data(at_position: Vector2, data) -> void:
 	_hide_drop_indicator()
 
 	var drag_data := data as FKDragData
-	if not drag_data or drag_data.type != DragTarget.Type.CONDITION_ITEM:
-		print("FKConditionBlock not dropped due to wrong drag data type")
+	if not drag_data or drag_data.type != DragTarget.Type.ACTION_ITEM:
 		return
 
 	var source_node := drag_data.node
 	if not source_node or source_node == self:
-		print("FKConditionBlock not dropped due to source node being self")
 		return
-	
-	print("Dropping FKConditionBlockUi")
+
 	var above := at_position.y < size.y / 2.0
 	reorder_requested.emit(source_node, self, above)
-
-signal reorder_requested(source_item, target_item, drop_above: bool)
 
 func _show_drop_indicator(above: bool) -> void:
 	if not drop_indicator:
@@ -278,3 +278,10 @@ func _hide_drop_indicator() -> void:
 func _notification(what: int) -> void:
 	if what == NOTIFICATION_DRAG_END:
 		_hide_drop_indicator()
+
+func _to_string() -> String:
+	var result := "FKActionUnitUi"
+	
+	if _block != null:
+		result += "\nhas block: true"
+	return result

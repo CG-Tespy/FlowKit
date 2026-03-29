@@ -21,6 +21,7 @@ bg_color = Color(0.13, 0.14, 0.17, 1)
 
 [node name="EventRow" type="MarginContainer" unique_id=132421565 node_paths=PackedStringArray("panel", "context_menu", "conditions_container", "actions_container", "event_header_label", "add_condition_label", "add_action_label", "condition_drop_zone", "action_drop_zone")]
 custom_minimum_size = Vector2(0, 60)
+mouse_filter = 0
 theme_override_constants/margin_bottom = 2
 script = ExtResource("1_eventrow")
 panel = NodePath("Panel")
