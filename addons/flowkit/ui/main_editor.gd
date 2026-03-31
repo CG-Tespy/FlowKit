@@ -303,7 +303,7 @@ func _paste_group() -> void:
 
 func _push_undo_state() -> void:
 	"""Push current state to undo manager before making changes."""
-	var blocks = _get_blocks()
+	var blocks = _get_block_nodes()
 	var state := serializer.capture_state(blocks)
 	undo_manager.push_state(state)
 
@@ -316,7 +316,7 @@ func _undo() -> void:
 	if not undo_manager.can_undo():
 		return
 	
-	var blocks = _get_blocks()
+	var blocks = _get_block_nodes()
 	var current_state := serializer.capture_state(blocks)
 	var previous_state := undo_manager.undo(current_state)
 
@@ -329,7 +329,7 @@ func _redo() -> void:
 	if not undo_manager.can_redo():
 		return
 
-	var blocks = _get_blocks()
+	var blocks = _get_block_nodes()
 	var current_state := serializer.capture_state(blocks)
 	var next_state := undo_manager.redo(current_state)
 
@@ -343,7 +343,7 @@ func _restore_sheet_state(state: Array) -> void:
 	_recreate_blocks(state)
 	
 	# Update UI state
-	if _get_blocks().size() > 0:
+	if _get_block_nodes().size() > 0:
 		_show_content_state()
 	else:
 		_show_empty_blocks_state()
@@ -545,15 +545,15 @@ func _process(delta: float) -> void:
 
 # === Block Management ===
 
-func _get_blocks() -> Array[Node]:
+func _get_block_nodes() -> Array[FKUnitUi]:
 	"""Get all block nodes (excluding empty label and nodes queued for deletion)."""
-	var blocks: Array[Node] = []
+	var blocks: Array[FKUnitUi] = []
 	
 	for child in blocks_container.get_children():
 		if !is_instance_valid(child) or child.is_queued_for_deletion():
 			continue
 			
-		if child != empty_label:
+		if child is FKUnitUi:
 			blocks.append(child)
 	
 	return blocks
@@ -647,32 +647,37 @@ func _generate_sheet_from_blocks() -> FKEventSheet:
 	var item_order: Array[Dictionary] = []
 	var standalone_conditions: Array[FKConditionUnit] = []
 	
-	for block in _get_blocks():
+	for block_ui in _get_block_nodes():
 		# Skip invalid or deleted blocks
-		if not is_instance_valid(block) or block.is_queued_for_deletion():
+		if not is_instance_valid(block_ui) or block_ui.is_queued_for_deletion():
 			continue
 		
-		if block.has_method("get_event_data"):
-			var data = block.get_event_data()
-			if data:
-				var event_copy = sheet_io.copy_event_block(data)
-				item_order.append({"type": "event", "index": events.size()})
-				events.append(event_copy)
+		var data := block_ui.get_block()
+		if not data:
+			continue
 		
-		elif block.has_method("get_comment_data"):
-			var data = block.get_comment_data()
-			if data:
-				var comment_copy = FKComment.new()
-				comment_copy.text = data.text
-				item_order.append({"type": "comment", "index": comments.size()})
-				comments.append(comment_copy)
+		var order_to_append: Dictionary = \
+		{
+			"type": data.block_type,
+			"index": 0
+		}
+		if data is FKEventBlock:
+			var event_copy = sheet_io.copy_event_block(data)
+			order_to_append["index"] = events.size()
+			events.append(event_copy)
 		
-		elif block.has_method("get_group_data"):
-			var data = block.get_group_data()
-			if data:
-				var group_copy = sheet_io.copy_group_block(data)
-				item_order.append({"type": "group", "index": groups.size()})
-				groups.append(group_copy)
+		elif data is FKComment:
+			var comment_copy = FKComment.new()
+			comment_copy.text = data.text
+			order_to_append["index"] = comments.size()
+			comments.append(comment_copy)
+		
+		elif data is FKGroup:
+			var group_copy = sheet_io.copy_group_block(data)
+			order_to_append["index"] = groups.size()
+			groups.append(group_copy)
+			
+		item_order.append(order_to_append)
 	
 	sheet.events = events
 	sheet.comments = comments

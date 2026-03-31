@@ -5,7 +5,7 @@ class_name FKSerializationManager
 # want to use in RAM.
 
 # Serialization #
-func capture_state(blocks: Array[Node]) -> Array[Dictionary]:
+func capture_state(blocks: Array[FKUnitUi]) -> Array[Dictionary]:
 	"""Capture the state of the passed block Nodes as serialized data."""
 	#print("FKSerializationManager: blocks gotten: " + str(blocks))
 	var state: Array[Dictionary] = []
@@ -23,6 +23,7 @@ func capture_state(blocks: Array[Node]) -> Array[Dictionary]:
 	
 func serialize_block(block_node: Node) -> Dictionary:
 	# At the time of this writing, all block node classes except group_ui implement FKUnitui
+	print("Serializer working with " + str(block_node))
 	var data: FKUnit = null
 	if block_node.has_method("_to_string"):
 		print("Serializing block node of type " + block_node.get_class())

@@ -129,7 +129,6 @@ func _on_gui_input(event: InputEvent) -> void:
 		get_viewport().set_input_as_handled()
 		
 func show_context_menu(global_pos: Vector2) -> void:
-	print("Showing Event row context menu")
 	context_menu.clear()
 	context_menu.add_item("Add Event Below", MenuChoices.ADD_EVENT_BELOW)
 	context_menu.add_item("Add Comment Below", MenuChoices.ADD_COMMENT_BELOW)
@@ -324,7 +323,7 @@ func _update_display() -> void:
 func _update_event_header() -> void:
 	var e := _get_event()
 	if not e:
-		printerr("Cannot update event header. Got no event to work with.")
+		printerr("[FKEventRowUi]: Cannot update event header. Got no event to work with.")
 		return
 
 	var display_name = _get_event_header_display_name(e)
@@ -740,7 +739,7 @@ func _create_drag_preview() -> Control:
 
 func _can_drop_data(at_position: Vector2, data) -> bool:
 	if data is not FKDragData:
-		printerr("FKEventUnitUi _can_drop_data was not passed an FKDragData. It was given: " + str(data))
+		printerr("FKEventRowUi _can_drop_data was not passed an FKDragData. It was given: " + str(data))
 		return false
 
 	var drag_data := data as FKDragData
@@ -768,7 +767,7 @@ func _can_drop_data(at_position: Vector2, data) -> bool:
 
 func _drop_data(at_position: Vector2, data) -> void:
 	if data is not FKDragData:
-		printerr("FKEventUnitUi _drop_data not given an FKDragData. It was given: " + str(data))
+		printerr("FKEventRowUi _drop_data not given an FKDragData. It was given: " + str(data))
 		return
 
 	var drag_data := data as FKDragData

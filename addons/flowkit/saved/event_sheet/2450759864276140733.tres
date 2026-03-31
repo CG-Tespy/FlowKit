@@ -15,6 +15,7 @@ inputs = {
 "Name": "times",
 "Value": "1"
 }
+block_type = "action"
 
 [sub_resource type="Resource" id="Resource_o0xcg"]
 script = ExtResource("3_7puo2")
@@ -24,6 +25,7 @@ inputs = {
 "color": "red",
 "message": "\"Counting from 1 to 10\""
 }
+block_type = "action"
 
 [sub_resource type="Resource" id="Resource_7puo2"]
 script = ExtResource("3_7puo2")
@@ -33,6 +35,7 @@ inputs = {
 "color": "blue",
 "message": "system.get_var(\"times\")"
 }
+block_type = "action"
 
 [sub_resource type="Resource" id="Resource_ko5ym"]
 script = ExtResource("3_7puo2")
@@ -42,6 +45,7 @@ inputs = {
 "Name": "times",
 "Value": "system.get_var(\"times\")+1"
 }
+block_type = "action"
 
 [sub_resource type="Resource" id="Resource_3014d"]
 script = ExtResource("3_7puo2")
@@ -52,6 +56,7 @@ branch_inputs = {
 "times": "10"
 }
 branch_actions = Array[ExtResource("3_7puo2")]([SubResource("Resource_7puo2"), SubResource("Resource_ko5ym")])
+block_type = "action"
 
 [sub_resource type="Resource" id="Resource_0vfw8"]
 script = ExtResource("3_7puo2")
@@ -61,6 +66,7 @@ inputs = {
 "color": "red",
 "message": "Done!"
 }
+block_type = "action"
 
 [sub_resource type="Resource" id="Resource_v5tg8"]
 script = ExtResource("2_o0xcg")
@@ -68,6 +74,7 @@ block_id = "event_1771972259_1225162116"
 event_id = "on_ready"
 target_node = NodePath(".")
 actions = Array[ExtResource("3_7puo2")]([SubResource("Resource_xv5k1"), SubResource("Resource_o0xcg"), SubResource("Resource_3014d"), SubResource("Resource_0vfw8")])
+block_type = "event"
 
 [resource]
 script = ExtResource("6_0vfw8")

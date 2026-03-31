@@ -91,7 +91,6 @@ func _on_gui_input(event: InputEvent) -> void:
 			get_viewport().set_input_as_handled()
 
 func _show_context_menu() -> void:
-	print("Showing branch context menu")
 	context_menu.clear()
 
 	var provider = _get_branch_provider()

@@ -19,6 +19,7 @@ target_node = NodePath("CharacterBody2D")
 inputs = {
 "Y": "0"
 }
+block_type = "action"
 
 [sub_resource type="Resource" id="Resource_ehuxe"]
 script = ExtResource("4_at6cs")
@@ -27,6 +28,7 @@ target_node = NodePath("CharacterBody2D")
 inputs = {
 "X": "n_initial_x"
 }
+block_type = "action"
 
 [sub_resource type="Resource" id="Resource_1wrk8"]
 script = ExtResource("4_at6cs")
@@ -35,6 +37,7 @@ target_node = NodePath("CharacterBody2D")
 inputs = {
 "Y": "n_initial_y"
 }
+block_type = "action"
 
 [sub_resource type="Resource" id="Resource_iu3q8"]
 script = ExtResource("5_1wrk8")

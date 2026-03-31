@@ -64,7 +64,7 @@ func get_global_mouse_position() -> Vector2:
 	
 func _is_on_event_row(mouse_pos: Vector2) -> bool:
 	"""Check if the mouse position is over any event row."""
-	for block in _editor._get_blocks():
+	for block in _editor._get_block_nodes():
 		var global_rect = block.get_global_rect()
 		if global_rect.has_point(mouse_pos):
 			return true

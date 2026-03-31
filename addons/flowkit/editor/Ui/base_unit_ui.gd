@@ -23,7 +23,7 @@ func legitimize(block: FKUnit, registry: FKRegistry):
 func _enter_tree() -> void:
 	if is_editor_preview:
 		return
-	print("Legit " + _to_string() + " instantiated")
+	#print("Legit " + get_class() + " instantiated")
 	_toggle_subs(true)
 
 

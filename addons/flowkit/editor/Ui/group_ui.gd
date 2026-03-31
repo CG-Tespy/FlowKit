@@ -93,7 +93,7 @@ var _group: FKGroup:
 func _enter_tree() -> void:
 	if is_editor_preview:
 		return
-	print("Group ui enter tree")
+	#print("Group ui enter tree")
 	super._enter_tree()
 	children_container.set_meta("_parent_group", self)
 
@@ -238,7 +238,7 @@ static var COMMENT_SCENE: PackedScene:
 
 func _instantiate_event_row(data: FKEventBlock) -> Control:
 	if is_editor_preview:
-		print("[FKGroupUi]: Cannot instantiate event row in editor preview mode")
+		printerr("[FKGroupUi]: Cannot instantiate event row in editor preview mode")
 		return null
 	var row: FKEventRowUi = EVENT_ROW_SCENE.instantiate()
 	row.call_deferred("legitimize", data, registry)
@@ -280,7 +280,7 @@ func _connect_event_row_signals(row: FKEventRowUi, data: FKEventBlock) -> void:
 
 func _instantiate_comment(data: FKComment) -> Control:
 	if is_editor_preview:
-		print("[FKGroupUi]: Cannot instantiate comment in editor preview mode")
+		printerr("[FKGroupUi]: Cannot instantiate comment in editor preview mode")
 		return null
 	var comment: FKCommentUi = COMMENT_SCENE.instantiate()
 	comment.legitimize(data, registry)
@@ -298,7 +298,7 @@ func _connect_comment_signals_to_group_handlers(comment: FKCommentUi, data: FKCo
 
 func _instantiate_group(data: FKGroup) -> Control:
 	if is_editor_preview:
-		print("[FKGroupUi]: Cannot instantiate group in editor preview mode")
+		printerr("[FKGroupUi]: Cannot instantiate group in editor preview mode")
 		return null
 	var group_scene := load("res://addons/flowkit/ui/workspace/group_ui.tscn")
 	var nested: FKGroupUi = group_scene.instantiate()
