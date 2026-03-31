@@ -23,7 +23,7 @@ func legitimize(block: FKUnit, registry: FKRegistry):
 func _enter_tree() -> void:
 	if is_editor_preview:
 		return
-	#print("Legit " + _to_string() + " instantiated")
+	#print("Legit " + get_class() + " instantiated")
 	_toggle_subs(true)
 
 
@@ -40,7 +40,6 @@ var _is_subbed := false
 func _ready() -> void:
 	if is_editor_preview:
 		return
-	print("Called _ready for " + _to_string())
 	# Ensure we receive mouse events
 	mouse_filter = Control.MOUSE_FILTER_STOP
 	update_display.call_deferred()
@@ -77,7 +76,7 @@ func _on_block_changed() -> void:
 	update_display()
 	
 func _alert_need_for_override(func_name: String):
-	var error_message := "FKBlockNode subclasses must override %s" % [func_name]
+	var error_message := "FKUnitUi " + name + " must override %s" % [func_name]
 	printerr(error_message)
 	
 func set_registry(reg: Node) -> void:

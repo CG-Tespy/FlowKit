@@ -113,7 +113,6 @@ func show_context_menu(global_pos: Vector2) -> void:
 	if not context_menu:
 		return
 	
-	print("Showing context menu in FKConditionUnitUi")
 	var c := get_block()
 	if c:
 		context_menu.set_item_checked(2, c.negated)
@@ -163,10 +162,8 @@ func _on_gui_input(event: InputEvent) -> void:
 
 func _on_left_click(event: InputEventMouseButton):
 	if event.double_click:
-		print("FKConditionUnitUi edit requested")
 		edit_requested.emit(self)
 	else:
-		print("FKConditionUnitUi selected")
 		set_selected(true)
 	
 func _on_right_click():
@@ -246,15 +243,12 @@ func _drop_data(at_position: Vector2, data) -> void:
 
 	var drag_data := data as FKDragData
 	if not drag_data or drag_data.type != DragTarget.Type.CONDITION_ITEM:
-		print("FKConditionBlock not dropped due to wrong drag data type")
 		return
 
 	var source_node := drag_data.node
 	if not source_node or source_node == self:
-		print("FKConditionBlock not dropped due to source node being self")
 		return
 	
-	print("Dropping FKConditionUnitUi")
 	var above := at_position.y < size.y / 2.0
 	reorder_requested.emit(source_node, self, above)
 

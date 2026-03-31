@@ -88,6 +88,7 @@ func _format_params(e: FKEventBlock) -> String:
 # ---------------------------------------------------------
 
 func show_context_menu(global_pos: Vector2) -> void:
+	print("Showing " + get_class() + " context menu")
 	context_menu.position = global_pos
 	context_menu.popup()
 

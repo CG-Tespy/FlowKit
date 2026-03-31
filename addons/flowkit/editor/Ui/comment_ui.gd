@@ -186,7 +186,6 @@ func _can_drop_data(at_position: Vector2, data) -> bool:
 		var parent = get_parent()
 		if parent and parent.has_method("_can_drop_data"):
 			var parent_pos = at_position + position
-			print("FKCommentUi: Comment passing job to parent _can_drop_data")
 			return parent._can_drop_data(parent_pos, data)
 	
 	return false
@@ -273,3 +272,7 @@ func _to_string() -> String:
 	if _block != null:
 		result += "\nhas block: true"
 	return result
+	
+func _on_registry_set():
+	# No-op
+	pass

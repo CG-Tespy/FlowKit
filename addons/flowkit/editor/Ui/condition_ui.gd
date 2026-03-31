@@ -24,7 +24,6 @@ var is_selected: bool = false
 
 func _enter_tree() -> void:
 	# Connect gui_input for click detection
-	print("Condition ui on enable")
 	_toggle_subs(true)
 	_update_negation_checkmark()
 
@@ -66,7 +65,6 @@ func _on_context_menu_id_pressed(id: int) -> void:
 			delete_condition_requested.emit(self)
 		4: # Negate
 			negate_condition_requested.emit(self)
-			print("Negate condition requested for: ", condition_data.condition_id if condition_data else "unknown")
 
 func set_condition_data(data: FKConditionUnit) -> void:
 	condition_data = data

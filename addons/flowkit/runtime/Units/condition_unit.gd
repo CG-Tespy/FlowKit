@@ -1,3 +1,4 @@
+@tool
 extends FKUnit
 class_name FKConditionUnit
 

@@ -1,3 +1,4 @@
+@tool
 extends FKUnit
 class_name FKGroup
 ## A group container for organizing events, comments, and nested groups in FlowKit.
@@ -88,7 +89,32 @@ func deserialize(dict: Dictionary) -> void:
 				"type": child_block.block_type,
 				"data": child_block
 			})
+			
+	normalize_children()
 
+func normalize_children() -> void:
+	if _is_normalized:
+		return
+		
+	var normalized: Array = []
+
+	for child in children:
+		var unit: FKUnit = null
+		if child is Dictionary:
+			var data: FKUnit = child.get("data")
+			if data is FKUnit:
+				unit = data
+		elif child is FKUnit:
+			unit = child
+			
+		if unit:
+			normalized.append(unit)
+
+	children.clear()
+	children.append_array(normalized)
+	_is_normalized = true
+
+var _is_normalized := false
 
 func copy_deep() -> FKGroup:
 	"""Create a deep copy of this group and all its children."""
@@ -96,17 +122,39 @@ func copy_deep() -> FKGroup:
 	copy.title = title
 	copy.collapsed = collapsed
 	copy.color = color
+	
+	# We don't have a guarantee that all our children are FKUnits, so we have to inspect
+	# each element carefully.
+	for child in children:
+		if child is FKUnit:
+			copy.children.append(child)
+		elif child is Dictionary:
+			var child_data: FKUnit = child.get("data")
+			copy.children.append(child_data)
+			
+	copy.normalize_children()
+	
+	return copy
+	
+func duplicate_block() -> FKGroup:
+	var copy := FKGroup.new()
+	copy.block_type = block_type
+	copy.title = title
+	copy.collapsed = collapsed
+	copy.color = color
+
 	copy.children = []
-	
-	for child_dict in children:
-		var child_type = child_dict.get("type", "")
-		var child_data = child_dict.get("data")
-		
-		if child_data and child_data.has_method("duplicate"):
-			var child_copy = child_data.duplicate()
-			# Deep copy for nested groups
-			if child_type == "group" and child_data is FKGroup:
-				child_copy = child_data.copy_deep()
-			copy.children.append({"type": child_type, "data": child_copy})
-	
+
+	for child in children:
+		var unit: FKUnit = null
+		# Legacy format: { "type": String, "data": FKUnit }
+		if child is Dictionary:
+			unit = child.get("data")
+		else:
+			unit = child
+
+		if unit != null:
+			var unit_copy := unit.duplicate_block()
+			copy.children.append(unit_copy)
+
 	return copy

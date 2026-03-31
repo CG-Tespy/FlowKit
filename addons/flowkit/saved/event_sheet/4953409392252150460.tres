@@ -15,6 +15,7 @@ inputs = {
 "Path": "physics/2d/default_gravity",
 "Store In": "gravity"
 }
+block_type = "action"
 
 [sub_resource type="Resource" id="Resource_1iq3u"]
 script = ExtResource("2_e5301")
@@ -24,6 +25,7 @@ inputs = {
 "Value": "-400.0",
 "Variable Name": "jump_force"
 }
+block_type = "action"
 
 [sub_resource type="Resource" id="Resource_cbhwn"]
 script = ExtResource("2_e5301")
@@ -33,6 +35,7 @@ inputs = {
 "Value": "200.0",
 "Variable Name": "speed"
 }
+block_type = "action"
 
 [sub_resource type="Resource" id="Resource_jqahe"]
 script = ExtResource("1_iqjwq")
@@ -49,6 +52,7 @@ target_node = NodePath(".")
 inputs = {
 "Y": "node.velocity.y+system.get_var(\"gravity\") * delta"
 }
+block_type = "action"
 
 [sub_resource type="Resource" id="Resource_8fi06"]
 script = ExtResource("3_6310v")
@@ -63,6 +67,7 @@ is_branch = true
 branch_type = "if"
 branch_condition = SubResource("Resource_8fi06")
 branch_actions = Array[ExtResource("2_e5301")]([SubResource("Resource_qhwv1")])
+block_type = "action"
 
 [sub_resource type="Resource" id="Resource_4pupr"]
 script = ExtResource("2_e5301")
@@ -71,11 +76,13 @@ target_node = NodePath(".")
 inputs = {
 "Y": "n_jump_force"
 }
+block_type = "action"
 
 [sub_resource type="Resource" id="Resource_rqf3r"]
 script = ExtResource("2_e5301")
 action_id = "play"
 target_node = NodePath("Jump")
+block_type = "action"
 
 [sub_resource type="Resource" id="Resource_smre5"]
 script = ExtResource("3_6310v")
@@ -89,6 +96,7 @@ is_branch = true
 branch_type = "if"
 branch_condition = SubResource("Resource_smre5")
 branch_actions = Array[ExtResource("2_e5301")]([SubResource("Resource_4pupr"), SubResource("Resource_rqf3r")])
+block_type = "action"
 
 [sub_resource type="Resource" id="Resource_rd6mx"]
 script = ExtResource("3_6310v")
@@ -105,6 +113,7 @@ is_branch = true
 branch_type = "if"
 branch_condition = SubResource("Resource_rd6mx")
 branch_actions = Array[ExtResource("2_e5301")]([SubResource("Resource_1tvq8")])
+block_type = "action"
 
 [sub_resource type="Resource" id="Resource_1geuf"]
 script = ExtResource("2_e5301")
@@ -115,6 +124,7 @@ inputs = {
 "Positive Action": "ui_right",
 "Store In": "direction"
 }
+block_type = "action"
 
 [sub_resource type="Resource" id="Resource_ftren"]
 script = ExtResource("2_e5301")
@@ -123,6 +133,7 @@ target_node = NodePath(".")
 inputs = {
 "X": "direction * n_speed"
 }
+block_type = "action"
 
 [sub_resource type="Resource" id="Resource_ogks2"]
 script = ExtResource("3_6310v")
@@ -141,6 +152,7 @@ is_branch = true
 branch_type = "if"
 branch_condition = SubResource("Resource_ogks2")
 branch_actions = Array[ExtResource("2_e5301")]([SubResource("Resource_ftren")])
+block_type = "action"
 
 [sub_resource type="Resource" id="Resource_iqbv7"]
 script = ExtResource("2_e5301")
@@ -149,17 +161,20 @@ target_node = NodePath(".")
 inputs = {
 "X": "move_toward(node.velocity.x,0,n_speed)"
 }
+block_type = "action"
 
 [sub_resource type="Resource" id="Resource_01p3u"]
 script = ExtResource("2_e5301")
 is_branch = true
 branch_type = "else"
 branch_actions = Array[ExtResource("2_e5301")]([SubResource("Resource_iqbv7")])
+block_type = "action"
 
 [sub_resource type="Resource" id="Resource_jtk1k"]
 script = ExtResource("2_e5301")
 action_id = "move_and_slide"
 target_node = NodePath(".")
+block_type = "action"
 
 [sub_resource type="Resource" id="Resource_7khp5"]
 script = ExtResource("1_iqjwq")
@@ -189,6 +204,7 @@ target_node = NodePath("AnimatedSprite2D")
 inputs = {
 "Value": "true"
 }
+block_type = "action"
 
 [sub_resource type="Resource" id="Resource_toik8"]
 script = ExtResource("3_6310v")
@@ -217,6 +233,7 @@ target_node = NodePath("AnimatedSprite2D")
 inputs = {
 "Value": "false"
 }
+block_type = "action"
 
 [sub_resource type="Resource" id="Resource_dkghy"]
 script = ExtResource("3_6310v")
@@ -265,6 +282,7 @@ inputs = {
 "From End": "false",
 "Name": "default"
 }
+block_type = "action"
 
 [sub_resource type="Resource" id="Resource_lvjr6"]
 script = ExtResource("3_6310v")
@@ -306,6 +324,7 @@ inputs = {
 "From End": "false",
 "Name": "run"
 }
+block_type = "action"
 
 [sub_resource type="Resource" id="Resource_olurx"]
 script = ExtResource("3_6310v")
