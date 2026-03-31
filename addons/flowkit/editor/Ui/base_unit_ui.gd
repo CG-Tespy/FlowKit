@@ -19,7 +19,6 @@ func legitimize(block: FKUnit, registry: FKRegistry):
 	set_registry(registry)
 	_enter_tree()
 	_ready()
-	print(get_class() + " instance is now legit!")
 	
 func _enter_tree() -> void:
 	if is_editor_preview:
@@ -77,7 +76,7 @@ func _on_block_changed() -> void:
 	update_display()
 	
 func _alert_need_for_override(func_name: String):
-	var error_message := "FKBlockNode subclasses must override %s" % [func_name]
+	var error_message := "FKUnitUi " + name + " must override %s" % [func_name]
 	printerr(error_message)
 	
 func set_registry(reg: Node) -> void:

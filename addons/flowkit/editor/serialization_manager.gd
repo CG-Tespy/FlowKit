@@ -29,9 +29,6 @@ func serialize_block(block_node: Node) -> Dictionary:
 		
 	if block_node is FKUnitUi:
 		data = block_node.get_block()
-	elif block_node.has_method("get_group_data"):
-		print("Working with get_group_data")
-		data = block_node.get_group_data()
 	else:
 		printerr("FKSerializationManager serialize_block: Node does not expose block data.")
 		return {}

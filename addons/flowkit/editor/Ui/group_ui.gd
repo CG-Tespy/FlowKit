@@ -157,7 +157,8 @@ func _notification(what: int) -> void:
 # ---------------------------------------------------------
 
 func _refresh_display() -> void:
-	if not _group or is_editor_preview:
+	if not _group:
+		printerr("Cannot refresh display of gruop block. No group to work with.")
 		return
 	_update_title_display()
 	_update_collapse_display()
@@ -190,7 +191,8 @@ func _update_color_display() -> void:
 		selected_stylebox.bg_color = _group.color
 
 func _rebuild_child_nodes() -> void:
-	if not _group or is_editor_preview:
+	if not _group:
+		printerr("Can't rebuild child nodes. Got no group to work with")
 		return
 
 	for child in children_container.get_children():
@@ -198,16 +200,26 @@ func _rebuild_child_nodes() -> void:
 			children_container.remove_child(child)
 			child.queue_free()
 
-	for unit in _group.children:
+	for raw_child in _group.children:
+		var unit = raw_child
+
+		# Legacy format: { "type": String, "data": FKUnit }
+		if raw_child is Dictionary:
+			unit = raw_child.get("data")
+
 		if unit is FKEventBlock:
 			var row := _instantiate_event_row(unit)
-			children_container.add_child(row)
+			if row:
+				children_container.add_child(row)
 		elif unit is FKComment:
 			var comment := _instantiate_comment(unit)
-			children_container.add_child(comment)
+			if comment:
+				children_container.add_child(comment)
 		elif unit is FKGroup:
 			var nested := _instantiate_group(unit)
-			children_container.add_child(nested)
+			if nested:
+				children_container.add_child(nested)
+
 
 	if drop_hint:
 		drop_hint.visible = _group.children.is_empty()
@@ -228,12 +240,12 @@ func _instantiate_event_row(data: FKEventBlock) -> Control:
 	if is_editor_preview:
 		print("[FKGroupUi]: Cannot instantiate event row in editor preview mode")
 		return null
-	var row: FKEventUnitUi = EVENT_ROW_SCENE.instantiate()
+	var row: FKEventRowUi = EVENT_ROW_SCENE.instantiate()
 	row.call_deferred("legitimize", data, registry)
 	_connect_event_row_signals(row, data)
 	return row
 
-func _connect_event_row_signals(row: FKEventUnitUi, data: FKEventBlock) -> void:
+func _connect_event_row_signals(row: FKEventRowUi, data: FKEventBlock) -> void:
 	row.delete_event_requested.connect(_on_child_row_delete_requested.bind(data))
 	row.selected.connect(func(n): _on_child_selected(data); selected.emit(n))
 	row.condition_selected.connect(func(n): selected.emit(n))
@@ -244,8 +256,8 @@ func _connect_event_row_signals(row: FKEventUnitUi, data: FKEventBlock) -> void:
 
 	row.insert_event_below_requested.connect(func(r): insert_event_below_requested.emit(r))
 	row.insert_comment_below_requested.connect(func(r): insert_comment_below_requested.emit(r))
-	row.insert_event_above_requested.connect(func(r): insert_event_above_requested.emit(r))
-	row.insert_comment_above_requested.connect(func(r): insert_comment_above_requested.emit(r))
+	#row.insert_event_above_requested.connect(func(r): insert_event_above_requested.emit(r))
+	#row.insert_comment_above_requested.connect(func(r): insert_comment_above_requested.emit(r))
 
 	row.replace_event_requested.connect(func(r): replace_event_requested.emit(r))
 	row.edit_event_requested.connect(func(r): edit_event_requested.emit(r))

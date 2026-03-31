@@ -273,3 +273,7 @@ func _to_string() -> String:
 	if _block != null:
 		result += "\nhas block: true"
 	return result
+	
+func _on_registry_set():
+	# No-op
+	pass
