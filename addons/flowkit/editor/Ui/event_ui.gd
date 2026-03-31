@@ -1,7 +1,7 @@
-# At the time of this writing, this class is unused.
+# At the time of this writing, this class seems unused.
 @tool
 extends FKUnitUi
-class_name FKEventBlockUi
+class_name FKEventUnitUi
 
 signal insert_condition_requested(event_node)
 signal replace_event_requested(event_node)
@@ -20,7 +20,7 @@ signal edit_event_requested(event_node)
 # ---------------------------------------------------------
 # Block Handling
 # ---------------------------------------------------------
-
+	
 func _validate_block(to_set: FKUnit) -> bool:
 	return to_set == null or to_set is FKEventBlock
 
@@ -108,6 +108,9 @@ const _delete_event_choice := 3
 # ---------------------------------------------------------
 
 func _toggle_subs(on: bool) -> void:
+	if is_editor_preview:
+		return
+		
 	if on && !_is_subbed:
 		gui_input.connect(_on_gui_input)
 		context_menu.id_pressed.connect(_on_context_menu_id_pressed)
@@ -142,7 +145,7 @@ func _get_drag_data(at_position: Vector2) -> FKDragData:
 func _create_drag_preview() -> Control:
 	var preview_label := Label.new()
 	preview_label.text = label.text if label else "Event"
-	preview_label.add_theme_color_override("font_color", Color(0.9, 0.95, 0.9, 0.7))
+	preview_label.add_theme_color_override("font_color", _preview_color)
 
 	var margin := MarginContainer.new()
 	margin.add_theme_constant_override("margin_left", 8)
@@ -153,8 +156,20 @@ func _create_drag_preview() -> Control:
 
 	return margin
 
+const _preview_color := Color(0.9, 0.95, 0.9, 0.7)
+
 func _can_drop_data(at_position: Vector2, data) -> bool:
 	return false  # Parent VBoxContainer handles drops
 
 func _drop_data(at_position: Vector2, data) -> void:
 	pass  # Parent handles drops
+
+func _to_string() -> String:
+	var result := "\nFKEventUnitUi"
+	
+	if _block != null:
+		result += "\nhas block: true"
+	return result
+	
+func get_class() -> String:
+	return "FKEventUnitUi"

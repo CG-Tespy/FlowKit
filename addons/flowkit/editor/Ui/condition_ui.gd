@@ -158,3 +158,11 @@ func _drop_data(at_position: Vector2, data) -> void:
 
 func _exit_tree() -> void:
 	_toggle_subs(false)
+
+func _to_string() -> String:
+	var result := "FKConditionUi"
+	return result
+
+func get_class() -> String:
+	var result := "FKConditionUi"
+	return result

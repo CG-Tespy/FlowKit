@@ -54,14 +54,16 @@ func _enter_tree() -> void:
 	_toggle_subs(true)
 
 func _toggle_subs(on: bool):
-	if on:
+	if on and not _is_subbed:
 		# For autosave and undo state on drag-and-drop reorder
 		blocks_container.before_block_moved.connect(_push_undo_state)
 		blocks_container.block_moved.connect(_save_and_reload_sheet)
-	else:
+	elif not on and _is_subbed:
 		blocks_container.before_block_moved.disconnect(_push_undo_state)
 		blocks_container.block_moved.disconnect(_save_and_reload_sheet)
-	
+
+var _is_subbed := false
+
 func _setup_ui() -> void:
 	"""Initialize UI state."""
 	_show_empty_state()
@@ -177,7 +179,7 @@ func _paste_events() -> void:
 	if first_row:
 		_on_row_selected(first_row)
 		
-func _find_parent_branch(node: Node) -> BranchItemUi:
+func _find_parent_branch(node: Node) -> FKBranchUnitUi:
 	"""Find the branch_item that contains this node, or null if at top level."""
 	var current = node.get_parent()
 	while current:
@@ -418,7 +420,7 @@ func _delete_selected_item() -> void:
 			var idx = event_data.conditions.find(cond_data)
 			if idx >= 0:
 				event_data.conditions.remove_at(idx)
-	elif item_to_delete is FKActionUnitUi or item_to_delete is BranchItemUi:
+	elif item_to_delete is FKActionUnitUi or item_to_delete is FKBranchUnitUi:
 		var act_data := item_to_delete.get_block() as FKActionUnit
 		var event_data = parent_row.get_event_data()
 		if act_data and event_data:
@@ -551,7 +553,8 @@ func _get_blocks() -> Array[Node]:
 			
 		if child != empty_label:
 			blocks.append(child)
-			
+	
+	print("FKMainEditor: blocks gotten: " + str(blocks))
 	return blocks
 
 func _clear_all_blocks() -> void:
@@ -690,23 +693,23 @@ func _new_sheet() -> void:
 
 func _create_event_row(data: FKEventBlock) -> Control:
 	"""Create event row node from data (GDevelop-style)."""
+	print("[FKMainEditor] Creating event row node")
 	var row: FKEventRowUi = EVENT_ROW_SCENE.instantiate()
-	
 	var copy := sheet_io.copy_event_block(data)
 	
-	row.set_block(copy)
-	row.set_registry(registry)
+	row.legitimize(copy, registry)
 	_connect_event_row_signals(row)
 	return row
 
 func _create_comment_block(data: FKComment) -> Control:
 	"""Create comment block node from data."""
+	print("[FKMainEditor]: Creating comment block node")
 	var comment: FKCommentUi = COMMENT_SCENE.instantiate()
 	
 	var copy = FKComment.new()
 	copy.text = data.text
 	print("About to give a block node a copy of a comment block")
-	comment.set_block(copy)
+	comment.legitimize(copy, registry)
 	_connect_comment_signals(comment)
 	return comment
 
@@ -721,8 +724,8 @@ func _connect_comment_signals(comment: FKCommentUi) -> void:
 
 func _create_group_block(data: FKGroup) -> Control:
 	"""Create group block node from data."""
-	print("Creating group block node from data")
-	var group: GroupBlockUi = GROUP_SCENE.instantiate()
+	print("[FKMainEditor]: Creating group block node")
+	var group: FKGroupUi = GROUP_SCENE.instantiate()
 	
 	var copy = FKGroup.new()
 	copy.title = data.title
@@ -744,8 +747,7 @@ func _create_group_block(data: FKGroup) -> Control:
 		elif child_type == "group" and child_data is FKGroup:
 			copy.children.append({"type": "group", "data": sheet_io.copy_group_block(child_data)})
 	
-	group.set_group_data(copy)
-	group.set_registry(registry)
+	group.legitimize(copy, registry)
 	_connect_group_signals(group)
 	return group
 
@@ -801,7 +803,7 @@ func _on_group_selected(node) -> void:
 		_on_condition_selected_in_row(node)
 		return
 	
-	if node is FKActionUnitUi or node is BranchItemUi:
+	if node is FKActionUnitUi or node is FKBranchUnitUi:
 		_on_action_selected_in_row(node)
 		return
 	

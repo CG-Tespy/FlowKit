@@ -266,3 +266,10 @@ const _insert_comment_below_choice: int = 13
 
 func get_block() -> FKComment:
 	return _block
+	
+func _to_string() -> String:
+	var result := "FKCommentUi"
+	
+	if _block != null:
+		result += "\nhas block: true"
+	return result

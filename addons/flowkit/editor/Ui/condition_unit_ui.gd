@@ -278,3 +278,10 @@ func _hide_drop_indicator() -> void:
 func _notification(what: int) -> void:
 	if what == NOTIFICATION_DRAG_END:
 		_hide_drop_indicator()
+		
+func _to_string() -> String:
+	var result := "FKConditionUnitUi"
+	
+	if _block != null:
+		result += "\nhas block: true"
+	return result
