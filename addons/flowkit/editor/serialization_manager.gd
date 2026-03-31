@@ -7,7 +7,7 @@ class_name FKSerializationManager
 # Serialization #
 func capture_state(blocks: Array[Node]) -> Array[Dictionary]:
 	"""Capture the state of the passed block Nodes as serialized data."""
-	print("FKSerializationManager: blocks gotten: " + str(blocks))
+	#print("FKSerializationManager: blocks gotten: " + str(blocks))
 	var state: Array[Dictionary] = []
 
 	for block_el in blocks:
@@ -25,7 +25,7 @@ func serialize_block(block_node: Node) -> Dictionary:
 	# At the time of this writing, all block node classes except group_ui implement FKUnitui
 	var data: FKUnit = null
 	if block_node.has_method("_to_string"):
-		print("Serializing block node of type " + block_node._to_string())
+		print("Serializing block node of type " + block_node.get_class())
 		
 	if block_node is FKUnitUi:
 		data = block_node.get_block()

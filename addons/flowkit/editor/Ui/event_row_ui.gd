@@ -96,8 +96,6 @@ func update_display() -> void:
 	_update_display()
 
 func _toggle_subs(on: bool) -> void:
-	if is_editor_preview:
-		return
 	if on and not _is_subbed:
 		gui_input.connect(_on_gui_input)
 		context_menu.id_pressed.connect(_on_context_menu_id_pressed)
@@ -131,6 +129,7 @@ func _on_gui_input(event: InputEvent) -> void:
 		get_viewport().set_input_as_handled()
 		
 func show_context_menu(global_pos: Vector2) -> void:
+	print("Showing Event row context menu")
 	context_menu.clear()
 	context_menu.add_item("Add Event Below", MenuChoices.ADD_EVENT_BELOW)
 	context_menu.add_item("Add Comment Below", MenuChoices.ADD_COMMENT_BELOW)
@@ -317,7 +316,7 @@ func _on_action_drop_zone_dropped(drag_data: FKDragData) -> void:
 # ---------------------------------------------------------
 
 func _update_display() -> void:
-	print("Updating display for " + _to_string())
+	#print("Updating display for " + _to_string())
 	_update_event_header()
 	_update_conditions()
 	_update_actions()
@@ -383,7 +382,6 @@ func _update_actions() -> void:
 	if not e:
 		return
 	
-	print("Updating actions in Event row ui")
 	_clear_action_container()	
 
 	for act_data in e.actions:
@@ -398,14 +396,14 @@ func _clear_action_container():
 		child.queue_free()
 
 func _add_branch_item_based_on(act_data: FKActionUnit):
-	print("Adding branch action in Event row ui")
+	#print("Adding branch action in Event row ui")
 	var branch: FKBranchUnitUi = BRANCH_ITEM_SCENE.instantiate()
 	branch.legitimize(act_data, registry)
 	_connect_branch_item_signals(branch)
 	actions_container.add_child(branch)
 
 func _add_regular_action_item_based_on(act_data: FKActionUnit):
-	print("Adding regular action in Event row ui")
+	#print("Adding regular action in Event row ui")
 	var item: FKActionUnitUi = ACTION_ITEM_SCENE.instantiate()
 	item.legitimize(act_data, registry)
 	_connect_action_item_signals(item)
@@ -479,9 +477,9 @@ func _connect_branch_item_signals(branch) -> void:
 # Condition handlers
 # ---------------------------------------------------------
 
-func _on_branch_item_delete(item) -> void:
+func _on_branch_item_delete(item: FKUnitUi) -> void:
 	before_data_changed.emit()
-	var act_data = item.get_block()
+	var act_data := item.get_block()
 	var e := _get_event()
 	if act_data and e:
 		var idx = e.actions.find(act_data)
@@ -493,7 +491,7 @@ func _on_branch_item_delete(item) -> void:
 func _on_condition_item_edit(item: FKConditionUnitUi) -> void:
 	condition_edit_requested.emit(item)
 
-func _on_condition_item_delete(item) -> void:
+func _on_condition_item_delete(item: FKConditionUnitUi) -> void:
 	before_data_changed.emit()
 	var cond_data = item.get_block()
 	var e := _get_event()
@@ -504,7 +502,7 @@ func _on_condition_item_delete(item) -> void:
 		_update_conditions()
 		data_changed.emit()
 
-func _on_condition_item_negate(item) -> void:
+func _on_condition_item_negate(item: FKConditionUnitUi) -> void:
 	before_data_changed.emit()
 	var cond_data = item.get_block()
 	if cond_data:
@@ -516,10 +514,10 @@ func _on_condition_item_negate(item) -> void:
 # Action handlers
 # ---------------------------------------------------------
 
-func _on_action_item_edit(item) -> void:
+func _on_action_item_edit(item: FKActionUnitUi) -> void:
 	action_edit_requested.emit(item)
 
-func _on_action_item_delete(item) -> void:
+func _on_action_item_delete(item: FKActionUnitUi) -> void:
 	before_data_changed.emit()
 	var act_data = item.get_block()
 	var e := _get_event()
@@ -545,8 +543,8 @@ drop_above: bool) -> void:
 	if not source_data or not target_data:
 		return
 
-	var source_idx = e.conditions.find(source_data)
-	var target_idx = e.conditions.find(target_data)
+	var source_idx := e.conditions.find(source_data)
+	var target_idx := e.conditions.find(target_data)
 
 	if source_idx < 0 or target_idx < 0:
 		return
@@ -586,7 +584,8 @@ func _recursive_remove_action(actions_array: Array, target_action) -> bool:
 
 	return false
 
-func _on_action_cross_reorder(source_data, target_data, is_drop_above: bool, target_branch: FKActionUnitUi) -> void:
+func _on_action_cross_reorder(source_data, target_data, is_drop_above: bool, 
+target_branch: FKActionUnitUi) -> void:
 	var e := _get_event()
 	if not e:
 		return
@@ -608,7 +607,7 @@ func _on_action_cross_reorder(source_data, target_data, is_drop_above: bool, tar
 	_update_actions()
 	data_changed.emit()
 
-func _on_action_dropped_into_branch(source_item: FKActionUnitUi, target_branch) -> void:
+func _on_action_dropped_into_branch(source_item: FKActionUnitUi, target_branch: FKBranchUnitUi) -> void:
 	var e := _get_event()
 	if not e:
 		return
@@ -626,7 +625,8 @@ func _on_action_dropped_into_branch(source_item: FKActionUnitUi, target_branch) 
 	_update_actions()
 	data_changed.emit()
 
-func _on_action_reorder(source_item: FKActionUnitUi, target_item: FKActionUnitUi, drop_above: bool) -> void:
+func _on_action_reorder(source_item: FKActionUnitUi, target_item: FKActionUnitUi, 
+drop_above: bool) -> void:
 	var e := _get_event()
 	if not e:
 		return
@@ -815,3 +815,14 @@ func _to_string() -> String:
 	if _block != null:
 		result += "\nhas block: true"
 	return result
+
+func get_class() -> String:
+	var result := "FKEventRowUi"
+	return result
+	
+func get_block() -> FKEventBlock:
+	if _block is FKEventBlock:
+		return _block as FKEventBlock
+	else:
+		return null
+	

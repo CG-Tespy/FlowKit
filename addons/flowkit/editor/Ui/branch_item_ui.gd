@@ -78,16 +78,20 @@ func _toggle_subs(on: bool) -> void:
 
 func _on_gui_input(event: InputEvent) -> void:
 	if event is InputEventMouseButton and event.pressed:
-		if event.button_index == MOUSE_BUTTON_LEFT:
+		var left_click: bool = event.button_index == MOUSE_BUTTON_LEFT
+		var right_click: bool = event.button_index == MOUSE_BUTTON_RIGHT
+		if left_click:
 			if event.double_click and _action.branch_type != "else":
 				edit_condition_requested.emit(self)
-		elif event.button_index == MOUSE_BUTTON_RIGHT:
+		elif right_click:
 			_show_context_menu()
-
-		set_selected(true)
-		get_viewport().set_input_as_handled()
+		
+		if left_click or right_click:
+			set_selected(true)
+			get_viewport().set_input_as_handled()
 
 func _show_context_menu() -> void:
+	print("Showing branch context menu")
 	context_menu.clear()
 
 	var provider = _get_branch_provider()
@@ -140,7 +144,9 @@ func _toggle_negate() -> void:
 # ---------------------------------------------------------
 
 func _on_add_action_input(event: InputEvent) -> void:
-	if event is InputEventMouseButton and event.pressed:
+	var we_want_to_respond: bool = event is InputEventMouseButton and event.pressed and \
+	event.button_index == MOUSE_BUTTON_RIGHT
+	if we_want_to_respond:
 		_flash_label(add_action_label)
 		_show_add_action_context_menu()
 		accept_event()

@@ -93,7 +93,7 @@ var _group: FKGroup:
 func _enter_tree() -> void:
 	if is_editor_preview:
 		return
-		
+	print("Group ui enter tree")
 	super._enter_tree()
 	children_container.set_meta("_parent_group", self)
 
@@ -361,7 +361,7 @@ func _remove_child_data(child_data) -> void:
 		data_changed.emit()
 
 func _sync_children_to_data() -> void:
-	if not _group:
+	if not _group or is_editor_preview:
 		return
 		
 	var new_children: Array[Node] = []
@@ -377,7 +377,7 @@ func _sync_children_to_data() -> void:
 	_group.children = new_children
 
 func add_event_to_group(event_data: FKEventBlock) -> void:
-	if not _group:
+	if not _group or is_editor_preview:
 		return
 	before_data_changed.emit()
 	_group.children.append(event_data)
@@ -823,8 +823,18 @@ func _show_drop_indicator(at_position: Vector2, _drag_node: Node) -> void:
 	DropIndicatorManager.show_indicator(children_container, at_position.y)
 
 func _to_string() -> String:
-	var result := "\nFKGroupUnitUi"
+	var result := "\nFKGroupUi"
 	
 	if _block != null:
 		result += "\nhas block: true"
 	return result
+	
+func get_class() -> String:
+	var result := "FKGroupUi"
+	return result
+
+func get_block() -> FKGroup:
+	if _block is FKGroup:
+		return _block as FKGroup
+	else:
+		return null

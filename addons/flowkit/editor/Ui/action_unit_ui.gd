@@ -110,6 +110,7 @@ func _get_params_text() -> String:
 # ---------------------------------------------------------
 
 func show_context_menu(global_pos: Vector2) -> void:
+	print("Showing Action context menu")
 	context_menu.position = global_pos
 	context_menu.popup()
 
@@ -284,4 +285,8 @@ func _to_string() -> String:
 	
 	if _block != null:
 		result += "\nhas block: true"
+	return result
+
+func get_class() -> String:
+	var result := "FKActionUnitUi"
 	return result

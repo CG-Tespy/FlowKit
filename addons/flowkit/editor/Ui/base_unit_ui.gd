@@ -19,11 +19,12 @@ func legitimize(block: FKUnit, registry: FKRegistry):
 	set_registry(registry)
 	_enter_tree()
 	_ready()
+	print(get_class() + " instance is now legit!")
 	
 func _enter_tree() -> void:
 	if is_editor_preview:
 		return
-	#print("Legit " + _to_string() + " instantiated")
+	print("Legit " + _to_string() + " instantiated")
 	_toggle_subs(true)
 
 
@@ -40,7 +41,6 @@ var _is_subbed := false
 func _ready() -> void:
 	if is_editor_preview:
 		return
-	print("Called _ready for " + _to_string())
 	# Ensure we receive mouse events
 	mouse_filter = Control.MOUSE_FILTER_STOP
 	update_display.call_deferred()

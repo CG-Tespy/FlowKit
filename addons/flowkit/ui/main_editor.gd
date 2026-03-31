@@ -40,7 +40,7 @@ var pending_target_item = null  # The specific condition/action item being edite
 var pending_target_group = null  # The group to add content to (for event_in_group workflow)
 var pending_target_branch = null  # The branch item for branch sub-action workflows
 var pending_branch_id: String = ""  # The branch provider ID for the current workflow
-var selected_row = null  # Currently selected event row
+var selected_row: Control = null  # Currently selected event row
 var selected_item = null  # Currently selected condition/action item
 
 var undo_manager: FKUndoManager = FKUndoManager.new()
@@ -257,20 +257,21 @@ func _paste_group() -> void:
 	var new_group = clipboard.paste_group()
 	if not new_group:
 		return
-
+	
+	print("[FKMainEditor]: Pasting group")
 	_push_undo_state()
 
-	var target_group = null
+	var target_group: FKGroupUi = null
 
 	# Case 1: selected row *is* a group
-	if selected_row and selected_row.has_method("get_group_data"):
+	if selected_row is FKGroupUi:
 		target_group = selected_row
 
 	# Case 2: selected row is inside a group
 	elif selected_row:
 		var parent = selected_row.get_parent()
 		while parent:
-			if parent.has_method("get_group_data"):
+			if parent is FKGroupUi:
 				target_group = parent
 				break
 			parent = parent.get_parent()
@@ -281,7 +282,8 @@ func _paste_group() -> void:
 			target_group.add_group_to_group(new_group)
 		else:
 			# Fallback: append to children manually
-			target_group.get_group_data().children.append({
+			var block := target_group.get_block()
+			block.children.append({
 				"type": "group",
 				"data": new_group
 			})
@@ -291,7 +293,7 @@ func _paste_group() -> void:
 		return
 
 	# Otherwise paste at root level
-	var group_node = _create_group_block(new_group)
+	var group_node := _create_group_block(new_group)
 	blocks_container.add_child(group_node)
 
 	_save_sheet()
@@ -554,7 +556,6 @@ func _get_blocks() -> Array[Node]:
 		if child != empty_label:
 			blocks.append(child)
 	
-	print("FKMainEditor: blocks gotten: " + str(blocks))
 	return blocks
 
 func _clear_all_blocks() -> void:
@@ -722,7 +723,7 @@ func _connect_comment_signals(comment: FKCommentUi) -> void:
 	comment.insert_event_above_requested.connect(_on_comment_insert_event_above.bind(comment))
 	comment.insert_event_below_requested.connect(_on_comment_insert_event_below.bind(comment))
 
-func _create_group_block(data: FKGroup) -> Control:
+func _create_group_block(data: FKGroup) -> FKGroupUi:
 	"""Create group block node from data."""
 	print("[FKMainEditor]: Creating group block node")
 	var group: FKGroupUi = GROUP_SCENE.instantiate()
@@ -739,19 +740,22 @@ func _create_group_block(data: FKGroup) -> Control:
 		var child_data = child_dict.get("data")
 		
 		if child_type == "event" and child_data is FKEventBlock:
+			print("Deep copying event block for fk group")
 			copy.children.append({"type": "event", "data": sheet_io.copy_event_block(child_data)})
 		elif child_type == "comment" and child_data is FKComment:
+			print("Deep copying comment block for fk group")
 			var comment_copy = FKComment.new()
 			comment_copy.text = child_data.text
 			copy.children.append({"type": "comment", "data": comment_copy})
 		elif child_type == "group" and child_data is FKGroup:
+			print("Deep copying child group block for fk group")
 			copy.children.append({"type": "group", "data": sheet_io.copy_group_block(child_data)})
 	
-	group.legitimize(copy, registry)
+	group.call_deferred("legitimize", copy, registry)
 	_connect_group_signals(group)
 	return group
 
-func _connect_group_signals(group) -> void:
+func _connect_group_signals(group: FKGroupUi) -> void:
 	group.selected.connect(_on_group_selected)
 	group.delete_requested.connect(_on_group_delete.bind(group))
 	group.data_changed.connect(_save_sheet)
@@ -772,20 +776,14 @@ func _connect_group_signals(group) -> void:
 	group.condition_dropped.connect(_on_condition_dropped)
 	group.action_dropped.connect(_on_action_dropped)
 	# Branch signals from groups
-	if group.has_signal("add_branch_requested"):
-		group.add_branch_requested.connect(func(row, bid): _on_row_add_branch(row, bid, row))
-	if group.has_signal("add_elseif_requested"):
-		group.add_elseif_requested.connect(_on_branch_add_elseif)
-	if group.has_signal("add_else_requested"):
-		group.add_else_requested.connect(_on_branch_add_else)
-	if group.has_signal("branch_condition_edit_requested"):
-		group.branch_condition_edit_requested.connect(_on_branch_condition_edit)
-	if group.has_signal("branch_action_add_requested"):
-		group.branch_action_add_requested.connect(_on_branch_action_add)
-	if group.has_signal("branch_action_edit_requested"):
-		group.branch_action_edit_requested.connect(_on_branch_action_edit)
-	if group.has_signal("nested_branch_add_requested"):
-		group.nested_branch_add_requested.connect(_on_nested_branch_add)
+
+	group.add_branch_requested.connect(func(row, bid): _on_row_add_branch(row, bid, row))
+	group.add_elseif_requested.connect(_on_branch_add_elseif)
+	group.add_else_requested.connect(_on_branch_add_else)
+	group.branch_condition_edit_requested.connect(_on_branch_condition_edit)
+	group.branch_action_add_requested.connect(_on_branch_action_add)
+	group.branch_action_edit_requested.connect(_on_branch_action_edit)
+	group.nested_branch_add_requested.connect(_on_nested_branch_add)
 
 func _on_group_add_event_requested(group_node) -> void:
 	"""Handle request to add an event inside a group."""
@@ -1003,7 +1001,7 @@ func _on_add_comment_button_pressed() -> void:
 	_show_content_state()
 	_save_sheet()
 
-func _on_row_selected(row) -> void:
+func _on_row_selected(row: FKUnitUi) -> void:
 	"""Handle row selection with visual feedback."""
 	# Deselect previous item (condition/action)
 	_deselect_item()
@@ -1017,7 +1015,7 @@ func _on_row_selected(row) -> void:
 	if selected_row and selected_row.has_method("set_selected"):
 		selected_row.set_selected(true)
 
-func _on_comment_selected(comment_node) -> void:
+func _on_comment_selected(comment_node: FKCommentUi) -> void:
 	"""Handle comment block selection."""
 	_deselect_item()
 	
@@ -1028,7 +1026,7 @@ func _on_comment_selected(comment_node) -> void:
 	if selected_row and selected_row.has_method("set_selected"):
 		selected_row.set_selected(true)
 
-func _on_comment_delete(comment) -> void:
+func _on_comment_delete(comment: FKCommentUi) -> void:
 	"""Delete a comment block."""
 	_push_undo_state()
 	
@@ -1039,20 +1037,20 @@ func _on_comment_delete(comment) -> void:
 	comment.queue_free()
 	_save_sheet()
 
-func _on_comment_insert_above(signal_node, bound_comment) -> void:
+func _on_comment_insert_above(signal_node, bound_comment: FKCommentUi) -> void:
 	"""Insert a new comment above the specified comment."""
 	_insert_comment_relative_to(bound_comment, 0)
 
-func _on_comment_insert_below(signal_node, bound_comment) -> void:
+func _on_comment_insert_below(signal_node, bound_comment: FKCommentUi) -> void:
 	"""Insert a new comment below the specified comment."""
 	_insert_comment_relative_to(bound_comment, 1)
 
-func _on_comment_insert_event_above(signal_node, bound_comment) -> void:
+func _on_comment_insert_event_above(signal_node, bound_comment: FKCommentUi) -> void:
 	"""Insert a new event above the specified comment."""
 	pending_target_row = bound_comment
 	_start_add_workflow("event_above_target", bound_comment)
 
-func _on_comment_insert_event_below(signal_node, bound_comment) -> void:
+func _on_comment_insert_event_below(signal_node, bound_comment: FKCommentUi) -> void:
 	"""Insert a new event below the specified comment."""
 	pending_target_row = bound_comment
 	_start_add_workflow("event", bound_comment)
@@ -1078,7 +1076,7 @@ func _insert_comment_relative_to(target_block, offset: int) -> void:
 	_show_content_state()
 	_save_sheet()
 
-func _on_condition_selected_in_row(condition_node) -> void:
+func _on_condition_selected_in_row(condition_node: FKConditionUnitUi) -> void:
 	"""Handle condition item selection."""
 	# Deselect previous row
 	if valid_selected_row and selected_row.has_method("set_selected"):
@@ -1093,7 +1091,7 @@ func _on_condition_selected_in_row(condition_node) -> void:
 	if selected_item and selected_item.has_method("set_selected"):
 		selected_item.set_selected(true)
 
-func _on_action_selected_in_row(action_node) -> void:
+func _on_action_selected_in_row(action_node: FKActionUnitUi) -> void:
 	"""Handle action item selection."""
 	# Deselect previous row
 	if valid_selected_row and selected_row.has_method("set_selected"):
@@ -1105,8 +1103,8 @@ func _on_action_selected_in_row(action_node) -> void:
 	
 	# Select new item
 	selected_item = action_node
-	if selected_item and selected_item.has_method("set_selected"):
-		selected_item.set_selected(true)
+	if action_node:
+		action_node.set_selected(true)
 
 func _deselect_item() -> void:
 	"""Deselect current condition/action item."""
@@ -1482,12 +1480,12 @@ func _on_row_insert_below(signal_row, bound_row) -> void:
 	pending_target_row = bound_row
 	_start_add_workflow("event", bound_row)
 
-func _on_row_replace(signal_row, bound_row) -> void:
+func _on_row_replace(signal_row, bound_row: FKEventRowUi) -> void:
 	pending_target_row = bound_row
 	pending_block_type = "event_replace"
 	
 	# Get current node path from the row being replaced
-	var data = bound_row.get_event_data()
+	var data := bound_row.get_block()
 	if data:
 		pending_node_path = str(data.target_node)
 	
