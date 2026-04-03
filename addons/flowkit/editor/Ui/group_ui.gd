@@ -61,6 +61,12 @@ const DRAG_THRESHOLD: float = 8.0
 @export var normal_stylebox: StyleBox
 @export var selected_stylebox: StyleBox
 
+func legitimize(block: FKUnit, registry: FKRegistry):
+	if not is_editor_preview:
+		return
+	var group := block as FKGroup
+	group.normalize_children()
+	super.legitimize(block, registry)
 # ---------------------------------------------------------
 # FKUnitUi integration
 # ---------------------------------------------------------
@@ -302,8 +308,13 @@ func _instantiate_group(data: FKGroup) -> Control:
 		return null
 	var group_scene := load("res://addons/flowkit/ui/workspace/group_ui.tscn")
 	var nested: FKGroupUi = group_scene.instantiate()
+	data.normalize_children()
 	nested.legitimize(data, registry)
 	
+	_attach_nested_group_signals(nested, data)
+	return nested
+
+func _attach_nested_group_signals(nested: FKGroupUi, data: FKGroup):
 	nested.delete_requested.connect(_on_child_group_delete_requested.bind(data))
 	nested.selected.connect(func(n): selected.emit(n))
 
@@ -339,8 +350,6 @@ func _instantiate_group(data: FKGroup) -> Control:
 	nested.branch_action_add_requested.connect(func(bi, r): branch_action_add_requested.emit(bi, r))
 	nested.branch_action_edit_requested.connect(func(ai, bi, r): branch_action_edit_requested.emit(ai, bi, r))
 	nested.nested_branch_add_requested.connect(func(bi, bid, r): nested_branch_add_requested.emit(bi, bid, r))
-
-	return nested
 
 # ---------------------------------------------------------
 # Child events / data sync
@@ -850,3 +859,4 @@ func get_block() -> FKGroup:
 		return _block as FKGroup
 	else:
 		return null
+		

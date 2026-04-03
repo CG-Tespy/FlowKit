@@ -1,3 +1,4 @@
+@tool
 extends FKUnit
 class_name FKActionUnit
 
@@ -71,3 +72,33 @@ func _deserialize_branch_conds_and_actions(dict: Dictionary):
 	
 func get_id() -> String:
 	return action_id
+	
+func duplicate_block() -> FKUnit:
+	var copy := FKActionUnit.new()
+	copy.block_type = block_type
+	copy.action_id = action_id
+	copy.target_node = target_node
+	copy.inputs = inputs.duplicate(true)
+	copy.is_branch = is_branch
+	copy.branch_type = branch_type
+	copy.branch_id = branch_id
+	copy.branch_inputs = branch_inputs
+	copy.branch_condition = branch_condition.duplicate_block() if branch_condition != null \
+	else null
+	
+	var base_dupes := _to_base_unit_arr(self.branch_actions)
+	base_dupes = _duplicate_blocks(base_dupes)
+	copy.branch_actions = _to_action_unit_arr(base_dupes)
+	# Copy your other fields here (ids, params, etc.)
+	# e.g. copy.action_id = action_id, etc.
+
+
+	return copy
+	
+static func _to_action_unit_arr(arr: Array) -> Array[FKActionUnit]:
+	var result: Array[FKActionUnit] = []
+	for child in arr:
+		if child is FKActionUnit:
+			result.append(child)
+	return result
+		

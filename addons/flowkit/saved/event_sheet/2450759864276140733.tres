@@ -9,6 +9,25 @@
 
 [sub_resource type="Resource" id="Resource_xv5k1"]
 script = ExtResource("3_7puo2")
+action_id = "set_window_mode"
+target_node = NodePath("System")
+inputs = {
+"Mode": "windowed"
+}
+block_type = "action"
+
+[sub_resource type="Resource" id="Resource_o0xcg"]
+script = ExtResource("3_7puo2")
+action_id = "set_window_size"
+target_node = NodePath("System")
+inputs = {
+"Height": "720",
+"Width": "1280"
+}
+block_type = "action"
+
+[sub_resource type="Resource" id="Resource_7puo2"]
+script = ExtResource("3_7puo2")
 action_id = "set_variable"
 target_node = NodePath("System")
 inputs = {
@@ -17,7 +36,7 @@ inputs = {
 }
 block_type = "action"
 
-[sub_resource type="Resource" id="Resource_o0xcg"]
+[sub_resource type="Resource" id="Resource_ko5ym"]
 script = ExtResource("3_7puo2")
 action_id = "Print Message"
 target_node = NodePath(".")
@@ -27,7 +46,7 @@ inputs = {
 }
 block_type = "action"
 
-[sub_resource type="Resource" id="Resource_7puo2"]
+[sub_resource type="Resource" id="Resource_3014d"]
 script = ExtResource("3_7puo2")
 action_id = "Print Message"
 target_node = NodePath(".")
@@ -37,7 +56,7 @@ inputs = {
 }
 block_type = "action"
 
-[sub_resource type="Resource" id="Resource_ko5ym"]
+[sub_resource type="Resource" id="Resource_0vfw8"]
 script = ExtResource("3_7puo2")
 action_id = "set_variable"
 target_node = NodePath("System")
@@ -47,7 +66,7 @@ inputs = {
 }
 block_type = "action"
 
-[sub_resource type="Resource" id="Resource_3014d"]
+[sub_resource type="Resource" id="Resource_v5tg8"]
 script = ExtResource("3_7puo2")
 is_branch = true
 branch_type = "if"
@@ -55,10 +74,10 @@ branch_id = "repeat"
 branch_inputs = {
 "times": "10"
 }
-branch_actions = Array[ExtResource("3_7puo2")]([SubResource("Resource_7puo2"), SubResource("Resource_ko5ym")])
+branch_actions = Array[ExtResource("3_7puo2")]([SubResource("Resource_3014d"), SubResource("Resource_0vfw8")])
 block_type = "action"
 
-[sub_resource type="Resource" id="Resource_0vfw8"]
+[sub_resource type="Resource" id="Resource_l83bg"]
 script = ExtResource("3_7puo2")
 action_id = "Print Message"
 target_node = NodePath(".")
@@ -68,17 +87,17 @@ inputs = {
 }
 block_type = "action"
 
-[sub_resource type="Resource" id="Resource_v5tg8"]
+[sub_resource type="Resource" id="Resource_5nvf0"]
 script = ExtResource("2_o0xcg")
-block_id = "event_1771972259_1225162116"
+block_id = "event_1775232400_3648767005"
 event_id = "on_ready"
 target_node = NodePath(".")
-actions = Array[ExtResource("3_7puo2")]([SubResource("Resource_xv5k1"), SubResource("Resource_o0xcg"), SubResource("Resource_3014d"), SubResource("Resource_0vfw8")])
+actions = Array[ExtResource("3_7puo2")]([SubResource("Resource_xv5k1"), SubResource("Resource_o0xcg"), SubResource("Resource_7puo2"), SubResource("Resource_ko5ym"), SubResource("Resource_v5tg8"), SubResource("Resource_l83bg")])
 block_type = "event"
 
 [resource]
 script = ExtResource("6_0vfw8")
-events = Array[ExtResource("2_o0xcg")]([SubResource("Resource_v5tg8")])
+events = Array[ExtResource("2_o0xcg")]([SubResource("Resource_5nvf0")])
 item_order = Array[Dictionary]([{
 "index": 0,
 "type": "event"

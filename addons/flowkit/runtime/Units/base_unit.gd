@@ -1,3 +1,4 @@
+@tool
 extends Resource
 class_name FKUnit
 
@@ -25,3 +26,20 @@ func duplicate_block() -> FKUnit:
 	
 func get_id() -> String:
 	return ""
+
+static func _duplicate_blocks(to_duplicate: Array[FKUnit]) -> Array[FKUnit]:
+	var result: Array[FKUnit] = []
+	for elem in to_duplicate:
+		if elem:
+			var elem_copy := elem.duplicate_block()
+			result.append(elem)
+	return result
+
+static func _to_base_unit_arr(arr: Array) -> Array[FKUnit]:
+	var result: Array[FKUnit] = []
+	
+	for child in arr:
+		if child is FKUnit:
+			result.append(child)
+			
+	return result

@@ -21,6 +21,16 @@ block_type = "action"
 
 [sub_resource type="Resource" id="Resource_ju1rn"]
 script = ExtResource("3_5poua")
+action_id = "set_window_size"
+target_node = NodePath("System")
+inputs = {
+"Height": "720",
+"Width": "1280"
+}
+block_type = "action"
+
+[sub_resource type="Resource" id="Resource_5poua"]
+script = ExtResource("3_5poua")
 action_id = "set_window_mode"
 target_node = NodePath("System")
 inputs = {
@@ -28,7 +38,7 @@ inputs = {
 }
 block_type = "action"
 
-[sub_resource type="Resource" id="Resource_5poua"]
+[sub_resource type="Resource" id="Resource_ayedq"]
 script = ExtResource("3_5poua")
 action_id = "Print Message"
 target_node = NodePath(".")
@@ -38,7 +48,7 @@ inputs = {
 }
 block_type = "action"
 
-[sub_resource type="Resource" id="Resource_ayedq"]
+[sub_resource type="Resource" id="Resource_np8on"]
 script = ExtResource("3_5poua")
 action_id = "Print Message"
 target_node = NodePath(".")
@@ -48,7 +58,7 @@ inputs = {
 }
 block_type = "action"
 
-[sub_resource type="Resource" id="Resource_np8on"]
+[sub_resource type="Resource" id="Resource_v1ajb"]
 script = ExtResource("3_5poua")
 action_id = "Print Message"
 target_node = NodePath(".")
@@ -58,7 +68,7 @@ inputs = {
 }
 block_type = "action"
 
-[sub_resource type="Resource" id="Resource_v1ajb"]
+[sub_resource type="Resource" id="Resource_e46t1"]
 script = ExtResource("3_5poua")
 action_id = "Print Message"
 target_node = NodePath(".")
@@ -68,17 +78,17 @@ inputs = {
 }
 block_type = "action"
 
-[sub_resource type="Resource" id="Resource_e46t1"]
+[sub_resource type="Resource" id="Resource_5spa6"]
 script = ExtResource("2_ju1rn")
-block_id = "event_1770489317_3093254674"
+block_id = "event_1775232152_1936602696"
 event_id = "on_ready"
 target_node = NodePath(".")
-actions = Array[ExtResource("3_5poua")]([SubResource("Resource_1axor"), SubResource("Resource_ju1rn"), SubResource("Resource_5poua"), SubResource("Resource_ayedq"), SubResource("Resource_np8on"), SubResource("Resource_v1ajb")])
+actions = Array[ExtResource("3_5poua")]([SubResource("Resource_1axor"), SubResource("Resource_ju1rn"), SubResource("Resource_5poua"), SubResource("Resource_ayedq"), SubResource("Resource_np8on"), SubResource("Resource_v1ajb"), SubResource("Resource_e46t1")])
 block_type = "event"
 
 [resource]
 script = ExtResource("6_v1ajb")
-events = Array[ExtResource("2_ju1rn")]([SubResource("Resource_e46t1")])
+events = Array[ExtResource("2_ju1rn")]([SubResource("Resource_5spa6")])
 item_order = Array[Dictionary]([{
 "index": 0,
 "type": "event"

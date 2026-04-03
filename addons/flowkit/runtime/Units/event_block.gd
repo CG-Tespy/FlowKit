@@ -1,3 +1,4 @@
+@tool
 extends FKUnit
 class_name FKEventBlock
 
@@ -68,3 +69,30 @@ func deserialize(dict: Dictionary) -> void:
 
 func get_id() -> String:
 	return block_id
+	
+func duplicate_block() -> FKUnit:
+	var copy := FKEventBlock.new()
+	copy.block_type = block_type
+	copy.event_id = event_id
+	copy.target_node = target_node
+	copy.inputs = inputs.duplicate(true)
+	
+	var conds : Array[FKUnit] = []
+	conds.append_array(self.conditions)
+	var base_dupes := _duplicate_blocks(conds)
+	var duplicated_conds: Array[FKCondition] = []
+	duplicated_conds.append_array(base_dupes)
+	copy.conditions.clear()
+	copy.conditions.append_array(duplicated_conds)
+
+	var acts: Array[FKUnit] = []
+	acts.append_array(self.actions)
+	base_dupes.clear()
+	base_dupes = _duplicate_blocks(acts)
+	var duplicated_acts: Array[FKActionUnit] = []
+	duplicated_acts.append_array(base_dupes)
+	copy.actions.clear()
+	copy.actions.append_array(duplicated_acts)
+
+	return copy
+	

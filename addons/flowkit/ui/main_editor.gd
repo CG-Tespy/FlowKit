@@ -302,59 +302,66 @@ func _paste_group() -> void:
 	_on_row_selected(group_node)
 	
 # === Undo/Redo System ===
-
 func _push_undo_state() -> void:
-	"""Push current state to undo manager before making changes."""
-	var blocks := _get_block_nodes()
-	var state := serializer.capture_state(blocks)
-	undo_manager.push_state(state)
+	var units := _get_units_from_block_nodes()
+	undo_manager.push_state(units)
 
+func _get_units_from_block_nodes() -> Array[FKUnit]:
+	var units: Array[FKUnit] = []
+	for ui in _get_block_nodes():
+		if ui and is_instance_valid(ui) and ui.has_block():
+			var unit := ui.get_block()
+			units.append(unit)
+			
+	return units
+	
 func _clear_undo_history() -> void:
 	"""Clear undo/redo history (called when switching scenes)."""
 	undo_manager.clear()
 
 func _undo() -> void:
-	"""Undo the last action."""
 	if not undo_manager.can_undo():
 		return
-	
-	var blocks := _get_block_nodes()
-	var current_state := serializer.capture_state(blocks)
-	var previous_state := undo_manager.undo(current_state)
 
-	_restore_sheet_state(previous_state)
+	var current_units := _capture_current_units()
+	var restored_units := ArrayUtils._get_fk_units_in(undo_manager.undo(current_units))
+
+	_restore_unit_uis(restored_units)
 	_save_sheet()
 	print("[FlowKit] Undo performed")
+
+func _capture_current_units() -> Array:
+	var units: Array = []
+	for ui in _get_block_nodes():
+		if ui and is_instance_valid(ui):
+			var block := ui.get_block()
+			if block:
+				units.append(block)
+	return units
 	
 func _redo() -> void:
-	"""Redo the last undone action."""
 	if not undo_manager.can_redo():
 		return
 
-	var blocks := _get_block_nodes()
-	var current_state := serializer.capture_state(blocks)
-	var next_state := undo_manager.redo(current_state)
+	var current_units := _capture_current_units()
+	var restored_units := ArrayUtils._get_fk_units_in(undo_manager.redo(current_units))
 
-	_restore_sheet_state(next_state)
+	_restore_unit_uis(restored_units)
 	_save_sheet()
 	print("[FlowKit] Redo performed")
 
-func _restore_sheet_state(state: Array) -> void:
-	"""Restore sheet to a previous state."""
+func _restore_unit_uis(units: Array[FKUnit]) -> void:
 	_clear_all_blocks()
-	_recreate_blocks(state)
-	
-	# Update UI state
-	if _get_block_nodes().size() > 0:
+
+	for unit in units:
+		var node := _create_block_node(unit)
+		blocks_container.add_child(node)
+
+	if units.size() > 0:
 		_show_content_state()
 	else:
 		_show_empty_blocks_state()
 
-func _recreate_blocks(state: Array[Dictionary]):
-	for item_dict in state:
-		var recreated_block := serializer.deserialize_block(item_dict)
-		var block_node := _create_block_node(recreated_block)
-		blocks_container.add_child(block_node)
 
 func _create_block_node(block_resource: FKUnit) -> FKUnitUi:
 	var result: FKUnitUi = null
@@ -733,27 +740,8 @@ func _create_group_block(data: FKGroup) -> FKGroupUi:
 	"""Create group block node from data."""
 	print("[FKMainEditor]: Creating group block node")
 	var group: FKGroupUi = GROUP_SCENE.instantiate()
-	
-	var copy := FKGroup.new()
-	copy.title = data.title
-	copy.collapsed = data.collapsed
-	copy.color = data.color
-	copy.children = []
-	
-	# Deep copy children
-	for child_dict in data.children:
-		var child_type: String = child_dict.get("type", "")
-		var child_data: FKUnit = child_dict.get("data")
-		
-		if child_type == "event" and child_data is FKEventBlock:
-			copy.children.append({"type": "event", "data": sheet_io.copy_event_block(child_data)})
-		elif child_type == "comment" and child_data is FKComment:
-			var comment_copy = FKComment.new()
-			comment_copy.text = child_data.text
-			copy.children.append({"type": "comment", "data": comment_copy})
-		elif child_type == "group" and child_data is FKGroup:
-			copy.children.append({"type": "group", "data": sheet_io.copy_group_block(child_data)})
-	
+	var copy := data.copy_deep()
+	copy.normalize_children()
 	group.call_deferred("legitimize", copy, registry)
 	_connect_group_signals(group)
 	return group
