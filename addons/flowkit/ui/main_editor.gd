@@ -324,7 +324,7 @@ func _undo() -> void:
 		return
 
 	var current_units := _capture_current_units()
-	var restored_units := ArrayUtils._get_fk_units_in(undo_manager.undo(current_units))
+	var restored_units := ArrayUtils.get_fk_units_in(undo_manager.undo(current_units))
 
 	_restore_unit_uis(restored_units)
 	_save_sheet()
@@ -344,7 +344,7 @@ func _redo() -> void:
 		return
 
 	var current_units := _capture_current_units()
-	var restored_units := ArrayUtils._get_fk_units_in(undo_manager.redo(current_units))
+	var restored_units := ArrayUtils.get_fk_units_in(undo_manager.redo(current_units))
 
 	_restore_unit_uis(restored_units)
 	_save_sheet()

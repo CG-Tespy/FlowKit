@@ -158,3 +158,6 @@ func duplicate_block() -> FKGroup:
 			copy.children.append(unit_copy)
 
 	return copy
+
+func get_class() -> String:
+	return "FKGroup"

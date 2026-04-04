@@ -52,7 +52,7 @@ block_type = "condition"
 
 [sub_resource type="Resource" id="Resource_n0pkj"]
 script = ExtResource("2_at6cs")
-block_id = "event_1765072118_562150315"
+block_id = "event_1775318729_1157764797"
 event_id = "on_process"
 target_node = NodePath("CharacterBody2D")
 conditions = Array[ExtResource("5_1wrk8")]([SubResource("Resource_iu3q8")])
@@ -62,13 +62,7 @@ block_type = "event"
 [sub_resource type="Resource" id="Resource_hkb6h"]
 script = ExtResource("3_ehuoq")
 title = "Prevent falling off map"
-children = [{
-"data": SubResource("Resource_at6cs"),
-"type": "comment"
-}, {
-"data": SubResource("Resource_n0pkj"),
-"type": "event"
-}]
+children = [SubResource("Resource_at6cs"), SubResource("Resource_n0pkj")]
 block_type = "group"
 
 [resource]

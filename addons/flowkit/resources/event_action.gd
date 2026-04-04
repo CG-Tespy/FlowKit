@@ -102,3 +102,5 @@ static func _to_action_unit_arr(arr: Array) -> Array[FKActionUnit]:
 			result.append(child)
 	return result
 		
+func get_class() -> String:
+	return "FKActionUnit"

@@ -28,3 +28,6 @@ func deserialize(dict: Dictionary) -> void:
 
 func get_id() -> String:
 	return condition_id
+
+func get_class() -> String:
+	return "FKConditionUnit"
