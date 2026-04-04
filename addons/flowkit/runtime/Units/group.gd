@@ -4,7 +4,8 @@ class_name FKGroup
 ## A group container for organizing events, comments, and nested groups in FlowKit.
 ##
 ## Groups provide visual organization and can be collapsed/expanded.
-## Children are stored as dictionaries with "type" and "data" keys.
+## Children used to be stored as dictionaries with "type" and "data" keys.
+## Now, they are stored as FKUnit subresources.
 
 @export var title: String = "Group"
 @export var collapsed: bool = false
