@@ -68,11 +68,15 @@ static func _get_serialized_children(block: FKGroup) -> Array:
 	var result: Array = []
 	
 	for child in block.children:
-		var child_type = child.get("type", "")
-		var child_data: FKUnit = child.get("data")
+		var unit: FKUnit = null
+		
+		if child is Dictionary:
+			unit = child.get("data")
+		else:
+			unit = child
 
-		if child_data:
-			var serialized = child_data.serialize()
+		if unit:
+			var serialized = unit.serialize()
 			result.append(serialized)
 			
 	return result
