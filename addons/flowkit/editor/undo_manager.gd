@@ -57,6 +57,7 @@ func push_state(units: Array) -> void:
 # Returns a previous snapshot of the units' state
 func undo(current_units: Array[FKUnit]) -> Array:
 	if _undo_stack.is_empty():
+		print("[UndoManager]: Current stack is empty. Returning passed units.")
 		return current_units
 	
 	var current_snapshot := _deep_copy_units(current_units)

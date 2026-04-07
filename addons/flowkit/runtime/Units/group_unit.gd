@@ -103,7 +103,7 @@ func copy_deep() -> FKGroup:
 	return result
 
 func duplicate_block() -> FKGroup:
-	print("[FKGroup] Duplicating!")
+	#print("[FKGroup] Duplicating!")
 	# Make sure we're working with FKUnits, not legacy dicts
 	normalize_children(true)
 

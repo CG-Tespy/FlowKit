@@ -74,7 +74,7 @@ func get_id() -> String:
 	return action_id
 	
 func duplicate_block() -> FKUnit:
-	print("[FKActionUnit]: Duplicating!")
+	#print("[FKActionUnit]: Duplicating!")
 	var copy := FKActionUnit.new()
 	copy.block_type = block_type
 	copy.action_id = action_id
