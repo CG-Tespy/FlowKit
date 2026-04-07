@@ -5,7 +5,7 @@ class_name DropZoneUi
 signal item_dropped(drag_data: Dictionary)
 
 @export var accept_type: DragTarget.Type  
-# ^DragTarget.Type.condition_item or DragTarget.Type.action_item
+# ^DragTarget.Type.CONDITION_ITEM or DragTarget.Type.ACTION_ITEM
 
 func _can_drop_data(at_position: Vector2, data) -> bool:
 	if data is not FKDragData:

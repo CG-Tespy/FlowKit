@@ -64,7 +64,7 @@ func get_global_mouse_position() -> Vector2:
 	
 func _is_on_event_row(mouse_pos: Vector2) -> bool:
 	"""Check if the mouse position is over any event row."""
-	for block in _editor._get_blocks():
+	for block in _editor._get_block_nodes():
 		var global_rect = block.get_global_rect()
 		if global_rect.has_point(mouse_pos):
 			return true
@@ -151,10 +151,10 @@ func _on_copy_input() -> bool:
 	return copied
 
 func _copy_selected_item():
-	if selected_item.has_method("get_action_data"):
-		clipboard.copy_action(selected_item.get_action_data())
-	elif selected_item.has_method("get_condition_data"):
-		clipboard.copy_condition(selected_item.get_condition_data())
+	if selected_item.has_method("get_block"):
+		clipboard.copy_action(selected_item.get_block())
+	elif selected_item.has_method("get_block"):
+		clipboard.copy_condition(selected_item.get_block())
 
 func _copy_selected_row():
 	if selected_row.has_method("get_event_data"):

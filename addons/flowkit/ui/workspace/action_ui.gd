@@ -8,7 +8,7 @@ signal delete_action_requested(action_node)
 signal edit_action_requested(action_node)
 signal selected(block_node)
 
-var action_data: FKEventAction
+var action_data: FKActionUnit
 var registry: Node
 var is_selected: bool = false
 
@@ -25,19 +25,24 @@ func _enter_tree() -> void:
 	_toggle_subs(true)
 	
 func _toggle_subs(on: bool):
-	if on:
+	if on && !_is_subbed:
 		gui_input.connect(_on_gui_input)
 		context_menu.id_pressed.connect(_on_context_menu_id_pressed)
-	else:
+		_is_subbed = true
+	elif !on && !_is_subbed:
 		gui_input.disconnect(_on_gui_input)
 		context_menu.id_pressed.disconnect(_on_context_menu_id_pressed)
-		
+		_is_subbed = false
+
+var _is_subbed := false
+
 func _on_gui_input(event: InputEvent) -> void:
 	var we_want_to_respond: bool = event is InputEventMouseButton and event.pressed
 	if not we_want_to_respond:
 		return
-		
+	
 	if event.button_index == MOUSE_BUTTON_LEFT:
+		print("Action Ui clicked")
 		selected.emit(self)
 	elif event.button_index == MOUSE_BUTTON_RIGHT:
 		selected.emit(self)
@@ -55,7 +60,7 @@ func _on_context_menu_id_pressed(id: int) -> void:
 		3: # Delete Action
 			delete_action_requested.emit(self)
 
-func set_action_data(data: FKEventAction) -> void:
+func set_action_data(data: FKActionUnit) -> void:
 	action_data = data
 	_update_label()
 
@@ -102,7 +107,7 @@ func set_registry(reg: Node) -> void:
 	registry = reg
 	_update_label()
 
-func get_action_data() -> FKEventAction:
+func get_action_data() -> FKActionUnit:
 	"""Return the internal action data."""
 	return action_data
 
@@ -126,7 +131,7 @@ func _get_drag_data(at_position: Vector2) -> FKDragData:
 	var preview_margin := _create_drag_preview()
 	set_drag_preview(preview_margin)
 	
-	var drag_data := FKDragData.new(DragTarget.Type.action, self)
+	var drag_data := FKDragData.new(DragTarget.Type.ACTION, self)
 	return drag_data
 
 func _create_drag_preview() -> Control:

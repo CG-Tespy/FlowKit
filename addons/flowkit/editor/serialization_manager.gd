@@ -5,8 +5,9 @@ class_name FKSerializationManager
 # want to use in RAM.
 
 # Serialization #
-func capture_state(blocks: Array[Node]) -> Array[Dictionary]:
+func capture_state(blocks: Array[FKUnitUi]) -> Array[Dictionary]:
 	"""Capture the state of the passed block Nodes as serialized data."""
+	#print("FKSerializationManager: blocks gotten: " + str(blocks))
 	var state: Array[Dictionary] = []
 
 	for block_el in blocks:
@@ -21,24 +22,24 @@ func capture_state(blocks: Array[Node]) -> Array[Dictionary]:
 	
 	
 func serialize_block(block_node: Node) -> Dictionary:
-	var data: FKBaseBlock = null
-
-	if block_node.has_method("get_event_data"):
-		data = block_node.get_event_data()
-	elif block_node.has_method("get_comment_data"):
-		data = block_node.get_comment_data()
-	elif block_node.has_method("get_group_data"):
-		data = block_node.get_group_data()
+	# At the time of this writing, all block node classes except group_ui implement FKUnitui
+	print("Serializer working with " + str(block_node))
+	var data: FKUnit = null
+	if block_node.has_method("_to_string"):
+		print("Serializing block node of type " + block_node.get_class())
+		
+	if block_node is FKUnitUi:
+		data = block_node.get_block()
 	else:
-		printerr("serialize_block: Node does not expose block data.")
+		printerr("FKSerializationManager serialize_block: Node does not expose block data.")
 		return {}
 
 	return data.serialize()
 
 
 # Deserialization #
-func restore_state(state: Array[Dictionary]) -> Array[FKBaseBlock]:
-	var result: Array[FKBaseBlock] = []
+func restore_state(state: Array[Dictionary]) -> Array[FKUnit]:
+	var result: Array[FKUnit] = []
 
 	for dict in state:
 		var block := deserialize_block(dict)
@@ -48,24 +49,30 @@ func restore_state(state: Array[Dictionary]) -> Array[FKBaseBlock]:
 	return result
 	
 	
-func deserialize_block(dict: Dictionary) -> FKBaseBlock:
+func deserialize_block(dict: Dictionary) -> FKUnit:
 	var block_type := dict.get("type", "")
+	
+	print("Deserializing dict with its type being " + block_type)
 	var block := _instantiate_block(block_type)
 	if block == null:
-		printerr("deserialize_block: Unknown block type '%s'" % block_type)
+		printerr("FKSerializationManager deserialize_block: Unknown block type '%s'" % block_type)
 		return null
 
 	block.deserialize(dict)
 	return block
 
-func _instantiate_block(block_type: String) -> FKBaseBlock:
+func _instantiate_block(block_type: String) -> FKUnit:
 	match block_type:
 		"event":
 			return FKEventBlock.new()
+		"action": 
+			return FKActionUnit.new()
 		"comment":
-			return FKCommentBlock.new()
+			return FKComment.new()
 		"group":
-			return FKGroupBlock.new()
+			return FKGroup.new()
+		"condition": 
+			return FKConditionUnit.new()
 		_:
 			return null
 

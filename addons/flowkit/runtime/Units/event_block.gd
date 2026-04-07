@@ -1,13 +1,14 @@
-extends FKBaseBlock
+@tool
+extends FKUnit
 class_name FKEventBlock
 
 @export var block_id: String  # Unique identifier for this specific block instance
 @export var event_id: String  # Type of event (e.g., "on_ready", "on_process")
 @export var target_node: NodePath
 @export var inputs: Dictionary = {}
-@export var conditions: Array[FKEventCondition] = []
-@export var actions: Array[FKEventAction] = []
-
+@export var conditions: Array[FKConditionUnit] = []
+@export var actions: Array[FKActionUnit] = []
+	
 func _init(p_block_id: String = "", p_event_id: String = "", 
 p_target_node: NodePath = NodePath()) -> void:
 	block_type = "event"
@@ -56,12 +57,35 @@ func deserialize(dict: Dictionary) -> void:
 
 	conditions = []
 	for cond_dict in dict.get("conditions", []):
-		var cond := FKEventCondition.new()
+		var cond := FKConditionUnit.new()
 		cond.deserialize(cond_dict)
 		conditions.append(cond)
 
 	actions = []
 	for act_dict in dict.get("actions", []):
-		var act := FKEventAction.new()
+		var act := FKActionUnit.new()
 		act.deserialize(act_dict)
 		actions.append(act)
+
+func get_id() -> String:
+	return block_id
+	
+func duplicate_block() -> FKUnit:
+	var copy := FKEventBlock.new()
+	copy.block_type = block_type
+	copy.event_id = event_id
+	copy.target_node = target_node
+	copy.inputs = inputs.duplicate(true)
+	
+	var duplicated_conds: Array[FKConditionUnit] = ArrayUtils.make_fk_condition_dupes(self.conditions)
+	copy.conditions.clear()
+	copy.conditions.append_array(duplicated_conds)
+
+	var duplicated_acts: Array[FKActionUnit] = ArrayUtils.make_fk_action_dupes(self.actions)
+	copy.actions.clear()
+	copy.actions.append_array(duplicated_acts)
+
+	return copy
+	
+func get_class() -> String:
+	return "FKEventBlock"

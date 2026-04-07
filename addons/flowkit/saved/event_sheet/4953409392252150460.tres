@@ -1,11 +1,11 @@
 [gd_resource type="Resource" script_class="FKEventSheet" format=3 uid="uid://b83l5jwe7e8b7"]
 
-[ext_resource type="Script" uid="uid://b1y3c8rnt2rcg" path="res://addons/flowkit/runtime/Blocks/comment_block.gd" id="1_6310v"]
-[ext_resource type="Script" uid="uid://bxdhylwvr4osy" path="res://addons/flowkit/runtime/Blocks/event_block.gd" id="1_iqjwq"]
-[ext_resource type="Script" uid="uid://bwbi0utcwmxwf" path="res://addons/flowkit/resources/event_action.gd" id="2_e5301"]
-[ext_resource type="Script" uid="uid://bmaxurgrsv4ct" path="res://addons/flowkit/resources/event_condition.gd" id="3_6310v"]
+[ext_resource type="Script" uid="uid://b1y3c8rnt2rcg" path="res://addons/flowkit/runtime/Units/comment_unit.gd" id="1_6310v"]
+[ext_resource type="Script" uid="uid://bxdhylwvr4osy" path="res://addons/flowkit/runtime/Units/event_block.gd" id="1_iqjwq"]
+[ext_resource type="Script" uid="uid://bwbi0utcwmxwf" path="res://addons/flowkit/runtime/Units/action_unit.gd" id="2_e5301"]
+[ext_resource type="Script" uid="uid://bmaxurgrsv4ct" path="res://addons/flowkit/runtime/Units/condition_unit.gd" id="3_6310v"]
 [ext_resource type="Script" uid="uid://bumsyiqkp46l1" path="res://addons/flowkit/resources/event_sheet.gd" id="4_1iq3u"]
-[ext_resource type="Script" path="res://addons/flowkit/runtime/Blocks/group_block.gd" id="5_1iq3u"]
+[ext_resource type="Script" path="res://addons/flowkit/runtime/Units/group_unit.gd" id="5_1iq3u"]
 
 [sub_resource type="Resource" id="Resource_6310v"]
 script = ExtResource("2_e5301")
@@ -15,6 +15,7 @@ inputs = {
 "Path": "physics/2d/default_gravity",
 "Store In": "gravity"
 }
+block_type = "action"
 
 [sub_resource type="Resource" id="Resource_1iq3u"]
 script = ExtResource("2_e5301")
@@ -24,6 +25,7 @@ inputs = {
 "Value": "-400.0",
 "Variable Name": "jump_force"
 }
+block_type = "action"
 
 [sub_resource type="Resource" id="Resource_cbhwn"]
 script = ExtResource("2_e5301")
@@ -33,6 +35,7 @@ inputs = {
 "Value": "200.0",
 "Variable Name": "speed"
 }
+block_type = "action"
 
 [sub_resource type="Resource" id="Resource_jqahe"]
 script = ExtResource("1_iqjwq")
@@ -49,12 +52,14 @@ target_node = NodePath(".")
 inputs = {
 "Y": "node.velocity.y+system.get_var(\"gravity\") * delta"
 }
+block_type = "action"
 
 [sub_resource type="Resource" id="Resource_8fi06"]
 script = ExtResource("3_6310v")
 condition_id = "is_on_floor"
 target_node = NodePath(".")
 negated = true
+block_type = "condition"
 
 [sub_resource type="Resource" id="Resource_lifsa"]
 script = ExtResource("2_e5301")
@@ -62,6 +67,7 @@ is_branch = true
 branch_type = "if"
 branch_condition = SubResource("Resource_8fi06")
 branch_actions = Array[ExtResource("2_e5301")]([SubResource("Resource_qhwv1")])
+block_type = "action"
 
 [sub_resource type="Resource" id="Resource_4pupr"]
 script = ExtResource("2_e5301")
@@ -70,16 +76,19 @@ target_node = NodePath(".")
 inputs = {
 "Y": "n_jump_force"
 }
+block_type = "action"
 
 [sub_resource type="Resource" id="Resource_rqf3r"]
 script = ExtResource("2_e5301")
 action_id = "play"
 target_node = NodePath("Jump")
+block_type = "action"
 
 [sub_resource type="Resource" id="Resource_smre5"]
 script = ExtResource("3_6310v")
 condition_id = "is_on_floor"
 target_node = NodePath(".")
+block_type = "condition"
 
 [sub_resource type="Resource" id="Resource_1tvq8"]
 script = ExtResource("2_e5301")
@@ -87,6 +96,7 @@ is_branch = true
 branch_type = "if"
 branch_condition = SubResource("Resource_smre5")
 branch_actions = Array[ExtResource("2_e5301")]([SubResource("Resource_4pupr"), SubResource("Resource_rqf3r")])
+block_type = "action"
 
 [sub_resource type="Resource" id="Resource_rd6mx"]
 script = ExtResource("3_6310v")
@@ -95,6 +105,7 @@ target_node = NodePath("System")
 inputs = {
 "Key": "Space"
 }
+block_type = "condition"
 
 [sub_resource type="Resource" id="Resource_ercbp"]
 script = ExtResource("2_e5301")
@@ -102,6 +113,7 @@ is_branch = true
 branch_type = "if"
 branch_condition = SubResource("Resource_rd6mx")
 branch_actions = Array[ExtResource("2_e5301")]([SubResource("Resource_1tvq8")])
+block_type = "action"
 
 [sub_resource type="Resource" id="Resource_1geuf"]
 script = ExtResource("2_e5301")
@@ -112,6 +124,7 @@ inputs = {
 "Positive Action": "ui_right",
 "Store In": "direction"
 }
+block_type = "action"
 
 [sub_resource type="Resource" id="Resource_ftren"]
 script = ExtResource("2_e5301")
@@ -120,6 +133,7 @@ target_node = NodePath(".")
 inputs = {
 "X": "direction * n_speed"
 }
+block_type = "action"
 
 [sub_resource type="Resource" id="Resource_ogks2"]
 script = ExtResource("3_6310v")
@@ -130,6 +144,7 @@ inputs = {
 "Property": "direction",
 "Value": "0"
 }
+block_type = "condition"
 
 [sub_resource type="Resource" id="Resource_iv7s5"]
 script = ExtResource("2_e5301")
@@ -137,6 +152,7 @@ is_branch = true
 branch_type = "if"
 branch_condition = SubResource("Resource_ogks2")
 branch_actions = Array[ExtResource("2_e5301")]([SubResource("Resource_ftren")])
+block_type = "action"
 
 [sub_resource type="Resource" id="Resource_iqbv7"]
 script = ExtResource("2_e5301")
@@ -145,17 +161,20 @@ target_node = NodePath(".")
 inputs = {
 "X": "move_toward(node.velocity.x,0,n_speed)"
 }
+block_type = "action"
 
 [sub_resource type="Resource" id="Resource_01p3u"]
 script = ExtResource("2_e5301")
 is_branch = true
 branch_type = "else"
 branch_actions = Array[ExtResource("2_e5301")]([SubResource("Resource_iqbv7")])
+block_type = "action"
 
 [sub_resource type="Resource" id="Resource_jtk1k"]
 script = ExtResource("2_e5301")
 action_id = "move_and_slide"
 target_node = NodePath(".")
+block_type = "action"
 
 [sub_resource type="Resource" id="Resource_7khp5"]
 script = ExtResource("1_iqjwq")
@@ -185,6 +204,7 @@ target_node = NodePath("AnimatedSprite2D")
 inputs = {
 "Value": "true"
 }
+block_type = "action"
 
 [sub_resource type="Resource" id="Resource_toik8"]
 script = ExtResource("3_6310v")
@@ -195,6 +215,7 @@ inputs = {
 "Property": "velocity.x",
 "Value": "0"
 }
+block_type = "condition"
 
 [sub_resource type="Resource" id="Resource_g1hr8"]
 script = ExtResource("1_iqjwq")
@@ -212,6 +233,7 @@ target_node = NodePath("AnimatedSprite2D")
 inputs = {
 "Value": "false"
 }
+block_type = "action"
 
 [sub_resource type="Resource" id="Resource_dkghy"]
 script = ExtResource("3_6310v")
@@ -222,6 +244,7 @@ inputs = {
 "Property": "velocity.x",
 "Value": "0"
 }
+block_type = "condition"
 
 [sub_resource type="Resource" id="Resource_0864s"]
 script = ExtResource("1_iqjwq")
@@ -235,7 +258,6 @@ block_type = "event"
 [sub_resource type="Resource" id="Resource_ja7sq"]
 script = ExtResource("5_1iq3u")
 title = "Sets the direction of the player sprite to flip the sprite horizontally based on if the player is moving left or right."
-collapsed = true
 color = Color(0.16839236, 0.07305908, 0.4453125, 1)
 children = [{
 "data": SubResource("Resource_g1hr8"),
@@ -260,6 +282,7 @@ inputs = {
 "From End": "false",
 "Name": "default"
 }
+block_type = "action"
 
 [sub_resource type="Resource" id="Resource_lvjr6"]
 script = ExtResource("3_6310v")
@@ -270,11 +293,13 @@ inputs = {
 "Property": "node.velocity.x",
 "Value": "0"
 }
+block_type = "condition"
 
 [sub_resource type="Resource" id="Resource_1lc76"]
 script = ExtResource("3_6310v")
 condition_id = "only_once_when_looped"
 target_node = NodePath("System")
+block_type = "condition"
 
 [sub_resource type="Resource" id="Resource_7ahgf"]
 script = ExtResource("1_iqjwq")
@@ -299,6 +324,7 @@ inputs = {
 "From End": "false",
 "Name": "run"
 }
+block_type = "action"
 
 [sub_resource type="Resource" id="Resource_olurx"]
 script = ExtResource("3_6310v")
@@ -309,11 +335,13 @@ inputs = {
 "Property": "node.velocity.x",
 "Value": "0"
 }
+block_type = "condition"
 
 [sub_resource type="Resource" id="Resource_a558m"]
 script = ExtResource("3_6310v")
 condition_id = "only_once_when_looped"
 target_node = NodePath("System")
+block_type = "condition"
 
 [sub_resource type="Resource" id="Resource_8cdef"]
 script = ExtResource("1_iqjwq")
@@ -327,7 +355,6 @@ block_type = "event"
 [sub_resource type="Resource" id="Resource_vco3e"]
 script = ExtResource("5_1iq3u")
 title = "Control animations"
-collapsed = true
 color = Color(0.38236463, 0.2642212, 0.7515625, 1)
 children = [{
 "data": SubResource("Resource_rcr8d"),

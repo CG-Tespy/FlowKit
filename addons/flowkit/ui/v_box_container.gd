@@ -18,8 +18,8 @@ func _can_drop_data(at_position: Vector2, data) -> bool:
 		return false
 	
 	# Only allow dragging event, condition, and action nodes
-	return drag_data.type in [DragTarget.Type.event, DragTarget.Type.condition, \
-	DragTarget.Type.action]
+	return drag_data.type in [DragTarget.Type.EVENT, DragTarget.Type.CONDITION, \
+	DragTarget.Type.ACTION]
 
 func _drop_data(at_position: Vector2, data):
 	var drag_data := data as FKDragData

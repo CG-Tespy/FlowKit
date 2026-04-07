@@ -7,9 +7,9 @@ class_name FKEventSheet
 ## The index refers to the position within that type's array (events, comments, or groups).
 
 @export var events: Array[FKEventBlock] = []
-@export var standalone_conditions: Array[FKEventCondition] = []
-@export var comments: Array[FKCommentBlock] = []
-@export var groups: Array[FKGroupBlock] = []
+@export var standalone_conditions: Array[FKConditionUnit] = []
+@export var comments: Array[FKComment] = []
+@export var groups: Array[FKGroup] = []
 
 ## Stores the display order: [{"type": "event"|"comment"|"group", "index": int}, ...]
 @export var item_order: Array[Dictionary] = []
@@ -22,18 +22,25 @@ func get_all_events() -> Array:
 
 func _collect_events_from_groups(groups: Array, out_events: Array) -> void:
 	for group in groups:
-		if group is not FKGroupBlock:
+		if not (group is FKGroup):
 			continue
-			
-		for child_item in group.children:
-			var child_type: String = child_item.get("type", "")
-			var child_data: Variant = child_item.get("data", null)
-			
-			if child_type == "event" and child_data is FKEventBlock:
-				out_events.append(child_data)
-			elif child_type == "group" and child_data is FKGroupBlock:
-				# Recursively collect from nested groups
-				_collect_events_from_groups([child_data], out_events)
+
+		for child in group.children:
+			var unit: FKUnit = null
+
+			# Legacy format: { "type": String, "data": FKUnit }
+			if child is Dictionary:
+				unit = child.get("data")
+			else:
+				unit = child
+
+			# New format: FKUnit directly
+			if unit is FKEventBlock:
+				out_events.append(unit)
+
+			elif unit is FKGroup:
+				# Recurse into nested groups
+				_collect_events_from_groups([unit], out_events)
 
 func get_ordered_items() -> Array:
 	"""Get all items in display order as an array of dictionaries with type and data."""
@@ -64,8 +71,8 @@ func get_ordered_items() -> Array:
 func rebuild_order_from_items(ordered_items: Array) -> void:
 	"""Rebuild the events, comments, groups arrays and item_order from an ordered list."""
 	events = [] as Array[FKEventBlock]
-	comments = [] as Array[FKCommentBlock]
-	groups = [] as Array[FKGroupBlock]
+	comments = [] as Array[FKComment]
+	groups = [] as Array[FKGroup]
 	item_order = [] as Array[Dictionary]
 	
 	for item in ordered_items:
@@ -78,10 +85,13 @@ func rebuild_order_from_items(ordered_items: Array) -> void:
 					item_order.append({"type": "event", "index": events.size()})
 					events.append(data)
 			"comment":
-				if data is FKCommentBlock:
+				if data is FKComment:
 					item_order.append({"type": "comment", "index": comments.size()})
 					comments.append(data)
 			"group":
-				if data is FKGroupBlock:
+				if data is FKGroup:
 					item_order.append({"type": "group", "index": groups.size()})
 					groups.append(data)
+					
+func get_class() -> String:
+	return "FKEventSheet"
