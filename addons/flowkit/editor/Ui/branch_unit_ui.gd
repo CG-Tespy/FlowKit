@@ -144,7 +144,7 @@ func _toggle_negate() -> void:
 
 func _on_add_action_input(event: InputEvent) -> void:
 	var we_want_to_respond: bool = event is InputEventMouseButton and event.pressed and \
-	event.button_index == MOUSE_BUTTON_RIGHT
+	(event.button_index == MOUSE_BUTTON_RIGHT or event.button_index == MOUSE_BUTTON_LEFT)
 	if we_want_to_respond:
 		_flash_label(add_action_label)
 		_show_add_action_context_menu()
