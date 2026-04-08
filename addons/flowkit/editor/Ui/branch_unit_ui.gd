@@ -493,3 +493,8 @@ func _to_string() -> String:
 func get_class() -> String:
 	var result := "FKBranchUnitUi"
 	return result
+	
+func add_branch_action(sub_action_unit: FKActionUnit):
+	if _action:
+		_action.branch_actions.append(sub_action_unit)
+		_update_branch_actions()
