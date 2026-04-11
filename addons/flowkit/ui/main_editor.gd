@@ -15,7 +15,7 @@ const GROUP_SCENE = preload("res://addons/flowkit/ui/workspace/group_ui.tscn")
 
 # UI References
 @export var scroll_container: ScrollContainer
-@export var blocks_container: BlockContainerUi
+@export var blocks_container: FKBlockContainerUi
 @export var empty_label: Label
 @export var add_event_btn: Button
 @export var menu_bar: FKMenuBar
@@ -36,7 +36,7 @@ const DRAG_SPACER_HEIGHT := 50  # Height of temporary drop zone
 var pending_block_type: String = ""  # "event", "condition", "action", "event_replace", "event_in_group", etc.
 var pending_node_path: String = ""
 var pending_id: String = ""
-var pending_target_row: Control = null  # The event row being modified
+var pending_target_row: FKUnitUi = null  # The event row being modified
 var pending_target_item: FKUnitUi = null  # The specific condition/action item being edited
 var pending_target_group: Control = null  # The group to add content to (for event_in_group workflow)
 var pending_target_branch: FKBranchUnitUi = null  # The branch item for branch sub-action workflows
@@ -304,18 +304,9 @@ func _paste_group() -> void:
 	
 # === Undo/Redo System ===
 func _push_undo_state() -> void:
-	var units := _get_units_from_block_nodes()
+	var units := blocks_container.units
 	undo_manager.push_state(units)
 
-func _get_units_from_block_nodes() -> Array[FKUnit]:
-	var units: Array[FKUnit] = []
-	for ui in _get_block_nodes():
-		if ui and is_instance_valid(ui) and ui.has_block():
-			var unit := ui.get_block()
-			units.append(unit)
-			
-	return units
-	
 func _clear_undo_history() -> void:
 	"""Clear undo/redo history (called when switching scenes)."""
 	undo_manager.clear()
@@ -325,7 +316,7 @@ func _undo() -> void:
 		return
 	_is_in_undo_redo = true
 	#print("[FKMainEditor]: Capturing units for undo")
-	var current_units := _capture_current_units()
+	var current_units := blocks_container.units
 	#print("[FKMainEditor]: Fetching prev state from undo manager")
 	var prev_state := undo_manager.undo(current_units)
 	var restored_units := ArrayUtils.get_fk_units_in(prev_state)
@@ -342,21 +333,12 @@ func _undo() -> void:
 	_save_sheet()
 	print("[FlowKit] Undo performed")
 var _is_in_undo_redo := false
-
-func _capture_current_units() -> Array[FKUnit]:
-	var units: Array[FKUnit] = []
-	for ui in _get_block_nodes():
-		if ui and is_instance_valid(ui):
-			var block := ui.get_block()
-			if block:
-				units.append(block)
-	return units
 	
 func _redo() -> void:
 	if not undo_manager.can_redo() or _is_in_undo_redo:
 		return
 	_is_in_undo_redo = true
-	var current_units := _capture_current_units()
+	var current_units := blocks_container.units
 	var restored_units := ArrayUtils.get_fk_units_in(undo_manager.redo(current_units))
 
 	_restore_unit_uis(restored_units)
@@ -365,7 +347,7 @@ func _redo() -> void:
 	print("[FlowKit] Redo performed")
 
 func _restore_unit_uis(units: Array[FKUnit]) -> void:
-	_clear_all_blocks()
+	blocks_container.clear_unit_nodes()
 
 	for unit in units:
 		#print("[FKMainEditor]: Current unit in _restore_unit_uis:")
@@ -554,7 +536,7 @@ func _process(delta: float) -> void:
 	if not scene_root:
 		if current_scene_uid != 0:
 			current_scene_uid = 0
-			_clear_all_blocks()
+			blocks_container.clear_block_nodes()
 			_clear_undo_history()
 			_show_empty_state()
 		return
@@ -563,7 +545,7 @@ func _process(delta: float) -> void:
 	if scene_path == "":
 		if current_scene_uid != 0:
 			current_scene_uid = 0
-			_clear_all_blocks()
+			blocks_container.clear_block_nodes()
 			_clear_undo_history()
 			_show_empty_state()
 		return
@@ -572,38 +554,9 @@ func _process(delta: float) -> void:
 	if scene_uid != current_scene_uid:
 		current_scene_uid = scene_uid
 		_clear_undo_history()
-		_load_scene_sheet()
+		_refresh_ui()
 
 # === Block Management ===
-
-func _get_block_nodes() -> Array[FKUnitUi]:
-	"""Get all block nodes (excluding empty label and nodes queued for deletion)."""
-	var blocks: Array[FKUnitUi] = []
-	
-	for child in blocks_container.get_children():
-		if !is_instance_valid(child):
-			#print("[FKMainEditor _get_block_nodes]: skipping " + child.name + " since it is not valid.")
-			continue
-			
-		if child.is_queued_for_deletion():
-			#print("[FKMainEditor _get_block_nodes]: skipping " + child.name + " since it is queued for deletion.")
-			continue
-			
-		if child is FKUnitUi:
-			#print("[FKMainEditor]: Registering " + child.name + " as a block Ui")
-			blocks.append(child)
-		else:
-			#print("[FKMainEditor]: NOT registering " + child.name + " as a block Ui")
-			pass
-	
-	return blocks
-
-func _clear_all_blocks() -> void:
-	"""Remove all blocks from the container."""
-	for child in blocks_container.get_children():
-		if child != empty_label:
-			blocks_container.remove_child(child)
-			child.queue_free()
 
 func _show_empty_blocks_state() -> void:
 	"""Show state when scene is loaded but has no blocks."""
@@ -615,26 +568,11 @@ func _show_content_state() -> void:
 	empty_label.visible = false
 	add_event_btn.visible = true
 
+func _get_block_nodes() -> Array[FKUnitUi]:
+	return blocks_container.unit_uis
+	
 # === File Operations ===
-
-func _load_scene_sheet() -> void:
-	"""Load event sheet for current scene."""
-	_clear_all_blocks()
-	if sheet_io == null:
-		printerr("[FKMainEditor]: Sheet io is null for some reason")
-	var sheet_path = sheet_io.get_sheet_path(current_scene_uid)
-	if sheet_path == "" or not FileAccess.file_exists(sheet_path):
-		_show_empty_blocks_state()
-		return
 	
-	var sheet := ResourceLoader.load(sheet_path)
-	if not (sheet is FKEventSheet):
-		_show_empty_blocks_state()
-		return
-	
-	_populate_from_sheet(sheet)
-	_show_content_state()
-
 func _populate_from_sheet(sheet: FKEventSheet) -> void:
 	"""Create event rows and comments from event sheet data (GDevelop-style)."""
 	# If we have item_order, use it to restore the correct order
@@ -645,12 +583,15 @@ func _populate_from_sheet(sheet: FKEventSheet) -> void:
 			
 			if item_type == "event" and item_index < sheet.events.size():
 				var event_row = _create_event_row(sheet.events[item_index])
-				blocks_container.add_child(event_row)
+				#print("[FKMainEditor] Adding event row child to block container")
+				blocks_container.add_child(event_row, false, 0)
 			elif item_type == "comment" and item_index < sheet.comments.size():
 				var comment = _create_comment_ui(sheet.comments[item_index])
+				#print("[FKMainEditor] Adding comment child to block container")
 				blocks_container.add_child(comment)
 			elif item_type == "group" and item_index < sheet.groups.size():
 				var group = _create_group_block(sheet.groups[item_index])
+				#print("[FKMainEditor] Adding group child to block container")
 				blocks_container.add_child(group)
 	else:
 		# Fallback: load events only (backwards compatibility)
@@ -658,102 +599,61 @@ func _populate_from_sheet(sheet: FKEventSheet) -> void:
 			var event_row := _create_event_row(event_data)
 			blocks_container.add_child(event_row)
 
-func _save_sheet() -> void:
+func _save_and_reload_sheet() -> void:
+	"""Save sheet and refresh UI to ensure visual/data sync (for drag-drop operations)."""
+	var saved := _save_sheet()
+	_refresh_ui(saved)
+	
+## Saves the sheet to disk before returning it.
+## If saving fails, this returns null.
+func _save_sheet() -> FKEventSheet:
 	var is_scene_open := current_scene_uid != 0
 	if not is_scene_open or _is_in_undo_redo:
-		push_warning("No scene open to save event sheet.")
+		push_warning("[FKMainEditor] No scene open to save event sheet.")
 		return
 
-	var sheet := _generate_sheet_from_blocks()
-	#print("[FKMainEditor]: Generated sheet from blocks for _save_sheet. Its arr sizes:")
-	#print("Comments: " + str(sheet.comments.size()))
-	#print("Events: " + str(sheet.events.size()))
-	#print("Groups: " + str(sheet.groups.size()))
-	#print("Standalone conditions: " + str(sheet.standalone_conditions.size()))
+	var units := blocks_container.units
+	#print("[FKMainEditor] Units found to save in _save_sheet:")
+	#for elem in units:
+		#print(elem.get_class())
+		
+	var sheet := FKEventSheet.from_copies_of(units)
 	var err := sheet_io.save_sheet(current_scene_uid, sheet)
-
+	var result: FKEventSheet = null
 	if err == OK:
 		print("[FKMainEditor] ✓ Event sheet saved")
+		result = sheet
 	else:
 		push_error("[FKMainEditor] Failed to save event sheet: ", err)
 	
-
-func _save_and_reload_sheet() -> void:
-	"""Save sheet and reload UI to ensure visual/data sync (for drag-drop operations)."""
-	_save_sheet()
-	_load_scene_sheet()
-
-func _generate_sheet_from_blocks() -> FKEventSheet:
-	"""Build event sheet from event rows, comments, and groups (GDevelop-style)."""
-	#print("[FKMainEditor]: Generating sheet from blocks")
-	var sheet = FKEventSheet.new()
-	var events: Array[FKEventBlock] = []
-	var comments: Array[FKComment] = []
-	var groups: Array[FKGroup] = []
-	var item_order: Array[Dictionary] = []
-	var standalone_conditions: Array[FKConditionUnit] = []
+	return result
 	
-	var block_nodes := _get_block_nodes()
-	#print("[FKMainEditor]: Amount of block nodes to work with: " + str(block_nodes.size()))
-	for block_ui in block_nodes:
-		# Skip invalid or deleted blocks
-		if not is_instance_valid(block_ui):
-			print("[FKMainEditor _generate_sheet_from_blocks]: skipping " + block_ui.name + \
-			" because it is not valid")
-			continue
-			
-		if block_ui.is_queued_for_deletion():
-			print("[FKMainEditor _generate_sheet_from_blocks]: skipping " + block_ui.name + \
-			" because it is queued for deletion")
-			continue
-		
-		var data := block_ui.get_block()
-		if not data:
-			print("[FKMainEditor]: " + block_ui.name + " has no block assigned, so we'll skip it")
-			continue
-		
-		var order_to_append: Dictionary = \
-		{
-			"type": data.block_type,
-			"index": 0
-		}
-		if data is FKEventBlock:
-			#print("[FKMainEditor]: saving FKEventBlock")
-			var event_copy = sheet_io.copy_event_block(data)
-			order_to_append["index"] = events.size()
-			events.append(event_copy)
-		
-		elif data is FKComment:
-			#print("[FKMainEditor]: saving FKComment")
-			var comment_copy: FKComment = data.duplicate_block()
-			order_to_append["index"] = comments.size()
-			comments.append(comment_copy)
-		
-		elif data is FKGroup:
-			#print("[FKMainEditor]: saving FKGroup")
-			var group_copy = sheet_io.copy_group_block(data)
-			order_to_append["index"] = groups.size()
-			groups.append(group_copy)
-		else:
-			print("[FKMainEditor]: Found strange " + data.block_type)
-			pass
-			
-		item_order.append(order_to_append)
+# Refreshes the Event Sheet Ui based on the sheet passed. If none is passed, 
+# this goes for the sheet tied to the current scene uid.
+func _refresh_ui(sheet: FKEventSheet = null):
+	if not sheet:
+		# Why this fallback? We want other parts of this script to be able to
+		# refresh the ui without having to look for the sheet first.
+		sheet = sheet_io.load_sheet(current_scene_uid)
+	_refresh_sheet_ui(sheet)
 	
-	sheet.events = events
-	sheet.comments = comments
-	sheet.groups = groups
-	sheet.item_order = item_order
-	sheet.standalone_conditions = standalone_conditions
-	return sheet
-
+func _refresh_sheet_ui(sheet: FKEventSheet):
+	blocks_container.clear_unit_nodes()
+	
+	if not sheet:
+		_show_empty_blocks_state()
+		return
+		
+	_populate_from_sheet(sheet)
+	_show_content_state()
+	
 func _new_sheet() -> void:
 	"""Create new empty sheet."""
 	if current_scene_uid == 0:
-		push_warning("No scene open to create event sheet.")
+		push_warning("No scene open to create event sheet for.")
 		return
 	
-	_clear_all_blocks()
+	blocks_container.clear_block_nodes()
 	_show_content_state()
 
 # === Event Row Creation ===
@@ -1411,7 +1311,7 @@ func _update_event_inputs(expressions: Dictionary) -> void:
 	_push_undo_state()
 	
 	if pending_target_row:
-		var data: FKEventRowUi = pending_target_row.get_block()
+		var data: FKUnit = pending_target_row.get_block()
 		if data:
 			data.inputs = expressions
 			pending_target_row.update_display()
@@ -1471,11 +1371,15 @@ func _replace_event(expressions: Dictionary) -> void:
 	# Remove old row and insert new one at same position
 	if old_parent:
 		old_parent.remove_child(pending_target_row)
+		
 	pending_target_row.queue_free()
 	
 	# Add to the same parent (blocks_container or children_container within group)
 	if old_parent:
-		old_parent.add_child(new_row)
+		if old_parent is FKBlockContainerUi and new_row is FKUnitUi:
+			old_parent.add_child(new_row)
+		else:
+			old_parent.add_child(new_row)
 		old_parent.move_child(new_row, old_index)
 	else:
 		# Fallback if no parent found
