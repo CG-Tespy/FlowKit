@@ -8,11 +8,6 @@ var registry: FKRegistry
 var generator
 var current_scene_uid: int = 0
 
-# Scene preloads - GDevelop-style event rows
-const EVENT_ROW_SCENE = preload("res://addons/flowkit/ui/workspace/event_row_ui.tscn")
-const COMMENT_SCENE = preload("res://addons/flowkit/ui/workspace/comment_ui.tscn")
-const GROUP_SCENE = preload("res://addons/flowkit/ui/workspace/group_ui.tscn")
-
 # UI References
 @export var scroll_container: ScrollContainer
 @export var blocks_container: FKBlockContainerUi
@@ -49,10 +44,13 @@ var clipboard := FKClipboardManager.new()
 var input_manager: FKMainEditorInputHandler = FKMainEditorInputHandler.new()
 var sheet_io : FKSheetIO = FKSheetIO.new()
 var serializer := FKSerializationManager.new()
+var unit_ui_factory: FKUnitUiFactory
 
 func _enter_tree() -> void:
+	unit_ui_factory = FKUnitUiFactory.new(sheet_io)
 	input_manager.initialize(self)
 	_toggle_subs(true)
+	
 
 func _toggle_subs(on: bool):
 	if on and not _is_subbed:
@@ -98,6 +96,9 @@ func set_editor_interface(interface: EditorInterface) -> void:
 
 func set_registry(reg: FKRegistry) -> void:
 	registry = reg
+	if not unit_ui_factory:
+		unit_ui_factory = FKUnitUiFactory.new(sheet_io)
+	unit_ui_factory.registry = reg
 	# Pass to modals (deferred in case they're not ready yet)
 	if select_event_modal:
 		select_event_modal.set_registry(reg)
@@ -170,7 +171,7 @@ func _paste_events() -> void:
 
 	var first_row = null
 	for ev in new_events:
-		var row = _create_event_row(ev)
+		var row := _create_unit_ui(ev)
 		blocks_container.add_child(row)
 		blocks_container.move_child(row, insert_idx)
 		insert_idx += 1
@@ -296,7 +297,8 @@ func _paste_group() -> void:
 		return
 
 	# Otherwise paste at root level
-	var group_node := _create_group_block(new_group)
+	var group_node := unit_ui_factory.unit_ui_from(new_group)
+	_wire_signals(group_node)
 	blocks_container.add_child(group_node)
 
 	_save_sheet()
@@ -352,7 +354,7 @@ func _restore_unit_uis(units: Array[FKUnit]) -> void:
 	for unit in units:
 		#print("[FKMainEditor]: Current unit in _restore_unit_uis:")
 		#print(unit.get_class() + ": " + str(unit))
-		var node := _create_block_node(unit)
+		var node := _create_unit_ui(unit)
 		blocks_container.add_child(node)
 
 	if units.size() > 0:
@@ -367,16 +369,10 @@ func _restore_unit_uis(units: Array[FKUnit]) -> void:
 		
 
 
-func _create_block_node(block_resource: FKUnit) -> FKUnitUi:
-	var result: FKUnitUi = null
-	
-	if block_resource is FKComment:
-		result = _create_comment_ui(block_resource)
-	elif block_resource is FKGroup:
-		result = _create_group_block(block_resource)
-	else:
-		result = _create_event_row(block_resource)
-		
+func _create_unit_ui(unit: FKUnit) -> FKUnitUi:
+	var result: FKUnitUi = unit_ui_factory.unit_ui_from(unit)
+	if result:
+		_wire_signals(result)
 	return result
 
 func _delete_selected_row() -> void:
@@ -574,31 +570,28 @@ func _get_block_nodes() -> Array[FKUnitUi]:
 # === File Operations ===
 	
 func _populate_from_sheet(sheet: FKEventSheet) -> void:
-	"""Create event rows and comments from event sheet data (GDevelop-style)."""
-	# If we have item_order, use it to restore the correct order
-	if sheet.item_order.size() > 0:
-		for item in sheet.item_order:
-			var item_type = item.get("type", "")
-			var item_index: int = item.get("index", 0)
-			
-			if item_type == "event" and item_index < sheet.events.size():
-				var event_row = _create_event_row(sheet.events[item_index])
-				#print("[FKMainEditor] Adding event row child to block container")
-				blocks_container.add_child(event_row, false, 0)
-			elif item_type == "comment" and item_index < sheet.comments.size():
-				var comment = _create_comment_ui(sheet.comments[item_index])
-				#print("[FKMainEditor] Adding comment child to block container")
-				blocks_container.add_child(comment)
-			elif item_type == "group" and item_index < sheet.groups.size():
-				var group = _create_group_block(sheet.groups[item_index])
-				#print("[FKMainEditor] Adding group child to block container")
-				blocks_container.add_child(group)
-	else:
-		# Fallback: load events only (backwards compatibility)
-		for event_data in sheet.events:
-			var event_row := _create_event_row(event_data)
-			blocks_container.add_child(event_row)
+	blocks_container.clear_unit_nodes()
 
+	# Use the sheet’s own ordered_items list
+	for unit in sheet.ordered_items:
+		var ui := unit_ui_factory.unit_ui_from(unit)
+		_wire_signals(ui)
+		blocks_container.add_child(ui)
+
+	if sheet.ordered_items.is_empty():
+		_show_empty_blocks_state()
+	else:
+		_show_content_state()
+
+func _wire_signals(unit: FKUnitUi):
+	if unit is FKCommentUi:
+		_connect_comment_signals(unit)
+	elif unit is FKGroupUi:
+		_connect_group_signals(unit)
+	else:
+		_connect_event_row_signals(unit)
+		
+	
 func _save_and_reload_sheet() -> void:
 	"""Save sheet and refresh UI to ensure visual/data sync (for drag-drop operations)."""
 	var saved := _save_sheet()
@@ -617,7 +610,7 @@ func _save_sheet() -> FKEventSheet:
 	#for elem in units:
 		#print(elem.get_class())
 		
-	var sheet := FKEventSheet.from_copies_of(units)
+	var sheet := FKEventSheet.from_units(units)
 	var err := sheet_io.save_sheet(current_scene_uid, sheet)
 	var result: FKEventSheet = null
 	if err == OK:
@@ -658,27 +651,6 @@ func _new_sheet() -> void:
 
 # === Event Row Creation ===
 
-func _create_event_row(data: FKEventBlock) -> FKEventRowUi:
-	"""Create event row node from data (GDevelop-style)."""
-	#print("[FKMainEditor] Creating event row node")
-	var row: FKEventRowUi = EVENT_ROW_SCENE.instantiate()
-	var copy := sheet_io.copy_event_block(data)
-	
-	row.legitimize(copy, registry)
-	_connect_event_row_signals(row)
-	return row
-
-func _create_comment_ui(data: FKComment) -> FKCommentUi:
-	"""Create comment block node from data."""
-	#print("[FKMainEditor]: Creating comment block node")
-	var comment: FKCommentUi = COMMENT_SCENE.instantiate()
-	var copy := FKComment.new()
-	copy.text = data.text
-	
-	comment.legitimize(copy, registry)
-	_connect_comment_signals(comment)
-	return comment
-
 func _connect_comment_signals(comment: FKCommentUi) -> void:
 	comment.selected.connect(_on_comment_selected)
 	comment.delete_requested.connect(_on_comment_delete.bind(comment))
@@ -688,16 +660,7 @@ func _connect_comment_signals(comment: FKCommentUi) -> void:
 	comment.insert_event_above_requested.connect(_on_comment_insert_event_above.bind(comment))
 	comment.insert_event_below_requested.connect(_on_comment_insert_event_below.bind(comment))
 
-func _create_group_block(data: FKGroup) -> FKGroupUi:
-	"""Create group block node from data."""
-	#print("[FKMainEditor]: Creating group block node")
-	var group: FKGroupUi = GROUP_SCENE.instantiate()
-	var copy := data.copy_deep()
-	copy.normalize_children()
-	#group.call_deferred("legitimize", copy, registry)
-	group.legitimize(copy, registry)
-	_connect_group_signals(group)
-	return group
+
 
 func _connect_group_signals(group: FKGroupUi) -> void:
 	group.selected.connect(_on_group_selected)
@@ -788,7 +751,7 @@ func _on_add_group_button_pressed() -> void:
 	data.color = Color(0.25, 0.22, 0.35, 1.0)
 	data.children = []
 	
-	var group := _create_group_block(data)
+	var group := _create_unit_ui(data)
 	blocks_container.add_child(group)
 	
 	_show_content_state()
@@ -935,7 +898,7 @@ func _on_add_comment_button_pressed() -> void:
 	var data := FKComment.new()
 	data.text = ""
 	
-	var comment := _create_comment_ui(data)
+	var comment := _create_unit_ui(data)
 	blocks_container.add_child(comment)
 	
 	_show_content_state()
@@ -1006,7 +969,7 @@ func _insert_comment_relative_to(target_block: Node, offset: int) -> void:
 	var data := FKComment.new()
 	data.text = ""
 	
-	var comment := _create_comment_ui(data)
+	var comment := _create_unit_ui(data)
 	blocks_container.add_child(comment)
 	
 	# Calculate insert position
@@ -1207,7 +1170,7 @@ func _finalize_event_creation(inputs: Dictionary) -> void:
 	data.conditions = [] as Array[FKConditionUnit]
 	data.actions = [] as Array[FKActionUnit]
 	
-	var row := _create_event_row(data)
+	var row := _create_unit_ui(data)
 	
 	if pending_target_row:
 		var insert_idx := pending_target_row.get_index() + 1
@@ -1232,7 +1195,7 @@ func _finalize_event_above_target(inputs: Dictionary) -> void:
 	data.conditions = [] as Array[FKConditionUnit]
 	data.actions = [] as Array[FKActionUnit]
 	
-	var row := _create_event_row(data)
+	var row := _create_unit_ui(data)
 	
 	if pending_target_row:
 		var insert_idx := pending_target_row.get_index()  # Insert at same position (above)
@@ -1366,7 +1329,7 @@ func _replace_event(expressions: Dictionary) -> void:
 	new_data.actions = old_data.actions if old_data else ([] as Array[FKActionUnit])
 	
 	# Create new row
-	var new_row := _create_event_row(new_data)
+	var new_row := _create_unit_ui(new_data)
 	
 	# Remove old row and insert new one at same position
 	if old_parent:
@@ -1784,9 +1747,9 @@ func _finalize_branch_action_creation(inputs: Dictionary) -> void:
 	if pending_target_branch and pending_target_branch.has_method("add_branch_action"):
 		pending_target_branch.add_branch_action(data)
 	elif pending_target_branch is FKBranchUnitUi:
-		print("[FKMainEditor]: Pending target branch has no add_branch_action method, but it is a FKBranchUnitUi ")
+		print("[FKMainEditor]: Pending target branch has no add_branch_action method, " +\
+		"but it is a FKBranchUnitUi.")
 		
-
 	_show_content_state()
 	_reset_workflow()
 	_save_sheet()
@@ -1948,6 +1911,7 @@ func _on_action_edit_requested(action_item: FKActionUnitUi, bound_row) -> void:
 func _on_condition_dropped(source_row: FKEventRowUi, condition_data: FKConditionUnit, 
 target_row: FKEventRowUi) -> void:
 	"""Handle condition dropped from one event row to another."""
+	print("[FKMainEditor] _on_condition_dropped")
 	if not source_row or not target_row or not condition_data:
 		return
 	
@@ -1962,13 +1926,7 @@ target_row: FKEventRowUi) -> void:
 	# Add to target
 	var target_data := target_row.get_block()
 	if target_data:
-		# Create a copy of the condition data
-		var cond_copy := FKConditionUnit.new()
-		cond_copy.condition_id = condition_data.condition_id
-		cond_copy.target_node = condition_data.target_node
-		cond_copy.inputs = condition_data.inputs.duplicate()
-		cond_copy.negated = condition_data.negated
-		cond_copy.actions = [] as Array[FKActionUnit]
+		var cond_copy := condition_data.duplicate_block()
 		
 		target_data.conditions.append(cond_copy)
 		target_row.update_display()
@@ -1977,6 +1935,7 @@ target_row: FKEventRowUi) -> void:
 
 func _on_action_dropped(source_row: FKEventRowUi, action_data: FKActionUnit, target_row: FKUnitUi) -> void:
 	"""Handle action dropped from one event row to another."""
+	print("[FKMainEditor] _on_action_dropped")
 	if not source_row or not target_row or not action_data:
 		return
 	

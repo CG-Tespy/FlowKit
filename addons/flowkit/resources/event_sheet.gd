@@ -1,3 +1,4 @@
+@tool
 extends Resource
 class_name FKEventSheet
 ## The main event sheet resource that stores all events, comments, and groups for a scene.
@@ -96,7 +97,7 @@ func get_ordered_items() -> Array:
 	
 	return items
 
-static func from_copies_of(units: Array[FKUnit]) -> FKEventSheet:
+static func from_units(units: Array[FKUnit]) -> FKEventSheet:
 	var sheet := FKEventSheet.new()
 	for elem in units:
 		sheet.append_copy_of(elem)
