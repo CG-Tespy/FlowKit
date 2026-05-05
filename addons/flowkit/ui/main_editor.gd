@@ -57,14 +57,13 @@ func _enter_tree() -> void:
 	
 func _toggle_subs(on: bool):
 	if on and not _is_subbed:
-		# For autosave and undo state on drag-and-drop reorder
+		# For undo state on drag-and-drop reorder
 		blocks_container.before_block_moved.connect(_push_undo_state)
 		select_node_modal.node_selected.connect(_on_node_selected)
 		select_event_modal.event_selected.connect(_on_event_selected)
 		select_action_modal.action_selected.connect(_on_action_selected)
 		select_condition_modal.condition_selected.connect(_on_condition_selected)
 		expression_modal.expressions_confirmed.connect(_on_expressions_confirmed)
-		#blocks_container.block_moved.connect(_on_auto_saver_saved)
 	elif not on and _is_subbed:
 		blocks_container.before_block_moved.disconnect(_push_undo_state)
 		select_node_modal.node_selected.disconnect(_on_node_selected)
@@ -72,7 +71,6 @@ func _toggle_subs(on: bool):
 		select_action_modal.action_selected.disconnect(_on_action_selected)
 		select_condition_modal.condition_selected.disconnect(_on_condition_selected)
 		expression_modal.expressions_confirmed.disconnect(_on_expressions_confirmed)
-		#blocks_container.block_moved.disconnect(_on_auto_saver_saved)
 	
 	_is_subbed = on
 
