@@ -191,8 +191,3 @@ visible = false
 [connection signal="pressed" from="OuterVBox/TopMargin/TopBar/AddCommentButton" to="." method="_on_add_comment_button_pressed"]
 [connection signal="pressed" from="OuterVBox/TopMargin/TopBar/AddGroupButton" to="." method="_on_add_group_button_pressed"]
 [connection signal="pressed" from="OuterVBox/BottomMargin/ButtonContainer/AddEventButton" to="." method="_on_add_event_button_pressed"]
-[connection signal="node_selected" from="SelectNodeModal" to="." method="_on_node_selected"]
-[connection signal="event_selected" from="SelectEventModal" to="." method="_on_event_selected"]
-[connection signal="action_selected" from="SelectActionModal" to="." method="_on_action_selected"]
-[connection signal="condition_selected" from="SelectConditionModal" to="." method="_on_condition_selected"]
-[connection signal="expressions_confirmed" from="ExpressionModal" to="." method="_on_expressions_confirmed"]
