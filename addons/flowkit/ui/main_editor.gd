@@ -23,11 +23,11 @@ var drag_spacer_bottom: Control = null  # Temporary spacer at bottom during drag
 const DRAG_SPACER_HEIGHT := 50  # Height of temporary drop zone
 
 # Modals
-@onready var select_node_modal: FKSelectNodeModal = $SelectNodeModal
-@onready var select_event_modal: FKSelectEventModal = $SelectEventModal
-@onready var select_condition_modal: FKSelectConditionModal = $SelectConditionModal
-@onready var select_action_modal: FKSelectActionModal = $SelectActionModal
-@onready var expression_modal: FKExpressionEditorModal = $ExpressionModal
+@export var select_node_modal: FKSelectNodeModal
+@export var select_event_modal: FKSelectEventModal
+@export var select_condition_modal: FKSelectConditionModal
+@export var select_action_modal: FKSelectActionModal
+@export var expression_modal: FKExpressionEditorModal
 
 # Workflow state
 var pending_block_type: String = ""  # "event", "condition", "action", "event_replace", "event_in_group", etc.
@@ -103,12 +103,16 @@ func set_registry(reg: FKRegistry) -> void:
 		unit_ui_factory = FKUnitUiFactory.new(sheet_io)
 	unit_ui_factory.registry = reg
 	# Pass to modals (deferred in case they're not ready yet)
+	if select_node_modal:
+		select_node_modal.set_registry(reg)
 	if select_event_modal:
 		select_event_modal.set_registry(reg)
 	if select_condition_modal:
 		select_condition_modal.set_registry(reg)
 	if select_action_modal:
 		select_action_modal.set_registry(reg)
+	if expression_modal:
+		expression_modal.set_registry(reg)
 
 func set_generator(gen) -> void:
 	generator = gen
