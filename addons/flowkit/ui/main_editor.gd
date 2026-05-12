@@ -53,7 +53,16 @@ func _enter_tree() -> void:
 	unit_ui_factory = FKUnitUiFactory.new(sheet_io)
 	sheet_auto_saver.init(self, auto_save_sheets)
 	input_manager.initialize(self)
+	
+	_legitimize_modals()
 	_toggle_subs(true)
+
+func _legitimize_modals():
+	select_node_modal.legitimize()
+	select_event_modal.legitimize()
+	select_condition_modal.legitimize()
+	select_action_modal.legitimize()
+	expression_modal.legitimize()
 	
 func _toggle_subs(on: bool):
 	if on and not _is_subbed:
@@ -130,7 +139,8 @@ func _popup_centered_on_editor(popup: Window) -> void:
 	# Use editor_interface to get the actual main editor window
 	var editor_window: Window = null
 	if editor_interface:
-		editor_window = editor_interface.get_base_control().get_window()
+		var base_control := editor_interface.get_base_control()
+		editor_window = base_control.get_window()
 	
 	if not editor_window:
 		# Fallback to default behavior if window not available
@@ -1045,7 +1055,10 @@ func _start_add_workflow(block_type: String, target_row: Node = null) -> void:
 	_popup_centered_on_editor(select_node_modal)
 
 func _on_node_selected(node_path: String, node_class: String) -> void:
-	"""Node selected in workflow."""
+	"""
+	Node selected in workflow. This should execute when it's time to edit an FKUnit
+	through the editor.
+	"""
 	pending_node_path = node_path
 	select_node_modal.hide()
 	

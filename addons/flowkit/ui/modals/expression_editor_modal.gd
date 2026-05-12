@@ -23,23 +23,43 @@ var param_values: Dictionary = {}
 
 var selected_tree_node: Node = null
 
+func legitimize():
+	if not is_editor_preview:
+		return
+	_is_editor_preview = false
+	_enter_tree()
+
+var is_editor_preview: bool:
+	get:
+		return _is_editor_preview
+		
+var _is_editor_preview := true
+
 func _enter_tree() -> void:
+	if is_editor_preview:
+		return
+		
 	_toggle_subs(true)
 	if editor_interface:
-		call_deferred("_setup_node_tree")
+		_setup_node_tree.call_deferred()
 
 func _toggle_subs(on: bool):
-	if on:
+	if on and not _is_subbed:
 		node_tree.item_selected.connect(_on_node_selected)
 		item_list.item_activated.connect(_on_item_activated)
-		if editor_interface:
-			call_deferred("_setup_node_tree")
+	elif _is_subbed and !on:
+		node_tree.item_selected.disconnect(_on_node_selected)
+		item_list.item_activated.disconnect(_on_item_activated)
 	
+	_is_subbed = on
+
+var _is_subbed := false
+
 func set_editor_interface(interface: EditorInterface) -> void:
 	editor_interface = interface
 	# Setup tree if we're already ready
 	if is_node_ready():
-		call_deferred("_setup_node_tree")
+		_setup_node_tree.call_deferred()
 
 func set_registry(reg: FKRegistry):
 	registry = reg
@@ -69,20 +89,27 @@ func _setup_node_tree() -> void:
 	if not _scene_root:
 		return
 	
-	# Add System node as first entry (runtime autoload)
+	_base_control = editor_interface.get_base_control()
+	_add_sys_node_entry()
+	var root_item := _create_root_item()
+	_add_node_children(_scene_root, root_item)
+
+var _base_control: Control
+
+func _add_sys_node_entry():
+	# The System Node should be a runtime Autoload.
 	var system_item: TreeItem = node_tree.create_item()
 	system_item.set_text(0, "System (FlowKitSystem)")
 	system_item.set_metadata(0, null)  # No actual node in editor
-	system_item.set_icon(0, editor_interface.get_base_control().get_theme_icon("Node", "EditorIcons"))
+	system_item.set_icon(0, _base_control.get_theme_icon("Node", "EditorIcons"))
 	
-	# Create root item
+func _create_root_item() -> TreeItem:
 	var root_item: TreeItem = node_tree.create_item()
 	root_item.set_text(0, _scene_root.name)
 	root_item.set_metadata(0, _scene_root)
-	root_item.set_icon(0, editor_interface.get_base_control().get_theme_icon("Node", "EditorIcons"))
+	root_item.set_icon(0, _base_control.get_theme_icon("Node", "EditorIcons"))
+	return root_item
 	
-	# Recursively add children
-	_add_node_children(_scene_root, root_item)
 
 func _add_node_children(node: Node, tree_item: TreeItem) -> void:
 	for child in node.get_children():
@@ -145,7 +172,8 @@ func _update_expr_input(param_name: String):
 func _update_nav_buttons():
 	prev_button.disabled = current_param_index == 0
 	next_button.disabled = current_param_index >= action_inputs.size() - 1
-	confirm_button.text = "Confirm" if current_param_index >= action_inputs.size() - 1 else "Next"
+	confirm_button.text = "Confirm" if current_param_index >= action_inputs.size() - 1 \
+	else "Next"
 	
 func _on_node_selected() -> void:
 	var selected_item: TreeItem = node_tree.get_selected()

@@ -8,10 +8,13 @@ var selected_node_path: String = ""
 var selected_node_class: String = ""
 var available_actions: Array = []
 
-@onready var search_box := $VBoxContainer/SearchBox
-@onready var item_list := $VBoxContainer/HSplitContainer/MainPanel/MainVBox/ItemList
-@onready var description_label := $VBoxContainer/HSplitContainer/MainPanel/MainVBox/DescriptionPanel/ScrollContainer/DescriptionLabel
-@onready var recent_item_list := $VBoxContainer/HSplitContainer/RecentPanel/RecentVBox/RecentItemList
+@export var search_box: LineEdit
+@export var item_list: ItemList
+@export var description_label: Label
+@export var recent_item_list: ItemList
+
+@export var desc_panel: Panel
+@export var desc_panel_style: StyleBoxFlat
 
 var _all_items_cache: Array = []
 var _recent_items_manager: Variant = null
@@ -21,33 +24,76 @@ func set_editor_interface(interface: EditorInterface) -> void:
 	
 var editor_interface: EditorInterface
 
+
+func legitimize():
+	if not is_editor_preview:
+		return
+	_is_editor_preview = false
+	_enter_tree()
+
+var is_editor_preview: bool:
+	get:
+		return _is_editor_preview
+		
+var _is_editor_preview := true
+
 func set_registry(reg: FKRegistry):
 	registry = reg
 	
 var registry: FKRegistry
 
-func _ready() -> void:
-	if search_box:
-		search_box.text_changed.connect(_on_search_text_changed)
+func _enter_tree() -> void:
+	if is_editor_preview:
+		return
 		
-	if item_list:
+	_ensure_export_fields_filled()
+	_set_desc_panel_style()
+	_toggle_subs(true)
+	_recent_items_manager = FKRecentItemsManagerUi.new()
+	_load_available_actions()
+
+func _ensure_export_fields_filled():
+	var path: String
+	if not search_box:
+		path = "VBoxContainer/SearchBox"
+		search_box = get_node(path)
+		
+	if not item_list:
+		path = "VBoxContainer/HSplitContainer/MainPanel/MainVBox/ItemList"
+		item_list = get_node(path)
+		
+	if not description_label:
+		path = "VBoxContainer/HSplitContainer/MainPanel/MainVBox/DescriptionPanel/" +\
+		"ScrollContainer/DescriptionLabel"
+		description_label = get_node(path)
+		
+	if not recent_item_list:
+		path = "VBoxContainer/HSplitContainer/RecentPanel/RecentVBox/RecentItemList"
+		recent_item_list = get_node(path)
+		
+	if not desc_panel:
+		path = "VBoxContainer/HSplitContainer/MainPanel/MainVBox/DescriptionPanel"
+		desc_panel = get_node(path)
+	
+func _set_desc_panel_style():
+	desc_panel.add_theme_stylebox_override("panel", desc_panel_style)
+	
+func _toggle_subs(on: bool):
+	if on and not _is_subbed:
+		search_box.text_changed.connect(_on_search_text_changed)
 		item_list.item_activated.connect(_on_item_activated)
 		item_list.item_selected.connect(_on_item_selected)
-	
-	if recent_item_list:
 		recent_item_list.item_activated.connect(_on_recent_item_activated)
+
+	elif _is_subbed and !on:
+		search_box.text_changed.disconnect(_on_search_text_changed)
+		item_list.item_activated.disconnect(_on_item_activated)
+		item_list.item_selected.disconnect(_on_item_selected)
+		recent_item_list.item_activated.disconnect(_on_recent_item_activated)
+		
+	_is_subbed = on
 	
-	# Set description panel style
-	var panel = $VBoxContainer/HSplitContainer/MainPanel/MainVBox/DescriptionPanel
-	var style = StyleBoxFlat.new()
-	style.bg_color = Color(0.2, 0.2, 0.2, 0.8)
-	panel.add_theme_stylebox_override("panel", style)
-	
-	# Load recent items manager
-	_recent_items_manager = load("res://addons/flowkit/ui/modals/recent_items_manager.gd").new()
-	
-	# Load all available actions
-	_load_available_actions()
+var _is_subbed := false
 
 func _load_available_actions() -> void:
 	"""Load all action scripts from the actions folder."""

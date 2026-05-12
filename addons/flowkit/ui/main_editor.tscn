@@ -170,6 +170,7 @@ theme_override_styles/hover = SubResource("StyleBoxFlat_button")
 text = "➕ Add Event"
 
 [node name="SelectNodeModal" parent="." unique_id=2030002633 instance=ExtResource("4_t4gjw")]
+visible = false
 
 [node name="SelectEventModal" parent="." unique_id=2026572997 instance=ExtResource("5_dqxt5")]
 visible = false

@@ -2,17 +2,17 @@
 
 [ext_resource type="Script" uid="uid://bn7bags6twbx0" path="res://addons/flowkit/ui/modals/select_condition_modal.gd" id="1_condition"]
 
-[node name="SelectCondition" type="PopupPanel"]
+[node name="SelectCondition" type="PopupPanel" unique_id=1328454773]
 oversampling_override = 1.0
 title = "Select a Condition"
-initial_position = 0
 size = Vector2i(900, 600)
+visible = true
+unresizable = false
 borderless = false
 keep_title_visible = true
-unresizable = false
 script = ExtResource("1_condition")
 
-[node name="VBoxContainer" type="VBoxContainer" parent="."]
+[node name="VBoxContainer" type="VBoxContainer" parent="." unique_id=1218923047]
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
@@ -23,21 +23,22 @@ offset_bottom = -4.0
 grow_horizontal = 2
 grow_vertical = 2
 
-[node name="SearchBox" type="LineEdit" parent="VBoxContainer"]
+[node name="SearchBox" type="LineEdit" parent="VBoxContainer" unique_id=376539148]
 layout_mode = 2
 placeholder_text = "Search..."
 
-[node name="HSplitContainer" type="HSplitContainer" parent="VBoxContainer"]
+[node name="HSplitContainer" type="HSplitContainer" parent="VBoxContainer" unique_id=1592481814]
 layout_mode = 2
 size_flags_vertical = 3
+split_offsets = PackedInt32Array(450)
 split_offset = 450
 
-[node name="RecentPanel" type="Panel" parent="VBoxContainer/HSplitContainer"]
-layout_mode = 2
+[node name="RecentPanel" type="Panel" parent="VBoxContainer/HSplitContainer" unique_id=1575374208]
 custom_minimum_size = Vector2(400, 0)
+layout_mode = 2
 
-[node name="RecentVBox" type="VBoxContainer" parent="VBoxContainer/HSplitContainer/RecentPanel"]
-anchors_preset = 15
+[node name="RecentVBox" type="VBoxContainer" parent="VBoxContainer/HSplitContainer/RecentPanel" unique_id=802680281]
+layout_mode = 0
 anchor_right = 1.0
 anchor_bottom = 1.0
 offset_left = 4.0
@@ -47,21 +48,20 @@ offset_bottom = -4.0
 grow_horizontal = 2
 grow_vertical = 2
 
-[node name="RecentLabel" type="Label" parent="VBoxContainer/HSplitContainer/RecentPanel/RecentVBox"]
+[node name="RecentLabel" type="Label" parent="VBoxContainer/HSplitContainer/RecentPanel/RecentVBox" unique_id=889454355]
 layout_mode = 2
 text = "Recent"
-theme_type_variations = ["header_small"]
 
-[node name="RecentItemList" type="ItemList" parent="VBoxContainer/HSplitContainer/RecentPanel/RecentVBox"]
+[node name="RecentItemList" type="ItemList" parent="VBoxContainer/HSplitContainer/RecentPanel/RecentVBox" unique_id=1854709250]
 layout_mode = 2
 size_flags_vertical = 3
 
-[node name="MainPanel" type="Panel" parent="VBoxContainer/HSplitContainer"]
+[node name="MainPanel" type="Panel" parent="VBoxContainer/HSplitContainer" unique_id=368839918]
 layout_mode = 2
 size_flags_horizontal = 3
 
-[node name="MainVBox" type="VBoxContainer" parent="VBoxContainer/HSplitContainer/MainPanel"]
-anchors_preset = 15
+[node name="MainVBox" type="VBoxContainer" parent="VBoxContainer/HSplitContainer/MainPanel" unique_id=1073361098]
+layout_mode = 0
 anchor_right = 1.0
 anchor_bottom = 1.0
 offset_left = 4.0
@@ -71,21 +71,20 @@ offset_bottom = -4.0
 grow_horizontal = 2
 grow_vertical = 2
 
-[node name="AllLabel" type="Label" parent="VBoxContainer/HSplitContainer/MainPanel/MainVBox"]
+[node name="AllLabel" type="Label" parent="VBoxContainer/HSplitContainer/MainPanel/MainVBox" unique_id=2070823011]
 layout_mode = 2
 text = "All Conditions"
-theme_type_variations = ["header_small"]
 
-[node name="ItemList" type="ItemList" parent="VBoxContainer/HSplitContainer/MainPanel/MainVBox"]
+[node name="ItemList" type="ItemList" parent="VBoxContainer/HSplitContainer/MainPanel/MainVBox" unique_id=34358662]
 layout_mode = 2
 size_flags_vertical = 3
 
-[node name="DescriptionPanel" type="Panel" parent="VBoxContainer/HSplitContainer/MainPanel/MainVBox"]
+[node name="DescriptionPanel" type="Panel" parent="VBoxContainer/HSplitContainer/MainPanel/MainVBox" unique_id=61533282]
+custom_minimum_size = Vector2(0, 150)
 layout_mode = 2
 size_flags_vertical = 0
-custom_minimum_size = Vector2(0, 150)
 
-[node name="ScrollContainer" type="ScrollContainer" parent="VBoxContainer/HSplitContainer/MainPanel/MainVBox/DescriptionPanel"]
+[node name="ScrollContainer" type="ScrollContainer" parent="VBoxContainer/HSplitContainer/MainPanel/MainVBox/DescriptionPanel" unique_id=1534101736]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -97,7 +96,7 @@ offset_bottom = -4.0
 grow_horizontal = 2
 grow_vertical = 2
 
-[node name="DescriptionLabel" type="Label" parent="VBoxContainer/HSplitContainer/MainPanel/MainVBox/DescriptionPanel/ScrollContainer"]
+[node name="DescriptionLabel" type="Label" parent="VBoxContainer/HSplitContainer/MainPanel/MainVBox/DescriptionPanel/ScrollContainer" unique_id=268459902]
 layout_mode = 2
 size_flags_horizontal = 3
 autowrap_mode = 3
