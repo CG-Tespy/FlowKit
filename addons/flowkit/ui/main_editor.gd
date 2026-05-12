@@ -49,7 +49,21 @@ var serializer := FKSerializationManager.new()
 var unit_ui_factory: FKUnitUiFactory
 var sheet_auto_saver: FKSheetAutoSaver = FKSheetAutoSaver.new()
 
+func legitimize():
+	if not is_editor_preview:
+		return
+	_is_editor_preview = false
+	_enter_tree()
+
+var is_editor_preview: bool:
+	get:
+		return _is_editor_preview
+		
+var _is_editor_preview := true
+
 func _enter_tree() -> void:
+	if is_editor_preview:
+		return
 	unit_ui_factory = FKUnitUiFactory.new(sheet_io)
 	sheet_auto_saver.init(self, auto_save_sheets)
 	input_manager.initialize(self)

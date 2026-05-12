@@ -2,7 +2,7 @@
 extends EditorPlugin
 
 var action_registry
-var editor
+var editor: FKMainEditor
 var generator
 var inspector_plugin
 var export_plugin
@@ -19,7 +19,8 @@ func _disable_plugin() -> void:
 func _enter_tree() -> void:
 	# Load UI
 	editor = preload("res://addons/flowkit/ui/main_editor.tscn").instantiate()
-
+	editor.legitimize()
+	
 	# Load registry
 	action_registry = preload("res://addons/flowkit/registry.gd").new()
 	action_registry.load_providers()

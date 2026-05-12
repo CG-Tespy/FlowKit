@@ -176,10 +176,15 @@ visible = false
 visible = false
 
 [node name="SelectActionModal" parent="." unique_id=374370571 instance=ExtResource("6_7k5ms")]
+position = Vector2i(0, 36)
+visible = false
 
 [node name="SelectConditionModal" parent="." unique_id=184117392 instance=ExtResource("7_pcxw6")]
+position = Vector2i(0, 36)
+visible = false
 
 [node name="ExpressionModal" parent="." unique_id=996764360 instance=ExtResource("8_8w7jk")]
+visible = false
 
 [connection signal="generate_manifest" from="OuterVBox/TopMargin/TopBar/MenuBar" to="." method="_on_generate_manifest"]
 [connection signal="generate_providers" from="OuterVBox/TopMargin/TopBar/MenuBar" to="." method="_on_generate_providers"]
