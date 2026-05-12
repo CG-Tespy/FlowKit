@@ -78,7 +78,7 @@ block_type = "action"
 
 [sub_resource type="Resource" id="Resource_5spa6"]
 script = ExtResource("2_ju1rn")
-block_id = "event_1778570755_1389141348"
+block_id = "event_1778579360_2640092096"
 event_id = "on_ready"
 target_node = NodePath(".")
 actions = Array[ExtResource("3_5poua")]([SubResource("Resource_1axor"), SubResource("Resource_ju1rn"), SubResource("Resource_5poua"), SubResource("Resource_ayedq"), SubResource("Resource_np8on"), SubResource("Resource_v1ajb"), SubResource("Resource_e46t1")])

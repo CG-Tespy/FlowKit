@@ -1,5 +1,5 @@
 @tool
-extends PopupPanel
+extends FKModalWindow
 class_name FKSelectEventModal
 
 signal event_selected(node_path: String, event_id: String, event_inputs: Array)
@@ -16,40 +16,19 @@ var available_events: Array = []
 
 @export var desc_panel_style: StyleBoxFlat
 
-func legitimize():
-	if not is_editor_preview:
-		return
-	_is_editor_preview = false
-	_enter_tree()
-
-var is_editor_preview: bool:
-	get:
-		return _is_editor_preview
-		
-var _is_editor_preview := true
-
 var _all_items_cache: Array = []
-var _recent_items_manager: Variant = null
 
-func set_editor_interface(interface: EditorInterface) -> void:
-	editor_interface = interface
-
-var editor_interface: EditorInterface
-
-func set_registry(reg: FKRegistry):
-	registry = reg
-	
-var registry: FKRegistry
 
 func _enter_tree() -> void:
+	super._enter_tree()
+	
 	if is_editor_preview:
 		return
 		
-	_ensure_export_fields_filled()
-	_set_desc_panel_style()
-	_toggle_subs(true)
 	_recent_items_manager = FKRecentItemsManagerUi.new()
 	_load_available_events()
+
+var _recent_items_manager: Variant = null
 
 func _ensure_export_fields_filled():
 	var path: String
@@ -74,10 +53,7 @@ func _ensure_export_fields_filled():
 		path = "VBoxContainer/HSplitContainer/MainPanel/MainVBox/DescriptionPanel"
 		desc_panel = get_node(path)
 		
-func _set_desc_panel_style():
-	if is_editor_preview:
-		return
-		
+func _apply_styling():
 	desc_panel.add_theme_stylebox_override("panel", desc_panel_style)
 		
 func _toggle_subs(on: bool):
@@ -96,8 +72,6 @@ func _toggle_subs(on: bool):
 		
 	_is_subbed = on
 	
-var _is_subbed := false
-
 func _load_available_events() -> void:
 	"""Load all event scripts from the events folder."""
 	available_events.clear()
@@ -292,9 +266,3 @@ func _on_recent_item_activated(index: int) -> void:
 	print("Recent event selected: ", event_id, " for node: ", selected_node_path)
 	event_selected.emit(selected_node_path, event_id, event_inputs)
 	hide()
-
-func _exit_tree() -> void:
-	if is_editor_preview:
-		return
-		
-	_toggle_subs(false)

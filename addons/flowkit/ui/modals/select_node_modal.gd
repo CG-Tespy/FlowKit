@@ -1,10 +1,9 @@
 @tool
-extends PopupPanel
+extends FKModalWindow
 class_name FKSelectNodeModal
 
 signal node_selected(node_path: String, node_class: String)
 
-var editor_interface: EditorInterface
 var available_events: Array = []
 
 @export var search_box: LineEdit  
@@ -12,35 +11,24 @@ var available_events: Array = []
 @export var recent_item_list: ItemList
 
 var _all_items_cache: Array = []
-var _recent_items_manager: Variant = null
-
-func legitimize():
-	if not is_editor_preview:
-		return
-	_is_editor_preview = false
-	_enter_tree()
-	_ready()
-
-var is_editor_preview: bool:
-	get:
-		return _is_editor_preview
-		
-var _is_editor_preview := true
 
 func _enter_tree() -> void:
+	super._enter_tree()
+	
 	if is_editor_preview:
 		return
 		
-	_toggle_subs(true)
 	_recent_items_manager = FKRecentItemsManagerUi.new()
 	
-func _toggle_subs(on: bool):
-	if on and not _is_subbed:
+var _recent_items_manager: Variant = null
+	
+func _toggle_subs(should_sub: bool):
+	if should_sub and not _is_subbed:
 		search_box.text_changed.connect(_on_search_text_changed)
 		item_list.item_activated.connect(_on_item_activated)
 		item_list.item_selected.connect(_on_item_selected)
 		recent_item_list.item_activated.connect(_on_recent_item_activated)
-	elif _is_subbed and !on:
+	elif _is_subbed and not should_sub:
 		search_box.text_changed.disconnect(_on_search_text_changed)
 		item_list.item_activated.disconnect(_on_item_activated)
 		item_list.item_selected.disconnect(_on_item_selected)
@@ -48,10 +36,11 @@ func _toggle_subs(on: bool):
 	else:
 		return
 		
-	_is_subbed = on
+	_is_subbed = should_sub
 
-var _is_subbed := false
 func _ready() -> void:
+	if is_editor_preview:
+		return
 	# Load all available events to check compatibility
 	_load_available_event_scripts()
 	_populate_recent_list()
@@ -59,9 +48,8 @@ func _ready() -> void:
 func _load_available_event_scripts() -> void:
 	"""Load all event scripts from the events folder."""
 	available_events.clear()
-	_scan_directory_recursive(_path_to_events_folder)
-
-static var _path_to_events_folder := "res://addons/flowkit/events"
+	var path := FKEditorGlobals.PATH_TO_EVENTS_FOLDER
+	_scan_directory_recursive(path)
 
 func _scan_directory_recursive(path: String) -> void:
 	"""Recursively scan directories for event scripts."""
@@ -109,14 +97,6 @@ func _populate_recent_list() -> void:
 		recent_item_list.add_item(display_name)
 		var index = recent_item_list.item_count - 1
 		recent_item_list.set_item_metadata(index, recent_node)
-		
-func set_editor_interface(interface: EditorInterface):
-	editor_interface = interface
-
-func set_registry(reg: FKRegistry):
-	registry = reg
-	
-var registry: FKRegistry
 
 func populate_from_scene(scene_root: Node) -> void:
 	if not item_list:
@@ -289,9 +269,3 @@ func _on_recent_item_activated(index: int) -> void:
 	print("Recent node selected: ", node_path_str, " (", node_class, ")")
 	node_selected.emit(node_path_str, node_class)
 	hide()
-
-func _exit_tree() -> void:
-	if is_editor_preview:
-		return
-		
-	_toggle_subs(false)

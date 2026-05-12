@@ -1,5 +1,5 @@
 @tool
-extends PopupPanel
+extends FKModalWindow
 class_name FKSelectConditionModal
 
 signal condition_selected(node_path: String, condition_id: String, condition_inputs: Array)
@@ -19,29 +19,28 @@ var _all_items_cache: Array = []
 var _recent_items_manager: Variant = null
 
 
-func _toggle_subs(on: bool):
-	if on and not _is_subbed:
+func _toggle_subs(should_sub: bool):
+	if should_sub and not _is_subbed:
 		search_box.text_changed.connect(_on_search_text_changed)
 		item_list.item_activated.connect(_on_item_activated)
 		item_list.item_selected.connect(_on_item_selected)
 		recent_item_list.item_activated.connect(_on_recent_item_activated)
-	elif _is_subbed and !on:
+	elif _is_subbed and !should_sub:
 		search_box.text_changed.disconnect(_on_search_text_changed)
 		item_list.item_activated.disconnect(_on_item_activated)
 		item_list.item_selected.disconnect(_on_item_selected)
 		recent_item_list.item_activated.disconnect(_on_recent_item_activated)
-		
-	_is_subbed = on
-	
-var _is_subbed := false
-
-func _enter_tree() -> void:
-	if is_editor_preview:
+	else:
 		return
 		
-	_ensure_export_fields_filled()
-	_set_desc_panel_style()
-	_toggle_subs(true)
+	_is_subbed = should_sub
+	
+
+func _enter_tree() -> void:
+	super._enter_tree()
+	
+	if is_editor_preview:
+		return
 	
 	_recent_items_manager = FKRecentItemsManagerUi.new()
 	_load_available_conditions()
@@ -75,17 +74,6 @@ func _set_desc_panel_style():
 		desc_panel_style.bg_color = Color(0.2, 0.2, 0.2, 0.8)
 	desc_panel.add_theme_stylebox_override("panel", desc_panel_style)
 	
-func legitimize():
-	if not is_editor_preview:
-		return
-	_is_editor_preview = false
-	_enter_tree()
-
-var is_editor_preview: bool:
-	get:
-		return _is_editor_preview
-		
-var _is_editor_preview := true
 
 func _load_available_conditions() -> void:
 	"""Load all condition scripts from the conditions folder."""
@@ -94,15 +82,6 @@ func _load_available_conditions() -> void:
 	_scan_directory_recursive(conditions_path)
 	print("Loaded ", available_conditions.size(), " conditions")
 
-func set_editor_interface(interface: EditorInterface) -> void:
-	editor_interface = interface
-		
-var editor_interface: EditorInterface
-
-func set_registry(reg: FKRegistry):
-	registry = reg
-	
-var registry: FKRegistry
 
 func _scan_directory_recursive(path: String) -> void:
 	"""Recursively scan directories for condition scripts."""
@@ -232,8 +211,7 @@ func _on_item_selected(index: int) -> void:
 			break
 
 func _on_popup_hide() -> void:
-	if search_box:
-		search_box.clear()
+	search_box.clear()
 
 func _populate_recent_list() -> void:
 	"""Populate the recent conditions list."""

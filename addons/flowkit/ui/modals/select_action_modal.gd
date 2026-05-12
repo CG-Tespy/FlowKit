@@ -1,5 +1,5 @@
 @tool
-extends PopupPanel
+extends FKModalWindow
 class_name FKSelectActionModal
 
 signal action_selected(node_path: String, action_id: String, action_inputs: Array)
@@ -19,36 +19,11 @@ var available_actions: Array = []
 var _all_items_cache: Array = []
 var _recent_items_manager: Variant = null
 
-func set_editor_interface(interface: EditorInterface) -> void:
-	editor_interface = interface
-	
-var editor_interface: EditorInterface
-
-
-func legitimize():
-	if not is_editor_preview:
-		return
-	_is_editor_preview = false
-	_enter_tree()
-
-var is_editor_preview: bool:
-	get:
-		return _is_editor_preview
-		
-var _is_editor_preview := true
-
-func set_registry(reg: FKRegistry):
-	registry = reg
-	
-var registry: FKRegistry
-
 func _enter_tree() -> void:
+	super._enter_tree()
 	if is_editor_preview:
 		return
 		
-	_ensure_export_fields_filled()
-	_set_desc_panel_style()
-	_toggle_subs(true)
 	_recent_items_manager = FKRecentItemsManagerUi.new()
 	_load_available_actions()
 
@@ -78,23 +53,21 @@ func _ensure_export_fields_filled():
 func _set_desc_panel_style():
 	desc_panel.add_theme_stylebox_override("panel", desc_panel_style)
 	
-func _toggle_subs(on: bool):
-	if on and not _is_subbed:
+func _toggle_subs(should_sub: bool):
+	if should_sub and not _is_subbed:
 		search_box.text_changed.connect(_on_search_text_changed)
 		item_list.item_activated.connect(_on_item_activated)
 		item_list.item_selected.connect(_on_item_selected)
 		recent_item_list.item_activated.connect(_on_recent_item_activated)
 
-	elif _is_subbed and !on:
+	elif _is_subbed and !should_sub:
 		search_box.text_changed.disconnect(_on_search_text_changed)
 		item_list.item_activated.disconnect(_on_item_activated)
 		item_list.item_selected.disconnect(_on_item_selected)
 		recent_item_list.item_activated.disconnect(_on_recent_item_activated)
 		
-	_is_subbed = on
+	_is_subbed = should_sub
 	
-var _is_subbed := false
-
 func _load_available_actions() -> void:
 	"""Load all action scripts from the actions folder."""
 	available_actions.clear()

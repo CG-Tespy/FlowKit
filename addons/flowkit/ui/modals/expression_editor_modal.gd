@@ -50,6 +50,8 @@ func _toggle_subs(on: bool):
 	elif _is_subbed and !on:
 		node_tree.item_selected.disconnect(_on_node_selected)
 		item_list.item_activated.disconnect(_on_item_activated)
+	else:
+		return
 	
 	_is_subbed = on
 
@@ -392,5 +394,3 @@ func _confirm() -> void:
 func _on_cancel_button_pressed() -> void:
 	hide()
 	
-func _exit_tree() -> void:
-	_toggle_subs(false)

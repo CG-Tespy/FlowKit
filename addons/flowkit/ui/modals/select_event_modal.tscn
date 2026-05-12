@@ -1,9 +1,7 @@
 [gd_scene format=3 uid="uid://crj5y8vh2m3qi"]
 
 [ext_resource type="Script" uid="uid://dcajc4erjcorh" path="res://addons/flowkit/ui/modals/select_event_modal.gd" id="1_event"]
-
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_vx0pf"]
-bg_color = Color(0.2, 0.2, 0.2, 0.8)
+[ext_resource type="StyleBox" uid="uid://coc5tirv43fp" path="res://addons/flowkit/editor/styles/modal_desc_panel_style.tres" id="2_vx0pf"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_p4fh0"]
 bg_color = Color(0.2, 0.2, 0.2, 0.8)
@@ -23,7 +21,7 @@ item_list = NodePath("VBoxContainer/HSplitContainer/MainPanel/MainVBox/ItemList"
 description_label = NodePath("VBoxContainer/HSplitContainer/MainPanel/MainVBox/DescriptionPanel/ScrollContainer/DescriptionLabel")
 recent_item_list = NodePath("VBoxContainer/HSplitContainer/RecentPanel/RecentVBox/RecentItemList")
 desc_panel = NodePath("VBoxContainer/HSplitContainer/MainPanel/MainVBox/DescriptionPanel")
-desc_panel_style = SubResource("StyleBoxFlat_vx0pf")
+desc_panel_style = ExtResource("2_vx0pf")
 
 [node name="VBoxContainer" type="VBoxContainer" parent="." unique_id=847659102]
 anchors_preset = 15
