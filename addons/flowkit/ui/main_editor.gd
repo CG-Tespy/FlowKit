@@ -68,9 +68,52 @@ func _enter_tree() -> void:
 	sheet_auto_saver.init(self, auto_save_sheets)
 	input_manager.initialize(self)
 	
+	_ensure_we_have_modals()
+	_hide_modals()
 	_legitimize_modals()
 	_toggle_subs(true)
 
+func _ensure_we_have_modals():
+	var path: String
+	var scene: PackedScene = null
+	if not select_node_modal:
+		path = FKModalPaths.SELECT_NODE_MODAL
+		scene = load(path)
+		select_node_modal = scene.instantiate()
+		add_child(select_node_modal)
+		
+	if not select_event_modal:
+		path = FKModalPaths.SELECT_EVENT_MODAL
+		scene = load(path)
+		select_event_modal = scene.instantiate()
+		add_child(select_event_modal)
+		
+	if not select_condition_modal:
+		path = FKModalPaths.SELECT_CONDITION_MODAL
+		scene = load(path)
+		select_condition_modal = scene.instantiate()
+		add_child(select_condition_modal)
+		
+	if not select_action_modal:
+		path = FKModalPaths	.SELECT_ACTION_MODAL
+		scene = load(path)
+		select_action_modal = scene.instantiate()
+		add_child(select_action_modal)
+	
+	if not expression_modal:
+		path = FKModalPaths.EXPRESSION_EDITOR_MODAL
+		scene = load(path)
+		expression_modal = scene.instantiate()
+		add_child(expression_modal)
+		
+	
+func _hide_modals():
+	select_node_modal.visible = false
+	select_event_modal.visible = false
+	select_condition_modal.visible = false
+	select_action_modal.visible = false
+	expression_modal.visible = false
+	
 func _legitimize_modals():
 	select_node_modal.legitimize()
 	select_event_modal.legitimize()

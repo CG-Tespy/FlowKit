@@ -30,9 +30,9 @@ func _toggle_subs(on: bool):
 var _is_subbed := false
 
 func set_editor_interface(interface: EditorInterface):
-	editor_interface = interface
+	_editor_interface = interface
 	
-var editor_interface: EditorInterface
+var _editor_interface: EditorInterface
 
 func legitimize():
 	if not is_editor_preview:

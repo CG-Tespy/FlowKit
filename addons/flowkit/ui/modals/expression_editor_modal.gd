@@ -1,10 +1,9 @@
 @tool
-extends PopupPanel
+extends FKModalWindow
 class_name FKExpressionEditorModal
 
 signal expressions_confirmed(node_path: String, action_id: String, expressions: Dictionary)
 
-var editor_interface: EditorInterface
 var selected_node_path: String = ""
 var selected_action_id: String = ""
 var action_inputs: Array = []
@@ -23,31 +22,20 @@ var param_values: Dictionary = {}
 
 var selected_tree_node: Node = null
 
-func legitimize():
-	if not is_editor_preview:
-		return
-	_is_editor_preview = false
-	_enter_tree()
-
-var is_editor_preview: bool:
-	get:
-		return _is_editor_preview
-		
-var _is_editor_preview := true
-
 func _enter_tree() -> void:
+	super._enter_tree()
+	
 	if is_editor_preview:
 		return
 		
-	_toggle_subs(true)
-	if editor_interface:
+	if _editor_interface:
 		_setup_node_tree.call_deferred()
 
 func _toggle_subs(on: bool):
 	if on and not _is_subbed:
 		node_tree.item_selected.connect(_on_node_selected)
 		item_list.item_activated.connect(_on_item_activated)
-	elif _is_subbed and !on:
+	elif _is_subbed and not on:
 		node_tree.item_selected.disconnect(_on_node_selected)
 		item_list.item_activated.disconnect(_on_item_activated)
 	else:
@@ -55,18 +43,12 @@ func _toggle_subs(on: bool):
 	
 	_is_subbed = on
 
-var _is_subbed := false
-
 func set_editor_interface(interface: EditorInterface) -> void:
-	editor_interface = interface
+	var already_had_it: bool = _editor_interface != null
+	super.set_editor_interface(interface)
 	# Setup tree if we're already ready
-	if is_node_ready():
+	if not already_had_it:
 		_setup_node_tree.call_deferred()
-
-func set_registry(reg: FKRegistry):
-	registry = reg
-	
-var registry: FKRegistry
 
 func populate_inputs(node_path: String, action_id: String, inputs: Array, \
 current_values: Dictionary = {}) -> void:
@@ -79,11 +61,11 @@ current_values: Dictionary = {}) -> void:
 	_show_current_parameter()
 	
 	# Setup node tree if editor interface is available
-	if editor_interface:
+	if _editor_interface:
 		_setup_node_tree()
 
 func _setup_node_tree() -> void:
-	if not editor_interface:
+	if not _editor_interface:
 		return
 	
 	node_tree.clear()
@@ -91,7 +73,7 @@ func _setup_node_tree() -> void:
 	if not _scene_root:
 		return
 	
-	_base_control = editor_interface.get_base_control()
+	_base_control = _editor_interface.get_base_control()
 	_add_sys_node_entry()
 	var root_item := _create_root_item()
 	_add_node_children(_scene_root, root_item)
@@ -121,7 +103,7 @@ func _add_node_children(node: Node, tree_item: TreeItem) -> void:
 		
 		# Get node icon from editor
 		var icon_name: String = child.get_class()
-		var base_control := editor_interface.get_base_control()
+		var base_control := _editor_interface.get_base_control()
 		var icon: Texture2D = base_control.get_theme_icon(icon_name, "EditorIcons")
 		if icon:
 			child_item.set_icon(0, icon)
@@ -203,7 +185,7 @@ func _populate_item_list_for_selected_node() -> void:
 
 var _scene_root: Node:
 	get:
-		return editor_interface.get_edited_scene_root() if editor_interface else null
+		return _editor_interface.get_edited_scene_root() if _editor_interface else null
 		
 func _add_var_items(target_node: Node):
 	if not selected_tree_node.has_meta("flowkit_variables"):

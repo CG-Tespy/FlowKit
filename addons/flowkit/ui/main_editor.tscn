@@ -179,9 +179,14 @@ visible = false
 position = Vector2i(0, 36)
 visible = false
 
-[node name="SelectConditionModal" parent="." unique_id=184117392 instance=ExtResource("7_pcxw6")]
+[node name="SelectConditionModal" parent="." unique_id=184117392 node_paths=PackedStringArray("search_box", "item_list", "description_label", "recent_item_list", "desc_panel") instance=ExtResource("7_pcxw6")]
 position = Vector2i(0, 36)
 visible = false
+search_box = NodePath("VBoxContainer/SearchBox")
+item_list = NodePath("VBoxContainer/HSplitContainer/MainPanel/MainVBox/ItemList")
+description_label = NodePath("VBoxContainer/HSplitContainer/MainPanel/MainVBox/DescriptionPanel/ScrollContainer/DescriptionLabel")
+recent_item_list = NodePath("VBoxContainer/HSplitContainer/RecentPanel/RecentVBox/RecentItemList")
+desc_panel = NodePath("VBoxContainer/HSplitContainer/MainPanel/MainVBox/DescriptionPanel")
 
 [node name="ExpressionModal" parent="." unique_id=996764360 instance=ExtResource("8_8w7jk")]
 visible = false
