@@ -18,8 +18,12 @@ func _disable_plugin() -> void:
 
 func _enter_tree() -> void:
 	# Load UI
-	editor = preload("res://addons/flowkit/ui/main_editor.tscn").instantiate()
+	print("[FlowKit] About to load main editor scene")
+	var editor_scene: PackedScene = preload("res://addons/flowkit/ui/main_editor.tscn")
+	print("[FlowKit] Loaded main editor scene. About to instantiate main editor.")
+	editor = editor_scene.instantiate()
 	editor.legitimize()
+	print("[FlowKit] Instantiated main editor.")
 	
 	# Load registry
 	action_registry = preload("res://addons/flowkit/registry.gd").new()
@@ -46,7 +50,12 @@ func _enter_tree() -> void:
 
 	# Add editor as main screen plugin
 	editor_main_screen = get_editor_interface().get_editor_main_screen()
+	print("[FlowKit] About to parent editor to main screen.")
 	editor_main_screen.add_child(editor)
+	print("[FlowKit] Added main editor to main screen. About to legitimize main editor.")
+	
+	
+	print("[FlowKit] Legitimized main editor")
 	# Hide by default until user clicks the FlowKit button
 	_make_visible(false)
 	

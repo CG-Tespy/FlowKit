@@ -53,10 +53,12 @@ var unit_ui_factory: FKUnitUiFactory
 var sheet_auto_saver: FKSheetAutoSaver = FKSheetAutoSaver.new()
 
 func legitimize():
-	if not is_editor_preview:
+	if !is_editor_preview:
 		return
+	print("[FKMainEditor] Starting legitimization. Instance id: " + str(get_instance_id()))
 	_is_editor_preview = false
 	_enter_tree()
+	_is_legit = true
 
 var is_editor_preview: bool:
 	get:
@@ -66,12 +68,23 @@ var _is_editor_preview := true
 
 func _enter_tree() -> void:
 	if is_editor_preview:
+		print("[FKMainEditor] Entered tree as editor preview instance. Instance id: " + str(get_instance_id()))
 		return
+	if is_legit:
+		return
+	print("[FKMainEditor] Entered tree as legit instance. Instance id: " + str(get_instance_id()))
 	unit_ui_factory = FKUnitUiFactory.new(sheet_io)
 	sheet_auto_saver.init(self, auto_save_sheets)
 	input_manager.initialize(self)
 	_prep_modals()
 	_toggle_subs(true)
+
+var is_legit: bool:
+	get:
+		return _is_legit
+
+var _is_legit := false 
+# ^Need this to keep the same main editor instance from entering the tree twice
 
 func _prep_modals():
 	_create_modals()
@@ -121,19 +134,23 @@ func _hide_modals():
 		child.visible = false
 	
 func _legitimize_modals():
+	print("[FKMainEditor] Legitimizing modals")
 	for child in _modals:
 		child.legitimize()
 	
 func _toggle_subs(on: bool):
-	if on and not _is_subbed:
+	print("[FKMainEditor]: In _toggle_subs. on: " + str(on) + " | _is_subbed: " + str(_is_subbed))
+	if on and !_is_subbed:
 		# For undo state on drag-and-drop reorder
+		print("[FKMainEditor]: Listening for events")
 		blocks_container.before_block_moved.connect(_push_undo_state)
 		select_node_modal.node_selected.connect(_on_node_selected)
 		select_event_modal.event_selected.connect(_on_event_selected)
 		select_action_modal.action_selected.connect(_on_action_selected)
 		select_condition_modal.condition_selected.connect(_on_condition_selected)
 		expression_modal.expressions_confirmed.connect(_on_expressions_confirmed)
-	elif not on and _is_subbed:
+	elif !on and _is_subbed:
+		print("[FKMainEditor]: UNlistening for events")
 		blocks_container.before_block_moved.disconnect(_push_undo_state)
 		select_node_modal.node_selected.disconnect(_on_node_selected)
 		select_event_modal.event_selected.disconnect(_on_event_selected)
@@ -152,8 +169,9 @@ func _show_empty_state() -> void:
 	
 func _exit_tree() -> void:
 	if is_editor_preview:
+		print("[FKMainEditor] Exiting tree as editor preview. Instance id: " + str(get_instance_id()))
 		return
-	print("[FlowKitMainEditor] Exiting tree.")
+	print("[FlowKitMainEditor] Exiting tree as legit instance. Instance id: " + str(get_instance_id()))
 	_toggle_subs(false)
 
 func set_editor_interface(interface: EditorInterface) -> void:
@@ -1109,7 +1127,7 @@ func _on_node_selected(node_path: String, node_class: String) -> void:
 	"""
 	pending_node_path = node_path
 	select_node_modal.hide()
-	print("Node selected. Pending block type: " + pending_block_type)
+	print("[FKMainEditor]: Node selected. Pending block type: " + pending_block_type)
 	match pending_block_type:
 		"event", "event_replace", "event_in_group":
 			select_event_modal.populate_events(node_path, node_class)

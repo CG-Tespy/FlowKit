@@ -7,10 +7,14 @@ func _enter_tree() -> void:
 	_ensure_export_fields_filled()
 	_apply_styling()
 	
-	# From here on, we only act when we're a legit instance.
-	if is_editor_preview:
+	if is_editor_preview or is_fully_legit:
 		return
 	_toggle_subs(true)
+
+var is_fully_legit: bool:
+	get:
+		return _is_fully_legit
+var _is_fully_legit := false
 
 func _ensure_export_fields_filled():
 	pass 
@@ -37,12 +41,13 @@ var _editor_interface: EditorInterface
 func legitimize():
 	if not is_editor_preview:
 		return
-	_is_editor_preview = false
+	_is_editor_preview = false # So the initialization process can begin
 	_enter_tree()
 	_ready()
+	_is_fully_legit = true # And now we're done!
 	
 func _exit_tree() -> void:
-	if is_editor_preview:
+	if !is_fully_legit:
 		return
 	_toggle_subs(false)
 

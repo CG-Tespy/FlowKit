@@ -8,21 +8,22 @@ var selected_node_path: String = ""
 var selected_node_class: String = ""
 var available_events: Array = []
 
+@export_category("UI")
 @export var search_box: LineEdit 
 @export var item_list: ItemList 
 @export var description_label: Label 
 @export var recent_item_list: ItemList 
 @export var desc_panel: Panel
 
+@export_category("Styling")
 @export var desc_panel_style: StyleBoxFlat
 
 var _all_items_cache: Array = []
 
-
 func _enter_tree() -> void:
 	super._enter_tree()
 	
-	if is_editor_preview:
+	if is_editor_preview or is_fully_legit:
 		return
 		
 	_recent_items_manager = FKRecentItemsManagerUi.new()

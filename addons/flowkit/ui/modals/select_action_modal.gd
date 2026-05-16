@@ -21,7 +21,7 @@ var _recent_items_manager: Variant = null
 
 func _enter_tree() -> void:
 	super._enter_tree()
-	if is_editor_preview:
+	if is_editor_preview or is_fully_legit:
 		return
 		
 	_recent_items_manager = FKRecentItemsManagerUi.new()
