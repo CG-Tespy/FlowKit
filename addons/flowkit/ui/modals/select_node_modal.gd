@@ -136,7 +136,8 @@ func _add_node_recursive(node: Node, scene_root: Node, depth: int) -> void:
 	
 	var icon = null
 	if _editor_interface:
-		icon = _editor_interface.get_base_control().get_theme_icon(node.get_class(), "EditorIcons")
+		var base_control := _editor_interface.get_base_control()
+		icon = base_control.get_theme_icon(node_class, "EditorIcons")
 	
 	_all_items_cache.append({
 		"display_name": node_name,
@@ -221,7 +222,7 @@ func _on_item_activated(index: int) -> void:
 	
 	# Handle System node
 	if node_path_str == "System":
-		print("Node selected: System (System)")
+		print("[FKSelectNodeModal]: Node selected: System (System)")
 		_recent_items_manager.add_recent_node("System", "System")
 		node_selected.emit("System", "System")
 		hide()
@@ -230,7 +231,7 @@ func _on_item_activated(index: int) -> void:
 	var node = _get_node_from_path(node_path_str)
 	if node:
 		var node_class = node.get_class()
-		print("Node selected: ", node_path_str, " (", node_class, ")")
+		print("[FKSelectNodeModal]: Node selected: ", node_path_str, " (", node_class, ")")
 		_recent_items_manager.add_recent_node(node_path_str, node_class)
 		node_selected.emit(node_path_str, node_class)
 		hide()
@@ -266,6 +267,6 @@ func _on_recent_item_activated(index: int) -> void:
 	var node_path_str = recent_node["path"]
 	var node_class = recent_node["class"]
 	
-	print("Recent node selected: ", node_path_str, " (", node_class, ")")
+	print("[FKSelectNodeModal]: Recent node selected: ", node_path_str, " (", node_class, ")")
 	node_selected.emit(node_path_str, node_class)
 	hide()

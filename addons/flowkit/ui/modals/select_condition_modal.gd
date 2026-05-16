@@ -80,7 +80,7 @@ func _load_available_conditions() -> void:
 	available_conditions.clear()
 	var conditions_path: String = "res://addons/flowkit/conditions"
 	_scan_directory_recursive(conditions_path)
-	print("Loaded ", available_conditions.size(), " conditions")
+	print("[FKSelectConditionModal]: Loaded ", available_conditions.size(), " conditions")
 
 
 func _scan_directory_recursive(path: String) -> void:
@@ -190,7 +190,7 @@ func _on_item_activated(index: int) -> void:
 			condition_name = condition.get_name()
 			break
 	
-	print("Condition selected: ", condition_id, " for node: ", selected_node_path)
+	print("[FKSelectConditionModal]: Condition selected: ", condition_id, " for node: ", selected_node_path)
 	_recent_items_manager.add_recent_condition(condition_id, condition_name, selected_node_class)
 	condition_selected.emit(selected_node_path, condition_id, inputs)
 	hide()
@@ -251,6 +251,6 @@ func _on_recent_item_activated(index: int) -> void:
 			condition_inputs = condition.get_inputs()
 			break
 	
-	print("Recent condition selected: ", condition_id, " for node: ", selected_node_path)
+	print("[FKSelectConditionModal]: Recent condition selected: ", condition_id, " for node: ", selected_node_path)
 	condition_selected.emit(selected_node_path, condition_id, condition_inputs)
 	hide()

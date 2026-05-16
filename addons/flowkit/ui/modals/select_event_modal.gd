@@ -77,7 +77,7 @@ func _load_available_events() -> void:
 	available_events.clear()
 	var events_path: String = FKEditorGlobals.PATH_TO_EVENTS_FOLDER
 	_scan_directory_recursive(events_path)
-	print("Loaded ", available_events.size(), " events")
+	print("[FKSelectEventModal]: Loaded ", available_events.size(), " events")
 
 func _scan_directory_recursive(path: String) -> void:
 	"""Recursively scan directories for event scripts."""
@@ -201,7 +201,7 @@ func _on_item_activated(index: int) -> void:
 				event_name = event.get_name()
 			break
 	
-	print("Event selected: ", event_id, " for node: ", selected_node_path, " with inputs: ", event_inputs)
+	print("[FKSelectEventModal]: Event selected: ", event_id, " for node: ", selected_node_path, " with inputs: ", event_inputs)
 	_recent_items_manager.add_recent_event(event_id, event_name, selected_node_class)
 	event_selected.emit(selected_node_path, event_id, event_inputs)
 	hide()
@@ -263,6 +263,6 @@ func _on_recent_item_activated(index: int) -> void:
 				event_inputs = event.get_inputs()
 			break
 	
-	print("Recent event selected: ", event_id, " for node: ", selected_node_path)
+	print("[FKSelectEventModal]: Recent event selected: ", event_id, " for node: ", selected_node_path)
 	event_selected.emit(selected_node_path, event_id, event_inputs)
 	hide()

@@ -8,9 +8,12 @@ var registry: FKRegistry
 var generator
 var current_scene_uid: int = 0
 
+## Whether or not FlowKit auto-saves sheets in response to things
+## like adding or editing Actions.
 @export var auto_save_sheets: bool = true
 
 # UI References
+@export_category("UI")
 @export var scroll_container: ScrollContainer
 @export var blocks_container: FKBlockContainerUi
 @export var empty_label: Label
@@ -23,11 +26,11 @@ var drag_spacer_bottom: Control = null  # Temporary spacer at bottom during drag
 const DRAG_SPACER_HEIGHT := 50  # Height of temporary drop zone
 
 # Modals
-@export var select_node_modal: FKSelectNodeModal
-@export var select_event_modal: FKSelectEventModal
-@export var select_condition_modal: FKSelectConditionModal
-@export var select_action_modal: FKSelectActionModal
-@export var expression_modal: FKExpressionEditorModal
+var select_node_modal: FKSelectNodeModal
+var select_event_modal: FKSelectEventModal
+var select_condition_modal: FKSelectConditionModal
+var select_action_modal: FKSelectActionModal
+var expression_modal: FKExpressionEditorModal
 
 # Workflow state
 var pending_block_type: String = ""  # "event", "condition", "action", "event_replace", "event_in_group", etc.
@@ -67,59 +70,59 @@ func _enter_tree() -> void:
 	unit_ui_factory = FKUnitUiFactory.new(sheet_io)
 	sheet_auto_saver.init(self, auto_save_sheets)
 	input_manager.initialize(self)
-	
-	_ensure_we_have_modals()
-	_hide_modals()
-	_legitimize_modals()
+	_prep_modals()
 	_toggle_subs(true)
 
-func _ensure_we_have_modals():
+func _prep_modals():
+	_create_modals()
+	_refresh_modal_cache()
+	_hide_modals()
+	_legitimize_modals()
+	
+func _create_modals():
 	var path: String
 	var scene: PackedScene = null
-	if not select_node_modal:
-		path = FKModalPaths.SELECT_NODE_MODAL
-		scene = load(path)
-		select_node_modal = scene.instantiate()
-		add_child(select_node_modal)
-		
-	if not select_event_modal:
-		path = FKModalPaths.SELECT_EVENT_MODAL
-		scene = load(path)
-		select_event_modal = scene.instantiate()
-		add_child(select_event_modal)
-		
-	if not select_condition_modal:
-		path = FKModalPaths.SELECT_CONDITION_MODAL
-		scene = load(path)
-		select_condition_modal = scene.instantiate()
-		add_child(select_condition_modal)
-		
-	if not select_action_modal:
-		path = FKModalPaths	.SELECT_ACTION_MODAL
-		scene = load(path)
-		select_action_modal = scene.instantiate()
-		add_child(select_action_modal)
 	
-	if not expression_modal:
-		path = FKModalPaths.EXPRESSION_EDITOR_MODAL
-		scene = load(path)
-		expression_modal = scene.instantiate()
-		add_child(expression_modal)
+	path = FKModalPaths.SELECT_NODE_MODAL
+	scene = load(path)
+	select_node_modal = scene.instantiate()
+	add_child(select_node_modal)
 		
+	path = FKModalPaths.SELECT_EVENT_MODAL
+	scene = load(path)
+	select_event_modal = scene.instantiate()
+	add_child(select_event_modal)
+		
+	path = FKModalPaths.SELECT_CONDITION_MODAL
+	scene = load(path)
+	select_condition_modal = scene.instantiate()
+	add_child(select_condition_modal)
+		
+	path = FKModalPaths	.SELECT_ACTION_MODAL
+	scene = load(path)
+	select_action_modal = scene.instantiate()
+	add_child(select_action_modal)
 	
+	path = FKModalPaths.EXPRESSION_EDITOR_MODAL
+	scene = load(path)
+	expression_modal = scene.instantiate()
+	add_child(expression_modal)
+	
+func _refresh_modal_cache():
+	_modals.clear()
+	for child in get_children():
+		if child is FKModalWindow:
+			_modals.append(child)
+	
+var _modals: Array[FKModalWindow] = []
+
 func _hide_modals():
-	select_node_modal.visible = false
-	select_event_modal.visible = false
-	select_condition_modal.visible = false
-	select_action_modal.visible = false
-	expression_modal.visible = false
+	for child in _modals:
+		child.visible = false
 	
 func _legitimize_modals():
-	select_node_modal.legitimize()
-	select_event_modal.legitimize()
-	select_condition_modal.legitimize()
-	select_action_modal.legitimize()
-	expression_modal.legitimize()
+	for child in _modals:
+		child.legitimize()
 	
 func _toggle_subs(on: bool):
 	if on and not _is_subbed:
@@ -142,34 +145,26 @@ func _toggle_subs(on: bool):
 
 var _is_subbed := false
 
-func _setup_ui() -> void:
-	"""Initialize UI state."""
-	_show_empty_state()
-	
 func _show_empty_state() -> void:
 	"""Show empty state UI (no scene loaded)."""
 	empty_label.visible = true
 	add_event_btn.visible = false
 	
 func _exit_tree() -> void:
+	if is_editor_preview:
+		return
+	print("[FlowKitMainEditor] Exiting tree.")
 	_toggle_subs(false)
 
 func set_editor_interface(interface: EditorInterface) -> void:
 	editor_interface = interface
 	# Pass to modals (deferred in case they're not ready yet)
-	if select_node_modal:
-		select_node_modal.set_editor_interface(interface)
-	if select_event_modal:
-		select_event_modal.set_editor_interface(interface)
-	if select_condition_modal:
-		select_condition_modal.set_editor_interface(interface)
-	if select_action_modal:
-		select_action_modal.set_editor_interface(interface)
-	if expression_modal:
-		expression_modal.set_editor_interface(interface)
-	else:
-		# If modal isn't ready yet, defer it
-		call_deferred("_set_expression_interface", interface)
+	select_node_modal.set_editor_interface(interface)
+	select_event_modal.set_editor_interface(interface)
+	select_condition_modal.set_editor_interface(interface)
+	select_action_modal.set_editor_interface(interface)
+	expression_modal.set_editor_interface(interface)
+	expression_modal.set_editor_interface(interface)
 
 func set_registry(reg: FKRegistry) -> void:
 	registry = reg
@@ -539,10 +534,6 @@ func _find_parent_event_row(node: Control) -> FKEventRowUi:
 			return current
 		current = current.get_parent()
 	return null
-
-func _set_expression_interface(interface: EditorInterface) -> void:
-	if expression_modal:
-		expression_modal.set_editor_interface(interface)
 
 func undo(): _undo()
 func redo(): _redo()
@@ -1118,7 +1109,7 @@ func _on_node_selected(node_path: String, node_class: String) -> void:
 	"""
 	pending_node_path = node_path
 	select_node_modal.hide()
-	
+	print("Node selected. Pending block type: " + pending_block_type)
 	match pending_block_type:
 		"event", "event_replace", "event_in_group":
 			select_event_modal.populate_events(node_path, node_class)
