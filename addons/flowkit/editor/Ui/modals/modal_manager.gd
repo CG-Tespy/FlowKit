@@ -1,73 +1,57 @@
-## For managing the modal windows of FlowKit's editor.
-extends RefCounted
+## For managing the creation, dependency injection. and access of the modal
+# windows of FlowKit's editor.
+extends Node
 class_name FKModalManager
 
-func _init(modal_holder: Control) -> void:
-	self._modal_holder = modal_holder
-	pass
+func initialize():
+	name = "FKModalManager"
+	_prep_modals()
 	
-var _modal_holder: Control
+func _prep_modals():
+	_create_and_parent_all_our_modals()
+	_refresh_modal_cache()
+	_hide_modals()
+	_legitimize_modals()
+	
+func _create_and_parent_all_our_modals():
+	var path: String
+	path = FKModalPaths.SELECT_NODE_MODAL
+	_select_node_modal = _create_and_parent_modal(path)
+		
+	path = FKModalPaths.SELECT_EVENT_MODAL
+	_select_event_modal = _create_and_parent_modal(path)
+		
+	path = FKModalPaths.SELECT_CONDITION_MODAL
+	_select_condition_modal = _create_and_parent_modal(path)
+		
+	path = FKModalPaths	.SELECT_ACTION_MODAL
+	_select_action_modal = _create_and_parent_modal(path)
+	
+	path = FKModalPaths.EXPRESSION_EDITOR_MODAL
+	_expression_modal = _create_and_parent_modal(path)
+
 var _select_node_modal: FKSelectNodeModal
 var _select_event_modal: FKSelectEventModal
 var _select_condition_modal: FKSelectConditionModal
 var _select_action_modal: FKSelectActionModal
 var _expression_modal: FKExpressionEditorModal
 
-func _prep_modals():
-	_create_modals()
-	_refresh_modal_cache()
-	_hide_modals()
-	_legitimize_modals()
+func _create_and_parent_modal(path_to_scene: String) -> FKModalWindow:
+	var scene: PackedScene = load(path_to_scene)
+	var result := scene.instantiate()
+	add_child(result)
+	return result
 	
-func _create_modals():
-	var path: String
-	var scene: PackedScene = null
-	
-	path = FKModalPaths.SELECT_NODE_MODAL
-	scene = load(path)
-	_select_node_modal = scene.instantiate()
-	add_child(_select_node_modal)
-		
-	path = FKModalPaths.SELECT_EVENT_MODAL
-	scene = load(path)
-	_select_event_modal = scene.instantiate()
-	add_child(_select_event_modal)
-		
-	path = FKModalPaths.SELECT_CONDITION_MODAL
-	scene = load(path)
-	_select_condition_modal = scene.instantiate()
-	add_child(_select_condition_modal)
-		
-	path = FKModalPaths	.SELECT_ACTION_MODAL
-	scene = load(path)
-	_select_action_modal = scene.instantiate()
-	add_child(_select_action_modal)
-	
-	path = FKModalPaths.EXPRESSION_EDITOR_MODAL
-	scene = load(path)
-	_expression_modal = scene.instantiate()
-	add_child(_expression_modal)
-	
-func add_child(node: Node):
-	_modal_holder.add_child(node, true)
-
 func _refresh_modal_cache():
 	_modals.clear()
 	for child in get_children():
 		if child is FKModalWindow:
 			_modals.append(child)
 	
-var _modals: Array[FKModalWindow] = []
+var _modals: Array[FKModalWindow] = [] 
+# ^Saves us keystrokes for when we want to do something to all our 
+# modals in the same frame
 
-func get_children() -> Array[Node]:
-	if not _modal_holder:
-		var error_message := "[FKModalManager]: Can't get children. Got no anchor."
-		printerr(error_message)
-		return []
-	
-	var result := _modal_holder.get_children()
-	return result
-	
 func _hide_modals():
 	for child in _modals:
 		child.visible = false
@@ -75,4 +59,46 @@ func _hide_modals():
 func _legitimize_modals():
 	for child in _modals:
 		child.legitimize()
+
+# Modal Accessors
+var select_node_modal: FKSelectNodeModal:
+	get:
+		return _select_node_modal
+		
+var select_event_modal: FKSelectEventModal:
+	get:
+		return _select_event_modal
+		
+var select_condition_modal: FKSelectConditionModal:
+	get:
+		return _select_condition_modal
+		
+var select_action_modal: FKSelectActionModal:
+	get:
+		return _select_action_modal
+		
+var expression_modal: FKExpressionEditorModal:
+	get:
+		return _expression_modal
+
+# Dependency Injection
+func set_editor_interface(interface: EditorInterface) -> void:
+	_editor_interface = interface
+	select_node_modal.set_editor_interface(interface)
+	select_event_modal.set_editor_interface(interface)
+	select_condition_modal.set_editor_interface(interface)
+	select_action_modal.set_editor_interface(interface)
+	expression_modal.set_editor_interface(interface)
+	expression_modal.set_editor_interface(interface)
 	
+var _editor_interface: EditorInterface
+
+func set_registry(reg: FKRegistry) -> void:
+	_registry = reg
+	select_node_modal.set_registry(reg)
+	select_event_modal.set_registry(reg)
+	select_condition_modal.set_registry(reg)
+	select_action_modal.set_registry(reg)
+	expression_modal.set_registry(reg)
+		
+var _registry: FKRegistry

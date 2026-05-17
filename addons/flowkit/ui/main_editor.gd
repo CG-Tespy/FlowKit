@@ -25,13 +25,6 @@ var drag_spacer_top: Control = null  # Temporary spacer at top during drag
 var drag_spacer_bottom: Control = null  # Temporary spacer at bottom during drag
 const DRAG_SPACER_HEIGHT := 50  # Height of temporary drop zone
 
-# Modals
-var select_node_modal: FKSelectNodeModal
-var select_event_modal: FKSelectEventModal
-var select_condition_modal: FKSelectConditionModal
-var select_action_modal: FKSelectActionModal
-var expression_modal: FKExpressionEditorModal
-
 # Workflow state
 var pending_block_type: String = ""  # "event", "condition", "action", "event_replace", "event_in_group", etc.
 var pending_node_path: String = ""
@@ -44,6 +37,7 @@ var pending_branch_id: String = ""  # The branch provider ID for the current wor
 var selected_row: FKUnitUi = null  # Currently selected event row
 var selected_item: FKUnitUi = null  # Currently selected condition/action item
 
+# Submodules
 var undo_manager: FKUndoManager = FKUndoManager.new()
 var clipboard := FKClipboardManager.new()
 var input_manager: FKMainEditorInputHandler = FKMainEditorInputHandler.new()
@@ -51,6 +45,7 @@ var sheet_io : FKSheetIO = FKSheetIO.new()
 var serializer := FKSerializationManager.new()
 var unit_ui_factory: FKUnitUiFactory
 var sheet_auto_saver: FKSheetAutoSaver = FKSheetAutoSaver.new()
+var modal_manager: FKModalManager
 
 func legitimize():
 	if !is_editor_preview:
@@ -58,7 +53,7 @@ func legitimize():
 	
 	_is_editor_preview = false
 	_enter_tree()
-	_is_legit = true
+	_is_fully_legit = true
 
 var is_editor_preview: bool:
 	get:
@@ -70,76 +65,32 @@ func _enter_tree() -> void:
 	if is_editor_preview:
 		print("[FKMainEditor]: Entered tree as editor preview instance. Instance id: " + str(get_instance_id()))
 		return
-	if is_legit:
+	if is_fully_legit:
 		return
 	print("[FKMainEditor]: Entered tree as legit instance. Instance id: " + str(get_instance_id()))
 	unit_ui_factory = FKUnitUiFactory.new(sheet_io)
 	sheet_auto_saver.init(self, auto_save_sheets)
 	input_manager.initialize(self)
-	_modal_signals = FKModalSignals.new()
-	add_child(_modal_signals)
-	_prep_modals()
+	
+	_modal_related_prep()
 	_toggle_subs(true)
 
-var is_legit: bool:
+var is_fully_legit: bool:
 	get:
-		return _is_legit
+		return _is_fully_legit
 
-var _is_legit := false 
+var _is_fully_legit := false 
 # ^Need this to keep the same main editor instance from entering the tree twice
 
 var _modal_signals: FKModalSignals
 
-func _prep_modals():
-	_create_modals()
-	_refresh_modal_cache()
-	_hide_modals()
-	_legitimize_modals()
+func _modal_related_prep():
+	_modal_signals = FKModalSignals.new()
+	add_child(_modal_signals)
 	
-func _create_modals():
-	var path: String
-	var scene: PackedScene = null
-	
-	path = FKModalPaths.SELECT_NODE_MODAL
-	scene = load(path)
-	select_node_modal = scene.instantiate()
-	add_child(select_node_modal)
-		
-	path = FKModalPaths.SELECT_EVENT_MODAL
-	scene = load(path)
-	select_event_modal = scene.instantiate()
-	add_child(select_event_modal)
-		
-	path = FKModalPaths.SELECT_CONDITION_MODAL
-	scene = load(path)
-	select_condition_modal = scene.instantiate()
-	add_child(select_condition_modal)
-		
-	path = FKModalPaths	.SELECT_ACTION_MODAL
-	scene = load(path)
-	select_action_modal = scene.instantiate()
-	add_child(select_action_modal)
-	
-	path = FKModalPaths.EXPRESSION_EDITOR_MODAL
-	scene = load(path)
-	expression_modal = scene.instantiate()
-	add_child(expression_modal)
-	
-func _refresh_modal_cache():
-	_modals.clear()
-	for child in get_children():
-		if child is FKModalWindow:
-			_modals.append(child)
-	
-var _modals: Array[FKModalWindow] = []
-
-func _hide_modals():
-	for child in _modals:
-		child.visible = false
-	
-func _legitimize_modals():
-	for child in _modals:
-		child.legitimize()
+	modal_manager = FKModalManager.new()
+	add_child(modal_manager)
+	modal_manager.initialize()
 	
 func _toggle_subs(on: bool):
 	if not _modal_signals:
@@ -183,30 +134,14 @@ func _exit_tree() -> void:
 
 func set_editor_interface(interface: EditorInterface) -> void:
 	editor_interface = interface
-	# Pass to modals (deferred in case they're not ready yet)
-	select_node_modal.set_editor_interface(interface)
-	select_event_modal.set_editor_interface(interface)
-	select_condition_modal.set_editor_interface(interface)
-	select_action_modal.set_editor_interface(interface)
-	expression_modal.set_editor_interface(interface)
-	expression_modal.set_editor_interface(interface)
+	modal_manager.set_editor_interface(interface)
 
 func set_registry(reg: FKRegistry) -> void:
 	registry = reg
 	if not unit_ui_factory:
 		unit_ui_factory = FKUnitUiFactory.new(sheet_io)
 	unit_ui_factory.registry = reg
-	# Pass to modals (deferred in case they're not ready yet)
-	if select_node_modal:
-		select_node_modal.set_registry(reg)
-	if select_event_modal:
-		select_event_modal.set_registry(reg)
-	if select_condition_modal:
-		select_condition_modal.set_registry(reg)
-	if select_action_modal:
-		select_action_modal.set_registry(reg)
-	if expression_modal:
-		expression_modal.set_registry(reg)
+	modal_manager.set_registry(reg)
 
 func set_generator(gen) -> void:
 	generator = gen
@@ -1110,13 +1045,36 @@ func _start_add_workflow(block_type: String, target_row: Node = null) -> void:
 	select_node_modal.populate_from_scene(scene_root)
 	_popup_centered_on_editor(select_node_modal)
 
+var select_node_modal: FKSelectNodeModal:
+	get:
+		return modal_manager.select_node_modal
+		
+var select_condition_modal: FKSelectConditionModal:
+	get:
+		return modal_manager.select_condition_modal
+
+var select_action_modal: FKSelectActionModal:
+	get:
+		return modal_manager.select_action_modal
+		
+var select_event_modal: FKSelectEventModal:
+	get:
+		return modal_manager.select_event_modal
+		
+var expression_modal: FKExpressionEditorModal:
+	get:
+		return modal_manager.expression_modal
+
 func _on_node_selected(node_path: String, node_class: String) -> void:
 	"""
 	Node selected in workflow. This should execute when it's time to edit an FKUnit
 	through the editor.
 	"""
 	pending_node_path = node_path
+	var select_node_modal := modal_manager.select_node_modal
 	select_node_modal.hide()
+	
+	var select_event_modal
 	match pending_block_type:
 		"event", "event_replace", "event_in_group":
 			select_event_modal.populate_events(node_path, node_class)
@@ -1252,7 +1210,6 @@ func _finalize_event_creation(inputs: Dictionary) -> void:
 	
 	_show_content_state()
 	_reset_workflow()
-
 
 func _finalize_event_above_target(inputs: Dictionary) -> void:
 	"""Create and add event row above the target (GDevelop-style)."""

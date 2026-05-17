@@ -111,24 +111,16 @@ func _add_node_children(node: Node, tree_item: TreeItem) -> void:
 			_add_node_children(child, child_item)
 
 func _show_current_parameter() -> void:
-	print("[FKExpressionEditorModal]: In show current param")
-	if action_inputs.is_empty():
-		print("[FKExpressionEditorModal]: Action inputs are empty. Doing nothing.")
-		return
-	
-	print("[FKExpressionEditorModal]: Action inputs:\n" + str(action_inputs))
 	var current_input = action_inputs[current_param_index]
 	var param_name: String; var param_type: String; var param_description: String;
 	var fk_action_input: FKActionInput
 	if current_input is Dictionary:
-		print("[FKExpressionEditorModal]: Current input is dict")
 		var param_dict: Dictionary = action_inputs[current_param_index]
 		param_name = param_dict.get("name", "Unknown")
 		param_type = param_dict.get("type", "Variant")
 		param_description = param_dict.get("description", "")
 		
 	elif current_input is FKActionInput:
-		print("[FKExpressionEditorModal]: Current input is FKActionInput")
 		fk_action_input = current_input
 		param_name = fk_action_input.name
 		param_type = fk_action_input.type
