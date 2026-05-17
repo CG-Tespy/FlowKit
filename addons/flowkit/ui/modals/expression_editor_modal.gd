@@ -2,8 +2,6 @@
 extends FKModalWindow
 class_name FKExpressionEditorModal
 
-signal expressions_confirmed(node_path: String, action_id: String, expressions: Dictionary)
-
 var selected_node_path: String = ""
 var selected_action_id: String = ""
 var action_inputs: Array = []
@@ -370,7 +368,7 @@ func _on_confirm_button_pressed() -> void:
 
 func _confirm() -> void:
 	_save_current_parameter()
-	expressions_confirmed.emit(selected_node_path, selected_action_id, param_values)
+	_modal_signals.expressions_confirmed.emit(selected_node_path, selected_action_id, param_values)
 	hide()
 
 func _on_cancel_button_pressed() -> void:

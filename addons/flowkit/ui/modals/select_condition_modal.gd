@@ -2,8 +2,6 @@
 extends FKModalWindow
 class_name FKSelectConditionModal
 
-signal condition_selected(node_path: String, condition_id: String, condition_inputs: Array)
-
 var selected_node_path: String = ""
 var selected_node_class: String = ""
 var available_conditions: Array = []
@@ -192,7 +190,7 @@ func _on_item_activated(index: int) -> void:
 	
 	print("[FKSelectConditionModal]: Condition selected: ", condition_id, " for node: ", selected_node_path)
 	_recent_items_manager.add_recent_condition(condition_id, condition_name, selected_node_class)
-	condition_selected.emit(selected_node_path, condition_id, inputs)
+	_modal_signals.condition_selected.emit(selected_node_path, condition_id, inputs)
 	hide()
 
 func _on_item_selected(index: int) -> void:
@@ -252,5 +250,5 @@ func _on_recent_item_activated(index: int) -> void:
 			break
 	
 	print("[FKSelectConditionModal]: Recent condition selected: ", condition_id, " for node: ", selected_node_path)
-	condition_selected.emit(selected_node_path, condition_id, condition_inputs)
+	_modal_signals.condition_selected.emit(selected_node_path, condition_id, condition_inputs)
 	hide()

@@ -58,3 +58,7 @@ var _registry: FKRegistry
 
 func _ready() -> void:
 	pass
+	
+var _modal_signals: FKModalSignals:
+	get:
+		return FKModalSignals.s

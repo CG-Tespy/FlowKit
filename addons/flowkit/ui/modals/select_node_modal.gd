@@ -2,8 +2,6 @@
 extends FKModalWindow
 class_name FKSelectNodeModal
 
-signal node_selected(node_path: String, node_class: String)
-
 var available_events: Array = []
 
 @export var search_box: LineEdit  
@@ -224,7 +222,7 @@ func _on_item_activated(index: int) -> void:
 	if node_path_str == "System":
 		print("[FKSelectNodeModal]: Node selected: System (System)")
 		_recent_items_manager.add_recent_node("System", "System")
-		node_selected.emit("System", "System")
+		_modal_signals.node_selected.emit("System", "System")
 		hide()
 		return
 	
@@ -233,7 +231,7 @@ func _on_item_activated(index: int) -> void:
 		var node_class = node.get_class()
 		print("[FKSelectNodeModal]: Node selected: ", node_path_str, " (", node_class, ")")
 		_recent_items_manager.add_recent_node(node_path_str, node_class)
-		node_selected.emit(node_path_str, node_class)
+		_modal_signals.node_selected.emit(node_path_str, node_class)
 		hide()
 
 func _get_node_from_path(node_path_str: String) -> Node:
@@ -268,5 +266,5 @@ func _on_recent_item_activated(index: int) -> void:
 	var node_class = recent_node["class"]
 	
 	print("[FKSelectNodeModal]: Recent node selected: ", node_path_str, " (", node_class, ")")
-	node_selected.emit(node_path_str, node_class)
+	_modal_signals.node_selected.emit(node_path_str, node_class)
 	hide()

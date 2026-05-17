@@ -2,8 +2,6 @@
 extends FKModalWindow
 class_name FKSelectActionModal
 
-signal action_selected(node_path: String, action_id: String, action_inputs: Array)
-
 var selected_node_path: String = ""
 var selected_node_class: String = ""
 var available_actions: Array = []
@@ -184,7 +182,7 @@ func _on_item_activated(index: int) -> void:
 	
 	print("[FKSelectActionModal]: Action selected: ", action_id, " for node: ", selected_node_path)
 	_recent_items_manager.add_recent_action(action_id, action_name, selected_node_class)
-	action_selected.emit(selected_node_path, action_id, inputs)
+	_modal_signals.action_selected.emit(selected_node_path, action_id, inputs)
 	hide()
 
 func _on_item_selected(index: int) -> void:
@@ -245,5 +243,5 @@ func _on_recent_item_activated(index: int) -> void:
 			break
 	
 	print("[FKSelectActionModal]: Recent action selected: ", action_id, " for node: ", selected_node_path)
-	action_selected.emit(selected_node_path, action_id, action_inputs)
+	_modal_signals.action_selected.emit(selected_node_path, action_id, action_inputs)
 	hide()

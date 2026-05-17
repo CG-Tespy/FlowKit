@@ -76,6 +76,8 @@ func _enter_tree() -> void:
 	unit_ui_factory = FKUnitUiFactory.new(sheet_io)
 	sheet_auto_saver.init(self, auto_save_sheets)
 	input_manager.initialize(self)
+	_modal_signals = FKModalSignals.new()
+	add_child(_modal_signals)
 	_prep_modals()
 	_toggle_subs(true)
 
@@ -85,6 +87,8 @@ var is_legit: bool:
 
 var _is_legit := false 
 # ^Need this to keep the same main editor instance from entering the tree twice
+
+var _modal_signals: FKModalSignals
 
 func _prep_modals():
 	_create_modals()
@@ -138,21 +142,28 @@ func _legitimize_modals():
 		child.legitimize()
 	
 func _toggle_subs(on: bool):
+	if not _modal_signals:
+		# This means that either this isn't a legit instance, or the signals object
+		# exited the tree before we did.
+		return
+		
 	if on and !_is_subbed:
 		# For undo state on drag-and-drop reorder
 		blocks_container.before_block_moved.connect(_push_undo_state)
-		select_node_modal.node_selected.connect(_on_node_selected)
-		select_event_modal.event_selected.connect(_on_event_selected)
-		select_action_modal.action_selected.connect(_on_action_selected)
-		select_condition_modal.condition_selected.connect(_on_condition_selected)
-		expression_modal.expressions_confirmed.connect(_on_expressions_confirmed)
+		_modal_signals.node_selected.connect(_on_node_selected)
+		_modal_signals.event_selected.connect(_on_event_selected)
+		_modal_signals.action_selected.connect(_on_action_selected)
+		_modal_signals.condition_selected.connect(_on_condition_selected)
+		_modal_signals.expressions_confirmed.connect(_on_expressions_confirmed)
 	elif !on and _is_subbed:
 		blocks_container.before_block_moved.disconnect(_push_undo_state)
-		select_node_modal.node_selected.disconnect(_on_node_selected)
-		select_event_modal.event_selected.disconnect(_on_event_selected)
-		select_action_modal.action_selected.disconnect(_on_action_selected)
-		select_condition_modal.condition_selected.disconnect(_on_condition_selected)
-		expression_modal.expressions_confirmed.disconnect(_on_expressions_confirmed)
+		_modal_signals.node_selected.disconnect(_on_node_selected)
+		_modal_signals.event_selected.disconnect(_on_event_selected)
+		_modal_signals.action_selected.disconnect(_on_action_selected)
+		_modal_signals.condition_selected.disconnect(_on_condition_selected)
+		_modal_signals.expressions_confirmed.disconnect(_on_expressions_confirmed)
+	else:
+		return
 	
 	_is_subbed = on
 

@@ -2,8 +2,6 @@
 extends FKModalWindow
 class_name FKSelectEventModal
 
-signal event_selected(node_path: String, event_id: String, event_inputs: Array)
-
 var selected_node_path: String = ""
 var selected_node_class: String = ""
 var available_events: Array = []
@@ -204,7 +202,7 @@ func _on_item_activated(index: int) -> void:
 	
 	print("[FKSelectEventModal]: Event selected: ", event_id, " for node: ", selected_node_path, " with inputs: ", event_inputs)
 	_recent_items_manager.add_recent_event(event_id, event_name, selected_node_class)
-	event_selected.emit(selected_node_path, event_id, event_inputs)
+	_modal_signals.event_selected.emit(selected_node_path, event_id, event_inputs)
 	hide()
 
 func _on_item_selected(index: int) -> void:
@@ -265,5 +263,5 @@ func _on_recent_item_activated(index: int) -> void:
 			break
 	
 	print("[FKSelectEventModal]: Recent event selected: ", event_id, " for node: ", selected_node_path)
-	event_selected.emit(selected_node_path, event_id, event_inputs)
+	_modal_signals.event_selected.emit(selected_node_path, event_id, event_inputs)
 	hide()
