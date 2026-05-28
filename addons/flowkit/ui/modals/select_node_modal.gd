@@ -104,8 +104,7 @@ func populate_from_scene(scene_root: Node) -> void:
 	
 	# Add System option at the top
 	var system_icon = null
-	if _editor_interface:
-		system_icon = _editor_interface.get_base_control().get_theme_icon("Node", "EditorIcons")
+	system_icon = _base_control.get_theme_icon("Node", "EditorIcons")
 		
 	_all_items_cache.append({
 		"display_name": "System",
@@ -133,9 +132,7 @@ func _add_node_recursive(node: Node, scene_root: Node, depth: int) -> void:
 	var has_compatible_event = _has_compatible_event(node_class)
 	
 	var icon = null
-	if _editor_interface:
-		var base_control := _editor_interface.get_base_control()
-		icon = base_control.get_theme_icon(node_class, "EditorIcons")
+	icon = _base_control.get_theme_icon(node_class, "EditorIcons")
 	
 	_all_items_cache.append({
 		"display_name": node_name,
@@ -155,7 +152,9 @@ func _update_list(filter_text: String = "") -> void:
 	var filter_lower = filter_text.to_lower()
 	
 	for item in _all_items_cache:
-		var match_search = filter_text.is_empty() or filter_lower in item["path"].to_lower() or filter_lower in item["display_name"].to_lower()
+		var match_search = filter_text.is_empty() or \
+		filter_lower in item["path"].to_lower() or \
+		filter_lower in item["display_name"].to_lower()
 		
 		if match_search:
 			var display_text = item["display_name"]
@@ -236,9 +235,6 @@ func _on_item_activated(index: int) -> void:
 
 func _get_node_from_path(node_path_str: String) -> Node:
 	"""Get the actual node from the scene by path."""
-	if not _editor_interface:
-		return null
-	
 	var current_scene = _editor_interface.get_edited_scene_root()
 	if not current_scene:
 		return null

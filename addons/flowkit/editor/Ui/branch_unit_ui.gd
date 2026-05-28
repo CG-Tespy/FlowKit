@@ -2,19 +2,19 @@
 extends FKActionUnitUi
 class_name FKBranchUnitUi
 
-signal edit_condition_requested(item)
-signal add_elseif_requested(item)
-signal add_else_requested(item)
-signal add_branch_action_requested(item)
-signal branch_action_edit_requested(action_item, branch_item)
-signal branch_action_delete_requested(action_item, branch_item)
-signal branch_action_selected(action_item)
-signal branch_action_reorder_requested(source_item, target_item, drop_above: bool)
-signal action_cross_reorder_requested(source_data, target_data, is_drop_above: bool, target_branch)
-signal action_dropped_into_branch(source_item, target_branch_item)
+signal edit_condition_requested(item: FKBranchUnitUi)
+signal add_elseif_requested(item: FKBranchUnitUi)
+signal add_else_requested(item: FKBranchUnitUi)
+signal add_branch_action_requested(item: FKBranchUnitUi)
+signal branch_action_edit_requested(action_item, branch_item: FKBranchUnitUi)
+signal branch_action_delete_requested(action_item, branch_item: FKBranchUnitUi)
+signal branch_action_selected(action_item: FKActionUnitUi)
+signal branch_action_reorder_requested(source_item: FKActionUnitUi, target_item: FKActionUnitUi, drop_above: bool)
+signal action_cross_reorder_requested(source_data, target_data, is_drop_above: bool, target_branch: FKActionUnitUi)
+signal action_dropped_into_branch(source_item: FKActionUnitUi, target_branch_item: FKBranchUnitUi)
 signal data_changed()
 signal before_data_changed()
-signal add_nested_branch_requested(branch_item, branch_id)
+signal add_nested_branch_requested(branch_item: FKBranchUnitUi, branch_id)
 
 var parent_branch: Control = null
 
@@ -314,7 +314,7 @@ func _connect_sub_action_signals(item) -> void:
 	if item.has_signal("reorder_requested"):
 		item.reorder_requested.connect(_on_sub_action_reorder)
 
-func _connect_nested_branch_signals(nested) -> void:
+func _connect_nested_branch_signals(nested: FKBranchUnitUi) -> void:
 	nested.selected.connect(func(n): selected.emit(n))
 	nested.edit_condition_requested.connect(func(i): edit_condition_requested.emit(i))
 	nested.delete_requested.connect(func(i): _on_sub_action_delete(i))

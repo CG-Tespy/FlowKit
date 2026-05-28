@@ -10,3 +10,7 @@ const BRANCH_ITEM_SCENE_PATH := "res://addons/flowkit/ui/workspace/branch_unit_u
 const BRANCH_ITEM_SCENE := preload(BRANCH_ITEM_SCENE_PATH)
 
 const PATH_TO_EVENTS_FOLDER := "res://addons/flowkit/events"
+
+var editor_interface: EditorInterface
+var generator: FKGenerator
+var registry: FKRegistry 

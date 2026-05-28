@@ -16,8 +16,8 @@ signal action_edit_requested(action_item, row)
 
 signal insert_event_below_requested(row)
 signal insert_event_above_requested(target)
-signal insert_comment_below_requested(row)
-signal insert_comment_above_requested(target)
+signal insert_comment_below_requested(thisGroup: FKGroupUi, row)
+signal insert_comment_above_requested(thisRow: FKGroupUi, target)
 
 signal replace_event_requested(row)
 signal edit_event_requested(row)
@@ -261,9 +261,9 @@ func _connect_event_row_signals(row: FKEventRowUi, data: FKEventBlock) -> void:
 	row.action_edit_requested.connect(func(item): action_edit_requested.emit(item, row))
 
 	row.insert_event_below_requested.connect(func(r): insert_event_below_requested.emit(r))
-	row.insert_comment_below_requested.connect(func(r): insert_comment_below_requested.emit(r))
+	row.insert_comment_below_requested.connect(func(r): insert_comment_below_requested.emit(self, r))
 	#row.insert_event_above_requested.connect(func(r): insert_event_above_requested.emit(r))
-	#row.insert_comment_above_requested.connect(func(r): insert_comment_above_requested.emit(r))
+	#row.insert_comment_above_requested.connect(func(r): insert_comment_above_requested.emit(self, r))
 
 	row.replace_event_requested.connect(func(r): replace_event_requested.emit(r))
 	row.edit_event_requested.connect(func(r): edit_event_requested.emit(r))

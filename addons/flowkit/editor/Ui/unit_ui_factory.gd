@@ -1,17 +1,21 @@
 extends Node
 class_name FKUnitUiFactory
 
-func _init(p_sheet_io: FKSheetIO) -> void:
+func _init(p_sheet_io: FKSheetIO, editor_globals: FKEditorGlobals) -> void:
 	sheet_io = p_sheet_io
-	
+	self._editor_globals = editor_globals
+
+var _editor_globals: FKEditorGlobals
 var sheet_io : FKSheetIO 
-var registry: FKRegistry
+var registry: FKRegistry:
+	get:
+		return _editor_globals.registry
 
 ##
 ## Currently only able to output these:
 ## FKEventRowUi
 ## FKCommentUi
-#3 FKGroupUi
+## FKGroupUi
 ##
 func unit_ui_from(unit: FKUnit, inputs: Dictionary = {}) -> FKUnitUi:
 	var result: FKUnitUi = null

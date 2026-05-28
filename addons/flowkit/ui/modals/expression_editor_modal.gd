@@ -26,8 +26,7 @@ func _enter_tree() -> void:
 	if is_editor_preview:
 		return
 		
-	if _editor_interface:
-		_setup_node_tree.call_deferred()
+	_setup_node_tree.call_deferred()
 
 func _toggle_subs(on: bool):
 	if on and not _is_subbed:
@@ -41,13 +40,6 @@ func _toggle_subs(on: bool):
 	
 	_is_subbed = on
 
-func set_editor_interface(interface: EditorInterface) -> void:
-	var already_had_it: bool = _editor_interface != null
-	super.set_editor_interface(interface)
-	# Setup tree if we're already ready
-	if not already_had_it:
-		_setup_node_tree.call_deferred()
-
 func populate_inputs(node_path: String, action_id: String, inputs: Array, \
 current_values: Dictionary = {}) -> void:
 	selected_node_path = node_path
@@ -59,37 +51,35 @@ current_values: Dictionary = {}) -> void:
 	_show_current_parameter()
 	
 	# Setup node tree if editor interface is available
-	if _editor_interface:
-		_setup_node_tree()
+	_setup_node_tree()
 
 func _setup_node_tree() -> void:
-	if not _editor_interface:
-		return
-	
 	node_tree.clear()
 	
 	if not _scene_root:
 		return
 	
-	_base_control = _editor_interface.get_base_control()
 	_add_sys_node_entry()
 	var root_item := _create_root_item()
 	_add_node_children(_scene_root, root_item)
 
-var _base_control: Control
 
 func _add_sys_node_entry():
 	# The System Node should be a runtime Autoload.
 	var system_item: TreeItem = node_tree.create_item()
 	system_item.set_text(0, "System (FlowKitSystem)")
 	system_item.set_metadata(0, null)  # No actual node in editor
-	system_item.set_icon(0, _base_control.get_theme_icon("Node", "EditorIcons"))
+	system_item.set_icon(0, _node_theme_icon)
 	
+var _node_theme_icon: Texture2D:
+	get:
+		return _base_control.get_theme_icon("Node", "EditorIcons")
+		
 func _create_root_item() -> TreeItem:
 	var root_item: TreeItem = node_tree.create_item()
 	root_item.set_text(0, _scene_root.name)
 	root_item.set_metadata(0, _scene_root)
-	root_item.set_icon(0, _base_control.get_theme_icon("Node", "EditorIcons"))
+	root_item.set_icon(0, _node_theme_icon)
 	return root_item
 	
 
@@ -101,14 +91,14 @@ func _add_node_children(node: Node, tree_item: TreeItem) -> void:
 		
 		# Get node icon from editor
 		var icon_name: String = child.get_class()
-		var base_control := _editor_interface.get_base_control()
-		var icon: Texture2D = base_control.get_theme_icon(icon_name, "EditorIcons")
+		var icon: Texture2D = _base_control.get_theme_icon(icon_name, "EditorIcons")
 		if icon:
 			child_item.set_icon(0, icon)
 		
 		# Recursively add this node's children
 		if child.get_child_count() > 0:
 			_add_node_children(child, child_item)
+
 
 func _show_current_parameter() -> void:
 	var current_input = action_inputs[current_param_index]
@@ -175,7 +165,7 @@ func _populate_item_list_for_selected_node() -> void:
 
 var _scene_root: Node:
 	get:
-		return _editor_interface.get_edited_scene_root() if _editor_interface else null
+		return _editor_interface.get_edited_scene_root()
 		
 func _add_var_items(target_node: Node):
 	if not selected_tree_node.has_meta("flowkit_variables"):

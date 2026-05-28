@@ -3,9 +3,6 @@
 extends Control
 class_name FKMainEditor
 
-var editor_interface: EditorInterface
-var registry: FKRegistry
-var generator
 var current_scene_uid: int = 0
 
 ## Whether or not FlowKit auto-saves sheets in response to things
@@ -68,7 +65,7 @@ func _enter_tree() -> void:
 	if is_fully_legit:
 		return
 	print("[FKMainEditor]: Entered tree as legit instance. Instance id: " + str(get_instance_id()))
-	unit_ui_factory = FKUnitUiFactory.new(sheet_io)
+	unit_ui_factory = FKUnitUiFactory.new(sheet_io, editor_globals)
 	sheet_auto_saver.init(self, auto_save_sheets)
 	input_manager.initialize(self)
 	
@@ -82,6 +79,7 @@ var is_fully_legit: bool:
 var _is_fully_legit := false 
 # ^Need this to keep the same main editor instance from entering the tree twice
 
+var editor_globals: FKEditorGlobals
 var _modal_signals: FKModalSignals
 
 func _modal_related_prep():
@@ -90,7 +88,7 @@ func _modal_related_prep():
 	
 	modal_manager = FKModalManager.new()
 	add_child(modal_manager)
-	modal_manager.initialize()
+	modal_manager.initialize(editor_globals)
 	
 func _toggle_subs(on: bool):
 	if not _modal_signals:
@@ -106,6 +104,8 @@ func _toggle_subs(on: bool):
 		_modal_signals.action_selected.connect(_on_action_selected)
 		_modal_signals.condition_selected.connect(_on_condition_selected)
 		_modal_signals.expressions_confirmed.connect(_on_expressions_confirmed)
+		menu_bar.save_sheet.connect(_save_sheet)
+		add_event_btn.pressed.connect(_on_add_event_button_pressed)
 	elif !on and _is_subbed:
 		blocks_container.before_block_moved.disconnect(_push_undo_state)
 		_modal_signals.node_selected.disconnect(_on_node_selected)
@@ -113,6 +113,8 @@ func _toggle_subs(on: bool):
 		_modal_signals.action_selected.disconnect(_on_action_selected)
 		_modal_signals.condition_selected.disconnect(_on_condition_selected)
 		_modal_signals.expressions_confirmed.disconnect(_on_expressions_confirmed)
+		menu_bar.save_sheet.disconnect(_save_sheet)
+		add_event_btn.pressed.disconnect(_on_add_event_button_pressed)
 	else:
 		return
 	
@@ -132,50 +134,38 @@ func _exit_tree() -> void:
 	print("[FKMainEditor]: Exiting tree as legit instance. Instance id: " + str(get_instance_id()))
 	_toggle_subs(false)
 
-func set_editor_interface(interface: EditorInterface) -> void:
-	editor_interface = interface
-	modal_manager.set_editor_interface(interface)
-
-func set_registry(reg: FKRegistry) -> void:
-	registry = reg
-	if not unit_ui_factory:
-		unit_ui_factory = FKUnitUiFactory.new(sheet_io)
-	unit_ui_factory.registry = reg
-	modal_manager.set_registry(reg)
-
-func set_generator(gen) -> void:
-	generator = gen
-
 func _popup_centered_on_editor(popup: Window) -> void:
 	"""Center popup on the same window as the editor, supporting multi-monitor setups."""
-	# Use editor_interface to get the actual main editor window
 	var editor_window: Window = null
-	if editor_interface:
-		var base_control := editor_interface.get_base_control()
-		editor_window = base_control.get_window()
+	var base_control := editor_interface.get_base_control()
+	editor_window = base_control.get_window()
 	
 	if not editor_window:
 		# Fallback to default behavior if window not available
 		popup.popup_centered()
 		return
 	
-	# Get the editor window's position and size
 	var window_pos: Vector2i = editor_window.position
 	var window_size: Vector2i = editor_window.size
-	
-	# Get the popup's size
 	var popup_size: Vector2i = popup.size
 	
-	# Calculate centered position within the editor window
 	var centered_pos: Vector2i = window_pos + (window_size - popup_size) / 2
 	
-	# Ensure popup stays within editor window bounds (handle case where popup is larger than window)
+	# Ensure popup stays within editor window bounds 
+	# (and handle cases where the popup is larger than the window)
 	centered_pos.x = maxi(centered_pos.x, window_pos.x)
 	centered_pos.y = maxi(centered_pos.y, window_pos.y)
 	
-	# Set the popup position and show it
 	popup.position = centered_pos
 	popup.popup()
+
+var editor_interface: EditorInterface:
+	get:
+		var result: EditorInterface = null
+		if editor_globals:
+			result = editor_globals.editor_interface
+			
+		return result
 
 func _input(event: InputEvent) -> void:
 	input_manager.handle_input(event)
@@ -483,6 +473,9 @@ func redo(): _redo()
 func deselect_all(): _deselect_all()
 
 func _process(delta: float) -> void:
+	if not is_fully_legit or not editor_interface:
+		return
+		
 	# Handle drag spacers - add temporary space only when needed
 	if viewport.gui_is_dragging():
 		if scroll_container and blocks_container:
@@ -530,15 +523,11 @@ func _process(delta: float) -> void:
 			drag_spacer_bottom.queue_free()
 			drag_spacer_bottom = null
 	
-	# Handle scene detection
-	if not editor_interface:
-		return
-
 	var scene_root := editor_interface.get_edited_scene_root()
 	if not scene_root:
 		if current_scene_uid != 0:
 			current_scene_uid = 0
-			blocks_container.clear_block_nodes()
+			blocks_container.clear_unit_nodes()
 			_clear_undo_history()
 			_show_empty_state()
 		return
@@ -547,7 +536,7 @@ func _process(delta: float) -> void:
 	if scene_path == "":
 		if current_scene_uid != 0:
 			current_scene_uid = 0
-			blocks_container.clear_block_nodes()
+			blocks_container.clear_unit_nodes()
 			_clear_undo_history()
 			_show_empty_state()
 		return
@@ -664,7 +653,7 @@ func _new_sheet() -> void:
 		push_warning("No scene open to create event sheet for.")
 		return
 	
-	blocks_container.clear_block_nodes()
+	blocks_container.clear_unit_nodes()
 	_show_content_state()
 
 # === Event Row Creation ===
@@ -803,7 +792,6 @@ func _connect_event_row_signals(row) -> void:
 func _on_new_sheet() -> void:
 	_new_sheet()
 
-
 func _on_generate_providers() -> void:
 	if not generator:
 		print("[FKMainEditor]: Generator not available")
@@ -849,6 +837,20 @@ func _on_generate_providers() -> void:
 			registry.load_all()
 		dialog.queue_free()
 	)
+
+var registry: FKRegistry:
+	get:
+		var result: FKRegistry = null
+		if editor_globals:
+			result = editor_globals.registry
+		return result
+
+var generator: FKGenerator:
+	get:
+		var result: FKGenerator = null
+		if editor_globals:
+			result = editor_globals.generator
+		return result
 
 func _on_generate_manifest() -> void:
 	if not generator:
@@ -1034,6 +1036,8 @@ func _deselect_all() -> void:
 
 func _start_add_workflow(block_type: String, target_row: Node = null) -> void:
 	"""Start workflow to add a new block."""
+	if not editor_interface:
+		return
 	pending_block_type = block_type
 	pending_target_row = target_row
 	
@@ -1041,7 +1045,6 @@ func _start_add_workflow(block_type: String, target_row: Node = null) -> void:
 	if not scene_root:
 		return
 	
-	select_node_modal.set_editor_interface(editor_interface)
 	select_node_modal.populate_from_scene(scene_root)
 	_popup_centered_on_editor(select_node_modal)
 
@@ -1071,10 +1074,8 @@ func _on_node_selected(node_path: String, node_class: String) -> void:
 	through the editor.
 	"""
 	pending_node_path = node_path
-	var select_node_modal := modal_manager.select_node_modal
 	select_node_modal.hide()
 	
-	var select_event_modal
 	match pending_block_type:
 		"event", "event_replace", "event_in_group":
 			select_event_modal.populate_events(node_path, node_class)
@@ -1424,7 +1425,6 @@ func _on_row_replace(signal_row, bound_row: FKEventRowUi) -> void:
 	if not scene_root:
 		return
 	
-	select_node_modal.set_editor_interface(editor_interface)
 	select_node_modal.populate_from_scene(scene_root)
 	_popup_centered_on_editor(select_node_modal)
 
@@ -1446,12 +1446,11 @@ func _on_row_edit(signal_row, bound_row: FKEventRowUi) -> void:
 	
 	# Get event provider to check if it has inputs
 	var provider_inputs = []
-	if registry:
-		for provider in registry.event_providers:
-			if provider.has_method("get_id") and provider.get_id() == data.event_id:
-				if provider.has_method("get_inputs"):
-					provider_inputs = provider.get_inputs()
-				break
+	for provider in registry.event_providers:
+		if provider.has_method("get_id") and provider.get_id() == data.event_id:
+			if provider.has_method("get_inputs"):
+				provider_inputs = provider.get_inputs()
+			break
 	
 	if provider_inputs.size() > 0:
 		# Set up editing mode
@@ -1578,12 +1577,11 @@ func _on_branch_condition_edit(branch_item: FKBranchUnitUi, event_row: FKEventRo
 			return
 		var cond := act_data.branch_condition
 		var provider_inputs = []
-		if registry:
-			for provider in registry.condition_providers:
-				if provider.has_method("get_id") and provider.get_id() == cond.condition_id:
-					if provider.has_method("get_inputs"):
-						provider_inputs = provider.get_inputs()
-					break
+		for provider in registry.condition_providers:
+			if provider.has_method("get_id") and provider.get_id() == cond.condition_id:
+				if provider.has_method("get_inputs"):
+					provider_inputs = provider.get_inputs()
+				break
 
 		pending_block_type = "branch_condition_edit"
 		pending_id = cond.condition_id
@@ -1621,12 +1619,11 @@ event_row: FKEventRowUi) -> void:
 		return
 
 	var provider_inputs: Array = []
-	if registry:
-		for provider in registry.action_providers:
-			if provider.has_method("get_id") and provider.get_id() == act_data.action_id:
-				if provider.has_method("get_inputs"):
-					provider_inputs = provider.get_inputs()
-				break
+	for provider in registry.action_providers:
+		if provider.has_method("get_id") and provider.get_id() == act_data.action_id:
+			if provider.has_method("get_inputs"):
+				provider_inputs = provider.get_inputs()
+			break
 
 	if provider_inputs.size() > 0:
 		pending_target_row = event_row
@@ -1866,12 +1863,11 @@ func _on_condition_edit_requested(condition_item: FKConditionUnitUi, bound_row) 
 	
 	# Get condition provider to check if it has inputs
 	var provider_inputs: Array = []
-	if registry:
-		for provider in registry.condition_providers:
-			if provider.has_method("get_id") and provider.get_id() == cond_data.condition_id:
-				if provider.has_method("get_inputs"):
-					provider_inputs = provider.get_inputs()
-				break
+	for provider in registry.condition_providers:
+		if provider.has_method("get_id") and provider.get_id() == cond_data.condition_id:
+			if provider.has_method("get_inputs"):
+				provider_inputs = provider.get_inputs()
+			break
 	
 	if provider_inputs.size() > 0:
 		pending_target_row = bound_row
@@ -1892,12 +1888,11 @@ func _on_action_edit_requested(action_item: FKActionUnitUi, bound_row) -> void:
 	
 	# Get action provider to check if it has inputs
 	var provider_inputs: Array[FKActionInput] = []
-	if registry:
-		for provider in registry.action_providers:
-			if provider.has_method("get_id") and provider.get_id() == act_data.action_id:
-				if provider is FKAction:
-					provider_inputs = provider.get_inputs()
-				break
+	for provider in registry.action_providers:
+		if provider.has_method("get_id") and provider.get_id() == act_data.action_id:
+			if provider is FKAction:
+				provider_inputs = provider.get_inputs()
+			break
 	
 	if provider_inputs.size() > 0:
 		pending_target_row = bound_row

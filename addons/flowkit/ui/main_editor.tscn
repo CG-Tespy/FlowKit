@@ -169,4 +169,3 @@ text = "➕ Add Event"
 [connection signal="id_pressed" from="OuterVBox/TopMargin/TopBar/MenuBar/Edit" to="OuterVBox/TopMargin/TopBar/MenuBar" method="_on_edit_id_pressed"]
 [connection signal="pressed" from="OuterVBox/TopMargin/TopBar/AddCommentButton" to="." method="_on_add_comment_button_pressed"]
 [connection signal="pressed" from="OuterVBox/TopMargin/TopBar/AddGroupButton" to="." method="_on_add_group_button_pressed"]
-[connection signal="pressed" from="OuterVBox/BottomMargin/ButtonContainer/AddEventButton" to="." method="_on_add_event_button_pressed"]

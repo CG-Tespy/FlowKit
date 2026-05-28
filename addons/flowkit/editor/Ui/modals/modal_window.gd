@@ -33,11 +33,16 @@ func _toggle_subs(on: bool):
 	
 var _is_subbed := false
 
-func set_editor_interface(interface: EditorInterface):
-	_editor_interface = interface
-	
-var _editor_interface: EditorInterface
+var _editor_interface: EditorInterface:
+	get:
+		return editor_globals.editor_interface
 
+var editor_globals: FKEditorGlobals
+
+var _base_control: Control:
+	get:
+		return _editor_interface.get_base_control()
+		
 func legitimize():
 	if not is_editor_preview:
 		return
@@ -51,14 +56,10 @@ func _exit_tree() -> void:
 		return
 	_toggle_subs(false)
 
-func set_registry(reg: FKRegistry):
-	_registry = reg
-	
-var _registry: FKRegistry
-
 func _ready() -> void:
 	pass
 	
 var _modal_signals: FKModalSignals:
 	get:
 		return FKModalSignals.s
+		

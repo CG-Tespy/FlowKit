@@ -1,11 +1,13 @@
-## For managing the creation, dependency injection. and access of the modal
-# windows of FlowKit's editor.
+## For managing the creation and access of the modal windows of FlowKit's editor.
 extends Node
 class_name FKModalManager
 
-func initialize():
+func initialize(editor_globals: FKEditorGlobals):
 	name = "FKModalManager"
+	self.editor_globals = editor_globals
 	_prep_modals()
+
+var editor_globals: FKEditorGlobals
 	
 func _prep_modals():
 	_create_and_parent_all_our_modals()
@@ -20,7 +22,8 @@ func _create_and_parent_all_our_modals():
 		
 	path = FKModalPaths.SELECT_EVENT_MODAL
 	_select_event_modal = _create_and_parent_modal(path)
-		
+	if not _select_event_modal:
+		print("FKModalManager: Select event modal not properly set up")
 	path = FKModalPaths.SELECT_CONDITION_MODAL
 	_select_condition_modal = _create_and_parent_modal(path)
 		
@@ -38,7 +41,8 @@ var _expression_modal: FKExpressionEditorModal
 
 func _create_and_parent_modal(path_to_scene: String) -> FKModalWindow:
 	var scene: PackedScene = load(path_to_scene)
-	var result := scene.instantiate()
+	var result: FKModalWindow = scene.instantiate()
+	result.editor_globals = self.editor_globals
 	add_child(result)
 	return result
 	
@@ -80,25 +84,3 @@ var select_action_modal: FKSelectActionModal:
 var expression_modal: FKExpressionEditorModal:
 	get:
 		return _expression_modal
-
-# Dependency Injection
-func set_editor_interface(interface: EditorInterface) -> void:
-	_editor_interface = interface
-	select_node_modal.set_editor_interface(interface)
-	select_event_modal.set_editor_interface(interface)
-	select_condition_modal.set_editor_interface(interface)
-	select_action_modal.set_editor_interface(interface)
-	expression_modal.set_editor_interface(interface)
-	expression_modal.set_editor_interface(interface)
-	
-var _editor_interface: EditorInterface
-
-func set_registry(reg: FKRegistry) -> void:
-	_registry = reg
-	select_node_modal.set_registry(reg)
-	select_event_modal.set_registry(reg)
-	select_condition_modal.set_registry(reg)
-	select_action_modal.set_registry(reg)
-	expression_modal.set_registry(reg)
-		
-var _registry: FKRegistry
