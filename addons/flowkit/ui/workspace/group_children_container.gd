@@ -2,6 +2,9 @@
 extends VBoxContainer
 class_name GroupChildrenContainerUi
 
+func _enter_tree() -> void:
+	set_meta("_parent_group", null)
+	
 ## Container for group children that handles drag-drop reordering.
 ## Handles both internal reordering and external drops from outside the group.
 
@@ -38,7 +41,6 @@ func _can_drop_data(at_position: Vector2, data) -> bool:
 	
 	return true
 
-
 func _drop_data(at_position: Vector2, data) -> void:
 	"""Handle drops."""
 	DropIndicatorManager.hide_indicator()
@@ -56,15 +58,14 @@ func _drop_data(at_position: Vector2, data) -> void:
 	if drag_type not in ["event_row", "comment", "group"]:
 		return
 	
-	var parent_group = get_meta("_parent_group", null)
 	if not parent_group:
 		return
 	
 	# Internal reorder (same parent)
 	if drag_node.get_parent() == self:
-		if parent_group.has_method("_handle_internal_reorder"):
-			parent_group._handle_internal_reorder(drag_node)
+		parent_group._handle_internal_reorder(drag_node)
 	else:
 		# External drop - delegate to parent group
-		if parent_group.has_method("_handle_drop"):
-			parent_group._handle_drop(drag_node, drag_type)
+		parent_group._handle_drop(drag_node, drag_type)
+
+var parent_group: FKGroupUi

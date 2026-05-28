@@ -101,7 +101,7 @@ func _enter_tree() -> void:
 		return
 	#print("Group ui enter tree")
 	super._enter_tree()
-	children_container.set_meta("_parent_group", self)
+	children_container.parent_group = self
 
 
 func _toggle_subs(on: bool) -> void:
