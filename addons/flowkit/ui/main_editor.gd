@@ -1,9 +1,8 @@
-
 @tool
 extends Control
 class_name FKMainEditor
 
-var current_scene_uid: int = 0
+
 
 ## Whether or not FlowKit auto-saves sheets in response to things
 ## like adding or editing Actions.
@@ -80,18 +79,17 @@ var _is_fully_legit := false
 # ^Need this to keep the same main editor instance from entering the tree twice
 
 var editor_globals: FKEditorGlobals
-var _modal_signals: FKModalSignals
+var modal_signals: FKModalSignals:
+	get:
+		return editor_globals.modal_signals
 
 func _modal_related_prep():
-	_modal_signals = FKModalSignals.new()
-	add_child(_modal_signals)
-	
 	modal_manager = FKModalManager.new()
 	add_child(modal_manager)
 	modal_manager.initialize(editor_globals)
 	
 func _toggle_subs(on: bool):
-	if not _modal_signals:
+	if not modal_signals:
 		# This means that either this isn't a legit instance, or the signals object
 		# exited the tree before we did.
 		return
@@ -99,20 +97,20 @@ func _toggle_subs(on: bool):
 	if on and !_is_subbed:
 		# For undo state on drag-and-drop reorder
 		blocks_container.before_block_moved.connect(_push_undo_state)
-		_modal_signals.node_selected.connect(_on_node_selected)
-		_modal_signals.event_selected.connect(_on_event_selected)
-		_modal_signals.action_selected.connect(_on_action_selected)
-		_modal_signals.condition_selected.connect(_on_condition_selected)
-		_modal_signals.expressions_confirmed.connect(_on_expressions_confirmed)
+		modal_signals.node_selected.connect(_on_node_selected)
+		modal_signals.event_selected.connect(_on_event_selected)
+		modal_signals.action_selected.connect(_on_action_selected)
+		modal_signals.condition_selected.connect(_on_condition_selected)
+		modal_signals.expressions_confirmed.connect(_on_expressions_confirmed)
 		menu_bar.save_sheet.connect(_save_sheet)
 		add_event_btn.pressed.connect(_on_add_event_button_pressed)
 	elif !on and _is_subbed:
 		blocks_container.before_block_moved.disconnect(_push_undo_state)
-		_modal_signals.node_selected.disconnect(_on_node_selected)
-		_modal_signals.event_selected.disconnect(_on_event_selected)
-		_modal_signals.action_selected.disconnect(_on_action_selected)
-		_modal_signals.condition_selected.disconnect(_on_condition_selected)
-		_modal_signals.expressions_confirmed.disconnect(_on_expressions_confirmed)
+		modal_signals.node_selected.disconnect(_on_node_selected)
+		modal_signals.event_selected.disconnect(_on_event_selected)
+		modal_signals.action_selected.disconnect(_on_action_selected)
+		modal_signals.condition_selected.disconnect(_on_condition_selected)
+		modal_signals.expressions_confirmed.disconnect(_on_expressions_confirmed)
 		menu_bar.save_sheet.disconnect(_save_sheet)
 		add_event_btn.pressed.disconnect(_on_add_event_button_pressed)
 	else:
@@ -545,6 +543,7 @@ func _process(delta: float) -> void:
 	if scene_uid != current_scene_uid:
 		_reset_for_new_scene(scene_uid)
 		
+var current_scene_uid: int = 0
 
 func _reset_for_new_scene(scene_uid: int):
 	current_scene_uid = scene_uid

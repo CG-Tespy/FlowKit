@@ -350,7 +350,8 @@ func _on_confirm_button_pressed() -> void:
 
 func _confirm() -> void:
 	_save_current_parameter()
-	_modal_signals.expressions_confirmed.emit(selected_node_path, selected_action_id, param_values)
+	_modal_signals.expressions_confirmed.emit(selected_node_path, selected_action_id, \
+	param_values)
 	hide()
 
 func _on_cancel_button_pressed() -> void:

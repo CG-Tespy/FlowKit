@@ -8,13 +8,15 @@ func initialize(editor_globals: FKEditorGlobals):
 	_prep_modals()
 
 var editor_globals: FKEditorGlobals
-	
+
 func _prep_modals():
 	_create_and_parent_all_our_modals()
 	_refresh_modal_cache()
 	_hide_modals()
 	_legitimize_modals()
-	
+
+var modal_signals: FKModalSignals
+
 func _create_and_parent_all_our_modals():
 	var path: String
 	path = FKModalPaths.SELECT_NODE_MODAL

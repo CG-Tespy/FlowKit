@@ -42,7 +42,11 @@ var editor_globals: FKEditorGlobals
 var _base_control: Control:
 	get:
 		return _editor_interface.get_base_control()
-		
+
+var _modal_signals: FKModalSignals:
+	get:
+		return editor_globals.modal_signals
+
 func legitimize():
 	if not is_editor_preview:
 		return
@@ -59,7 +63,3 @@ func _exit_tree() -> void:
 func _ready() -> void:
 	pass
 	
-var _modal_signals: FKModalSignals:
-	get:
-		return FKModalSignals.s
-		

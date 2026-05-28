@@ -242,6 +242,7 @@ func _on_recent_item_activated(index: int) -> void:
 			action_inputs = action.get_inputs()
 			break
 	
-	print("[FKSelectActionModal]: Recent action selected: ", action_id, " for node: ", selected_node_path)
+	print("[FKSelectActionModal]: Recent action selected: ", action_id, " for node: ", \
+	selected_node_path)
 	_modal_signals.action_selected.emit(selected_node_path, action_id, action_inputs)
 	hide()

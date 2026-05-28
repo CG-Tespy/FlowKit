@@ -14,3 +14,4 @@ const PATH_TO_EVENTS_FOLDER := "res://addons/flowkit/events"
 var editor_interface: EditorInterface
 var generator: FKGenerator
 var registry: FKRegistry 
+var modal_signals: FKModalSignals = FKModalSignals.new()
