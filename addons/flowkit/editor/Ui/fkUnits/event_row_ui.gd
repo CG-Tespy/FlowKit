@@ -33,7 +33,6 @@ signal action_selected(action_node)
 signal condition_edit_requested(condition_item)
 signal action_edit_requested(action_item)
 
-signal data_changed()
 signal condition_dropped(source_row, condition_data, target_row)
 signal action_dropped(source_row, action_data, target_row)
 signal before_data_changed() # Emitted before any data modification for undo state capture
@@ -346,7 +345,7 @@ func _update_conditions() -> void:
 
 	for condition_data in e.conditions:
 		var item: FKConditionUnitUi = CONDITION_ITEM_SCENE.instantiate()
-		item.legitimize(condition_data, registry)
+		item.legitimize(condition_data, _globals)
 		_connect_condition_item_signals(item)
 		conditions_container.add_child(item)
 
@@ -397,14 +396,14 @@ func _clear_action_container():
 func _add_branch_item_based_on(act_data: FKActionUnit):
 	#print("Adding branch action in Event row ui")
 	var branch: FKBranchUnitUi = BRANCH_ITEM_SCENE.instantiate()
-	branch.legitimize(act_data, registry)
+	branch.legitimize(act_data, _globals)
 	_connect_branch_item_signals(branch)
 	actions_container.add_child(branch)
 
 func _add_regular_action_item_based_on(act_data: FKActionUnit):
 	#print("Adding regular action in Event row ui")
 	var item: FKActionUnitUi = ACTION_ITEM_SCENE.instantiate()
-	item.legitimize(act_data, registry)
+	item.legitimize(act_data, _globals)
 	_connect_action_item_signals(item)
 	actions_container.add_child(item)
 
@@ -463,9 +462,6 @@ func _connect_branch_item_signals(branch) -> void:
 	if branch.has_signal("action_dropped_into_branch"):
 		branch.action_dropped_into_branch.connect(_on_action_dropped_into_branch)
 
-	if branch.has_signal("data_changed"):
-		branch.data_changed.connect(func(): data_changed.emit())
-
 	if branch.has_signal("before_data_changed"):
 		branch.before_data_changed.connect(func(): before_data_changed.emit())
 
@@ -485,7 +481,6 @@ func _on_branch_item_delete(item: FKUnitUi) -> void:
 		if idx >= 0:
 			e.actions.remove_at(idx)
 		_update_actions()
-		data_changed.emit()
 
 func _on_condition_item_edit(item: FKConditionUnitUi) -> void:
 	condition_edit_requested.emit(item)
@@ -499,7 +494,7 @@ func _on_condition_item_delete(item: FKConditionUnitUi) -> void:
 		if idx >= 0:
 			e.conditions.remove_at(idx)
 		_update_conditions()
-		data_changed.emit()
+		contents_changed.emit(self)
 
 func _on_condition_item_negate(item: FKConditionUnitUi) -> void:
 	before_data_changed.emit()
@@ -507,7 +502,7 @@ func _on_condition_item_negate(item: FKConditionUnitUi) -> void:
 	if cond_data:
 		cond_data.negated = not cond_data.negated
 		item.update_display()
-		data_changed.emit()
+		contents_changed.emit(self)
 
 # ---------------------------------------------------------
 # Action handlers
@@ -525,7 +520,7 @@ func _on_action_item_delete(item: FKActionUnitUi) -> void:
 		if idx >= 0:
 			e.actions.remove_at(idx)
 		_update_actions()
-		data_changed.emit()
+		contents_changed.emit(self)
 
 # ---------------------------------------------------------
 # Reordering helpers
@@ -569,7 +564,7 @@ drop_above: bool) -> void:
 	e.conditions.insert(insert_idx, source_data)
 
 	_update_conditions()
-	data_changed.emit()
+	contents_changed.emit(self)
 
 func _recursive_remove_action(actions_array: Array, target_action) -> bool:
 	var idx = actions_array.find(target_action)
@@ -604,7 +599,7 @@ target_branch: FKActionUnitUi) -> void:
 		target_actions.append(source_data)
 
 	_update_actions()
-	data_changed.emit()
+	contents_changed.emit(self)
 
 func _on_action_dropped_into_branch(source_item: FKActionUnitUi, target_branch: FKBranchUnitUi) -> void:
 	var e := _get_event()
@@ -622,7 +617,7 @@ func _on_action_dropped_into_branch(source_item: FKActionUnitUi, target_branch: 
 	action_data.branch_actions.append(source_data)
 
 	_update_actions()
-	data_changed.emit()
+	contents_changed.emit(self)
 
 func _on_action_reorder(source_item: FKActionUnitUi, target_item: FKActionUnitUi, 
 drop_above: bool) -> void:
@@ -655,7 +650,7 @@ drop_above: bool) -> void:
 		e.actions.insert(insert_idx, source_data)
 
 		_update_actions()
-		data_changed.emit()
+		contents_changed.emit(self)
 		return
 
 	if source_idx == target_idx:
@@ -680,7 +675,7 @@ drop_above: bool) -> void:
 	e.actions.insert(insert_idx2, source_data)
 
 	_update_actions()
-	data_changed.emit()
+	contents_changed.emit(self)
 
 func _pull_action_to_top_level(act_data: FKActionUnit) -> void:
 	var e := _get_event()
@@ -696,7 +691,7 @@ func _pull_action_to_top_level(act_data: FKActionUnit) -> void:
 		e.actions.append(act_data)
 
 	_update_actions()
-	data_changed.emit()
+	contents_changed.emit(self)
 
 # ---------------------------------------------------------
 # Add condition / action to data

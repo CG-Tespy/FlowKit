@@ -4,33 +4,42 @@ class_name FKUnitUi
 
 signal before_block_changed(node: FKUnitUi)
 signal block_changed(node: FKUnitUi)
-signal block_contents_changed()
+signal contents_changed(unit_ui: FKUnitUi)
 signal selected(node: FKUnitUi)
 
 ## Call this when you want to have an FKUnitUi work properly as
 ## a non-preview instance. This func assumes this instance
 ## already has a Block and registry registered.
 
-func legitimize(block: FKUnit, registry: FKRegistry):
+func legitimize(block: FKUnit, editor_globals: FKEditorGlobals):
 	if not is_editor_preview:
 		return
 	is_editor_preview = false
+	self._globals = editor_globals
 	set_block(block)
-	set_registry(registry)
 	_enter_tree()
 	_ready()
-	
+
+var _globals: FKEditorGlobals
+
 func _enter_tree() -> void:
 	if is_editor_preview:
 		return
-	#print("Legit " + get_class() + " instantiated")
 	_toggle_subs(true)
 
-
 ## When overriding, make sure to call the super class version last.
-## 
 func _toggle_subs(on: bool):
+	if on and not _is_subbed:
+		contents_changed.connect(_on_contents_changed)
+	elif _is_subbed and not on:
+		contents_changed.disconnect(_on_contents_changed)
+	else:
+		return
+		
 	_is_subbed = on
+	
+func _on_contents_changed(unit_ui: FKUnitUi):
+	_globals.unit_ui_signals.contents_changed.emit(unit_ui)
 	
 ## Whether or not this instance is just being shown in the editor preview or not. 
 ## Helps keep the instance from doing things it shouldn't in that case
@@ -80,17 +89,10 @@ func _alert_need_for_override(func_name: String):
 	var error_message := "FKUnitUi " + name + " must override %s" % [func_name]
 	printerr(error_message)
 	
-func set_registry(reg: Node) -> void:
-	if is_editor_preview:
-		return
-	registry = reg
-	_on_registry_set()
-	
-var registry: Node
+var registry: Node:
+	get:
+		return _globals.registry
 
-func _on_registry_set() -> void:
-	_alert_need_for_override("_on_registry_set")
-	
 func set_selected(value: bool) -> void:
 	if _is_selected == value or is_editor_preview:
 		return

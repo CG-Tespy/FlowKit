@@ -1,7 +1,8 @@
+@tool
 extends Window
 class_name FKSettingsWindow
 
-@export var auto_save_toggle: CheckBox
+@export var auto_save_toggle: CheckButton
 ## Saves the settings to a json file
 @export var save_button: Button
 
@@ -18,16 +19,49 @@ func _enter_tree() -> void:
 		var log_message := "[FlowKit]: Viewing FKSettingsWindow in the Scene View."
 		print(log_message)
 		return
-	_toggle_subs(true)
 	
+	_update_toggle()
+	_update_sheet_auto_saver.call_deferred()
+	_toggle_subs(true)
+
+func _update_toggle():
+	if not editor_settings.has_setting(_auto_save_toggle_key):
+		return
+	var current: bool = _auto_save_toggle_setting
+	auto_save_toggle.button_pressed = current
+
+var editor_settings: EditorSettings:
+	get:
+		return editor_interface.get_editor_settings()
+		
+var _auto_save_toggle_key: String:
+	get:
+		return FKEditorGlobals.AUTO_SAVE_TOGGLE_KEY
+
+var editor_interface: EditorInterface:
+	get:
+		return globals.editor_interface
+		
+var globals: FKEditorGlobals
+
+var _auto_save_toggle_setting: bool:
+	get:
+		return editor_settings.get_setting(_auto_save_toggle_key)
+		
+func _update_sheet_auto_saver():
+	var current: bool = _auto_save_toggle_setting
+	if globals and globals.sheet_auto_saver:
+		globals.sheet_auto_saver.enabled = current
+		print("[FKSettingsWindow]: updated auto saver enabled: " + str(current))
+
 func _toggle_subs(on: bool):
 	if on && !_is_subbed:
-		auto_save_toggle.toggled.connect(_on_auto_save_toggled)
 		save_button.pressed.connect(_on_save_button_pressed)
+		close_requested.connect(_on_close_requested)
 		
 	elif _is_subbed && !on:
-		auto_save_toggle.toggled.disconnect(_on_auto_save_toggled)
 		save_button.pressed.disconnect(_on_save_button_pressed)
+		close_requested.disconnect(_on_close_requested)
 		
 	else:
 		return
@@ -36,24 +70,16 @@ func _toggle_subs(on: bool):
 
 var _is_subbed := false
 
-func _on_auto_save_toggled(value: bool) -> void:
-	var editor_settings := editor_interface.get_editor_settings()
-	editor_settings.set_setting(FKEditorGlobals.AUTO_SAVE_TOGGLE_KEY, value)
-	editor_settings.save()
-	# If your FKEditorGlobals holds the auto-saver:
-	if globals and globals.auto_saver:
-		globals.auto_saver.enabled = value
-
-var editor_interface: EditorInterface:
-	get:
-		return globals.editor_interface
-		
-var globals: FKEditorGlobals
-
-
 func _on_save_button_pressed() -> void:
-	hide()
+	var should_auto_save := auto_save_toggle.button_pressed
+	var name := FKEditorGlobals.AUTO_SAVE_TOGGLE_KEY
+	editor_settings.set_setting(name, should_auto_save)
+	_update_sheet_auto_saver()
+	print("[FKSettingsWindow]: Settings saved!")
 
+func _on_close_requested():
+	hide()
+	
 func _exit_tree() -> void:
 	if _is_editor_preview:
 		var log_message := "[FlowKit]: FKSettingsWindow exiting the Scene View."

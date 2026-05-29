@@ -61,12 +61,12 @@ const DRAG_THRESHOLD: float = 8.0
 @export var normal_stylebox: StyleBox
 @export var selected_stylebox: StyleBox
 
-func legitimize(block: FKUnit, registry: FKRegistry):
+func legitimize(block: FKUnit, editor_globals: FKEditorGlobals):
 	if not is_editor_preview:
 		return
 	var group := block as FKGroup
 	group.normalize_children()
-	super.legitimize(block, registry)
+	super.legitimize(block, editor_globals)
 # ---------------------------------------------------------
 # FKUnitUi integration
 # ---------------------------------------------------------
@@ -289,7 +289,7 @@ func _instantiate_comment(data: FKComment) -> Control:
 		printerr("[FKGroupUi]: Cannot instantiate comment in editor preview mode")
 		return null
 	var comment: FKCommentUi = COMMENT_SCENE.instantiate()
-	comment.legitimize(data, registry)
+	comment.legitimize(data, _globals)
 	_connect_comment_signals_to_group_handlers(comment, data)
 	return comment
 
@@ -309,7 +309,7 @@ func _instantiate_group(data: FKGroup) -> Control:
 	var group_scene := load("res://addons/flowkit/ui/workspace/group_ui.tscn")
 	var nested: FKGroupUi = group_scene.instantiate()
 	data.normalize_children()
-	nested.legitimize(data, registry)
+	nested.legitimize(data, _globals)
 	
 	_attach_nested_group_signals(nested, data)
 	return nested

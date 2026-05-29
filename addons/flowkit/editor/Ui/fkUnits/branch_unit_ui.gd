@@ -290,13 +290,13 @@ func _update_branch_actions() -> void:
 		if sub.is_branch:
 			var scene := load(FKEditorGlobals.BRANCH_ITEM_SCENE_PATH)
 			var nested: FKBranchUnitUi = scene.instantiate()
-			nested.legitimize(sub, registry)
+			nested.legitimize(sub, _globals)
 			nested.parent_branch = self
 			_connect_nested_branch_signals(nested)
 			actions_container.add_child(nested)
 		else:
 			var item: FKActionUnitUi = FKEditorGlobals.ACTION_ITEM_SCENE.instantiate()
-			item.legitimize(sub, registry)
+			item.legitimize(sub, _globals)
 			_connect_sub_action_signals(item)
 			actions_container.add_child(item)
 

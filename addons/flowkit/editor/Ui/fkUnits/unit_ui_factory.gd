@@ -2,9 +2,9 @@ extends Node
 class_name FKUnitUiFactory
 
 func _init(editor_globals: FKEditorGlobals) -> void:
-	self._editor_globals = editor_globals
+	self._globals = editor_globals
 
-var _editor_globals: FKEditorGlobals
+var _globals: FKEditorGlobals
 
 ##
 ## Currently only able to output these:
@@ -30,17 +30,17 @@ func _create_event_row(data: FKEventBlock) -> FKEventRowUi:
 	var row: FKEventRowUi = EVENT_ROW_SCENE.instantiate()
 	var copy := sheet_io.copy_event_block(data)
 	
-	row.legitimize(copy, registry)
+	row.legitimize(copy, _globals)
 	return row
 	
 var registry: FKRegistry:
 	get:
-		return _editor_globals.registry
+		return _globals.registry
 	
 const EVENT_ROW_SCENE = preload(FKEditorGlobals.EVENT_ROW_SCENE_PATH)
 var sheet_io : FKSheetIO:
 	get:
-		return _editor_globals.sheet_io
+		return _globals.sheet_io
 		
 func _create_comment_ui(data: FKComment) -> FKCommentUi:
 	"""Create comment block node from data."""
@@ -49,7 +49,7 @@ func _create_comment_ui(data: FKComment) -> FKCommentUi:
 	var copy := FKComment.new()
 	copy.text = data.text
 	
-	comment.legitimize(copy, registry)
+	comment.legitimize(copy, _globals)
 	return comment
 
 const COMMENT_SCENE = preload(FKEditorGlobals.COMMENT_SCENE_PATH)
@@ -60,7 +60,7 @@ func _create_group_block(data: FKGroup) -> FKGroupUi:
 	var group: FKGroupUi = GROUP_SCENE.instantiate()
 	var copy := data.copy_deep()
 	copy.normalize_children()
-	group.legitimize(copy, registry)
+	group.legitimize(copy, _globals)
 	return group
 	
 const GROUP_SCENE = preload(FKEditorGlobals.GROUP_SCENE_PATH)

@@ -69,7 +69,7 @@ func _enter_tree() -> void:
 		print("In the get_main_editor_tree func, self is " + str(self.get_class()))
 		return self.get_tree()
 	editor_globals.block_container_ui = blocks_container
-	editor_globals.main_editor_root = self
+	editor_globals.sheet_editor_visible = self.visible
 	editor_globals.sheet_auto_saver = self.sheet_auto_saver
 	self.sheet_auto_saver.init(editor_globals)
 	
@@ -121,6 +121,7 @@ func _toggle_subs(on: bool):
 		
 	if on and !_is_subbed:
 		# For undo state on drag-and-drop reorder
+		visibility_changed.connect(_on_visibility_changed)
 		blocks_container.before_block_moved.connect(_push_undo_state)
 		modal_signals.node_selected.connect(_on_node_selected)
 		modal_signals.event_selected.connect(_on_event_selected)
@@ -130,6 +131,7 @@ func _toggle_subs(on: bool):
 		menu_bar.save_sheet.connect(_save_sheet)
 		add_event_btn.pressed.connect(_on_add_event_button_pressed)
 	elif !on and _is_subbed:
+		visibility_changed.disconnect(_on_visibility_changed)
 		blocks_container.before_block_moved.disconnect(_push_undo_state)
 		modal_signals.node_selected.disconnect(_on_node_selected)
 		modal_signals.event_selected.disconnect(_on_event_selected)
@@ -144,6 +146,9 @@ func _toggle_subs(on: bool):
 	_is_subbed = on
 
 var _is_subbed := false
+
+func _on_visibility_changed():
+	editor_globals.sheet_editor_visible = self.visible
 
 func _show_empty_state() -> void:
 	"""Show empty state UI (no scene loaded)."""

@@ -43,7 +43,7 @@ func _update_block_text():
 	if _comment_block.text != new_text:
 		_comment_block.text = new_text
 		update_display()
-		block_contents_changed.emit()
+		contents_changed.emit(self)
 		
 
 var _comment_block: FKComment:
