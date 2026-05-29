@@ -17,7 +17,23 @@ const CONDITION_ITEM_SCENE := preload(CONDITION_SCENE_PATH)
 const ACTION_ITEM_SCENE := preload(ACTION_ITEM_SCENE_PATH)
 const BRANCH_ITEM_SCENE := preload(BRANCH_ITEM_SCENE_PATH)
 
+const AUTO_SAVE_TOGGLE_KEY = "flowkit/auto_save_enabled"
+
 var editor_interface: EditorInterface
+var editor_settings:
+	get:
+		return editor_interface.get_editor_settings()
+		
 var generator: FKGenerator
 var registry: FKRegistry 
 var modal_signals: FKModalSignals = FKModalSignals.new()
+var current_scene_uid: int = 0
+
+## Should return a SceneTree object. No args.
+var get_main_editor_tree: Callable
+
+var is_in_undo_redo := false
+var sheet_auto_saver: FKSheetAutoSaver
+var sheet_io: FKSheetIO = FKSheetIO.new()
+var block_container_ui: FKBlockContainerUi
+var main_editor_root: Control

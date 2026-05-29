@@ -1,15 +1,10 @@
 extends Node
 class_name FKUnitUiFactory
 
-func _init(p_sheet_io: FKSheetIO, editor_globals: FKEditorGlobals) -> void:
-	sheet_io = p_sheet_io
+func _init(editor_globals: FKEditorGlobals) -> void:
 	self._editor_globals = editor_globals
 
 var _editor_globals: FKEditorGlobals
-var sheet_io : FKSheetIO 
-var registry: FKRegistry:
-	get:
-		return _editor_globals.registry
 
 ##
 ## Currently only able to output these:
@@ -29,7 +24,6 @@ func unit_ui_from(unit: FKUnit, inputs: Dictionary = {}) -> FKUnitUi:
 		
 	return result
 		
-	
 func _create_event_row(data: FKEventBlock) -> FKEventRowUi:
 	"""Create event row node from data (GDevelop-style)."""
 	#print("[FKUnitUiFactory] Creating event row node")
@@ -39,8 +33,15 @@ func _create_event_row(data: FKEventBlock) -> FKEventRowUi:
 	row.legitimize(copy, registry)
 	return row
 	
+var registry: FKRegistry:
+	get:
+		return _editor_globals.registry
+	
 const EVENT_ROW_SCENE = preload(FKEditorGlobals.EVENT_ROW_SCENE_PATH)
-
+var sheet_io : FKSheetIO:
+	get:
+		return _editor_globals.sheet_io
+		
 func _create_comment_ui(data: FKComment) -> FKCommentUi:
 	"""Create comment block node from data."""
 	#print("[FKUnitUiFactory]: Creating comment block node")

@@ -2,8 +2,6 @@
 extends Control
 class_name FKMainEditor
 
-
-
 ## Whether or not FlowKit auto-saves sheets in response to things
 ## like adding or editing Actions.
 @export var auto_save_sheets: bool = true
@@ -33,11 +31,11 @@ var pending_branch_id: String = ""  # The branch provider ID for the current wor
 var selected_row: FKUnitUi = null  # Currently selected event row
 var selected_item: FKUnitUi = null  # Currently selected condition/action item
 
-# Submodules
+# Submodules local to us
 var undo_manager: FKUndoManager = FKUndoManager.new()
 var clipboard := FKClipboardManager.new()
 var input_manager: FKMainEditorInputHandler = FKMainEditorInputHandler.new()
-var sheet_io : FKSheetIO = FKSheetIO.new()
+
 var serializer := FKSerializationManager.new()
 var unit_ui_factory: FKUnitUiFactory
 var sheet_auto_saver: FKSheetAutoSaver = FKSheetAutoSaver.new()
@@ -58,19 +56,46 @@ var is_editor_preview: bool:
 var _is_editor_preview := true
 
 func _enter_tree() -> void:
+	var instance_id := str(get_instance_id())
 	if is_editor_preview:
-		print("[FKMainEditor]: Entered tree as editor preview instance. Instance id: " + str(get_instance_id()))
+		print("[FKMainEditor]: Entered tree as editor preview instance. " +\
+		"Instance id: " + instance_id)
 		return
 	if is_fully_legit:
 		return
-	print("[FKMainEditor]: Entered tree as legit instance. Instance id: " + str(get_instance_id()))
-	unit_ui_factory = FKUnitUiFactory.new(sheet_io, editor_globals)
-	sheet_auto_saver.init(self, auto_save_sheets)
+	print("[FKMainEditor]: Entered tree as legit instance. Instance id: " + instance_id)
+	
+	editor_globals.get_main_editor_tree = func() -> SceneTree:
+		print("In the get_main_editor_tree func, self is " + str(self.get_class()))
+		return self.get_tree()
+	editor_globals.block_container_ui = blocks_container
+	editor_globals.main_editor_root = self
+	editor_globals.sheet_auto_saver = self.sheet_auto_saver
+	self.sheet_auto_saver.init(editor_globals)
+	
+	unit_ui_factory = FKUnitUiFactory.new(editor_globals)
+	
 	input_manager.initialize(self)
 	
 	_modal_related_prep()
 	_toggle_subs(true)
 
+func _apply_auto_save_enablement():
+	var auto_save_setting_registered: bool = \
+	_editor_settings.has_setting(FKEditorGlobals.AUTO_SAVE_TOGGLE_KEY)
+	var enable_auto_save: bool = false if not auto_save_setting_registered \
+	else _editor_settings.get_setting(FKEditorGlobals.AUTO_SAVE_TOGGLE_KEY)
+	
+	sheet_auto_saver.enabled = enable_auto_save
+
+var _editor_settings: EditorSettings:
+	get:
+		return editor_globals._editor_settings
+		
+var sheet_io : FKSheetIO:
+	get:
+		return editor_globals.sheet_io
+		
 var is_fully_legit: bool:
 	get:
 		return _is_fully_legit
@@ -343,7 +368,11 @@ func _undo() -> void:
 	_is_in_undo_redo = false
 	print("[FKMainEditor]: Undo performed")
 	
-var _is_in_undo_redo := false
+var _is_in_undo_redo: bool:
+	get:
+		return editor_globals.is_in_undo_redo
+	set(value):
+		editor_globals.is_in_undo_redo = value
 	
 func _redo() -> void:
 	if not undo_manager.can_redo() or _is_in_undo_redo:
@@ -543,7 +572,11 @@ func _process(delta: float) -> void:
 	if scene_uid != current_scene_uid:
 		_reset_for_new_scene(scene_uid)
 		
-var current_scene_uid: int = 0
+var current_scene_uid: int:
+	get:
+		return editor_globals.current_scene_uid
+	set(value):
+		editor_globals.current_scene_uid = value
 
 func _reset_for_new_scene(scene_uid: int):
 	current_scene_uid = scene_uid
@@ -1962,3 +1995,6 @@ func _on_action_dropped(source_row: FKEventRowUi, action_data: FKActionUnit, tar
 func _generate_unique_block_id(event_id: String) -> String:
 	"""Generate a unique ID for an event block."""
 	return "%s_%d_%d" % [event_id, Time.get_ticks_msec(), randi()]
+
+func get_class() -> String:
+	return "FKMainEditor"

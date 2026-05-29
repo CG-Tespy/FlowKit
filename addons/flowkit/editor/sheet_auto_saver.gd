@@ -5,13 +5,15 @@
 extends RefCounted
 class_name FKSheetAutoSaver
 
-func init(main_editor: FKMainEditor, enabled: bool = true):
-	self._main_editor = main_editor
+func init(editor_globals: FKEditorGlobals, enabled: bool = true):
+	self._editor_globals = editor_globals
+	self._editor_settings = editor_globals.editor_settings
 	self.enabled = enabled
-	_prep_cooldown_timer()
+	_prep_cooldown_timer.call_deferred()
 	
-var _main_editor: FKMainEditor 
+var _editor_globals: FKEditorGlobals
 # ^Used as a context to access other modules as needed
+var _editor_settings: EditorSettings
 var enabled: bool = false
 # ^Decides whether or not this can do any saving
 
@@ -22,34 +24,31 @@ func _prep_cooldown_timer():
 	_cooldown_timer = Timer.new()
 	_cooldown_timer.one_shot = false
 	_cooldown_timer.wait_time = COOLDOWN
-	_main_editor.add_child(_cooldown_timer)
+	_main_editor_root.add_child(_cooldown_timer)
 	_cooldown_timer.timeout.connect(_on_cooldown_finished)
-	
+
 var _cooldown_timer: Timer
 const COOLDOWN := 0.2
 
+var _main_editor_root: Control:
+	get:
+		return _editor_globals.main_editor_root
+		
 func _on_cooldown_finished():
 	_cooldown_active = false
 
-	if _save_scheduled:
-		_save_scheduled = false
-		_handle_save_as_needed()
-
 var _cooldown_active: bool = false
-var _save_scheduled: bool = false
 
 func _handle_save_as_needed():
 	if not _cooldown_active:
 		_save_after_one_frame()
 		_start_cooldown()
-	else:
-		_save_scheduled = true
 
 func _save_after_one_frame():
 	# Why one frame? To give time for any setup that the unit uis need upon
 	# being added, removed, etc.
 	if enabled:
-		await _main_editor.get_tree().process_frame 
+		await _main_editor_root.get_tree().process_frame 
 		_save_sheet()
 
 ## Saves the sheet to disk before returning it.
@@ -58,9 +57,9 @@ func _save_sheet() -> FKEventSheet:
 	if not enabled:
 		return
 		
-	var current_scene_uid = _main_editor.current_scene_uid
+	var current_scene_uid = _editor_globals.current_scene_uid
 	var is_scene_open: bool = current_scene_uid > 0
-	var in_undo_redo := _main_editor._is_in_undo_redo
+	var in_undo_redo := _editor_globals.is_in_undo_redo
 	if not is_scene_open or in_undo_redo:
 		push_warning("[FKSheetAutoSaver] No scene open to save event sheet.")
 		return
@@ -69,7 +68,7 @@ func _save_sheet() -> FKEventSheet:
 	var sheet := FKEventSheet.from_units(units)
 	
 	var result: FKEventSheet = null
-	var sheet_io := _main_editor.sheet_io
+	var sheet_io := _editor_globals.sheet_io
 	var err := sheet_io.save_sheet(current_scene_uid, sheet)
 
 	if err == OK:
@@ -83,8 +82,8 @@ func _save_sheet() -> FKEventSheet:
 var _block_container: FKBlockContainerUi:
 	get:
 		var result: FKBlockContainerUi = null
-		if _main_editor:
-			result = _main_editor.blocks_container
+		if _editor_globals:
+			result = _editor_globals.block_container_ui
 		return result
 		
 func _start_cooldown():
