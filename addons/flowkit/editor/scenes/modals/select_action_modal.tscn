@@ -1,6 +1,6 @@
 [gd_scene format=3 uid="uid://c7j20avh3m4rj"]
 
-[ext_resource type="Script" uid="uid://ckts6rjlmh4hr" path="res://addons/flowkit/ui/modals/select_action_modal.gd" id="1_action"]
+[ext_resource type="Script" uid="uid://ckts6rjlmh4hr" path="res://addons/flowkit/editor/modals/select_action_modal.gd" id="1_action"]
 [ext_resource type="StyleBox" uid="uid://coc5tirv43fp" path="res://addons/flowkit/editor/styles/modal_desc_panel_style.tres" id="2_3qifl"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_fkpqk"]

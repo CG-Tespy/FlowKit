@@ -1,6 +1,6 @@
 [gd_scene format=3 uid="uid://cam4a1xj6n7ql"]
 
-[ext_resource type="Script" uid="uid://bn7bags6twbx0" path="res://addons/flowkit/ui/modals/select_condition_modal.gd" id="1_condition"]
+[ext_resource type="Script" uid="uid://bn7bags6twbx0" path="res://addons/flowkit/editor/modals/select_condition_modal.gd" id="1_condition"]
 [ext_resource type="StyleBox" uid="uid://coc5tirv43fp" path="res://addons/flowkit/editor/styles/modal_desc_panel_style.tres" id="2_ftt57"]
 
 [node name="SelectCondition" type="PopupPanel" unique_id=1328454773 node_paths=PackedStringArray("search_box", "item_list", "description_label", "recent_item_list", "desc_panel")]

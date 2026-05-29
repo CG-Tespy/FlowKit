@@ -1,6 +1,6 @@
 [gd_scene format=3 uid="uid://crj5y8vh2m3qi"]
 
-[ext_resource type="Script" uid="uid://dcajc4erjcorh" path="res://addons/flowkit/ui/modals/select_event_modal.gd" id="1_event"]
+[ext_resource type="Script" uid="uid://dcajc4erjcorh" path="res://addons/flowkit/editor/modals/select_event_modal.gd" id="1_event"]
 [ext_resource type="StyleBox" uid="uid://coc5tirv43fp" path="res://addons/flowkit/editor/styles/modal_desc_panel_style.tres" id="2_vx0pf"]
 
 [node name="SelectEvent" type="PopupPanel" unique_id=484748214 node_paths=PackedStringArray("search_box", "item_list", "description_label", "recent_item_list", "desc_panel")]

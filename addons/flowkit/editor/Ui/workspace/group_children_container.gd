@@ -2,9 +2,6 @@
 extends VBoxContainer
 class_name GroupChildrenContainerUi
 
-func _enter_tree() -> void:
-	set_meta("_parent_group", null)
-	
 ## Container for group children that handles drag-drop reordering.
 ## Handles both internal reordering and external drops from outside the group.
 

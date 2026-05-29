@@ -45,7 +45,8 @@ func _prep_editor_globals():
 	editor_globals.generator = generator
 
 func _prep_main_editor():
-	var editor_scene: PackedScene = preload("res://addons/flowkit/ui/main_editor.tscn")
+	const path := FKEditorGlobals.MAIN_EDITOR_SCENE_PATH
+	var editor_scene: PackedScene = preload(path)
 	editor = editor_scene.instantiate()
 	editor.editor_globals = editor_globals
 	# ^Very important that we assign this _before_ legitimization. Why? At least

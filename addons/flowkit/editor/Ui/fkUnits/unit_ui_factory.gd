@@ -39,7 +39,7 @@ func _create_event_row(data: FKEventBlock) -> FKEventRowUi:
 	row.legitimize(copy, registry)
 	return row
 	
-const EVENT_ROW_SCENE = preload("res://addons/flowkit/ui/workspace/event_row_ui.tscn")
+const EVENT_ROW_SCENE = preload(FKEditorGlobals.EVENT_ROW_SCENE_PATH)
 
 func _create_comment_ui(data: FKComment) -> FKCommentUi:
 	"""Create comment block node from data."""
@@ -51,7 +51,7 @@ func _create_comment_ui(data: FKComment) -> FKCommentUi:
 	comment.legitimize(copy, registry)
 	return comment
 
-const COMMENT_SCENE = preload("res://addons/flowkit/ui/workspace/comment_ui.tscn")
+const COMMENT_SCENE = preload(FKEditorGlobals.COMMENT_SCENE_PATH)
 
 func _create_group_block(data: FKGroup) -> FKGroupUi:
 	"""Create group block node from data."""
@@ -62,4 +62,4 @@ func _create_group_block(data: FKGroup) -> FKGroupUi:
 	group.legitimize(copy, registry)
 	return group
 	
-const GROUP_SCENE = preload("res://addons/flowkit/ui/workspace/group_ui.tscn")
+const GROUP_SCENE = preload(FKEditorGlobals.GROUP_SCENE_PATH)

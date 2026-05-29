@@ -1,8 +1,8 @@
 [gd_scene format=3 uid="uid://d1uy22pv42td3"]
 
-[ext_resource type="Script" uid="uid://bwh2bhg4rvhcx" path="res://addons/flowkit/ui/main_editor.gd" id="1_gkvd7"]
-[ext_resource type="Script" uid="uid://dg46wtoo70ju2" path="res://addons/flowkit/ui/menu_bar.gd" id="2_cq0bt"]
-[ext_resource type="Script" uid="uid://d3kkt2ew5wf7j" path="res://addons/flowkit/ui/blocks_container_ui.gd" id="3_xf0se"]
+[ext_resource type="Script" uid="uid://bwh2bhg4rvhcx" path="res://addons/flowkit/editor/Ui/main_editor.gd" id="1_gkvd7"]
+[ext_resource type="Script" uid="uid://dg46wtoo70ju2" path="res://addons/flowkit/editor/Ui/menu_bar.gd" id="2_cq0bt"]
+[ext_resource type="Script" uid="uid://d3kkt2ew5wf7j" path="res://addons/flowkit/editor/Ui/blocks_container_ui.gd" id="3_xf0se"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_bg"]
 bg_color = Color(0.12, 0.12, 0.15, 1)

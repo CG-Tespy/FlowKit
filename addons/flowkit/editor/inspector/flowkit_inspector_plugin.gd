@@ -19,7 +19,7 @@ func _parse_begin(object: Object) -> void:
 	var node: Node = object as Node
 	
 	# Create the FlowKit inspector section
-	var inspector: Control = preload("res://addons/flowkit/ui/inspector/flowkit_inspector_section.gd").new()
+	var inspector: Control = FKInspectorSection.new()
 	inspector.set_node(node)
 	if registry:
 		inspector.set_registry(registry)

@@ -1,5 +1,6 @@
 @tool
 extends VBoxContainer
+class_name FKInspectorSection
 
 ## FlowKit Inspector Section
 ## Displays node behaviors in the inspector with Godot-style UI
