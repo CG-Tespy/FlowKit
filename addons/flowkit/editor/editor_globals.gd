@@ -45,3 +45,6 @@ var base_control: Control:
 		return editor_interface.get_base_control()
 		
 var sheet_editor_visible: bool = false
+
+## Ready to let the user do things like add and reorder Actions
+var sheet_editor_ready := false

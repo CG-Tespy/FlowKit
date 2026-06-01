@@ -10,12 +10,14 @@ func init(editor_globals: FKEditorGlobals, enabled: bool = true):
 	self._editor_settings = editor_globals.editor_settings
 	self.enabled = enabled
 	_prep_cooldown_timer.call_deferred()
+	_toggle_subs(true)
+	print("[FKSheetAutoSaver]: Initialized.")
 	
 var _globals: FKEditorGlobals
 # ^Used as a context to access other modules as needed
 var _editor_settings: EditorSettings
 var enabled: bool = false
-# ^Decides whether or not this can do any saving
+# ^Decides whether or not this can do any saving.
 
 func _prep_cooldown_timer():
 	if _cooldown_timer:
@@ -41,9 +43,10 @@ var _cooldown_active: bool = false
 
 func _handle_save_as_needed():
 	if not _allowed_to_save:
-		var log_message := "[FKAutoSaver]: Not allowed to save. Enabled: " + str(enabled) +\
-		" cooldown active: " + str(_cooldown_active) + " sheet editor visible: " + \
-		str(_globals.sheet_editor_visible)
+		var log_message := "[FKSheetAutoSaver]: Not allowed to save. Enabled: " + str(enabled) +\
+		" | cooldown active: " + str(_cooldown_active) + " | sheet editor visible: " + \
+		str(_globals.sheet_editor_visible) + " | Sheet editor ready: " + \
+		str(_globals.sheet_editor_ready)
 		print(log_message)
 		return
 		
@@ -53,14 +56,14 @@ func _handle_save_as_needed():
 var _allowed_to_save: bool:
 	get:
 		return self.enabled and not _cooldown_active and \
-	_globals.sheet_editor_visible
+	_globals.sheet_editor_visible and _globals.sheet_editor_ready
 	
 func _save_after_one_frame():
 	# Why one frame? To give time for any setup that the unit uis need upon
 	# being added, removed, etc.
-	if enabled:
-		await _base_control.get_tree().process_frame 
-		_save_sheet()
+	var tree := _base_control.get_tree()
+	await tree.process_frame
+	_save_sheet()
 
 ## Saves the sheet to disk before returning it.
 ## If saving fails, this returns null.
@@ -102,12 +105,8 @@ func _start_timer_and_cooldown():
 	
 ## Ensures that the auto-saver is properly in sync with things.
 func refresh():
-	_toggle_subs(false)
-	_units_listening_for.clear()
-	var current_uis := _block_container.unit_uis
-	_units_listening_for.append_array(current_uis)
-	_toggle_subs(true)
-	_prep_cooldown_timer()
+	# No-op for now, thanks to the new signal bus approach
+	pass
 	
 func _toggle_subs(on: bool):
 	if on and not _is_subbed:
@@ -131,21 +130,17 @@ var _unit_ui_signals: FKUnitUiSignals:
 	get:
 		return _globals.unit_ui_signals
 		
-var _units_listening_for: Array[FKUnitUi] = []
-
 func _on_unit_contents_changed(unit_ui: FKUnitUi):
 	print("[FKSheetAutoSaver]: Responding to unit contents changing")
 	_handle_save_as_needed()
 
-func _on_child_entered_block_container(child: Node):
-	if child is FKUnitUi:
-		print("[FKSheetAutoSaver]: Responding to block child entering")
-		_handle_save_as_needed()
+func _on_child_entered_block_container(child: FKUnitUi):
+	print("[FKSheetAutoSaver]: Responding to block child entering")
+	_handle_save_as_needed()
 
-func _on_child_exiting_block_container(child: Node):
-	if child is FKUnitUi:
-		print("[FKSheetAutoSaver]: Responding to block child exiting")
-		_handle_save_as_needed()
+func _on_child_exiting_block_container(child: FKUnitUi):
+	print("[FKSheetAutoSaver]: Responding to block child exiting")
+	_handle_save_as_needed()
 	
 func _on_block_container_children_reordered():
 	print("[FKSheetAutoSaver]: Responding to block children reordered")

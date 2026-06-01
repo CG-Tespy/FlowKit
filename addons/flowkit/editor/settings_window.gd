@@ -20,39 +20,43 @@ func _enter_tree() -> void:
 		print(log_message)
 		return
 	
+	_ensure_settings_registered()
 	_update_toggle()
 	_update_sheet_auto_saver.call_deferred()
 	_toggle_subs(true)
 
-func _update_toggle():
+func _ensure_settings_registered():
 	if not editor_settings.has_setting(_auto_save_toggle_key):
-		return
+		print("[FKSettingsWindow]: Initializing auto save setting.")
+		editor_settings.set_setting(_auto_save_toggle_key, auto_save_toggle.button_pressed)
+	
+var _auto_save_toggle_key: String:
+	get:
+		return FKEditorGlobals.AUTO_SAVE_TOGGLE_KEY
+		
+func _update_toggle():
 	var current: bool = _auto_save_toggle_setting
 	auto_save_toggle.button_pressed = current
 
+var _auto_save_toggle_setting: bool:
+	get:
+		return editor_settings.get_setting(_auto_save_toggle_key)
+		
 var editor_settings: EditorSettings:
 	get:
 		return editor_interface.get_editor_settings()
 		
-var _auto_save_toggle_key: String:
-	get:
-		return FKEditorGlobals.AUTO_SAVE_TOGGLE_KEY
-
 var editor_interface: EditorInterface:
 	get:
 		return globals.editor_interface
 		
 var globals: FKEditorGlobals
 
-var _auto_save_toggle_setting: bool:
-	get:
-		return editor_settings.get_setting(_auto_save_toggle_key)
-		
 func _update_sheet_auto_saver():
 	var current: bool = _auto_save_toggle_setting
 	if globals and globals.sheet_auto_saver:
+		print("[FKSettingsWindow]: Updated auto sheet saver enabled to: " + str(current))
 		globals.sheet_auto_saver.enabled = current
-		print("[FKSettingsWindow]: updated auto saver enabled: " + str(current))
 
 func _toggle_subs(on: bool):
 	if on && !_is_subbed:
