@@ -43,11 +43,6 @@ var _cooldown_active: bool = false
 
 func _handle_save_as_needed():
 	if not _allowed_to_save:
-		var log_message := "[FKSheetAutoSaver]: Not allowed to save. Enabled: " + str(enabled) +\
-		" | cooldown active: " + str(_cooldown_active) + " | sheet editor visible: " + \
-		str(_globals.sheet_editor_visible) + " | Sheet editor ready: " + \
-		str(_globals.sheet_editor_ready)
-		print(log_message)
 		return
 		
 	_save_after_one_frame()
@@ -131,18 +126,14 @@ var _unit_ui_signals: FKUnitUiSignals:
 		return _globals.unit_ui_signals
 		
 func _on_unit_contents_changed(unit_ui: FKUnitUi):
-	print("[FKSheetAutoSaver]: Responding to unit contents changing")
 	_handle_save_as_needed()
 
 func _on_child_entered_block_container(child: FKUnitUi):
-	print("[FKSheetAutoSaver]: Responding to block child entering")
 	_handle_save_as_needed()
 
 func _on_child_exiting_block_container(child: FKUnitUi):
-	print("[FKSheetAutoSaver]: Responding to block child exiting")
 	_handle_save_as_needed()
 	
 func _on_block_container_children_reordered():
-	print("[FKSheetAutoSaver]: Responding to block children reordered")
 	_handle_save_as_needed()
 	

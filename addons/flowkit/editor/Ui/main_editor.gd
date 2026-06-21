@@ -438,10 +438,10 @@ func _delete_selected_row() -> void:
 		# Row is inside a group - emit the appropriate delete signal
 		if row_to_delete is FKGroupUi:
 			# It's a nested group
-			row_to_delete.delete_requested.emit()
+			row_to_delete.delete_requested.emit(row_to_delete)
 		elif row_to_delete is FKCommentUi:
 			# It's a comment
-			row_to_delete.delete_requested.emit()
+			row_to_delete.delete_requested.emit(row_to_delete)
 		else:
 			# It's an event row
 			row_to_delete.delete_event_requested.emit(row_to_delete)
@@ -701,7 +701,7 @@ func _new_sheet() -> void:
 
 func _connect_comment_signals(comment: FKCommentUi) -> void:
 	comment.selected.connect(_on_comment_selected)
-	comment.delete_requested.connect(_on_comment_delete.bind(comment))
+	comment.delete_requested.connect(_on_comment_delete)
 
 	comment.insert_comment_above_requested.connect(_on_comment_insert_above.bind(comment))
 	comment.insert_comment_below_requested.connect(_on_comment_insert_below.bind(comment))
@@ -711,7 +711,7 @@ func _connect_comment_signals(comment: FKCommentUi) -> void:
 
 func _connect_group_signals(group: FKGroupUi) -> void:
 	group.selected.connect(_on_group_selected)
-	group.delete_requested.connect(_on_group_delete.bind(group))
+	group.delete_requested.connect(_on_group_delete)
 
 	group.before_contents_changed.connect(func(n): _push_undo_state())
 	group.add_event_requested.connect(_on_group_add_event_requested)

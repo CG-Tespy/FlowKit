@@ -244,7 +244,7 @@ func _instantiate_event_row(data: FKEventBlock) -> Control:
 		printerr("[FKGroupUi]: Cannot instantiate event row in editor preview mode")
 		return null
 	var row: FKEventRowUi = EVENT_ROW_SCENE.instantiate()
-	row.call_deferred("legitimize", data, registry)
+	row.call_deferred("legitimize", data, _globals)
 	_connect_event_row_signals(row, data)
 	return row
 
@@ -297,7 +297,7 @@ func _instantiate_comment(data: FKComment) -> Control:
 func _connect_comment_signals_to_group_handlers(comment: FKCommentUi, data: FKComment) -> void:
 	comment.delete_requested.connect(_on_child_comment_delete_requested.bind(data))
 	comment.selected.connect(func(n): _on_child_selected(data); selected.emit(n))
-	comment.block_contents_changed.connect(_on_child_modified)
+	comment.contents_changed.connect(_on_child_modified)
 	comment.insert_comment_above_requested.connect(func(c): insert_comment_above_requested.emit(c))
 	comment.insert_comment_below_requested.connect(func(c): insert_comment_below_requested.emit(c))
 	comment.insert_event_above_requested.connect(func(c): insert_event_above_requested.emit(c))
@@ -316,13 +316,11 @@ func _instantiate_group(data: FKGroup) -> Control:
 	return nested
 
 func _attach_nested_group_signals(nested: FKGroupUi, data: FKGroup):
-	nested.delete_requested.connect(_on_child_group_delete_requested.bind(data))
+	nested.delete_requested.connect(func(n): _on_child_group_delete_requested.bind(data))
 	nested.selected.connect(func(n): selected.emit(n))
 
-	nested.block_contents_changed.connect(_on_child_modified)
-
 	nested.contents_changed.connect(_on_child_modified)
-	nested.before_contents_changed.connect(func(): before_contents_changed.emit())
+	nested.before_contents_changed.connect(func(n): before_contents_changed.emit(self))
 
 	nested.add_event_requested.connect(func(g): add_event_requested.emit(g))
 	nested.add_comment_requested.connect(func(g): add_comment_requested.emit(g))
@@ -356,8 +354,8 @@ func _attach_nested_group_signals(nested: FKGroupUi, data: FKGroup):
 # Child events / data sync
 # ---------------------------------------------------------
 
-func _on_child_modified() -> void:
-	contents_changed.emit()
+func _on_child_modified(modified: FKUnitUi) -> void:
+	_unit_ui_signals.contents_changed.emit(self)
 
 func _on_child_row_delete_requested(row: Node, data: FKEventBlock) -> void:
 	_remove_child_data(data)
@@ -378,10 +376,10 @@ func _remove_child_data(child_data) -> void:
 			break
 	if idx >= 0:
 		print("Emitting FKGroupUi before_contents_changed")
-		before_contents_changed.emit()
+		before_contents_changed.emit(self)
 		_group.children.remove_at(idx)
 		_rebuild_child_nodes()
-		contents_changed.emit()
+		contents_changed.emit(self)
 
 func _sync_children_to_data() -> void:
 	if not _group or is_editor_preview:
@@ -402,10 +400,10 @@ func _sync_children_to_data() -> void:
 func add_event_to_group(event_data: FKEventBlock) -> void:
 	if not _group or is_editor_preview:
 		return
-	before_contents_changed.emit()
+	before_contents_changed.emit(self)
 	_group.children.append(event_data)
 	_rebuild_child_nodes()
-	contents_changed.emit()
+	contents_changed.emit(self)
 
 # ---------------------------------------------------------
 # Collapse / expand
@@ -434,10 +432,10 @@ func _on_collapse_btn_mouse_exited() -> void:
 
 func _toggle_collapse() -> void:
 	if _group:
-		before_contents_changed.emit()
+		before_contents_changed.emit(self)
 		_group.collapsed = not _group.collapsed
 		_update_collapse_display()
-		contents_changed.emit()
+		contents_changed.emit(self)
 
 # ---------------------------------------------------------
 # Title editing
@@ -504,13 +502,13 @@ func _on_title_focus_lost() -> void:
 		_finish_title_edit(title_edit.text)
 
 func _finish_title_edit(new_text: String) -> void:
-	before_contents_changed.emit()
+	before_contents_changed.emit(self)
 	title_edit.visible = false
 	title_label.visible = true
 	if _group:
 		_group.title = new_text if new_text != "" else "Group"
 		title_label.text = _group.title
-	contents_changed.emit()
+	contents_changed.emit(self)
 
 # ---------------------------------------------------------
 # Context menu
@@ -552,7 +550,7 @@ func _on_child_selected(child_data: Variant) -> void:
 func _add_comment_to_group() -> void:
 	if not _group:
 		return
-	before_contents_changed.emit()
+	before_contents_changed.emit(self)
 	var comment := FKComment.new()
 	comment.text = ""
 	var insert_index := _group.children.size()
@@ -563,7 +561,7 @@ func _add_comment_to_group() -> void:
 				break
 	_group.children.insert(insert_index, comment)
 	_rebuild_child_nodes()
-	contents_changed.emit()
+	contents_changed.emit(self)
 
 func _show_color_picker() -> void:
 	if not _group:
@@ -583,10 +581,10 @@ func _show_color_picker() -> void:
 	)
 
 	dialog.confirmed.connect(func():
-		before_contents_changed.emit()
+		before_contents_changed.emit(self)
 		_group.color = picker.color
 		_update_color_display()
-		contents_changed.emit()
+		contents_changed.emit(self)
 		dialog.queue_free()
 	)
 
@@ -768,10 +766,10 @@ func _handle_internal_reorder(drag_node: Node) -> void:
 	if target_child_idx > current_child_idx:
 		target_child_idx -= 1
 
-	before_contents_changed.emit()
+	before_contents_changed.emit(self)
 	children_container.move_child(drag_node, target_child_idx)
 	_sync_children_to_data()
-	contents_changed.emit()
+	contents_changed.emit(self)
 
 func _get_visible_unit_children() -> Array[Control]:
 	var visible_children: Array[Control] = []
@@ -791,7 +789,7 @@ func _handle_external_drop(drag_node: Node, drag_data: FKDragData, original_pare
 	if not unit or not _group:
 		return
 
-	before_contents_changed.emit()
+	before_contents_changed.emit(self)
 
 	var drop_idx := _calculate_drop_index(drag_node)
 
@@ -813,7 +811,7 @@ func _handle_external_drop(drag_node: Node, drag_data: FKDragData, original_pare
 
 	_group.children.insert(drop_idx, unit)
 	_rebuild_child_nodes()
-	contents_changed.emit()
+	contents_changed.emit(self)
 
 func _calculate_drop_index(dragged_node: Node) -> int:
 	if not children_container:
