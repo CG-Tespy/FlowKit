@@ -128,7 +128,7 @@ func _toggle_negate() -> void:
 	if not _action.branch_condition:
 		return
 
-	before_contents_changed.emit()
+	before_contents_changed.emit(self)
 	_action.branch_condition.negated = not _action.branch_condition.negated
 	update_display()
 	contents_changed.emit(self)
@@ -319,14 +319,14 @@ func _connect_nested_branch_signals(nested: FKBranchUnitUi) -> void:
 	nested.action_cross_reorder_requested.connect(func(sd, td, above, tb): action_cross_reorder_requested.emit(sd, td, above, tb))
 	nested.action_dropped_into_branch.connect(func(si, bi): action_dropped_into_branch.emit(si, bi))
 	nested.contents_changed.connect(func(n): contents_changed.emit(n))
-	nested.before_contents_changed.connect(func(): before_contents_changed.emit())
+	nested.before_contents_changed.connect(func(n): before_contents_changed.emit(self))
 
 # ---------------------------------------------------------
 # Sub‑Action Delete / Reorder
 # ---------------------------------------------------------
 
 func _on_sub_action_delete(item: FKUnitUi) -> void:
-	before_contents_changed.emit()
+	before_contents_changed.emit(item)
 	var data: FKUnit = item.get_block()
 	if data and _action:
 		var idx := _action.branch_actions.find(data)
@@ -355,7 +355,7 @@ func _on_sub_action_reorder(source_item, target_item, drop_above: bool) -> void:
 	if source_idx == target_idx:
 		return
 
-	before_contents_changed.emit()
+	before_contents_changed.emit(self)
 
 	_action.branch_actions.remove_at(source_idx)
 	if source_idx < target_idx:
