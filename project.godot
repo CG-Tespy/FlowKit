@@ -31,7 +31,7 @@ window/size/resizable=false
 
 [editor_plugins]
 
-enabled=PackedStringArray("res://addons/flowkit/plugin.cfg")
+enabled=PackedStringArray("res://addons/flowkit/plugin.cfg", "res://addons/gut/plugin.cfg")
 
 [rendering]
 
