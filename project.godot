@@ -26,7 +26,6 @@ FlowKit="*uid://b6cetiyknul1b"
 
 [display]
 
-window/size/mode=3
 window/size/resizable=false
 
 [editor_plugins]

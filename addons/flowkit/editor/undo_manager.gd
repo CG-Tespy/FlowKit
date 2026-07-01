@@ -1,69 +1,82 @@
-# FKUndoManager.gd
 extends RefCounted
-class_name FKUndoManager
+class_name FKSheetStateTracker
 
-const MAX_UNDO_STATES := 50
+const MAX_HISTORY := 50
 
-var _undo_stack: Array = []
-var _redo_stack: Array = []
+var _history: Array = [] # Past snapshots
+var _future: Array = [] # Forward snapshots
 
 func clear() -> void:
-	_undo_stack.clear()
-	_redo_stack.clear()
+	_history.clear()
+	_future.clear()
 
-func can_undo() -> bool:
-	return not _undo_stack.is_empty()
+func has_previous() -> bool:
+	return not _history.is_empty()
 
-func can_redo() -> bool:
-	return not _redo_stack.is_empty()
+func has_next() -> bool:
+	return not _future.is_empty()
 
 func _deep_copy_units(units: Array) -> Array:
 	var result: Array = []
-	for u in units:
-		if u == null:
+
+	for unitEl in units:
+		if unitEl == null:
 			result.append(null)
-		elif u is FKUnit:
-			result.append(u.duplicate_block())
-		elif u is Resource:
-			result.append(u.duplicate(true))
+		elif unitEl is FKUnit:
+			result.append(unitEl.duplicate_block())
+		elif unitEl is Resource:
+			result.append(unitEl.duplicate(true))
+		elif unitEl is Array or unitEl is Dictionary:
+			result.append(unitEl.duplicate(true))
 		else:
-			if u is Array or u is Dictionary:
-				result.append(u.duplicate(true))
-			else:
-				result.append(u)
+			result.append(unitEl)
+
 	return result
 
-func push_state(units: Array) -> void:
+## Stores a copy of the sheet's current state.
+## This function takes the list of FKUnits currently in the editor,
+## makes a deep copy of them, and adds that snapshot to the history.
+## Each snapshot represents “what the sheet looked like” before a
+## change happened. This is what allows the editor to step backward
+## through previous states when the user performs an undo.
+## After recording the snapshot, the forward history (redo stack) is
+## cleared because any new change breaks the redo chain.
+func record_snapshot(units: Array) -> void:
 	var snapshot := _deep_copy_units(units)
-	
-	_undo_stack.append(snapshot)
-	while _undo_stack.size() > MAX_UNDO_STATES:
-		_undo_stack.pop_front()
+	_history.append(snapshot)
+	print("[FKSheetStateTracker]: Recorded snapshot. History size =", _history.size())
+	_enforce_history_size_cap()
+	_future.clear()
 
-	_redo_stack.clear()
 
-# Returns a previous snapshot of the units' state
-func undo(current_units: Array[FKUnit]) -> Array:
-	if _undo_stack.is_empty():
-		print("[UndoManager]: Current stack is empty. Returning passed units.")
-		return current_units
-	
-	var current_snapshot := _deep_copy_units(current_units)
-	_redo_stack.append(current_snapshot)
-	var to_pop_back: Array = _undo_stack.pop_back()
-		
-	if to_pop_back.size() == 1 and to_pop_back[0] is FKGroup:
-		var group: FKGroup = to_pop_back[0]
-		
-	return to_pop_back
+func _enforce_history_size_cap():
+	while _history.size() > MAX_HISTORY:
+		_history.pop_front()
 
-func redo(current_units: Array) -> Array:
-	if _redo_stack.is_empty():
+
+## Returns the most recently recorded snapshot of the sheet.
+## This function is used when the user performs an undo. It takes the
+## current sheet state, saves a copy of it into the forward history
+## (so redo will work), then removes and returns the last snapshot
+## from the history list. The returned snapshot represents the sheet
+## state from before the most recent change.
+## If no snapshots exist, the current sheet state is returned instead.
+func get_previous_snapshot(current_units: Array[FKUnit]) -> Array:
+	if _history.is_empty():
 		return current_units
 
 	var current_snapshot := _deep_copy_units(current_units)
-	_undo_stack.append(current_snapshot)
-	
-	var to_pop_back: Array = _redo_stack.pop_back()
-	return to_pop_back
-	
+	_future.append(current_snapshot)
+
+	var popped: Array = _history.pop_back()
+	return popped
+
+func get_next_snapshot(current_units: Array) -> Array:
+	if _future.is_empty():
+		return current_units
+
+	var current_snapshot := _deep_copy_units(current_units)
+	_history.append(current_snapshot)
+
+	var popped: Array = _future.pop_back()
+	return popped

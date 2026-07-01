@@ -161,3 +161,71 @@ func test_serialization_structure():
 	assert_eq(restored_act.target_node, NodePath("Enemy"))
 	assert_eq(restored_act.inputs, {"speed": 10})
 	assert_false(restored_act.is_branch)
+
+func test_event_block_target_node_roundtrip():
+	var ev := FKEventBlock.new()
+	ev.event_id = "OnReady"
+	ev.target_node = NodePath("Player/Camera")
+
+	var json := ev.serialize()
+
+	assert_eq(json["target_node"], "Player/Camera")
+
+	var restored := FKEventBlock.new()
+	restored.deserialize(json)
+
+	assert_eq(restored.target_node, NodePath("Player/Camera"))
+
+func test_event_block_inputs_nested_roundtrip():
+	var ev := FKEventBlock.new()
+	ev.inputs = {
+		"simple": 1,
+		"nested": {"a": 10, "b": 20}
+	}
+
+	var json := ev.serialize()
+	assert_eq(json["inputs"], {
+		"simple": 1,
+		"nested": {"a": 10, "b": 20}
+	})
+
+	var restored := FKEventBlock.new()
+	restored.deserialize(json)
+
+	assert_eq(restored.inputs, ev.inputs)
+
+
+func test_event_block_duplicate_multiple_items():
+	var ev := FKEventBlock.new()
+	ev.event_id = "Multi"
+	ev.inputs = {"x": 1}
+
+	# Add multiple conditions
+	var c1 := FKConditionUnit.new()
+	c1.condition_id = "C1"
+	var c2 := FKConditionUnit.new()
+	c2.condition_id = "C2"
+	ev.conditions.append_array([c1, c2])
+
+	# Add multiple actions
+	var a1 := FKActionUnit.new()
+	a1.action_id = "A1"
+	var a2 := FKActionUnit.new()
+	a2.action_id = "A2"
+	ev.actions.append_array([a1, a2])
+
+	var dup := ev.duplicate_block() as FKEventBlock
+
+	# Conditions deep-copied
+	assert_eq(dup.conditions.size(), 2)
+	assert_true(not is_same(dup.conditions[0], ev.conditions[0]))
+	assert_true(not is_same(dup.conditions[1], ev.conditions[1]))
+
+	# Actions deep-copied
+	assert_eq(dup.actions.size(), 2)
+	assert_true(not is_same(dup.actions[0], ev.actions[0]))
+	assert_true(not is_same(dup.actions[1], ev.actions[1]))
+
+	# Mutating duplicate should not affect original
+	dup.conditions[0].condition_id = "Changed"
+	assert_ne(ev.conditions[0].condition_id, dup.conditions[0].condition_id)
