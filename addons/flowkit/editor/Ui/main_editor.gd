@@ -32,7 +32,7 @@ var selected_row: FKUnitUi = null  # Currently selected event row
 var selected_item: FKUnitUi = null  # Currently selected condition/action item
 
 # Submodules local to us
-var undo_manager: FKUndoManager = FKUndoManager.new()
+var sheet_state_tracker: FKSheetStateTracker = FKSheetStateTracker.new()
 var clipboard := FKClipboardManager.new()
 var input_manager: FKMainEditorInputHandler = FKMainEditorInputHandler.new()
 
@@ -361,18 +361,21 @@ func _paste_group() -> void:
 # === Undo/Redo System ===
 func _push_undo_state() -> void:
 	var units := blocks_container.units
-	undo_manager.push_state(units)
+	if sheet_state_tracker == null:
+		sheet_state_tracker = FKSheetStateTracker.new()
+	sheet_state_tracker.record_snapshot(units)
 
 func _clear_undo_history() -> void:
 	"""Clear undo/redo history (called when switching scenes)."""
-	undo_manager.clear()
+	sheet_state_tracker.clear()
 
 func _undo() -> void:
-	if not undo_manager.can_undo() or _is_in_undo_redo:
+	print("[FKMainEditor]: Undo requested. Has previous =", sheet_state_tracker.has_previous())
+	if not sheet_state_tracker.has_previous() or _is_in_undo_redo:
 		return
 	_is_in_undo_redo = true
 	var current_units := blocks_container.units
-	var prev_state := undo_manager.undo(current_units)
+	var prev_state := sheet_state_tracker.get_previous_snapshot(current_units)
 	var restored_units := ArrayUtils.get_fk_units_in(prev_state)
 	_restore_unit_uis(restored_units)
 	
@@ -386,11 +389,11 @@ var _is_in_undo_redo: bool:
 		editor_globals.is_in_undo_redo = value
 	
 func _redo() -> void:
-	if not undo_manager.can_redo() or _is_in_undo_redo:
+	if not sheet_state_tracker.has_next() or _is_in_undo_redo:
 		return
 	_is_in_undo_redo = true
 	var current_units := blocks_container.units
-	var restored_units := ArrayUtils.get_fk_units_in(undo_manager.redo(current_units))
+	var restored_units := ArrayUtils.get_fk_units_in(sheet_state_tracker.get_next_snapshot(current_units))
 
 	_restore_unit_uis(restored_units)
 	_is_in_undo_redo = false
