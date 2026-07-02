@@ -32,7 +32,7 @@ var selected_row: FKUnitUi = null  # Currently selected event row
 var selected_item: FKUnitUi = null  # Currently selected condition/action item
 
 # Submodules local to us
-var undo_manager: FKUndoManager = FKUndoManager.new()
+var sheet_state_tracker: FKSheetStateTracker
 var clipboard := FKClipboardManager.new()
 var input_manager: FKMainEditorInputHandler = FKMainEditorInputHandler.new()
 
@@ -65,6 +65,7 @@ func _enter_tree() -> void:
 		return
 	print("[FKMainEditor]: Entered tree as legit instance. Instance id: " + instance_id)
 	
+	sheet_state_tracker = FKSheetStateTracker.new()
 	editor_globals.get_main_editor_tree = func() -> SceneTree:
 		print("In the get_main_editor_tree func, self is " + str(self.get_class()))
 		return self.get_tree()
@@ -79,6 +80,14 @@ func _enter_tree() -> void:
 	
 	_modal_related_prep()
 	_toggle_subs(true)
+
+func _ready() -> void:
+	if is_fully_legit:
+		await get_tree().create_timer(1.0).timeout
+		sheet_state_tracker.enabled = true
+		# ^We apply this delay to make sure that no snapshots are recorded before the 
+		# full ui is initially built
+
 
 func _apply_auto_save_enablement():
 	var auto_save_setting_registered: bool = \
@@ -224,8 +233,8 @@ func _paste_events() -> void:
 	if new_events.is_empty():
 		return
 
-	_push_undo_state()
-
+	_on_pre_ui_change()
+	
 	var insert_idx = blocks_container.get_child_count()
 	if selected_row:
 		insert_idx = selected_row.get_index() + 1
@@ -241,7 +250,8 @@ func _paste_events() -> void:
 
 	if first_row:
 		_on_row_selected(first_row)
-		
+	_on_ui_change_done()
+
 func _find_parent_branch(node: Control) -> FKBranchUnitUi:
 	"""Find the branch_item that contains this node, or null if at top level."""
 	var current := node.get_parent()
@@ -267,7 +277,7 @@ func _paste_actions() -> void:
 	if new_actions.is_empty():
 		return
 
-	_push_undo_state()
+	_on_pre_ui_change()
 
 	# Check if pasting into a branch
 	var target_branch: FKBranchUnitUi = null
@@ -283,12 +293,13 @@ func _paste_actions() -> void:
 		return
 
 	# Normal paste into event row
-	var data := target_row.get_block() as FKEventBlock
+	var data := target_row.get_block() as FKEventUnit
 	for act in new_actions:
 		data.actions.append(act)
 
 	target_row.update_display()
 	_on_row_selected(target_row)
+	_on_ui_change_done()
 
 func _paste_conditions() -> void:
 	var target_row := selected_row
@@ -304,14 +315,15 @@ func _paste_conditions() -> void:
 	if new_conditions.is_empty():
 		return
 
-	_push_undo_state()
+	_on_pre_ui_change()
 
-	var data := target_row.get_block() as FKEventBlock
+	var data := target_row.get_block() as FKEventUnit
 	for cond in new_conditions:
 		data.conditions.append(cond)
 
 	target_row.update_display()
 	_on_row_selected(target_row)
+	_on_ui_change_done()
 
 func _paste_group() -> void:
 	var new_group := clipboard.paste_group()
@@ -319,7 +331,7 @@ func _paste_group() -> void:
 		return
 	
 	print("[FKMainEditor]: Pasting group")
-	_push_undo_state()
+	_on_pre_ui_change()
 
 	var target_group: FKGroupUi = null
 
@@ -357,28 +369,46 @@ func _paste_group() -> void:
 	blocks_container.add_child(group_node)
 
 	_on_row_selected(group_node)
+	_on_ui_change_done()
 	
 # === Undo/Redo System ===
 func _push_undo_state() -> void:
+	if not is_fully_legit:
+		print("[FKMainEditor]: Cannot push undo state without being fully legit")
+		return
+	if _is_in_undo_redo || _is_in_editor_rebuild || not sheet_state_tracker.enabled:
+		return
+	
+	print("[FKMainEditor]: Pushing undo state")
 	var units := blocks_container.units
-	undo_manager.push_state(units)
+	sheet_state_tracker.record_snapshot(units)
 
 func _clear_undo_history() -> void:
 	"""Clear undo/redo history (called when switching scenes)."""
-	undo_manager.clear()
+	sheet_state_tracker.clear()
 
 func _undo() -> void:
-	if not undo_manager.can_undo() or _is_in_undo_redo:
+	print("[FKMainEditor]: Undo requested. Has previous = ", sheet_state_tracker.has_previous())
+	if _is_in_editor_rebuild or not sheet_state_tracker.has_previous() or \
+	_is_in_undo_redo or not sheet_state_tracker.enabled:
 		return
+
+	_is_in_editor_rebuild = true
 	_is_in_undo_redo = true
+
 	var current_units := blocks_container.units
-	var prev_state := undo_manager.undo(current_units)
+	var prev_state := sheet_state_tracker.get_previous_snapshot(current_units)
 	var restored_units := ArrayUtils.get_fk_units_in(prev_state)
 	_restore_unit_uis(restored_units)
 	
-	_is_in_undo_redo = false
-	print("[FKMainEditor]: Undo performed")
+	await get_tree().process_frame
+	_is_in_undo_redo = false 
+	_is_in_editor_rebuild = false
 	
+	print("[FKMainEditor]: Undo performed")
+
+var _is_in_editor_rebuild: bool = false
+
 var _is_in_undo_redo: bool:
 	get:
 		return editor_globals.is_in_undo_redo
@@ -386,17 +416,37 @@ var _is_in_undo_redo: bool:
 		editor_globals.is_in_undo_redo = value
 	
 func _redo() -> void:
-	if not undo_manager.can_redo() or _is_in_undo_redo:
+	print("[FKMainEditor]: Redo requested. Has next = ", sheet_state_tracker.has_next())
+	if not sheet_state_tracker.has_next() or _is_in_undo_redo or \
+		not sheet_state_tracker.enabled or _is_in_editor_rebuild:
 		return
+	
+	_is_in_editor_rebuild = true
 	_is_in_undo_redo = true
-	var current_units := blocks_container.units
-	var restored_units := ArrayUtils.get_fk_units_in(undo_manager.redo(current_units))
 
+	# 🔥 Step 1: pop the next snapshot
+	var next_snapshot := sheet_state_tracker._future.pop_back()
+
+	# 🔥 Step 2: restore the UI
+	var restored_units := ArrayUtils.get_fk_units_in(next_snapshot)
 	_restore_unit_uis(restored_units)
+
+	# 🔥 Step 3: AFTER UI is restored, capture the new current state
+	await get_tree().process_frame
+	var current_units := blocks_container.units
+
+	# 🔥 Step 4: push current state into history
+	var current_snapshot := sheet_state_tracker._deep_copy_units(current_units)
+	sheet_state_tracker._history.append(current_snapshot)
+
 	_is_in_undo_redo = false
+	_is_in_editor_rebuild = false
+
 	print("[FKMainEditor]: Redo performed")
 
+
 func _restore_unit_uis(units: Array[FKUnit]) -> void:
+	_on_pre_ui_restoration()
 	blocks_container.clear_unit_nodes()
 
 	for unit in units:
@@ -407,7 +457,13 @@ func _restore_unit_uis(units: Array[FKUnit]) -> void:
 		_show_content_state()
 	else:
 		_show_empty_blocks_state()
-		
+	_on_ui_restoration_done()
+
+func _on_pre_ui_restoration():
+	_is_in_editor_rebuild = true
+
+func _on_ui_restoration_done():
+	_is_in_editor_rebuild = false
 		
 func _create_unit_ui(unit: FKUnit) -> FKUnitUi:
 	var result: FKUnitUi = unit_ui_factory.unit_ui_from(unit)
@@ -420,8 +476,7 @@ func _delete_selected_row() -> void:
 	if not selected_row or not is_instance_valid(selected_row):
 		return
 	
-	# Push undo state before deleting
-	_push_undo_state()
+	_on_pre_ui_change()
 	
 	var row_to_delete := selected_row
 	
@@ -445,6 +500,19 @@ func _delete_selected_row() -> void:
 		else:
 			# It's an event row
 			row_to_delete.delete_event_requested.emit(row_to_delete)
+	
+	_on_ui_change_done()
+
+## Meant to fire right before we try making any change to the editor ui.
+func _on_pre_ui_change():
+	if _is_in_editor_rebuild:
+		return 
+	_push_undo_state()
+	_is_in_editor_rebuild = true
+
+## Meant to fire when we;re done making a change to the editor ui.
+func _on_ui_change_done():
+	_is_in_editor_rebuild = false
 
 func _delete_selected_item() -> void:
 	"""Delete the currently selected condition or action item."""
@@ -458,8 +526,7 @@ func _delete_selected_item() -> void:
 	if not parent_row:
 		return
 	
-	# Push undo state before deleting
-	_push_undo_state()
+	_on_pre_ui_change()
 	
 	# Check if it's a condition or action
 	if item_to_delete is FKConditionUnitUi:
@@ -485,6 +552,7 @@ func _delete_selected_item() -> void:
 	
 	# Update display and save
 	parent_row.update_display()
+	_on_ui_change_done()
 
 func _recursive_remove_action_from_list(actions: Array, target_action) -> bool:
 	"""Recursively search and remove an action from actions array and branch sub-actions."""
@@ -513,7 +581,7 @@ func deselect_all(): _deselect_all()
 func _process(delta: float) -> void:
 	if not is_fully_legit or not editor_interface:
 		return
-		
+	
 	# Handle drag spacers - add temporary space only when needed
 	if viewport.gui_is_dragging():
 		if scroll_container and blocks_container:
@@ -671,12 +739,14 @@ func _save_sheet() -> FKEventSheet:
 # Refreshes the Event Sheet Ui based on the sheet passed. If none is passed, 
 # this goes for the sheet tied to the current scene uid.
 func _refresh_ui(sheet: FKEventSheet = null):
+	_on_pre_ui_restoration()
 	if not sheet:
 		# Why this fallback? We want other parts of this script to be able to
 		# refresh the ui without having to look for the sheet first.
 		sheet = sheet_io.load_sheet(current_scene_uid)
 		
 	_refresh_sheet_ui(sheet)
+	_on_ui_restoration_done()
 	
 func _refresh_sheet_ui(sheet: FKEventSheet):
 	blocks_container.clear_unit_nodes()
@@ -687,21 +757,23 @@ func _refresh_sheet_ui(sheet: FKEventSheet):
 		
 	_populate_from_sheet(sheet)
 	_show_content_state()
+	_is_in_editor_rebuild = false
 	
 func _new_sheet() -> void:
 	"""Create new empty sheet."""
 	if current_scene_uid == 0:
 		push_warning("No scene open to create event sheet for.")
 		return
-	
+	_is_in_editor_rebuild = true
 	blocks_container.clear_unit_nodes()
 	_show_content_state()
+	_is_in_editor_rebuild = false
 
 # === Event Row Creation ===
 
 func _connect_comment_signals(comment: FKCommentUi) -> void:
 	comment.selected.connect(_on_comment_selected)
-	comment.delete_requested.connect(_on_comment_delete)
+	comment.delete_requested.connect(_on_comment_delete_requested)
 
 	comment.insert_comment_above_requested.connect(_on_comment_insert_above.bind(comment))
 	comment.insert_comment_below_requested.connect(_on_comment_insert_below.bind(comment))
@@ -711,9 +783,9 @@ func _connect_comment_signals(comment: FKCommentUi) -> void:
 
 func _connect_group_signals(group: FKGroupUi) -> void:
 	group.selected.connect(_on_group_selected)
-	group.delete_requested.connect(_on_group_delete)
+	group.delete_requested.connect(_on_group_delete_requested)
 
-	group.before_contents_changed.connect(func(n): _push_undo_state())
+	group.before_contents_changed.connect(_on_group_before_contents_changed)
 	group.add_event_requested.connect(_on_group_add_event_requested)
 	# Connect edit signals from children inside groups
 	group.condition_edit_requested.connect(_on_condition_edit_requested)
@@ -737,6 +809,9 @@ func _connect_group_signals(group: FKGroupUi) -> void:
 	group.branch_action_add_requested.connect(_on_branch_action_add)
 	group.branch_action_edit_requested.connect(_on_branch_action_edit)
 	group.nested_branch_add_requested.connect(_on_nested_branch_add)
+
+func _on_group_before_contents_changed(n):
+	_push_undo_state()
 
 func _on_group_add_event_requested(group_node: FKGroupUi) -> void:
 	"""Handle request to add an event inside a group."""
@@ -775,7 +850,7 @@ func _on_group_selected(node) -> void:
 	if selected_row is FKUnitUi:
 		selected_row.set_selected(true)
 
-func _on_group_delete(group: FKGroupUi) -> void:
+func _on_group_delete_requested(group: FKGroupUi) -> void:
 	"""Delete a group block."""
 	_push_undo_state()
 	
@@ -827,6 +902,9 @@ func _connect_event_row_signals(row: FKEventRowUi) -> void:
 	row.branch_action_add_requested.connect(_on_branch_action_add)
 	row.branch_action_edit_requested.connect(_on_branch_action_edit)
 	row.nested_branch_add_requested.connect(_on_nested_branch_add)
+
+func _on_row_before_contents_changed(n):
+	_push_undo_state()
 
 # === Menu Button Handlers ===
 
@@ -904,15 +982,15 @@ func _on_generate_manifest() -> void:
 
 	var message := "[FKMainEditor]: Optimized manifest generated!\n\n"
 	message += "Included providers (actively used):\n"
-	message += "  Actions:    %d\n" % result.actions
+	message += "  Actions:	%d\n" % result.actions
 	message += "  Conditions: %d\n" % result.conditions
-	message += "  Events:     %d\n" % result.events
+	message += "  Events:	 %d\n" % result.events
 	message += "  Behaviors:  %d\n" % result.behaviors
 	message += "  Branches:   %d\n" % result.branches
 	message += "\nBuild optimization:\n"
 	message += "  Total available: %d providers\n" % result.total_available
-	message += "  Included:        %d providers\n" % result.total_included
-	message += "  Excluded:        %d unused providers\n" % result.total_excluded
+	message += "  Included:		%d providers\n" % result.total_included
+	message += "  Excluded:		%d unused providers\n" % result.total_excluded
 
 	if result.total_available > 0:
 		var pct: float = (float(result.total_excluded) / float(result.total_available)) * 100.0
@@ -982,15 +1060,17 @@ func _on_comment_selected(comment_node: FKCommentUi) -> void:
 	if selected_row:
 		selected_row.set_selected(true)
 
-func _on_comment_delete(comment: FKCommentUi) -> void:
+func _on_comment_delete_requested(comment: FKCommentUi) -> void:
 	"""Delete a comment block."""
 
 	if selected_row == comment:
 		selected_row = null
 	
+	_on_pre_ui_change()
 	blocks_container.remove_child(comment)
 	comment.queue_free()
 	# ^To make sure we have a snapshot ready in time
+	_on_ui_change_done()
 
 func _on_comment_insert_above(signal_node, bound_comment: FKCommentUi) -> void:
 	"""Insert a new comment above the specified comment."""
@@ -1236,7 +1316,7 @@ func _finalize_event_creation(inputs: Dictionary) -> void:
 	_push_undo_state()
 	
 	# Generate new block_id for new events (pass empty string to auto-generate)
-	var data := FKEventBlock.new("", pending_id, pending_node_path)
+	var data := FKEventUnit.new("", pending_id, pending_node_path)
 	data.inputs = inputs
 	data.conditions = [] as Array[FKConditionUnit]
 	data.actions = [] as Array[FKActionUnit]
@@ -1255,11 +1335,12 @@ func _finalize_event_creation(inputs: Dictionary) -> void:
 
 func _finalize_event_above_target(inputs: Dictionary) -> void:
 	"""Create and add event row above the target (GDevelop-style)."""
+
 	# Push undo state before adding event
 	_push_undo_state()
 	
 	# Generate new block_id for new events (pass empty string to auto-generate)
-	var data := FKEventBlock.new("", pending_id, pending_node_path)
+	var data := FKEventUnit.new("", pending_id, pending_node_path)
 	data.inputs = inputs
 	data.conditions = [] as Array[FKConditionUnit]
 	data.actions = [] as Array[FKActionUnit]
@@ -1287,7 +1368,7 @@ func _finalize_event_in_group(inputs: Dictionary) -> void:
 	_push_undo_state()
 	
 	# Generate new block_id for new events (pass empty string to auto-generate)
-	var data := FKEventBlock.new("", pending_id, pending_node_path)
+	var data := FKEventUnit.new("", pending_id, pending_node_path)
 	data.inputs = inputs
 	data.conditions = [] as Array[FKConditionUnit]
 	data.actions = [] as Array[FKActionUnit]
@@ -1388,7 +1469,7 @@ func _replace_event(expressions: Dictionary) -> void:
 	
 	# Create new event data, preserving block_id if available
 	var old_block_id := old_data.get_id() if old_data else ""
-	var new_data := FKEventBlock.new(old_block_id, pending_id, pending_node_path)
+	var new_data := FKEventUnit.new(old_block_id, pending_id, pending_node_path)
 	new_data.inputs = expressions
 	new_data.conditions = old_data.conditions if old_data else ([] as Array[FKConditionUnit])
 	new_data.actions = old_data.actions if old_data else ([] as Array[FKActionUnit])

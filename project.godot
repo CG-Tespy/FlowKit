@@ -26,12 +26,11 @@ FlowKit="*uid://b6cetiyknul1b"
 
 [display]
 
-window/size/mode=3
 window/size/resizable=false
 
 [editor_plugins]
 
-enabled=PackedStringArray("res://addons/flowkit/plugin.cfg")
+enabled=PackedStringArray("res://addons/flowkit/plugin.cfg", "res://addons/gut/plugin.cfg")
 
 [rendering]
 

@@ -22,10 +22,10 @@ signal edit_event_requested(event_node)
 # ---------------------------------------------------------
 	
 func _validate_block(to_set: FKUnit) -> bool:
-	return to_set == null or to_set is FKEventBlock
+	return to_set == null or to_set is FKEventUnit
 
-func get_event() -> FKEventBlock:
-	return _block as FKEventBlock
+func get_event() -> FKEventUnit:
+	return _block as FKEventUnit
 
 func _on_contents_changed(node: FKUnitUi) -> void:
 	update_display()
@@ -61,7 +61,7 @@ func _update_label() -> void:
 
 	label.text = "%s (%s)%s" % [display_name, node_name, params_text]
 
-func _resolve_display_name(e: FKEventBlock) -> String:
+func _resolve_display_name(e: FKEventUnit) -> String:
 	var name := e.event_id
 
 	if registry:
@@ -73,7 +73,7 @@ func _resolve_display_name(e: FKEventBlock) -> String:
 
 	return name
 
-func _format_params(e: FKEventBlock) -> String:
+func _format_params(e: FKEventUnit) -> String:
 	if e.inputs.is_empty():
 		return ""
 

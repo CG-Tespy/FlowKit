@@ -38,7 +38,7 @@ func new_sheet() -> FKEventSheet:
 #  EVENT COPY (supports both old dict format and new FKUnit format)
 # -------------------------------------------------------------------
 
-func copy_event_block(data: FKEventBlock) -> FKEventBlock:
+func copy_event_block(data: FKEventUnit) -> FKEventUnit:
 	if data == null:
 		return null
 

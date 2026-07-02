@@ -64,7 +64,7 @@ func deserialize_block(dict: Dictionary) -> FKUnit:
 func _instantiate_block(block_type: String) -> FKUnit:
 	match block_type:
 		"event":
-			return FKEventBlock.new()
+			return FKEventUnit.new()
 		"action": 
 			return FKActionUnit.new()
 		"comment":
