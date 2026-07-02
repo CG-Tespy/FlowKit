@@ -77,7 +77,7 @@ const _preview_label_color := Color(0.9, 0.95, 0.9, 0.7)
 # ---------------------------------------------------------
 
 func _validate_block(to_set: FKUnit) -> bool:
-	return to_set == null or to_set is FKEventBlock
+	return to_set == null or to_set is FKEventUnit
 
 func _update_styling() -> void:
 	var style := selected_stylebox if is_selected \
@@ -326,8 +326,8 @@ func _update_event_header() -> void:
 
 	event_header_label.text = _header_label_format % [display_name, node_name, params_text]
 
-func _get_event() -> FKEventBlock:
-	return get_block() as FKEventBlock
+func _get_event() -> FKEventUnit:
+	return get_block() as FKEventUnit
 
 func _update_conditions() -> void:
 	var e := _get_event()
@@ -344,14 +344,14 @@ func _update_conditions() -> void:
 		_connect_condition_item_signals(item)
 		conditions_container.add_child(item)
 
-func _get_event_header_display_name(e: FKEventBlock) -> String:
+func _get_event_header_display_name(e: FKEventUnit) -> String:
 	var result: String = e.event_id
 	var from_registry := _provider_name_from_registry(e)
 	if from_registry.length() > 0:
 		result = from_registry
 	return result
 
-func _provider_name_from_registry(e: FKEventBlock) -> String:
+func _provider_name_from_registry(e: FKEventUnit) -> String:
 	var result: String = ""
 	if registry:
 		for provider in registry.event_providers:
@@ -361,7 +361,7 @@ func _provider_name_from_registry(e: FKEventBlock) -> String:
 				break
 	return result
 
-func _get_params_text(e: FKEventBlock) -> String:
+func _get_params_text(e: FKEventUnit) -> String:
 	var params_text = ""
 	if not e.inputs.is_empty():
 		var param_pairs = []
@@ -817,9 +817,9 @@ func get_class() -> String:
 	var result := "FKEventRowUi"
 	return result
 	
-func get_block() -> FKEventBlock:
-	if _block is FKEventBlock:
-		return _block as FKEventBlock
+func get_block() -> FKEventUnit:
+	if _block is FKEventUnit:
+		return _block as FKEventUnit
 	else:
 		return null
 	

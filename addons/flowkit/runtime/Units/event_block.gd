@@ -1,6 +1,6 @@
 @tool
 extends FKUnit
-class_name FKEventBlock
+class_name FKEventUnit
 
 @export var block_id: String  # Unique identifier for this specific block instance
 @export var event_id: String  # Type of event (e.g., "on_ready", "on_process")
@@ -71,7 +71,7 @@ func get_id() -> String:
 	return block_id
 	
 func duplicate_block() -> FKUnit:
-	var copy := FKEventBlock.new()
+	var copy := FKEventUnit.new()
 	copy.block_type = block_type
 	copy.event_id = event_id
 	copy.target_node = target_node
@@ -88,4 +88,4 @@ func duplicate_block() -> FKUnit:
 	return copy
 	
 func get_class() -> String:
-	return "FKEventBlock"
+	return "FKEventUnit"

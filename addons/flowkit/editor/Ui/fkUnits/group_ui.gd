@@ -210,7 +210,7 @@ func _rebuild_child_nodes() -> void:
 		if raw_child is Dictionary:
 			unit = raw_child.get("data")
 
-		if unit is FKEventBlock:
+		if unit is FKEventUnit:
 			var row := _instantiate_event_row(unit)
 			if row:
 				children_container.add_child(row)
@@ -239,7 +239,7 @@ static var COMMENT_SCENE: PackedScene:
 	get:
 		return FKEditorGlobals.COMMENT_SCENE
 
-func _instantiate_event_row(data: FKEventBlock) -> Control:
+func _instantiate_event_row(data: FKEventUnit) -> Control:
 	if is_editor_preview:
 		printerr("[FKGroupUi]: Cannot instantiate event row in editor preview mode")
 		return null
@@ -248,7 +248,7 @@ func _instantiate_event_row(data: FKEventBlock) -> Control:
 	_connect_event_row_signals(row, data)
 	return row
 
-func _connect_event_row_signals(row: FKEventRowUi, data: FKEventBlock) -> void:
+func _connect_event_row_signals(row: FKEventRowUi, data: FKEventUnit) -> void:
 	row.delete_event_requested.connect(_on_child_row_delete_requested.bind(data))
 	row.selected.connect(func(n): 
 		_on_child_selected(data); 
@@ -357,7 +357,7 @@ func _attach_nested_group_signals(nested: FKGroupUi, data: FKGroup):
 func _on_child_modified(modified: FKUnitUi) -> void:
 	_unit_ui_signals.contents_changed.emit(self)
 
-func _on_child_row_delete_requested(row: Node, data: FKEventBlock) -> void:
+func _on_child_row_delete_requested(row: Node, data: FKEventUnit) -> void:
 	_remove_child_data(data)
 
 func _on_child_comment_delete_requested(data: FKComment) -> void:
@@ -397,7 +397,7 @@ func _sync_children_to_data() -> void:
 				new_children.append(unit)
 	_group.children = new_children
 
-func add_event_to_group(event_data: FKEventBlock) -> void:
+func add_event_to_group(event_data: FKEventUnit) -> void:
 	if not _group or is_editor_preview:
 		return
 	before_contents_changed.emit(self)
