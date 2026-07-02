@@ -15,7 +15,7 @@ var _globals: FKEditorGlobals
 func unit_ui_from(unit: FKUnit, inputs: Dictionary = {}) -> FKUnitUi:
 	var result: FKUnitUi = null
 	
-	if unit is FKEventBlock:
+	if unit is FKEventUnit:
 		result = _create_event_row(unit)
 	elif unit is FKComment:
 		result = _create_comment_ui(unit)
@@ -24,7 +24,7 @@ func unit_ui_from(unit: FKUnit, inputs: Dictionary = {}) -> FKUnitUi:
 		
 	return result
 		
-func _create_event_row(data: FKEventBlock) -> FKEventRowUi:
+func _create_event_row(data: FKEventUnit) -> FKEventRowUi:
 	"""Create event row node from data (GDevelop-style)."""
 	#print("[FKUnitUiFactory] Creating event row node")
 	var row: FKEventRowUi = EVENT_ROW_SCENE.instantiate()

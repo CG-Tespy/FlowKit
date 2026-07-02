@@ -2,19 +2,19 @@ extends GutTest
 class_name FKEventBlockTests
 
 func test_event_block_defaults():
-	var ev := FKEventBlock.new()
+	var ev := FKEventUnit.new()
 	assert_eq(ev.conditions.size(), 0)
 	assert_eq(ev.actions.size(), 0)
 	assert_eq(ev.event_id, "")
 
 func test_event_block_serialization_roundtrip():
-	var ev := FKEventBlock.new()
+	var ev := FKEventUnit.new()
 	ev.event_id = "TestEvent"
 	ev.conditions.append(FKConditionUnit.new())
 	ev.actions.append(FKActionUnit.new())
 
 	var json: Dictionary = ev.serialize()
-	var restored: FKEventBlock = FKEventBlock.new()
+	var restored: FKEventUnit = FKEventUnit.new()
 	restored.deserialize(json)
 
 	assert_eq(restored.event_id, "TestEvent")
@@ -22,13 +22,13 @@ func test_event_block_serialization_roundtrip():
 	assert_eq(restored.actions.size(), 1)
 	
 func test_deep_duplication():
-	var ev := FKEventBlock.new()
+	var ev := FKEventUnit.new()
 	ev.event_id = "TestEvent"
 	ev.inputs = {"x": 1, "y": 2}
 	ev.conditions.append(FKConditionUnit.new())
 	ev.actions.append(FKActionUnit.new())
 
-	var dup := ev.duplicate_block() as FKEventBlock
+	var dup := ev.duplicate_block() as FKEventUnit
 
 	# Basic sanity: not the same instance
 	assert_ne(dup, ev, "Duplicate should be a different instance")
@@ -56,30 +56,30 @@ func test_deep_duplication():
 
 func test_ensure_block_id():
 	# Case 1: Empty block_id should generate a new one
-	var ev1 := FKEventBlock.new()
+	var ev1 := FKEventUnit.new()
 	ev1.block_id = ""
 	ev1.ensure_block_id()
 	assert_false(ev1.block_id.is_empty(), "ensure_block_id should generate a new ID when empty")
 
 	# Case 2: Existing block_id should be preserved
-	var ev2 := FKEventBlock.new()
+	var ev2 := FKEventUnit.new()
 	ev2.block_id = "my_custom_id"
 	ev2.ensure_block_id()
 	assert_eq(ev2.block_id, "my_custom_id", "ensure_block_id should not overwrite existing ID")
 
 	# Case 3: Generated IDs should be unique
-	var ev3 := FKEventBlock.new()
+	var ev3 := FKEventUnit.new()
 	ev3.block_id = ""
 	ev3.ensure_block_id()
 
-	var ev4 := FKEventBlock.new()
+	var ev4 := FKEventUnit.new()
 	ev4.block_id = ""
 	ev4.ensure_block_id()
 
 	assert_ne(ev3.block_id, ev4.block_id, "Generated block IDs should be unique")
 
 func test_serialization_structure():
-	var ev := FKEventBlock.new()
+	var ev := FKEventUnit.new()
 	ev.event_id = "TestEvent"
 	ev.inputs = {"foo": "bar"}
 
@@ -141,7 +141,7 @@ func test_serialization_structure():
 	assert_false(act_json.has("branch_actions"))
 
 	# --- Round-trip check ---
-	var restored := FKEventBlock.new()
+	var restored := FKEventUnit.new()
 	restored.deserialize(json)
 
 	assert_eq(restored.inputs, ev.inputs)
@@ -163,7 +163,7 @@ func test_serialization_structure():
 	assert_false(restored_act.is_branch)
 
 func test_event_block_target_node_roundtrip():
-	var ev := FKEventBlock.new()
+	var ev := FKEventUnit.new()
 	ev.event_id = "OnReady"
 	ev.target_node = NodePath("Player/Camera")
 
@@ -171,13 +171,13 @@ func test_event_block_target_node_roundtrip():
 
 	assert_eq(json["target_node"], "Player/Camera")
 
-	var restored := FKEventBlock.new()
+	var restored := FKEventUnit.new()
 	restored.deserialize(json)
 
 	assert_eq(restored.target_node, NodePath("Player/Camera"))
 
 func test_event_block_inputs_nested_roundtrip():
-	var ev := FKEventBlock.new()
+	var ev := FKEventUnit.new()
 	ev.inputs = {
 		"simple": 1,
 		"nested": {"a": 10, "b": 20}
@@ -189,14 +189,14 @@ func test_event_block_inputs_nested_roundtrip():
 		"nested": {"a": 10, "b": 20}
 	})
 
-	var restored := FKEventBlock.new()
+	var restored := FKEventUnit.new()
 	restored.deserialize(json)
 
 	assert_eq(restored.inputs, ev.inputs)
 
 
 func test_event_block_duplicate_multiple_items():
-	var ev := FKEventBlock.new()
+	var ev := FKEventUnit.new()
 	ev.event_id = "Multi"
 	ev.inputs = {"x": 1}
 
@@ -214,7 +214,7 @@ func test_event_block_duplicate_multiple_items():
 	a2.action_id = "A2"
 	ev.actions.append_array([a1, a2])
 
-	var dup := ev.duplicate_block() as FKEventBlock
+	var dup := ev.duplicate_block() as FKEventUnit
 
 	# Conditions deep-copied
 	assert_eq(dup.conditions.size(), 2)

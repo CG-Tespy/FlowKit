@@ -823,7 +823,7 @@ func _extract_ids_from_group(group: FKGroup, used: Dictionary) -> void:
 			continue
 		match child_type:
 			"event":
-				if child_data is FKEventBlock:
+				if child_data is FKEventUnit:
 					_extract_ids_from_event_block(child_data, used)
 			"group":
 				if child_data is FKGroup:
@@ -831,7 +831,7 @@ func _extract_ids_from_group(group: FKGroup, used: Dictionary) -> void:
 
 
 ## Extract IDs from a single event block and all its contents.
-func _extract_ids_from_event_block(block: FKEventBlock, used: Dictionary) -> void:
+func _extract_ids_from_event_block(block: FKEventUnit, used: Dictionary) -> void:
 	# Event provider
 	if block.event_id and not block.event_id.is_empty():
 		used.event_ids[block.event_id] = true

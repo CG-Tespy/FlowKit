@@ -293,7 +293,7 @@ func _paste_actions() -> void:
 		return
 
 	# Normal paste into event row
-	var data := target_row.get_block() as FKEventBlock
+	var data := target_row.get_block() as FKEventUnit
 	for act in new_actions:
 		data.actions.append(act)
 
@@ -317,7 +317,7 @@ func _paste_conditions() -> void:
 
 	_on_pre_ui_change()
 
-	var data := target_row.get_block() as FKEventBlock
+	var data := target_row.get_block() as FKEventUnit
 	for cond in new_conditions:
 		data.conditions.append(cond)
 
@@ -1316,7 +1316,7 @@ func _finalize_event_creation(inputs: Dictionary) -> void:
 	_push_undo_state()
 	
 	# Generate new block_id for new events (pass empty string to auto-generate)
-	var data := FKEventBlock.new("", pending_id, pending_node_path)
+	var data := FKEventUnit.new("", pending_id, pending_node_path)
 	data.inputs = inputs
 	data.conditions = [] as Array[FKConditionUnit]
 	data.actions = [] as Array[FKActionUnit]
@@ -1340,7 +1340,7 @@ func _finalize_event_above_target(inputs: Dictionary) -> void:
 	_push_undo_state()
 	
 	# Generate new block_id for new events (pass empty string to auto-generate)
-	var data := FKEventBlock.new("", pending_id, pending_node_path)
+	var data := FKEventUnit.new("", pending_id, pending_node_path)
 	data.inputs = inputs
 	data.conditions = [] as Array[FKConditionUnit]
 	data.actions = [] as Array[FKActionUnit]
@@ -1368,7 +1368,7 @@ func _finalize_event_in_group(inputs: Dictionary) -> void:
 	_push_undo_state()
 	
 	# Generate new block_id for new events (pass empty string to auto-generate)
-	var data := FKEventBlock.new("", pending_id, pending_node_path)
+	var data := FKEventUnit.new("", pending_id, pending_node_path)
 	data.inputs = inputs
 	data.conditions = [] as Array[FKConditionUnit]
 	data.actions = [] as Array[FKActionUnit]
@@ -1469,7 +1469,7 @@ func _replace_event(expressions: Dictionary) -> void:
 	
 	# Create new event data, preserving block_id if available
 	var old_block_id := old_data.get_id() if old_data else ""
-	var new_data := FKEventBlock.new(old_block_id, pending_id, pending_node_path)
+	var new_data := FKEventUnit.new(old_block_id, pending_id, pending_node_path)
 	new_data.inputs = expressions
 	new_data.conditions = old_data.conditions if old_data else ([] as Array[FKConditionUnit])
 	new_data.actions = old_data.actions if old_data else ([] as Array[FKActionUnit])

@@ -312,7 +312,7 @@ func _teardown_all_signal_events() -> void:
 
 ## Create a Callable that evaluates a block's conditions and runs its actions.
 ## This is what signal events call when their signal fires.
-func _make_trigger_callback(block: FKEventBlock, current_root: Node) -> Callable:
+func _make_trigger_callback(block: FKEventUnit, current_root: Node) -> Callable:
 	return func() -> void:
 		if not is_instance_valid(current_root):
 			return
@@ -320,7 +320,7 @@ func _make_trigger_callback(block: FKEventBlock, current_root: Node) -> Callable
 
 ## Execute a single event block: check all conditions, then run all actions.
 ## Shared by both the poll loop and signal-based trigger callbacks.
-func _execute_block(block: FKEventBlock, current_root: Node) -> void:
+func _execute_block(block: FKEventUnit, current_root: Node) -> void:
 	# Conditions
 	var passed: bool = true
 	for cond in block.conditions:
@@ -356,7 +356,7 @@ func _collect_events_from_groups(groups: Array, out_events: Array) -> void:
 				var child_type: String = child_item.get("type", "")
 				var child_data: Variant = child_item.get("data", null)
 				
-				if child_type == "event" and child_data is FKEventBlock:
+				if child_type == "event" and child_data is FKEventUnit:
 					out_events.append(child_data)
 				elif child_type == "group" and child_data is FKGroup:
 					# Recursively collect from nested groups
@@ -365,7 +365,7 @@ func _collect_events_from_groups(groups: Array, out_events: Array) -> void:
 
 func _ensure_block_ids_in_groups(groups: Array) -> void:
 	"""
-	Recursively ensure all FKEventBlock instances inside FKGroup children
+	Recursively ensure all FKEventUnit instances inside FKGroup children
 	have unique block IDs. Supports both legacy dictionary children and
 	new FKUnit-only children.
 	"""
@@ -382,7 +382,7 @@ func _ensure_block_ids_in_groups(groups: Array) -> void:
 			else:
 				unit = child
 
-			if unit is FKEventBlock:
+			if unit is FKEventUnit:
 				unit.ensure_block_id()
 
 			elif unit is FKGroup:
