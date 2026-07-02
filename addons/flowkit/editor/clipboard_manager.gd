@@ -32,7 +32,7 @@ func get_clipboard_type() -> String:
 # COPY API
 # ---------------------------
 
-func copy_event(event_data: FKEventBlock) -> void:
+func copy_event(event_data: FKEventUnit) -> void:
 	clear()
 	_type = "event"
 	_event_data.append(_serialize_event_block(event_data))
@@ -57,10 +57,10 @@ func copy_group(group_data: FKGroup) -> void:
 # PASTE API
 # ---------------------------
 
-func paste_event() -> Array[FKEventBlock]:
+func paste_event() -> Array[FKEventUnit]:
 	if _type != "event":
 		return []
-	var result: Array[FKEventBlock] = []
+	var result: Array[FKEventUnit] = []
 	for dict in _event_data:
 		result.append(_deserialize_event_block(dict))
 	return result
@@ -91,7 +91,7 @@ func paste_group() -> FKGroup:
 # INTERNAL SERIALIZATION
 # ===========================
 
-func _serialize_event_block(data: FKEventBlock) -> Dictionary:
+func _serialize_event_block(data: FKEventUnit) -> Dictionary:
 	var result = {
 		"type": "event",
 		"block_id": data.block_id,
@@ -188,12 +188,12 @@ func _serialize_comment_block(data: FKComment) -> Dictionary:
 # INTERNAL DESERIALIZATION
 # ===========================
 
-func _deserialize_event_block(dict: Dictionary) -> FKEventBlock:
+func _deserialize_event_block(dict: Dictionary) -> FKEventUnit:
 	var block_id = dict.get("block_id", "")
 	var event_id = dict.get("event_id", "")
 	var target_node = NodePath(dict.get("target_node", ""))
 
-	var data = FKEventBlock.new(block_id, event_id, target_node)
+	var data = FKEventUnit.new(block_id, event_id, target_node)
 	data.inputs = dict.get("inputs", {}).duplicate()
 	data.conditions = [] as Array[FKConditionUnit]
 	data.actions = [] as Array[FKActionUnit]

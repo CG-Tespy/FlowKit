@@ -7,7 +7,7 @@ class_name FKEventSheet
 ## Each entry is: {"type": "event"|"comment"|"group", "index": int}
 ## The index refers to the position within that type's array (events, comments, or groups).
 
-@export var events: Array[FKEventBlock] = []
+@export var events: Array[FKEventUnit] = []
 @export var standalone_conditions: Array[FKConditionUnit] = []
 @export var comments: Array[FKComment] = []
 @export var groups: Array[FKGroup] = []
@@ -65,7 +65,7 @@ func _collect_events_from_groups(groups: Array, out_events: Array) -> void:
 				unit = child
 
 			# New format: FKUnit directly
-			if unit is FKEventBlock:
+			if unit is FKEventUnit:
 				out_events.append(unit)
 
 			elif unit is FKGroup:
@@ -121,7 +121,7 @@ func append_copy_of(unit: FKUnit):
 func _array_for(unit: FKUnit) -> Array:
 	var result: Array = []
 	
-	if unit is FKEventBlock:
+	if unit is FKEventUnit:
 		result = events
 		#print("[FKEventSheet] chosen arr: events")
 	elif unit is FKComment:
@@ -142,7 +142,7 @@ func _array_for(unit: FKUnit) -> Array:
 	
 func rebuild_order_from_items(ordered_items: Array) -> void:
 	"""Rebuild the events, comments, groups arrays and item_order from an ordered list."""
-	events = [] as Array[FKEventBlock]
+	events = [] as Array[FKEventUnit]
 	comments = [] as Array[FKComment]
 	groups = [] as Array[FKGroup]
 	item_order = [] as Array[Dictionary]
@@ -153,7 +153,7 @@ func rebuild_order_from_items(ordered_items: Array) -> void:
 		
 		match item_type:
 			"event":
-				if data is FKEventBlock:
+				if data is FKEventUnit:
 					item_order.append({"type": "event", "index": events.size()})
 					events.append(data)
 			"comment":

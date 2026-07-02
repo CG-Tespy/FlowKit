@@ -3,8 +3,8 @@ extends GutTest
 func test_undo_basic_behavior():
 	var state_tracker := FKSheetStateTracker.new()
 
-	var firstSnapshot: Array[FKUnit] = [FKEventBlock.new()]
-	var secondSnapshot: Array[FKUnit] = [FKEventBlock.new(), FKConditionUnit.new()]
+	var firstSnapshot: Array[FKUnit] = [FKEventUnit.new()]
+	var secondSnapshot: Array[FKUnit] = [FKEventUnit.new(), FKConditionUnit.new()]
 
 	state_tracker.record_snapshot(firstSnapshot)
 	state_tracker.record_snapshot(secondSnapshot)
@@ -15,7 +15,7 @@ func test_undo_basic_behavior():
 
 	# Should return the previous snapshot (s1)
 	assert_eq(result.size(), secondSnapshot.size())
-	assert_true(result[0] is FKEventBlock)
+	assert_true(result[0] is FKEventUnit)
 
 	# Redo stack should now contain a deep copy of s2
 	assert_true(state_tracker.has_next())
@@ -23,7 +23,7 @@ func test_undo_basic_behavior():
 func test_undo_manager_deep_copy():
 	var state_tracker := FKSheetStateTracker.new()
 
-	var evBlock := FKEventBlock.new()
+	var evBlock := FKEventUnit.new()
 	evBlock.inputs = {"x": 1}
 	var state: Array[FKUnit] = [evBlock]
 
@@ -45,8 +45,8 @@ func test_undo_manager_deep_copy():
 func test_redo_restores_state():
 	var state_tracker := FKSheetStateTracker.new()
 
-	var firstSnapshot: Array[FKUnit] = [FKEventBlock.new()]
-	var secondSnapshot: Array[FKUnit] = [FKEventBlock.new(), FKActionUnit.new()]
+	var firstSnapshot: Array[FKUnit] = [FKEventUnit.new()]
+	var secondSnapshot: Array[FKUnit] = [FKEventUnit.new(), FKActionUnit.new()]
 
 	state_tracker.record_snapshot(firstSnapshot)
 	state_tracker.record_snapshot(secondSnapshot)
