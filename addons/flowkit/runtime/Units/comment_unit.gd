@@ -8,12 +8,12 @@ func _init() -> void:
 	block_type = "comment"
 
 func serialize() -> Dictionary:
-	return {
-		"type": block_type,
-		"text": text,
-	}
+	var result := super.serialize()
+	result["text"] = text
+	return result
 
 func deserialize(dict: Dictionary) -> void:
+	super.deserialize(dict)
 	text = dict.get("text", "")
 	
 func duplicate_block() -> FKUnit:

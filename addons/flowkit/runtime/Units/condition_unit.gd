@@ -12,13 +12,16 @@ func _init() -> void:
 	block_type = "condition"
 
 func serialize() -> Dictionary:
-	return {
-		"type": block_type,
+	var result := super.serialize()
+	var our_added_fields := {
 		"condition_id": condition_id,
 		"target_node": str(target_node),
 		"inputs": inputs.duplicate(),
 		"negated": negated,
 	}
+	result.merge(our_added_fields)
+	
+	return result
 
 func deserialize(dict: Dictionary) -> void:
 	condition_id = dict.get("condition_id", "")

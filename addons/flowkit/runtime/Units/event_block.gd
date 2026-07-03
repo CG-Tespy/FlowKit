@@ -31,8 +31,8 @@ func ensure_block_id() -> void:
 		block_id = _generate_unique_id()
 		
 func serialize() -> Dictionary:
-	var result := {
-		"type": block_type,
+	var result := super.serialize()
+	var our_added_fields := {
 		"block_id": block_id,
 		"event_id": event_id,
 		"target_node": str(target_node),
@@ -40,6 +40,7 @@ func serialize() -> Dictionary:
 		"conditions": [],
 		"actions": []
 	}
+	result.merge(our_added_fields)
 
 	for cond in conditions:
 		result["conditions"].append(cond.serialize())

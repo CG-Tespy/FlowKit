@@ -66,14 +66,16 @@ func find_child_index(unit: FKUnit) -> int:
 
 func serialize() -> Dictionary:
 	normalize_children(true)
-	
-	var result := {
-		"type": block_type,
+
+	var result := super.serialize()
+	var our_added_fields := {
 		"title": title,
 		"collapsed": collapsed,
 		"color": color,
 		"children": _get_serialized_children(self)
 	}
+	result.merge(our_added_fields)
+
 	return result
 
 static func _get_serialized_children(block: FKGroup) -> Array:
@@ -85,6 +87,8 @@ static func _get_serialized_children(block: FKGroup) -> Array:
 	return result
 
 func deserialize(dict: Dictionary) -> void:
+	print("Deserializing fk group")
+	super.deserialize(dict)
 	title = dict.get("title", "Group")
 	collapsed = dict.get("collapsed", false)
 	color = dict.get("color", Color(0.25, 0.22, 0.35, 1.0))
