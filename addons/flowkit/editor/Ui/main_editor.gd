@@ -83,11 +83,15 @@ func _enter_tree() -> void:
 
 func _ready() -> void:
 	if is_fully_legit:
-		await get_tree().create_timer(1.0).timeout
-		sheet_state_tracker.enabled = true
-		# ^We apply this delay to make sure that no snapshots are recorded before the 
-		# full ui is initially built
+		await _disable_sheet_tracker_for(1)
+		
 
+func _disable_sheet_tracker_for(duration: float):
+	sheet_state_tracker.enabled = false 
+	await get_tree().create_timer(duration).timeout
+	sheet_state_tracker.enabled = true
+	# ^We apply this delay to make sure that no snapshots are recorded before the 
+		# full ui is initially built
 
 func _apply_auto_save_enablement():
 	var auto_save_setting_registered: bool = \
@@ -659,6 +663,7 @@ var current_scene_uid: int:
 
 func _reset_for_new_scene(scene_uid: int):
 	current_scene_uid = scene_uid
+	_disable_sheet_tracker_for(1)
 	_clear_undo_history()
 	editor_globals.sheet_editor_ready = false
 	_refresh_ui()

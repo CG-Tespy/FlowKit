@@ -14,8 +14,7 @@ class_name FKEventSheet
 
 ## Stores the display order: [{"type": "event"|"comment"|"group", "index": int}, ...]
 @export var item_order: Array[Dictionary] = []
-
-@export_storage var _latest_uid_given := FKUnit.INVALID_ID
+var _id_assigner: FKIdAssigner = FKIdAssigner.new()
 
 ## Returns an array of the top-level FKUnits in the order they were
 ## appended to this sheet.
@@ -171,51 +170,23 @@ func on_loaded_from_disk():
 	refresh()
 
 func refresh():
+	_id_assigner.prop_name = "personal_id"
+	_id_assigner._append_array_as_invalid([0, FKUnit.INVALID_ID])
 	_refresh_uids()
 
 # For backwards compatibility with older versions of FlowKit
 func _refresh_uids():
-	var taken_ids: Array[int] = [FKUnit.INVALID_ID]
-	# ^Why does it start with the invalid id? To simplify the process of 
-	# ensuring our FKUnits have unique ones.
-
-	_ensure_uids_in(events, taken_ids)
-	_ensure_uids_in(standalone_conditions, taken_ids)
-	_ensure_uids_in(comments, taken_ids)
-	_ensure_uids_in(groups, taken_ids)
-
-	_latest_uid_given = taken_ids.max()
-
-func _ensure_uids_in(units: Array, taken_ids: Array[int]):
-	for elem in units:
-		var unit_elem: FKUnit = elem as FKUnit if elem is FKUnit else null
-
-		if unit_elem == null:
-			printerr("[FKEventSheets] Skipping non-FKUnit element during UID refresh.")
-			continue
-
-		while taken_ids.has(unit_elem.personal_id):
-			_assign_next_uid_to(unit_elem)
-		
-		taken_ids.append(unit_elem.personal_id)
-
-		if unit_elem is FKGroup:
-			_ensure_uids_in(unit_elem.children, taken_ids)
-		
-		var action_unit: FKActionUnit = elem as FKActionUnit if elem is FKActionUnit else null
-		if action_unit != null:
-			_ensure_uids_in(unit_elem.branch_actions, taken_ids)
-
-
-func _assign_next_uid_to(unit: FKUnit):
-	unit.personal_id = _latest_uid_given + 1
-	_latest_uid_given = unit.personal_id
+	_id_assigner.reset_taken_caches()
+	_id_assigner.refresh_for(events)
+	_id_assigner.refresh_for(standalone_conditions)
+	_id_assigner.refresh_for(comments)
+	_id_assigner.refresh_for(groups)
 
 func get_class() -> String:
 	return "FKEventSheet"
 
 func _to_string() -> String:
-	var result := "FKEventSheet"
+	var result := "FKEventSheet\n"
 	result += "Events: " + str(events) + "\n"
 	result += "Standalone Conditions: " + str(standalone_conditions) + "\n"
 	result += "Comments: " + str(comments) + "\n"
