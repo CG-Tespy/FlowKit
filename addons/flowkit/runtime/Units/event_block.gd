@@ -8,7 +8,16 @@ class_name FKEventUnit
 @export var inputs: Dictionary = {}
 @export var conditions: Array[FKConditionUnit] = []
 @export var actions: Array[FKActionUnit] = []
-	
+
+func may_have_children() -> bool:
+	return true
+
+func get_children() -> Array[FKUnit]:
+	var defensive_copy: Array[FKUnit] = [] as Array[FKUnit]
+	defensive_copy.append_array(conditions)
+	defensive_copy.append_array(actions)
+	return defensive_copy
+
 func _init(p_block_id: String = "", p_event_id: String = "", 
 p_target_node: NodePath = NodePath()) -> void:
 	block_type = "event"
@@ -23,6 +32,7 @@ p_target_node: NodePath = NodePath()) -> void:
 func _generate_unique_id() -> String:
 	"""Generate a unique ID for this block using timestamp and random component."""
 	var timestamp = Time.get_unix_time_from_system()
+	# event_id can be stuff like "on_ready" and "on_process"
 	return "%s_%d_%d" % [event_id if event_id else "event", int(timestamp), randi()]
 
 func ensure_block_id() -> void:
@@ -49,6 +59,7 @@ func serialize() -> Dictionary:
 		result["actions"].append(act.serialize())
 
 	return result
+
 
 func deserialize(dict: Dictionary) -> void:
 	block_id = dict.get("block_id", "")
