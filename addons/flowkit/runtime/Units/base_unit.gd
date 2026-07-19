@@ -23,6 +23,33 @@ const INVALID_ID := 0
 	get:
 		return personal_id
 
+func may_have_children():
+	return false 
+
+## Called after this FKUnit has been fully deserialized from disk 
+## into an FKEventSheet instance.
+## Makes it easier for this to do things like:
+## - Normalize or upgrade legacy serialized data
+## - Self-repair
+## - Re‑establish metadata
+func on_loaded_from_disk():
+	_call_children_on_loaded_from_disk()
+	
+func _call_children_on_loaded_from_disk():
+	var message: String = ""
+	var children := get_children()
+	for elem in children:
+		# message = "Instance of %s is calling its %s child's on_loaded_from_disk" \
+		# % [self.get_class(), elem.get_real_class()]
+		# print(message)
+		
+		elem.on_loaded_from_disk()
+
+## Accessor for this FKUnit's child units. Child classes (if they are intended to have child units)
+## are expected to override this.
+func get_children() -> Array[FKUnit]:
+	return []
+
 # Editor-friendly name for menus, debugging, etc.
 func get_display_name() -> String:
 	return block_type.capitalize()
@@ -69,6 +96,11 @@ static func _to_base_unit_arr(arr: Array) -> Array[FKUnit]:
 
 func get_class() -> String:
 	return "FKUnit"
+
+## We need this so that even when cast to another type, we get the right
+## get_class result.
+func get_real_class() -> String:
+	return self.get_class()
 
 func _to_string() -> String:
 	var self_serialized: Dictionary = self.serialize()

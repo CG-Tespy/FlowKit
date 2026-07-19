@@ -6,8 +6,6 @@ class_name FKActionUnit
 @export var target_node: NodePath
 @export var inputs: Dictionary = {}
 
-@export var weee: int = 123
-
 # Branch support
 @export var is_branch: bool = false
 @export var branch_type: String = ""              # "if", "elseif", "else", etc.
@@ -15,6 +13,14 @@ class_name FKActionUnit
 @export var branch_condition: FKConditionUnit = null
 @export var branch_inputs: Dictionary = {}
 @export var branch_actions: Array[FKActionUnit] = []
+
+func may_have_children() -> bool:
+	return true
+
+func get_children() -> Array[FKUnit]:
+	var defensive_copy: Array[FKUnit] = [] as Array[FKUnit]
+	defensive_copy.append_array(branch_actions)
+	return defensive_copy
 
 func _init() -> void:
 	block_type = "action"
@@ -35,6 +41,7 @@ func serialize() -> Dictionary:
 	_serialize_branch_conds_and_actions(result)
 
 	return result
+
 
 func _serialize_branch_conds_and_actions(result: Dictionary):
 	if is_branch and branch_condition != null:

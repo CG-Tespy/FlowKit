@@ -1,11 +1,12 @@
+@tool
 extends Resource
 class_name FKIdAssigner
 
 ## Highest ID found during the last refresh.
-var _latest_id_given: int = -1
+@export_storage var _latest_id_given: int = -1
 
 ## It is assumed that all elements inherit from Object
-func refresh_for(items: Array):
+func refresh_for(items: Array) -> int:
 	_validate_and_register_init_taken_ids(items)
 	_refresh_latest_id_given()
 	_assign_new_ids_as_needed(items)
@@ -106,3 +107,6 @@ func _assign_next_uid_to(unit: Object) -> int:
 	unit.set(prop_name, new_id)
 	_latest_id_given = new_id
 	return new_id
+
+func get_real_class() -> String:
+	return "FKIdAssigner"

@@ -11,6 +11,14 @@ class_name FKConditionUnit
 func _init() -> void:
 	block_type = "condition"
 
+func may_have_children():
+	return true 
+	
+func get_children() -> Array[FKUnit]:
+	var defensive_copy: Array[FKUnit] = [] as Array[FKUnit]
+	defensive_copy.append_array(actions)
+	return defensive_copy
+	
 func serialize() -> Dictionary:
 	var result := super.serialize()
 	var our_added_fields := {
