@@ -14,12 +14,20 @@ class_name FKActionUnit
 @export var branch_inputs: Dictionary = {}
 @export var branch_actions: Array[FKActionUnit] = []
 
+func may_have_children() -> bool:
+	return true
+
+func get_children() -> Array[FKUnit]:
+	var defensive_copy: Array[FKUnit] = [] as Array[FKUnit]
+	defensive_copy.append_array(branch_actions)
+	return defensive_copy
+
 func _init() -> void:
 	block_type = "action"
 
 func serialize() -> Dictionary:
-	var result := {
-		"type": block_type,
+	var result := super.serialize()
+	var our_added_fields := {
 		"action_id": action_id,
 		"target_node": str(target_node),
 		"inputs": inputs.duplicate(),
@@ -28,10 +36,12 @@ func serialize() -> Dictionary:
 		"branch_id": branch_id,
 		"branch_inputs": branch_inputs.duplicate()
 	}
+	result.merge(our_added_fields)
 
 	_serialize_branch_conds_and_actions(result)
 
 	return result
+
 
 func _serialize_branch_conds_and_actions(result: Dictionary):
 	if is_branch and branch_condition != null:
@@ -45,6 +55,8 @@ func _serialize_branch_conds_and_actions(result: Dictionary):
 		result["branch_actions"] = copied_actions
 		
 func deserialize(dict: Dictionary) -> void:
+	print("Deserializing fk action")
+	super.deserialize(dict)
 	action_id = dict.get("action_id", "")
 	target_node = NodePath(dict.get("target_node", ""))
 	inputs = dict.get("inputs", {}).duplicate()
@@ -77,6 +89,7 @@ func duplicate_block() -> FKUnit:
 	#print("[FKActionUnit]: Duplicating!")
 	var copy := FKActionUnit.new()
 	copy.block_type = block_type
+	copy.personal_id = personal_id
 	copy.action_id = action_id
 	copy.target_node = target_node
 	copy.inputs = inputs.duplicate(true)
@@ -93,10 +106,6 @@ func duplicate_block() -> FKUnit:
 		branch_actions_copy.append(act_copy)
 	copy.branch_actions = branch_actions_copy
 		
-	# Copy your other fields here (ids, params, etc.)
-	# e.g. copy.action_id = action_id, etc.
-
-
 	return copy
 	
 static func _to_action_unit_arr(arr: Array) -> Array[FKActionUnit]:

@@ -18,6 +18,15 @@ static var _serialization_manager := FKSerializationManager.new()
 func _init() -> void:
 	block_type = "group"
 
+func may_have_children() -> bool:
+	return true
+
+func get_children() -> Array[FKUnit]:
+	normalize_children()
+	var defensive_copy: Array[FKUnit] = [] as Array[FKUnit]
+	defensive_copy.append_array(children)
+	return defensive_copy
+
 func normalize_children(force: bool = false) -> void:
 	if _is_normalized and not force:
 		return
@@ -41,7 +50,6 @@ func normalize_children(force: bool = false) -> void:
 
 var _is_normalized := false
 
-# Optional helpers if you still want them, but FKUnit-only now
 func add_child_unit(unit: FKUnit) -> void:
 	if unit:
 		children.append(unit)
@@ -54,7 +62,8 @@ func get_child_count() -> int:
 	return children.size()
 
 func get_child_unit(index: int) -> FKUnit:
-	if index >= 0 and index < children.size():
+	var valid_index: bool = index >= 0 and index < children.size()
+	if valid_index:
 		return children[index]
 	return null
 
@@ -66,14 +75,16 @@ func find_child_index(unit: FKUnit) -> int:
 
 func serialize() -> Dictionary:
 	normalize_children(true)
-	
-	var result := {
-		"type": block_type,
+
+	var result := super.serialize()
+	var our_added_fields := {
 		"title": title,
 		"collapsed": collapsed,
 		"color": color,
 		"children": _get_serialized_children(self)
 	}
+	result.merge(our_added_fields)
+
 	return result
 
 static func _get_serialized_children(block: FKGroup) -> Array:
@@ -85,6 +96,8 @@ static func _get_serialized_children(block: FKGroup) -> Array:
 	return result
 
 func deserialize(dict: Dictionary) -> void:
+	print("Deserializing fk group")
+	super.deserialize(dict)
 	title = dict.get("title", "Group")
 	collapsed = dict.get("collapsed", false)
 	color = dict.get("color", Color(0.25, 0.22, 0.35, 1.0))

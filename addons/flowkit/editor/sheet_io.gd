@@ -19,11 +19,13 @@ func load_sheet(scene_uid: int) -> FKEventSheet:
 
 	var sheet := ResourceLoader.load(sheet_path)
 	if sheet is FKEventSheet:
+		sheet.on_loaded_from_disk()
 		return sheet
 	return null
 
 func save_sheet(scene_uid: int, sheet: FKEventSheet) -> int:
 	var sheet_path := get_sheet_path(scene_uid)
+	sheet.refresh() # To ensure any cleanup is done
 	if sheet_path == "":
 		print("[SheetIo] Returning err invalid param")
 		return ERR_INVALID_PARAMETER

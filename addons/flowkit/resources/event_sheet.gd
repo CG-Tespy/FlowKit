@@ -14,6 +14,7 @@ class_name FKEventSheet
 
 ## Stores the display order: [{"type": "event"|"comment"|"group", "index": int}, ...]
 @export var item_order: Array[Dictionary] = []
+@export_storage var _id_assigner: FKIdAssigner
 
 ## Returns an array of the top-level FKUnits in the order they were
 ## appended to this sheet.
@@ -164,6 +165,62 @@ func rebuild_order_from_items(ordered_items: Array) -> void:
 				if data is FKGroup:
 					item_order.append({"type": "group", "index": groups.size()})
 					groups.append(data)
-					
+
+func on_loaded_from_disk():
+	_call_child_on_loaded_from_disk(events)
+	_call_child_on_loaded_from_disk(standalone_conditions)
+	_call_child_on_loaded_from_disk(comments)
+	_call_child_on_loaded_from_disk(groups)
+	refresh()
+
+func _call_child_on_loaded_from_disk(children: Array):
+	for elem in children:
+		var fk_unit := elem as FKUnit
+		#print("Calling on_loaded_from_disk for instance of " + fk_unit.get_real_class())
+		fk_unit.on_loaded_from_disk()
+
+func refresh():
+	if not _id_assigner:
+		_id_assigner = FKIdAssigner.new()
+		
+	_id_assigner.prop_name = "personal_id"
+	_id_assigner._append_array_as_invalid([0, FKUnit.INVALID_ID])
+	_refresh_uids()
+
+# For backwards compatibility with older versions of FlowKit
+func _refresh_uids():
+	print("[FKEventSheet]: Refreshing uids")
+	_refresh_uids_in_array(events)
+	_refresh_uids_in_array(standalone_conditions)
+	_refresh_uids_in_array(comments)
+	_refresh_uids_in_array(groups)
+
+
+func _refresh_uids_in_array(arr: Array):
+	for elem in arr:
+		var unit := elem as FKUnit
+		if unit == null:
+			continue
+
+		_assign_uid_recursive(unit)
+
+
+func _assign_uid_recursive(unit: FKUnit):
+	var assigned := _id_assigner.refresh_for([unit])
+	# print("Assigning uid " + str(assigned) + " to " + unit.get_real_class())
+	var childArr := unit.get_children()
+
+	for child in childArr:
+		_assign_uid_recursive(child)
+
+
 func get_class() -> String:
 	return "FKEventSheet"
+
+func _to_string() -> String:
+	var result := "FKEventSheet\n"
+	result += "Events: " + str(events) + "\n"
+	result += "Standalone Conditions: " + str(standalone_conditions) + "\n"
+	result += "Comments: " + str(comments) + "\n"
+	result += "Groups : " + str(groups) + "\n"
+	return result

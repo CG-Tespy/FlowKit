@@ -11,14 +11,25 @@ class_name FKConditionUnit
 func _init() -> void:
 	block_type = "condition"
 
+func may_have_children():
+	return true 
+	
+func get_children() -> Array[FKUnit]:
+	var defensive_copy: Array[FKUnit] = [] as Array[FKUnit]
+	defensive_copy.append_array(actions)
+	return defensive_copy
+	
 func serialize() -> Dictionary:
-	return {
-		"type": block_type,
+	var result := super.serialize()
+	var our_added_fields := {
 		"condition_id": condition_id,
 		"target_node": str(target_node),
 		"inputs": inputs.duplicate(),
 		"negated": negated,
 	}
+	result.merge(our_added_fields)
+	
+	return result
 
 func deserialize(dict: Dictionary) -> void:
 	condition_id = dict.get("condition_id", "")
