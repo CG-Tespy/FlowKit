@@ -1,16 +1,17 @@
 @tool
 extends FKUnit
-class_name FKGroup
 
 ## A group container for organizing events, comments, and nested groups in FlowKit.
 ## Groups provide visual organization and can be collapsed/expanded.
 ## Children used to be stored as dictionaries with "type" and "data" keys.
 ## Now, they are stored as FKUnit subresources.
+class_name FKGroup
 
 @export var title: String = "Group"
 @export var collapsed: bool = false
 @export var color: Color = Color(0.25, 0.22, 0.35, 1.0)
 
+## If accessing from outside FKGroupUnit, best use get_children instead.
 @export var children: Array = []
 
 static var _serialization_manager := FKSerializationManager.new()
@@ -96,13 +97,12 @@ static func _get_serialized_children(block: FKGroup) -> Array:
 	return result
 
 func deserialize(dict: Dictionary) -> void:
-	print("Deserializing fk group")
 	super.deserialize(dict)
 	title = dict.get("title", "Group")
 	collapsed = dict.get("collapsed", false)
 	color = dict.get("color", Color(0.25, 0.22, 0.35, 1.0))
 
-	children = []
+	children.clear()
 
 	for child_dict in dict.get("children", []):
 		var child_block := _serialization_manager.deserialize_block(child_dict)

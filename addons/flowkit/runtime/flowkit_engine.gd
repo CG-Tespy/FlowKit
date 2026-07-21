@@ -204,7 +204,8 @@ func _run_sheet(entry: Dictionary) -> void:
 		if not cnode:
 			continue
 
-		var cond_result: bool = registry.check_condition(standalone_cond.condition_id, cnode, standalone_cond.inputs, standalone_cond.negated, current_root, "")
+		var cond_result: bool = registry.check_condition(standalone_cond.condition_id, cnode, 
+		standalone_cond.inputs, standalone_cond.negated, current_root)
 		if cond_result:
 			# Execute actions associated with this standalone condition
 			for act in standalone_cond.actions:
@@ -213,7 +214,8 @@ func _run_sheet(entry: Dictionary) -> void:
 				if not anode:
 					print("[FlowKit] Standalone condition action target node not found: ", act.target_node)
 					continue
-				var provider: Variant = await registry.execute_action(act.action_id, anode, act.inputs, current_root, "")
+				var provider: Variant = await registry.execute_action(act.action_id, anode, 
+				act.inputs, current_root)
 
 
 	# Collect all events from the sheet (both top-level and nested in groups)
@@ -330,7 +332,8 @@ func _execute_block(block: FKEventUnit, current_root: Node) -> void:
 			passed = false
 			break
 
-		var cond_result: bool = registry.check_condition(cond.condition_id, cnode, cond.inputs, cond.negated, current_root, block.block_id)
+		var cond_result: bool = registry.check_condition(cond.condition_id, cnode, cond.inputs, 
+		cond.negated, current_root, block.personal_id)
 		if not cond_result:
 			passed = false
 			break
@@ -339,11 +342,11 @@ func _execute_block(block: FKEventUnit, current_root: Node) -> void:
 		return
 
 	# Execute all actions (with branch support, including nested branches)
-	await _execute_actions_list(block.actions, current_root, block.block_id)
+	await _execute_actions_list(block.actions, current_root, block.personal_id)
 
 ## Execute a list of actions, handling branch chains via providers.
 ## Used by both _execute_block (top-level actions) and nested branches.
-func _execute_actions_list(actions: Array, current_root: Node, block_id: String) -> void:
+func _execute_actions_list(actions: Array, current_root: Node, block_id: int) -> void:
 	await _branch_executor._execute_actions(actions, current_root, block_id)
 	
 func _is_multi_frame_provider(provider: Variant) -> bool:

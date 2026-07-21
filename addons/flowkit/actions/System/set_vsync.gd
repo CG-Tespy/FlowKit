@@ -19,7 +19,7 @@ static var _enabled_input: FKBoolActionInput:
 	get:
 		return FKBoolActionInput.new("Enabled", "Whether VSync should be enabled.", true)
 
-func execute(node: Node, inputs: Dictionary, block_id: String = "") -> void:
+func execute(node: Node, inputs: Dictionary, block_id: int = -1) -> void:
 	var enabled: bool = _enabled_input.get_val(inputs)
 	if enabled:
 		DisplayServer.window_set_vsync_mode(DisplayServer.VSYNC_ENABLED)

@@ -25,7 +25,7 @@ static var _y_input: FKFloatActionInput:
 func get_supported_types() -> Array[String]:
 	return ["CharacterBody2D"]
 
-func execute(node: Node, inputs: Dictionary, block_id: String = "") -> void:
+func execute(node: Node, inputs: Dictionary, block_id: int = -1) -> void:
 	if not node is CharacterBody2D:
 		return
 	

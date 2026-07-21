@@ -21,6 +21,6 @@ static var _scale_input: FKFloatActionInput:
 		"The time scale multiplier (1.0 = normal speed).",
 		1.0)
 
-func execute(node: Node, inputs: Dictionary, block_id: String = "") -> void:
+func execute(node: Node, inputs: Dictionary, block_id: int = -1) -> void:
 	var scale: float = _scale_input.get_val(inputs)
 	Engine.time_scale = scale

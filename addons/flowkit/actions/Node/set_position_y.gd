@@ -20,7 +20,7 @@ static var _val_input: FKActionInput:
 func get_supported_types() -> Array[String]:
 	return ["Node2D"]
 
-func execute(node: Node, inputs: Dictionary, block_id: String = "") -> void:
+func execute(node: Node, inputs: Dictionary, block_id: int = -1) -> void:
 	if not node is Node2D:
 		return
 	

@@ -20,7 +20,7 @@ static var _path_input: FKStringActionInput:
 		return FKStringActionInput.new("Scene Path", 
 		"The path to the scene file (e.g., 'res://scenes/level2.tscn').")
 
-func execute(node: Node, inputs: Dictionary, block_id: String = "") -> void:
+func execute(node: Node, inputs: Dictionary, block_id: int = -1) -> void:
 	if not node or not node.is_inside_tree():
 		return
 	var scene_path: String = _path_input.get_val(inputs)

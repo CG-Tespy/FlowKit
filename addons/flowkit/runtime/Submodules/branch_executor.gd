@@ -13,7 +13,7 @@ const _sys_node_name := "System"
 const _path_to_sys := NodePath("/root/FlowKitSystem")
 
 ## Evaluate a branch's condition. Returns true if the condition passes.
-func _evaluate_condition(act: FKActionUnit, current_root: Node, block_id: String) -> bool:
+func _evaluate_condition(act: FKActionUnit, current_root: Node, block_id: int) -> bool:
 	if not act.branch_condition:
 		return false
 
@@ -23,11 +23,12 @@ func _evaluate_condition(act: FKActionUnit, current_root: Node, block_id: String
 	if not cnode:
 		return false
 
-	return registry.check_condition(cond.condition_id, cnode, cond.inputs, cond.negated, current_root, block_id)
+	return registry.check_condition(cond.condition_id, cnode, cond.inputs, 
+	cond.negated, current_root, block_id)
 
 ## Execute a list of actions, handling branch chains via providers.
 ## Used by both _execute_block (top-level actions) and nested branches.
-func _execute_actions(actions: Array, current_root: Node, block_id: String) -> void:
+func _execute_actions(actions: Array, current_root: Node, block_id: int) -> void:
 	var branch_taken: bool = false
 	var in_branch_chain: bool = false
 
@@ -84,12 +85,13 @@ func _execute_actions(actions: Array, current_root: Node, block_id: String) -> v
 			if not anode:
 				print("[FlowKit] Action target node not found: ", act.target_node)
 				continue
-			var provider: Variant = await registry.execute_action(act.action_id, anode, act.inputs, current_root, block_id)
+			var provider: Variant = await registry.execute_action(act.action_id, anode, 
+			act.inputs, current_root, block_id)
 
 ## Determine whether a branch should execute, delegating to the branch provider.
 ## Handles both condition-type and evaluation-type branches.
 func _should_execute_branch(act: FKActionUnit, provider: Variant, 
-current_root: Node, block_id: String) -> bool:
+current_root: Node, block_id: int) -> bool:
 	if not provider:
 		return false
 

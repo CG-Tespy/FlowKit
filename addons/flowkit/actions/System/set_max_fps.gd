@@ -19,6 +19,6 @@ static var _fps_input: FKIntActionInput:
 	get:
 		return FKIntActionInput.new("Max FPS", "The maximum FPS limit (0 = unlimited).")
 
-func execute(node: Node, inputs: Dictionary, block_id: String = "") -> void:
+func execute(node: Node, inputs: Dictionary, block_id: int = -1) -> void:
 	var max_fps: int = _fps_input.get_val(inputs)
 	Engine.max_fps = max_fps

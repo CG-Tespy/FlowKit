@@ -19,7 +19,7 @@ static var _name_input: FKStringActionInput:
 	get:
 		return FKStringActionInput.new("Name", "The name of the function to define.")
 
-func execute(node: Node, inputs: Dictionary, block_id: String = "") -> void:
+func execute(node: Node, inputs: Dictionary, block_id: int = -1) -> void:
 	var function_name: String = _name_input.get_val(inputs)
 
 	if function_name.is_empty():

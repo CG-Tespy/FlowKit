@@ -19,7 +19,7 @@ static var _url_input: FKStringActionInput:
 	get:
 		return FKStringActionInput.new("URL", "The URL to open in the web browser.")
 
-func execute(node: Node, inputs: Dictionary, block_id: String = "") -> void:
+func execute(node: Node, inputs: Dictionary, block_id: int = -1) -> void:
 	var url: String = _url_input.get_val(inputs)
 	if not url.is_empty():
 		OS.shell_open(url)

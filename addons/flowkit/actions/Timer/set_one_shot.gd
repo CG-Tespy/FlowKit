@@ -20,7 +20,7 @@ static var _one_shot_input: FKBoolActionInput:
 func get_supported_types() -> Array[String]:
 	return ["Timer"]
 
-func execute(node: Node, inputs: Dictionary, block_id: String = "") -> void:
+func execute(node: Node, inputs: Dictionary, block_id: int = -1) -> void:
 	if node and node is Timer:
 		var one_shot: bool = _one_shot_input.get_val(inputs)
 		node.one_shot = one_shot

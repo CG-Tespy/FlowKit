@@ -22,7 +22,7 @@ static var _y_input: FKFloatActionInput:
 	get:
 		return FKFloatActionInput.new("Y", "The Y position to move the mouse to.")
 
-func execute(node: Node, inputs: Dictionary, block_id: String = "") -> void:
+func execute(node: Node, inputs: Dictionary, block_id: int = -1) -> void:
 	var x: float = _x_input.get_val(inputs)
 	var y: float = _y_input.get_val(inputs)
 	var pos: Vector2 = Vector2(x, y)

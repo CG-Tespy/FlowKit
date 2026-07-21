@@ -17,7 +17,7 @@ func get_inputs() -> Array[Dictionary]:
 		{"name": "BusName", "type": "String", "description": "The name of the audio bus to check."}
 	]
 
-func check(node: Node, inputs: Dictionary, block_id: String = "") -> bool:
+func check(node: Node, inputs: Dictionary, block_id: int = -1) -> bool:
 	var bus_name: String = str(inputs.get("BusName", "Master"))
 	var bus_idx: int = AudioServer.get_bus_index(bus_name)
 	

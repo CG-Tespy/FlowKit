@@ -56,7 +56,6 @@ func get_display_name() -> String:
 
 # Subclasses override this to return a Dictionary representation.
 func serialize() -> Dictionary:
-	print("Serializing an FKUnit")
 	var result: Dictionary = {
 		"type": block_type,
 		"personal_id": personal_id
@@ -65,7 +64,6 @@ func serialize() -> Dictionary:
 
 ## Subclasses override this to populate themselves from a Dictionary.
 func deserialize(dict: Dictionary) -> void:
-	print("Deserializing fk unit base")
 	personal_id = dict.get("personal_id")
 
 # Deep-copy contract for undo/redo and clipboard.

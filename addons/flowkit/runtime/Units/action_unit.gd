@@ -55,7 +55,6 @@ func _serialize_branch_conds_and_actions(result: Dictionary):
 		result["branch_actions"] = copied_actions
 		
 func deserialize(dict: Dictionary) -> void:
-	print("Deserializing fk action")
 	super.deserialize(dict)
 	action_id = dict.get("action_id", "")
 	target_node = NodePath(dict.get("target_node", ""))

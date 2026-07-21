@@ -42,7 +42,7 @@ static var _store_y_input: FKStringActionInput:
 func get_supported_types() -> Array[String]:
 	return ["System"]
 
-func execute(node: Node, inputs: Dictionary, block_id: String = "") -> void:
+func execute(node: Node, inputs: Dictionary, block_id: int = -1) -> void:
 	var negative_x_action: String = _neg_x_input.get_val(inputs)
 	var positive_x_action: String = _pos_x_input.get_val(inputs)
 	var negative_y_action: String = _neg_y_input.get_val(inputs)

@@ -1321,7 +1321,7 @@ func _finalize_event_creation(inputs: Dictionary) -> void:
 	_push_undo_state()
 	
 	# Generate new block_id for new events (pass empty string to auto-generate)
-	var data := FKEventUnit.new("", pending_id, pending_node_path)
+	var data := FKEventUnit.new(pending_id, pending_node_path)
 	data.inputs = inputs
 	data.conditions = [] as Array[FKConditionUnit]
 	data.actions = [] as Array[FKActionUnit]
@@ -1345,7 +1345,7 @@ func _finalize_event_above_target(inputs: Dictionary) -> void:
 	_push_undo_state()
 	
 	# Generate new block_id for new events (pass empty string to auto-generate)
-	var data := FKEventUnit.new("", pending_id, pending_node_path)
+	var data := FKEventUnit.new(pending_id, pending_node_path)
 	data.inputs = inputs
 	data.conditions = [] as Array[FKConditionUnit]
 	data.actions = [] as Array[FKActionUnit]
@@ -1373,7 +1373,7 @@ func _finalize_event_in_group(inputs: Dictionary) -> void:
 	_push_undo_state()
 	
 	# Generate new block_id for new events (pass empty string to auto-generate)
-	var data := FKEventUnit.new("", pending_id, pending_node_path)
+	var data := FKEventUnit.new(pending_id, pending_node_path)
 	data.inputs = inputs
 	data.conditions = [] as Array[FKConditionUnit]
 	data.actions = [] as Array[FKActionUnit]
@@ -1468,19 +1468,20 @@ func _replace_event(expressions: Dictionary) -> void:
 	_push_undo_state()
 	
 	# Get old row's position and conditions/actions
-	var old_data: FKUnit = pending_target_row.get_block()
+	var old_unit: FKUnit = pending_target_row.get_block()
 	var old_index := pending_target_row.get_index()
 	var old_parent := pending_target_row.get_parent()
 	
-	# Create new event data, preserving block_id if available
-	var old_block_id := old_data.get_id() if old_data else ""
-	var new_data := FKEventUnit.new(old_block_id, pending_id, pending_node_path)
-	new_data.inputs = expressions
-	new_data.conditions = old_data.conditions if old_data else ([] as Array[FKConditionUnit])
-	new_data.actions = old_data.actions if old_data else ([] as Array[FKActionUnit])
+	# Create new event data, preserving personal id
+	var old_unit_id: int = old_unit.personal_id
+	var new_unit := FKEventUnit.new(pending_id, pending_node_path)
+	new_unit.personal_id = old_unit_id
+	new_unit.inputs = expressions
+	new_unit.conditions = old_unit.conditions if old_unit else ([] as Array[FKConditionUnit])
+	new_unit.actions = old_unit.actions if old_unit else ([] as Array[FKActionUnit])
 	
 	# Create new row
-	var new_row := _create_unit_ui(new_data)
+	var new_row := _create_unit_ui(new_unit)
 	
 	# Remove old row and insert new one at same position
 	if old_parent:

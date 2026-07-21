@@ -19,7 +19,7 @@ static var _title_input: FKStringActionInput:
 func get_supported_types() -> Array[String]:
 	return ["Window"]
 
-func execute(node: Node, inputs: Dictionary, block_id: String = "") -> void:
+func execute(node: Node, inputs: Dictionary, block_id: int = -1) -> void:
 	if node and node is Window:
 		var title: String = _title_input.get_val(inputs)
 		node.title = title

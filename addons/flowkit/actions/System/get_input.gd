@@ -28,7 +28,7 @@ static var _store_input: FKStringActionInput:
 func get_supported_types() -> Array[String]:
 	return ["System"]
 
-func execute(node: Node, inputs: Dictionary, block_id: String = "") -> void:
+func execute(node: Node, inputs: Dictionary, block_id: int = -1) -> void:
 	var negative_action: String = _neg_action_input.get_val(inputs)
 	var positive_action: String = _pos_action_input.get_val(inputs)
 	var store_in: String = _store_input.get_val(inputs)

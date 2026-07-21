@@ -19,6 +19,6 @@ static var _title_input: FKStringActionInput:
 	get:
 		return FKStringActionInput.new("Title", "The title to set for the window.")
 
-func execute(node: Node, inputs: Dictionary, block_id: String = "") -> void:
+func execute(node: Node, inputs: Dictionary, block_id: int = -1) -> void:
 	var title: String = _title_input.get_val(inputs)
 	DisplayServer.window_set_title(title)

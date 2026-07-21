@@ -22,7 +22,7 @@ static var _y_input: FKIntActionInput:
 	get:
 		return FKIntActionInput.new("Y", "The Y position of the window in pixels.")
 
-func execute(node: Node, inputs: Dictionary, block_id: String = "") -> void:
+func execute(node: Node, inputs: Dictionary, block_id: int = -1) -> void:
 	var x: int = _x_input.get_val(inputs)
 	var y: int = _y_input.get_val(inputs)
 	DisplayServer.window_set_position(Vector2i(x, y))

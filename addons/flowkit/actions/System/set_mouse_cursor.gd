@@ -28,7 +28,7 @@ static var _y_input: FKIntActionInput:
 		return FKIntActionInput.new("Hotspot Y",
 		"The Y coordinate of the cursor hotspot.")
 
-func execute(node: Node, inputs: Dictionary, block_id: String = "") -> void:
+func execute(node: Node, inputs: Dictionary, block_id: int = -1) -> void:
 	var cursor_path: String = _path_input.get_val(inputs)
 	var hotspot_x: int = _x_input.get_val(inputs)
 	var hotspot_y: int = _y_input.get_val(inputs)

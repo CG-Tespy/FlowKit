@@ -21,6 +21,6 @@ static var _duration_input: FKIntActionInput:
 		"Duration of vibration in milliseconds.",
 		200)
 
-func execute(node: Node, inputs: Dictionary, block_id: String = "") -> void:
+func execute(node: Node, inputs: Dictionary, block_id: int = -1) -> void:
 	var duration_ms: int = _duration_input.get_val(inputs)
 	Input.vibrate_handheld(duration_ms)

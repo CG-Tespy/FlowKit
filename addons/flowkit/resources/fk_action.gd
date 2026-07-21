@@ -21,7 +21,7 @@ func get_supported_types() -> Array[String]:
 func requires_multi_frames() -> bool:
 	return false
 
-func execute(node: Node, inputs: Dictionary, block_id: String = "") -> void:
+func execute(node: Node, inputs: Dictionary, block_id: int = -1) -> void:
 	pass
 
 func get_class() -> String:

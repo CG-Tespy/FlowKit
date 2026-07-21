@@ -17,7 +17,7 @@ func get_inputs() -> Array[Dictionary]:
 		{"name": "Button", "type": "String", "description": "The mouse button to check: 'left', 'right', 'middle', 'wheel_up', 'wheel_down'."}
 	]
 
-func check(node: Node, inputs: Dictionary, block_id: String = "") -> bool:
+func check(node: Node, inputs: Dictionary, block_id: int = -1) -> bool:
 	var button_str: String = str(inputs.get("Button", "left")).to_lower()
 	var button: MouseButton = _string_to_button(button_str)
 	

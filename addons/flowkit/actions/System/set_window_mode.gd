@@ -21,7 +21,7 @@ static var _mode_input: FKStringActionInput:
 		"Window mode: 'windowed', 'fullscreen', 'borderless', 'minimized', or 'maximized'.",
 		"windowed")
 
-func execute(node: Node, inputs: Dictionary, block_id: String = "") -> void:
+func execute(node: Node, inputs: Dictionary, block_id: int = -1) -> void:
 	var mode_str: String = _mode_input.get_val(inputs)
 	mode_str = mode_str.to_lower()
 	var mode: DisplayServer.WindowMode = DisplayServer.WINDOW_MODE_WINDOWED

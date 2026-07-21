@@ -25,7 +25,7 @@ static var _value_input: FKActionInput:
 func get_supported_types() -> Array[String]:
 	return ["Node"]
 
-func execute(node: Node, inputs: Dictionary, block_id: String = "") -> void:
+func execute(node: Node, inputs: Dictionary, block_id: int = -1) -> void:
 	var var_name: String = _name_input.get_val(inputs)
 	var value: Variant = _value_input.get_val(inputs)
 	

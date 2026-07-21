@@ -225,7 +225,7 @@ func get_inputs() -> Array[FKActionInput]:
 func get_supported_types() -> Array[String]:
 	return ["%s"]
 
-func execute(node: Node, inputs: Dictionary, block_id: String = "") -> void:
+func execute(node: Node, inputs: Dictionary, block_id: int = -1) -> void:
 	if not node is %s:
 		return
 	
@@ -288,7 +288,7 @@ func get_inputs() -> Array[FKActionInput]:
 func get_supported_types() -> Array[String]:
 	return ["%s"]
 
-func execute(node: Node, inputs: Dictionary, block_id: String = "") -> void:
+func execute(node: Node, inputs: Dictionary, block_id: int = -1) -> void:
 	if not node is %s:
 		return
 	
@@ -387,7 +387,7 @@ func get_inputs() -> Array[Dictionary]:
 func get_supported_types() -> Array[String]:
 	return ["%s"]
 
-func check(node: Node, inputs: Dictionary, block_id: String = "") -> bool:
+func check(node: Node, inputs: Dictionary, block_id: int = -1) -> bool:
 	if not node is %s:
 		return false
 	
@@ -450,7 +450,7 @@ func get_inputs() -> Array[Dictionary]:
 func get_supported_types() -> Array[String]:
 	return ["%s"]
 
-func check(node: Node, inputs: Dictionary, block_id: String = "") -> bool:
+func check(node: Node, inputs: Dictionary, block_id: int = -1) -> bool:
 	if not node is %s:
 		return false
 	
@@ -530,25 +530,26 @@ func is_signal_event() -> bool:
 # Key: block_id -> Callable
 var _connections: Dictionary = {}
 
-func setup(node: Node, trigger_callback: Callable, block_id: String = "") -> void:
+func setup(node: Node, trigger_callback: Callable, block_id: int = -1) -> void:
 	if not node or not node.is_inside_tree():
 		return
 	if not node.has_signal("%s"):
 		return
 
 	var cb: Callable = func(%s): trigger_callback.call()
-	_connections[block_id] = cb
+	_connections[str(block_id)] = cb
 	node.%s.connect(cb)
 
-func teardown(node: Node, block_id: String = "") -> void:
+func teardown(node: Node, block_id: int = -1) -> void:
+	var id_str := str(block_id)
 	if not node or not is_instance_valid(node):
-		_connections.erase(block_id)
+		_connections.erase(id_str)
 		return
-	if _connections.has(block_id):
-		var cb: Callable = _connections[block_id]
+	if _connections.has(id_str):
+		var cb: Callable = _connections[id_str]
 		if node.has_signal("%s") and node.%s.is_connected(cb):
 			node.%s.disconnect(cb)
-		_connections.erase(block_id)
+		_connections.erase(id_str)
 """ % [
 		event_id,
 		event_name,

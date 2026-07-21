@@ -17,7 +17,7 @@ func get_inputs() -> Array[Dictionary]:
 		{"name": "Action", "type": "String", "description": "The name of the input action (defined in InputMap)."}
 	]
 
-func check(node: Node, inputs: Dictionary, block_id: String = "") -> bool:
+func check(node: Node, inputs: Dictionary, block_id: int = -1) -> bool:
 	var action_name: String = str(inputs.get("Action", ""))
 	if action_name.is_empty():
 		return false

@@ -21,7 +21,7 @@ static var _captured_input: FKBoolActionInput:
 		"Whether the mouse cursor should be captured.",
 		true)
 
-func execute(node: Node, inputs: Dictionary, block_id: String = "") -> void:
+func execute(node: Node, inputs: Dictionary, block_id: int = -1) -> void:
 	var captured: bool = _captured_input.get_val(inputs)
 	if captured:
 		Input.set_mouse_mode(Input.MOUSE_MODE_CAPTURED)

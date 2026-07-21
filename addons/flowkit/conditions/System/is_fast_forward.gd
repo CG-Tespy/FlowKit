@@ -15,5 +15,5 @@ func get_supported_types() -> Array[String]:
 func get_inputs() -> Array[Dictionary]:
 	return []
 
-func check(node: Node, inputs: Dictionary, block_id: String = "") -> bool:
+func check(node: Node, inputs: Dictionary, block_id: int = -1) -> bool:
 	return Engine.time_scale > 1.0

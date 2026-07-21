@@ -23,7 +23,7 @@ static var _muted_input: FKBoolActionInput:
 	get:
 		return FKBoolActionInput.new("Muted", "Whether the audio bus should be muted.", true)
 
-func execute(node: Node, inputs: Dictionary, block_id: String = "") -> void:
+func execute(node: Node, inputs: Dictionary, block_id: int = -1) -> void:
 	var bus_name: String = _bus_name_input.get_val(inputs)
 	var muted: bool = _muted_input.get_val(inputs)
 	

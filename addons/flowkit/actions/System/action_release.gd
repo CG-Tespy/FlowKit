@@ -20,7 +20,7 @@ static var _action_input: FKStringActionInput:
 		return FKStringActionInput.new("Action",
 		"The name of the input action to simulate releasing.")
 
-func execute(node: Node, inputs: Dictionary, block_id: String = "") -> void:
+func execute(node: Node, inputs: Dictionary, block_id: int = -1) -> void:
 	var action_name: String = _action_input.get_val(inputs)
 	
 	if not action_name.is_empty():

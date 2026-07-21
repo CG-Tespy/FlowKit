@@ -132,13 +132,15 @@ func _scan_directory_recursive(path: String, array: Array) -> void:
 	
 	dir.list_dir_end()
 
-func poll_event(event_id: String, node: Node, inputs: Dictionary = {}, block_id: String = "", scene_root: Node = null) -> bool:
+func poll_event(event_id: String, node: Node, inputs: Dictionary = {}, unit_id: int = -1, 
+scene_root: Node = null) -> bool:
 	for provider in event_providers:
 		if provider.has_method("get_id") and provider.get_id() == event_id:
 			if provider.has_method("poll"):
 				# Evaluate expressions in inputs before polling
-				var evaluated_inputs: Dictionary = FKExpressionEvaluator.evaluate_inputs(inputs, node, scene_root)
-				return provider.poll(node, evaluated_inputs, block_id)
+				var evaluated_inputs: Dictionary 
+				evaluated_inputs = FKExpressionEvaluator.evaluate_inputs(inputs, node, scene_root)
+				return provider.poll(node, evaluated_inputs, unit_id)
 	return false
 
 ## Returns the event provider instance for the given event_id, or null.
@@ -158,16 +160,16 @@ func create_event_instance(event_id: String) -> Variant:
 
 ## Call setup() on an event provider so it can connect to signals on the target node.
 ## trigger_callback is a Callable the provider can call to fire the block immediately.
-func setup_event(event_id: String, node: Node, trigger_callback: Callable, block_id: String = "") -> void:
+func setup_event(event_id: String, node: Node, trigger_callback: Callable, unit_id: int = -1) -> void:
 	var provider: Variant = get_event_provider(event_id)
 	if provider and provider.has_method("setup"):
-		provider.setup(node, trigger_callback, block_id)
+		provider.setup(node, trigger_callback, unit_id)
 
 ## Call teardown() on an event provider so it can disconnect signals / clean up.
-func teardown_event(event_id: String, node: Node, block_id: String = "") -> void:
+func teardown_event(event_id: String, node: Node, unit_id: int = -1) -> void:
 	var provider: Variant = get_event_provider(event_id)
 	if provider and provider.has_method("teardown"):
-		provider.teardown(node, block_id)
+		provider.teardown(node, unit_id)
 
 ## Returns true if the event provider with the given id is a signal-based event.
 func is_signal_event(event_id: String) -> bool:
@@ -176,7 +178,8 @@ func is_signal_event(event_id: String) -> bool:
 		return provider.is_signal_event()
 	return false
 
-func check_condition(condition_id: String, node: Node, inputs: Dictionary, negated: bool = false, scene_root: Node = null, block_id: String = "") -> bool:
+func check_condition(condition_id: String, node: Node, inputs: Dictionary, 
+negated: bool = false, scene_root: Node = null, unit_id: int = -1) -> bool:
 	for provider in condition_providers:
 		if provider.has_method("get_id") and provider.get_id() == condition_id:
 			if provider.has_method("check"):
@@ -185,11 +188,12 @@ func check_condition(condition_id: String, node: Node, inputs: Dictionary, negat
 				# Pass node as target_node so n_ variable lookups resolve on the correct node
 				var context = node
 				var evaluated_inputs: Dictionary = FKExpressionEvaluator.evaluate_inputs(inputs, context, scene_root, node)
-				var result = provider.check(node, evaluated_inputs, block_id)
+				var result = provider.check(node, evaluated_inputs, unit_id)
 				return not result if negated else result
 	return false
 
-func execute_action(action_id: String, node: Node, inputs: Dictionary, scene_root: Node = null, block_id: String = "") -> Variant:
+func execute_action(action_id: String, node: Node, inputs: Dictionary, 
+scene_root: Node = null, unit_id: int = -1) -> Variant:
 	for provider in action_providers:
 		if provider.has_method("get_id") and provider.get_id() == action_id:
 			if provider.has_method("execute"):
@@ -206,7 +210,7 @@ func execute_action(action_id: String, node: Node, inputs: Dictionary, scene_roo
 					# Otherwise, under circumstances where the action only needs one frame to work,
 					# we'll miss the timing and end up freezing the game.
 					
-				provider.execute(node, evaluated_inputs, block_id)
+				provider.execute(node, evaluated_inputs, unit_id)
 				while _waiting_on_action:
 					await node.get_tree().process_frame
 				

@@ -17,7 +17,7 @@ func get_inputs() -> Array[Dictionary]:
 		{"name": "Platform", "type": "String", "description": "The platform to check: 'windows', 'linux', 'macos', 'android', 'ios', 'web'."}
 	]
 
-func check(node: Node, inputs: Dictionary, block_id: String = "") -> bool:
+func check(node: Node, inputs: Dictionary, block_id: int = -1) -> bool:
 	var platform_str: String = str(inputs.get("Platform", "")).to_lower()
 	
 	match platform_str:

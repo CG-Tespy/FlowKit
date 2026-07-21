@@ -15,6 +15,6 @@ func get_supported_types() -> Array[String]:
 func get_inputs() -> Array[Dictionary]:
 	return []
 
-func check(node: Node, inputs: Dictionary, block_id: String = "") -> bool:
+func check(node: Node, inputs: Dictionary, block_id: int = -1) -> bool:
 	var mode: DisplayServer.WindowMode = DisplayServer.window_get_mode()
 	return mode == DisplayServer.WINDOW_MODE_FULLSCREEN or mode == DisplayServer.WINDOW_MODE_EXCLUSIVE_FULLSCREEN

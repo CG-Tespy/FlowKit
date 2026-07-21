@@ -19,7 +19,7 @@ func get_inputs() -> Array[Dictionary]:
 func get_supported_types() -> Array[String]:
 	return ["System"]
 
-func check(node: Node, inputs: Dictionary, block_id: String = "") -> bool:
+func check(node: Node, inputs: Dictionary, block_id: int = -1) -> bool:
 	var name: String = str(inputs.get("Name", ""))
 	var comparison: String = str(inputs.get("Comparison", "=="))
 	var compare_value: Variant = inputs.get("Value", null)
