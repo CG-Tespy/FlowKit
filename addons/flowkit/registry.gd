@@ -232,7 +232,7 @@ func get_event_provider(event_id: String) -> Variant:
 	return null
 
 ## Create a new, independent instance of the event provider for the given event_id.
-## Each event block should get its own instance to avoid shared state bugs.
+## Each event unit should get its own instance to avoid shared state bugs.
 func create_event_instance(event_id: String) -> Variant:
 	for provider in event_providers:
 		if _provider_matches_id(provider, event_id):
@@ -240,7 +240,7 @@ func create_event_instance(event_id: String) -> Variant:
 	return null
 
 ## Call setup() on an event provider so it can connect to signals on the target node.
-## trigger_callback is a Callable the provider can call to fire the block immediately.
+## trigger_callback is a Callable the provider can call to fire the unit immediately.
 func setup_event(event_id: String, node: Node, trigger_callback: Callable, unit_id: int = -1) -> void:
 	var provider: Variant = get_event_provider(event_id)
 	if provider and provider.has_method("setup"):
