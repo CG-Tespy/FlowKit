@@ -40,6 +40,20 @@ func _provider_matches_id(provider: Variant, wanted_id: String) -> bool:
 		return false
 	return _provider_id_of(provider) == wanted_id
 
+func _provider_source_of(provider: Variant) -> String:
+	if provider == null:
+		return "<null>"
+
+	if provider is Object and provider.has_method("get_script"):
+		var script: Variant = provider.get_script()
+		if script is Script and not script.resource_path.is_empty():
+			return script.resource_path
+
+	if provider is Script and not provider.resource_path.is_empty():
+		return provider.resource_path
+
+	return str(provider)
+
 func _warn_registry_duplicates() -> void:
 	_warn_duplicate_ids(action_providers, "action")
 	_warn_duplicate_ids(condition_providers, "condition")
@@ -51,13 +65,14 @@ func _warn_duplicate_ids(providers: Array, label: String) -> void:
 	var seen: Dictionary = {}
 	for p in providers:
 		var pid := _provider_id_of(p)
+		var source := _provider_source_of(p)
 		if pid.is_empty():
-			push_warning("[FKRegistry] %s provider has empty id: %s" % [label, p])
+			push_warning("[FKRegistry] %s provider has empty id in %s" % [label, source])
 			continue
 		if seen.has(pid):
-			push_warning("[FKRegistry] Duplicate %s provider id '%s': %s and %s" % [label, pid, seen[pid], p])
+			push_warning("[FKRegistry] Duplicate %s provider id '%s' in %s and %s" % [label, pid, seen[pid], source])
 		else:
-			seen[pid] = p
+			seen[pid] = source
 
 func load_all() -> void:
 	# Try to load from manifest first (required for exported builds)
