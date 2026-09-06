@@ -70,12 +70,12 @@ func _load_available_actions() -> void:
 	"""Load all action scripts from the actions folder."""
 	available_actions.clear()
 	var actions_path: String = "res://addons/flowkit/actions";
-	_scan_directory_recursive(actions_path);
-	print("[FKSelectActionModal]: Loaded ", available_actions.size(), " actions");
+	_scan_directory_recursive(actions_path)
+	print("[FKSelectActionModal]: Loaded ", available_actions.size(), " actions")
 
 func _scan_directory_recursive(path: String) -> void:
 	"""Recursively scan directories for action scripts."""
-	var dir: DirAccess = DirAccess.open(path);
+	var dir: DirAccess = DirAccess.open(path)
 	if not dir:
 		return
 	
@@ -119,14 +119,14 @@ func populate_actions(node_path: String, node_class: String) -> void:
 			_all_items_cache.append({
 				"name": action_name,
 				"metadata": {"id": action_id, "inputs": action.get_inputs()}
-			});
+			})
 			
-	_update_list();
-	_populate_recent_list();
+	_update_list()
+	_populate_recent_list()
 
 func _update_list(filter_text: String = "") -> void:
-	item_list.clear();
-	var filter_lower := filter_text.to_lower();
+	item_list.clear()
+	var filter_lower := filter_text.to_lower()
 	
 	for item in _all_items_cache:
 		if filter_text.is_empty() or filter_lower in item["name"].to_lower():
@@ -169,7 +169,7 @@ func _on_item_activated(index: int) -> void:
 	if item_list.is_item_disabled(index):
 		return
 	
-	var metadata = item_list.get_item_metadata(index);
+	var metadata = item_list.get_item_metadata(index)
 	var action_id: String = metadata["id"];
 	var inputs = metadata["inputs"];
 	
@@ -177,13 +177,13 @@ func _on_item_activated(index: int) -> void:
 	var action_name := "";
 	for action in available_actions:
 		if action.get_provider_id() == action_id:
-			action_name = action.get_display_name();
+			action_name = action.get_display_name()
 			break
 	
-	print("[FKSelectActionModal]: Action selected: ", action_id, " for node: ", selected_node_path);
-	_recent_items_manager.add_recent_action(action_id, action_name, selected_node_class);
-	_modal_signals.action_selected.emit(selected_node_path, action_id, inputs);
-	hide();
+	print("[FKSelectActionModal]: Action selected: ", action_id, " for node: ", selected_node_path)
+	_recent_items_manager.add_recent_action(action_id, action_name, selected_node_class)
+	_modal_signals.action_selected.emit(selected_node_path, action_id, inputs)
+	hide()
 
 func _on_item_selected(index: int) -> void:
 	"""Update description when item is selected."""
@@ -191,18 +191,18 @@ func _on_item_selected(index: int) -> void:
 		description_label.text = "";
 		return
 	
-	var metadata = item_list.get_item_metadata(index);
+	var metadata = item_list.get_item_metadata(index)
 	var action_id: String = metadata["id"];
 	
 	# Find the action and get description
 	for action in available_actions:
 		if action.get_provider_id() == action_id:
-			description_label.text = action.get_description();
+			description_label.text = action.get_description()
 			break
 
 func _on_popup_hide() -> void:
 	if search_box:
-		search_box.clear();
+		search_box.clear()
 
 func _populate_recent_list() -> void:
 	"""Populate the recent actions list."""
@@ -215,11 +215,11 @@ func _populate_recent_list() -> void:
 	var recent_for_type = [];
 	for recent_action in _recent_items_manager.recent_actions:
 		if recent_action["node_class"] == selected_node_class:
-			recent_for_type.append(recent_action);
+			recent_for_type.append(recent_action)
 	
 	if recent_for_type.is_empty():
 		recent_item_list.add_item("(No recent items)")
-		recent_item_list.set_item_disabled(0, true);
+		recent_item_list.set_item_disabled(0, true)
 		return
 	
 	for recent_action in recent_for_type:
@@ -232,14 +232,14 @@ func _on_recent_item_activated(index: int) -> void:
 	if recent_item_list.is_item_disabled(index):
 		return
 	
-	var recent_action = recent_item_list.get_item_metadata(index);
+	var recent_action = recent_item_list.get_item_metadata(index)
 	var action_id: String = recent_action["id"];
 	
 	# Find the action to get its inputs
 	var action_inputs: Array[FKActionInput] = [];
 	for action in available_actions:
 		if action.get_provider_id() == action_id:
-			action_inputs = action.get_inputs();
+			action_inputs = action.get_inputs()
 			break
 	
 	print("[FKSelectActionModal]: Recent action selected: ", action_id, " for node: ", \

@@ -89,8 +89,7 @@ func _show_context_menu() -> void:
 	context_menu.clear()
 
 	var provider = _get_branch_provider()
-	var input_type = provider.get_input_type() if provider and provider.has_method("get_input_type") \
-	else "condition"
+	var input_type = provider.get_input_type()
 
 	if _action.branch_type != "else":
 		if input_type == "condition":
@@ -267,7 +266,7 @@ func _get_branch_provider() -> FKBranch:
 	if bid.is_empty() and _action.branch_type in ["if", "elseif", "else"]:
 		bid = "if_branch";
 
-	var result := registry.get_branch_provider(bid);
+	var result := registry.get_branch_provider(bid)
 	return result;
 
 # ---------------------------------------------------------

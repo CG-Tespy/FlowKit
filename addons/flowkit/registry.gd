@@ -366,7 +366,7 @@ func _on_exec_completed():
 
 var _waiting_on_action: bool = false
 
-func get_behavior(behavior_id: String) -> Variant:
+func get_behavior(behavior_id: String) -> FKBehavior:
 	for provider in behavior_providers:
 		if _provider_matches_id(provider, behavior_id):
 			return provider
