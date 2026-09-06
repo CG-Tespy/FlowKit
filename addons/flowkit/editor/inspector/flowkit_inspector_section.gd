@@ -130,8 +130,7 @@ func _populate_behaviors() -> void:
 				break
 		
 		if is_supported:
-			var behavior_name: String = provider.get_display_name() \
-			if provider.has_method("get_name") else provider.get_id()
+			var behavior_name: String = provider.get_display_name();
 			
 			if behavior_name == null || behavior_name.length() == 0:
 				behavior_name = provider.get_provider_id()
@@ -190,7 +189,7 @@ func _on_behavior_selected(index: int) -> void:
 		return
 	
 	var provider = available_behaviors[behavior_index]
-	var behavior_id: String = provider.get_id() if provider.has_method("get_id") else ""
+	var behavior_id: String = provider.get_provider_id() if provider.has_method("get_id") else ""
 	
 	# Get default inputs
 	var default_inputs: Dictionary = {}

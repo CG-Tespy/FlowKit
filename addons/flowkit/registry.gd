@@ -387,7 +387,7 @@ func remove_behavior(behavior_id: String, node: Node) -> void:
 
 # --- Branch providers -------------------------------------------------------
 
-func get_branch_provider(branch_id: String) -> Variant:
+func get_branch_provider(branch_id: String) -> FKBranch:
 	for provider in branch_providers:
 		if _provider_matches_id(provider, branch_id):
 			return provider
