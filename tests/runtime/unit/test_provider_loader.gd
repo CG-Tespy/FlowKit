@@ -20,3 +20,11 @@ func test_registry_reload_replaces_provider_catalog() -> void:
 	registry.event_providers.size() + registry.behavior_providers.size() + registry.branch_providers.size()
 
 	assert_eq(first_count, second_count)
+
+func test_new_registry_can_dispatch_an_unknown_action() -> void:
+	var registry := FKRegistry.new()
+	var target_node := Node.new()
+
+	var result = await registry.execute_action("missing_action", target_node, {})
+
+	assert_null(result)
