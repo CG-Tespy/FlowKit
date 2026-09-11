@@ -1,7 +1,0 @@
-[gd_resource type="Resource" script_class="FKProjectSettings" format=3 uid="uid://c67l2dmk5yxpi"]
-
-[ext_resource type="Script" uid="uid://b72w0xdy6vr76" path="res://addons/flowkit/editor/fk_project_settings.gd" id="1_4321n"]
-
-[resource]
-script = ExtResource("1_4321n")
-provider_paths = Array[String](["res://addons/flowkit/providers"])

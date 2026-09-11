@@ -204,11 +204,11 @@ func set_path_chosen(new_path: String, trigger_signals: bool = true):
 		path_text_field.text = ""
 		return
 
+	_prev_path = path_text_field.text
+	path_text_field.text = new_path
+
 	if trigger_signals:
 		_window_signals.editor_path_choice_changed.emit(_prev_path, new_path)
-
-	_prev_path = new_path
-	pass
 
 func clear_path_chosen():
 	_prev_path = path_text_field.text

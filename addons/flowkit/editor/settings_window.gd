@@ -46,10 +46,11 @@ func _load_project_settings():
 		ResourceSaver.save(_project_settings, _project_settings_path)
 		
 		var file_sys := EditorInterface.get_resource_filesystem()
+		file_sys.scan()
 	else:
 		_project_settings = ResourceLoader.load(_project_settings_path, "FKProjectSettings")
 
-static var _project_settings_path := "res://addons/flowkit/editor/fk_project_settings.tres"
+static var _project_settings_path := "res://addons/flowkit/editor/_fk_project_settings.tres"
 var _project_settings := FKProjectSettings.new()
 
 func _ensure_settings_registered():
