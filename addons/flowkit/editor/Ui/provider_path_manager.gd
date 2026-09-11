@@ -1,5 +1,5 @@
 @tool
-extends Control
+extends VBoxContainer
 
 class_name FKProviderPathManager
 
@@ -7,6 +7,7 @@ class_name FKProviderPathManager
 @export var file_dialog: FileDialog
 # ^ Meant to be shared between the path fields. Otherwise, they'd each
 # need their own, meaning extra bloat.
+@export var add_button: Button
 
 func legitimize():
 	if not _is_editor_preview:
@@ -23,6 +24,7 @@ func _enter_tree() -> void:
 		return
 
 	_find_path_fields()
+	_toggle_subs(true)
 
 func _find_path_fields():
 	print("[FKProviderPathManager] Finding pickers")
@@ -45,8 +47,20 @@ var _globals: FKEditorGlobals
 var _signals: FKSettingsWindowSignals
 
 func _toggle_subs(do_sub: bool):
+	if do_sub and not _is_subbed:
+		add_button.pressed.connect(_on_add_button_pressed)
+	elif not do_sub and _is_subbed:
+		add_button.pressed.disconnect(_on_add_button_pressed)
+	else:
+		return
 
-	pass
+	_is_subbed = !_is_subbed
+
+var _is_subbed := false
+
+func _on_add_button_pressed():
+	print("[FKProviderPathManager] On add button pressed")
+	_add_new_path_field()
 
 func _exit_tree() -> void:
 	if _is_editor_preview:
@@ -78,10 +92,14 @@ func set_provider_paths(new_paths: Array[String], trigger_signals: bool = true):
 
 func _ensure_path_field_count_min(min_amount: int):
 	while _path_fields.size() < min_amount:
-		var first_registered := _path_fields[0]
-		var copy := first_registered.duplicate()
-		# We assume that the stuff NOT meant to be removed is already part of the scene, so...
-		copy.removable = true 
-		copy.clear_path_chosen()
-		holds_path_fields.add_child(copy)
-		_path_fields.append(copy)
+		_add_new_path_field()
+
+func _add_new_path_field():
+	print("[FKProviderPathManager] Adding new path field")
+	var first_registered := _path_fields[0]
+	var copy := first_registered.duplicate()
+	# We assume that the stuff NOT meant to be removed is already part of the scene, so...
+	copy.removable = true 
+	copy.clear_path_chosen()
+	holds_path_fields.add_child(copy)
+	_path_fields.append(copy)

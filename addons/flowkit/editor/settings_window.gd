@@ -46,6 +46,7 @@ func _load_project_settings():
 		ResourceSaver.save(_project_settings, _project_settings_path)
 		
 		var file_sys := EditorInterface.get_resource_filesystem()
+		#file_sys.reimport_files([_project_settings_path])
 		file_sys.scan()
 	else:
 		_project_settings = ResourceLoader.load(_project_settings_path, "FKProjectSettings")
