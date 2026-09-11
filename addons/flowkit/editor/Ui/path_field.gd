@@ -47,7 +47,7 @@ func _decide_error_message_for_inputs() -> String:
 	var error_message := ""
 
 	if not path_text_field:
-		error_message += "[FKPathField] Missing a path text field!"
+		error_message += "[FKPathField] Missing a path_chosen text field!"
 	if not browse_button:
 		if error_message.length() > 0:
 			error_message += "\n"
@@ -150,17 +150,11 @@ func _on_focus_exited():
 	_refresh_path_choices()
 
 func _refresh_path_choices():
-	var new_path := path_text_field.text
-	if _prev_path == new_path:
-		return
-
-	if not _is_path_valid(new_path):
-		_report_invalid_path()
-		path_text_field.text = ""
-
-	_window_signals.editor_path_choice_changed.emit(_prev_path, new_path)
-	_prev_path = new_path
-
+	var new_path := path_text_field.text.strip_edges()
+	if new_path.is_empty():
+		clear_path_chosen()
+	else:
+		set_path_chosen(new_path)
 
 var _prev_path: String = ""
 
@@ -177,8 +171,8 @@ func _is_path_valid(path: String) -> bool:
 	var dir_exists = DirAccess.dir_exists_absolute(normalized_path)
 	return dir_exists
 
-func _report_invalid_path():
-	var log_message := "Path %s is not a valid path." % [path_text_field.text]
+func _report_invalid_path(to_report: String):
+	var log_message := "Path %s is not a valid path_chosen." % [to_report]
 	printerr(log_message)
 
 func _exit_tree() -> void:
@@ -191,11 +185,31 @@ func _exit_tree() -> void:
 	if inputs_are_fine:
 		_toggle_subs(false)
 	
-func path_picked() -> String:
+## Path chosen for this field.
+func path_chosen() -> String:
 	var result: String = ""
 	if path_text_field == null:
-		var error_message := "[FKPathField] Cannot find path picked when no text field is set."
+		var error_message := "[FKPathField] Cannot find path_chosen picked when no text field is set."
 		printerr(error_message)
 	else:
 		result = path_text_field.text
 	return result
+
+func set_path_chosen(new_path: String, trigger_signals: bool = true):
+	if _prev_path == new_path:
+		return
+
+	if not _is_path_valid(new_path):
+		_report_invalid_path(new_path)
+		path_text_field.text = ""
+		return
+
+	if trigger_signals:
+		_window_signals.editor_path_choice_changed.emit(_prev_path, new_path)
+
+	_prev_path = new_path
+	pass
+
+func clear_path_chosen():
+	_prev_path = path_text_field.text
+	path_text_field.text = ""

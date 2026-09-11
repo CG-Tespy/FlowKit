@@ -2,7 +2,7 @@ extends RefCounted
 class_name FKProviderLoader
 
 const DEFAULT_MANIFEST_PATH := "res://addons/flowkit/saved/provider_manifest.tres"
-
+const DEFAULT_PROVIDER_PATH = "res://addons/flowkit/providers"
 var manifest_path: String = DEFAULT_MANIFEST_PATH
 var provider_paths: Dictionary[String, String] = {
 	"action": "res://addons/flowkit/actions",

@@ -4,7 +4,7 @@
 [ext_resource type="Texture2D" uid="uid://dfw21gww7gdwq" path="res://addons/flowkit/assets/flowkitLogoAlt.png" id="2_1wusu"]
 [ext_resource type="PackedScene" uid="uid://cuxtanqksw6bx" path="res://addons/flowkit/editor/scenes/provider_path_manager.tscn" id="3_d0tub"]
 
-[node name="FKEditorSettings" type="Window" unique_id=813573723 node_paths=PackedStringArray("auto_save_toggle", "save_button", "prov_paths")]
+[node name="FKEditorSettings" type="Window" unique_id=813573723 node_paths=PackedStringArray("auto_save_toggle", "save_button", "holds_prov_paths")]
 oversampling_override = 1.0
 title = "FlowKit Editor Settings"
 position = Vector2i(0, 36)
@@ -15,7 +15,7 @@ maximize_disabled = true
 script = ExtResource("1_tn2p2")
 auto_save_toggle = NodePath("MainList/AutoSave/CheckButton")
 save_button = NodePath("SaveSettingsButton")
-prov_paths = NodePath("MainList/MarginContainer/FKProviderPathManager")
+holds_prov_paths = NodePath("MainList/MarginContainer/FKProviderPathManager")
 metadata/_custom_type_script = "uid://d2tcskuiujrg7"
 
 [node name="BG" type="ColorRect" parent="." unique_id=1156956499]
