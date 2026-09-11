@@ -1,0 +1,44 @@
+[gd_scene format=3 uid="uid://dvv71dsowqnlq"]
+
+[ext_resource type="Script" uid="uid://diwcfmifceu0f" path="res://addons/flowkit/editor/Ui/path_field.gd" id="1_yqj1a"]
+
+[node name="FKPathField" type="Control" unique_id=1801841937 node_paths=PackedStringArray("path_text_field", "browse_button", "removal_button")]
+custom_minimum_size = Vector2(0, 40)
+layout_mode = 3
+anchors_preset = 0
+offset_right = 500.0
+offset_bottom = 40.0
+size_flags_horizontal = 3
+size_flags_vertical = 0
+script = ExtResource("1_yqj1a")
+path_text_field = NodePath("HBoxContainer/LineEdit")
+browse_button = NodePath("HBoxContainer/BrowseButton")
+removal_button = NodePath("HBoxContainer/RemovalButton")
+metadata/_custom_type_script = "uid://diwcfmifceu0f"
+
+[node name="HBoxContainer" type="HBoxContainer" parent="." unique_id=797557857]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="LineEdit" type="LineEdit" parent="HBoxContainer" unique_id=1119297702]
+layout_direction = 2
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_stretch_ratio = 5.0
+context_menu_enabled = false
+emoji_menu_enabled = false
+shortcut_keys_enabled = false
+
+[node name="BrowseButton" type="Button" parent="HBoxContainer" unique_id=1028192853]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Browse"
+
+[node name="RemovalButton" type="Button" parent="HBoxContainer" unique_id=319062141]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Remove"

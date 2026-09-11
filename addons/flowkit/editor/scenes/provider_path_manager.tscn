@@ -1,0 +1,53 @@
+[gd_scene format=3 uid="uid://cuxtanqksw6bx"]
+
+[ext_resource type="Script" uid="uid://dra3frldpqqfh" path="res://addons/flowkit/editor/Ui/provider_path_manager.gd" id="1_8ffoe"]
+[ext_resource type="PackedScene" uid="uid://dvv71dsowqnlq" path="res://addons/flowkit/editor/scenes/fk_path_field.tscn" id="2_dcf8n"]
+
+[node name="FKProviderPathManager" type="Control" unique_id=1653078193 node_paths=PackedStringArray("holds_path_fields", "file_dialog")]
+custom_minimum_size = Vector2(0, 300)
+layout_mode = 3
+anchors_preset = 0
+script = ExtResource("1_8ffoe")
+holds_path_fields = NodePath("ScrollContainer/HoldsPathFields")
+file_dialog = NodePath("FileDialog")
+metadata/_custom_type_script = "uid://dra3frldpqqfh"
+
+[node name="ScrollContainer" type="ScrollContainer" parent="." unique_id=920799938]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+follow_focus = true
+draw_focus_border = true
+horizontal_scroll_mode = 0
+vertical_scroll_mode = 2
+
+[node name="HoldsPathFields" type="VBoxContainer" parent="ScrollContainer" unique_id=752657953]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
+[node name="FKPathField" parent="ScrollContainer/HoldsPathFields" unique_id=1801841937 instance=ExtResource("2_dcf8n")]
+layout_mode = 2
+removable = false
+
+[node name="RemovalButton" parent="ScrollContainer/HoldsPathFields/FKPathField/HBoxContainer" parent_id_path=PackedInt32Array(1801841937, 797557857) index="2" unique_id=319062141]
+layout_direction = 2
+
+[node name="FKPathField2" parent="ScrollContainer/HoldsPathFields" unique_id=1214552534 instance=ExtResource("2_dcf8n")]
+layout_mode = 2
+removable = false
+
+[node name="RemovalButton" parent="ScrollContainer/HoldsPathFields/FKPathField2/HBoxContainer" parent_id_path=PackedInt32Array(1214552534, 797557857) index="2" unique_id=319062141]
+layout_direction = 2
+
+[node name="FileDialog" type="FileDialog" parent="." unique_id=241251717]
+oversampling_override = 1.0
+title = "Open a Directory"
+dialog_hide_on_ok = true
+file_mode = 2
+
+[editable path="ScrollContainer/HoldsPathFields/FKPathField"]
+[editable path="ScrollContainer/HoldsPathFields/FKPathField2"]

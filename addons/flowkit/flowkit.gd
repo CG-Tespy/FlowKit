@@ -65,7 +65,7 @@ func _prep_settings_window():
 	settings_window = window_scene.instantiate() as FKSettingsWindow
 	
 	settings_window.visible = false
-	settings_window.globals = editor_globals
+	settings_window.set_globals(editor_globals)
 	editor_globals.base_control.add_child(settings_window)
 	settings_window._legitimize()
 	

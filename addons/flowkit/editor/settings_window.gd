@@ -5,6 +5,8 @@ class_name FKSettingsWindow
 @export var auto_save_toggle: CheckButton
 ## Saves the settings to a json file
 @export var save_button: Button
+@export var prov_paths: FKProviderPathManager
+
 
 func _legitimize():
 	if not _is_editor_preview:
@@ -24,6 +26,9 @@ func _enter_tree() -> void:
 	_update_toggle()
 	_update_sheet_auto_saver.call_deferred()
 	_toggle_subs(true)
+	if prov_paths:
+		print("[FKSettingsWindow] Legitimizing prov paths")
+		prov_paths.legitimize()
 
 func _ensure_settings_registered():
 	if not editor_settings.has_setting(_auto_save_toggle_key):
@@ -48,15 +53,20 @@ var editor_settings: EditorSettings:
 		
 var editor_interface: EditorInterface:
 	get:
-		return globals.editor_interface
-		
-var globals: FKEditorGlobals
+		return _globals.editor_interface
+
+func set_globals(new_globals: FKEditorGlobals):
+	_globals = new_globals
+	if prov_paths:
+		prov_paths.set_globals(_globals)
+
+var _globals: FKEditorGlobals
 
 func _update_sheet_auto_saver():
 	var current: bool = _auto_save_toggle_setting
-	if globals and globals.sheet_auto_saver:
+	if _globals and _globals.sheet_auto_saver:
 		print("[FKSettingsWindow]: Updated auto sheet saver enabled to: " + str(current))
-		globals.sheet_auto_saver.enabled = current
+		_globals.sheet_auto_saver.enabled = current
 
 func _toggle_subs(on: bool):
 	if on && !_is_subbed:
