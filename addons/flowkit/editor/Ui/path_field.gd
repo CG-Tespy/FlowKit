@@ -1,13 +1,44 @@
 @tool
 extends Control
 
+## Requires a file dialog injected as a dependency before being legitimized.
 class_name FKPathField 
 
+## Displays the path chosen. Can't be edited while the browse button is disabled.
 @export var path_text_field: LineEdit
 @export var browse_button: Button
 @export var removal_button: Button 
 
+## Affects whether or not the browse button is enabled. 
+## In code, best only change this through set_browsable.
+@export var browsable: bool = true
+
+## Affects whether or not the removal button is enabled. 
+## In code, best only change this through set_browsable.
 @export var removable: bool = true
+
+## Keeps the browsability from changing to anything other than what this had when
+## instantiated. Can be bypassed through set_browsable.
+@export var lock_browsability = false
+
+## Keeps the removability from changing to anything other than what this had when
+## instantiated. Can be bypassed through set_removable.
+@export var lock_removability = false
+
+func set_browsable(browsability: bool, bypass_lock: bool = false):
+	if lock_browsability and not bypass_lock:
+		return
+
+	browsable = browsability
+	browse_button.disabled = not browsable
+	path_text_field.editable = browsable
+	
+func set_removable(removability: bool, bypass_lock: bool = false):
+	if lock_removability and not bypass_lock:
+		return
+
+	removable = removability
+	removal_button.disabled = not removable
 
 func legitimize(signals: FKSettingsWindowSignals):
 	if not _is_editor_preview:
@@ -27,6 +58,7 @@ func _enter_tree() -> void:
 		print(log_message)
 		return
 
+	path_text_field.editable = browsable
 	var inputs_are_fine := _validate_inputs()
 	if inputs_are_fine:
 		_toggle_subs(true)
@@ -118,13 +150,8 @@ func _on_browse_button_pressed():
 var _awaiting_selection := false
 
 func _toggle_button_enabled(enablement: bool):
-	browse_button.disabled = !enablement
-
-	if not removable:
-		removal_button.disabled = true
-		removal_button.visible = false
-	else:
-		removal_button.disabled = !enablement
+	set_browsable(enablement)
+	set_removable(enablement)
 
 func _on_removal_button_pressed():
 	_toggle_button_enabled(false)

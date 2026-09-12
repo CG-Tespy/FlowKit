@@ -34,18 +34,24 @@ layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
 
-[node name="FKPathField" parent="ScrollContainer/HoldsPathFields" unique_id=1801841937 instance=ExtResource("2_dcf8n")]
+[node name="DefaultFKPathField" parent="ScrollContainer/HoldsPathFields" unique_id=1801841937 instance=ExtResource("2_dcf8n")]
 layout_mode = 2
+browsable = false
 removable = false
+lock_browsability = true
+lock_removability = true
 
-[node name="RemovalButton" parent="ScrollContainer/HoldsPathFields/FKPathField/HBoxContainer" parent_id_path=PackedInt32Array(1801841937, 797557857) index="2" unique_id=319062141]
+[node name="BrowseButton" parent="ScrollContainer/HoldsPathFields/DefaultFKPathField/HBoxContainer" parent_id_path=PackedInt32Array(1801841937, 797557857) index="1" unique_id=1028192853]
+disabled = true
+
+[node name="RemovalButton" parent="ScrollContainer/HoldsPathFields/DefaultFKPathField/HBoxContainer" parent_id_path=PackedInt32Array(1801841937, 797557857) index="2" unique_id=319062141]
 layout_direction = 2
+disabled = true
 
-[node name="FKPathField2" parent="ScrollContainer/HoldsPathFields" unique_id=152697115 instance=ExtResource("2_dcf8n")]
+[node name="FirstUserPathField" parent="ScrollContainer/HoldsPathFields" unique_id=152697115 instance=ExtResource("2_dcf8n")]
 layout_mode = 2
-removable = false
 
-[node name="RemovalButton" parent="ScrollContainer/HoldsPathFields/FKPathField2/HBoxContainer" parent_id_path=PackedInt32Array(152697115, 797557857) index="2" unique_id=319062141]
+[node name="RemovalButton" parent="ScrollContainer/HoldsPathFields/FirstUserPathField/HBoxContainer" parent_id_path=PackedInt32Array(152697115, 797557857) index="2" unique_id=319062141]
 layout_direction = 2
 
 [node name="FileDialog" type="FileDialog" parent="." unique_id=137929853]
@@ -58,5 +64,5 @@ file_mode = 2
 layout_mode = 2
 text = "Add"
 
-[editable path="ScrollContainer/HoldsPathFields/FKPathField"]
-[editable path="ScrollContainer/HoldsPathFields/FKPathField2"]
+[editable path="ScrollContainer/HoldsPathFields/DefaultFKPathField"]
+[editable path="ScrollContainer/HoldsPathFields/FirstUserPathField"]

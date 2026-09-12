@@ -35,7 +35,6 @@ func _find_path_fields():
 			child_el.set_file_dialog(file_dialog)
 			print("[FKProviderPathManager] Legitimizing path field " + child_el.name)
 			child_el.legitimize(_signals)
-	pass
 
 var _path_fields: Array[FKPathField] = []
 
@@ -49,8 +48,10 @@ var _signals: FKSettingsWindowSignals
 func _toggle_subs(do_sub: bool):
 	if do_sub and not _is_subbed:
 		add_button.pressed.connect(_on_add_button_pressed)
+		_signals.editor_path_removal_requested.connect(_on_editor_path_removal_requested)
 	elif not do_sub and _is_subbed:
 		add_button.pressed.disconnect(_on_add_button_pressed)
+		_signals.editor_path_removal_requested.disconnect(_on_editor_path_removal_requested)
 	else:
 		return
 
@@ -61,6 +62,13 @@ var _is_subbed := false
 func _on_add_button_pressed():
 	print("[FKProviderPathManager] On add button pressed")
 	_add_new_path_field()
+
+func _on_editor_path_removal_requested(requested_for: FKPathField):
+	if not _path_fields.has(requested_for):
+		return
+
+	_path_fields.erase(requested_for)
+	requested_for.queue_free()
 
 func _exit_tree() -> void:
 	if _is_editor_preview:
@@ -98,8 +106,9 @@ func _add_new_path_field():
 	print("[FKProviderPathManager] Adding new path field")
 	var first_registered := _path_fields[0]
 	var copy := first_registered.duplicate()
-	# We assume that the stuff NOT meant to be removed is already part of the scene, so...
-	copy.removable = true 
+	# We assume that the stuff NOT meant to be removed or browsed is already part of the scene, so...
+	copy.set_removable(true, true)
+	copy.set_browsable(true, true)
 	copy.clear_path_chosen()
 	holds_path_fields.add_child(copy)
 	_path_fields.append(copy)
