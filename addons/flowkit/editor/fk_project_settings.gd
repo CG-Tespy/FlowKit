@@ -1,3 +1,4 @@
+@tool
 ## Not to be confused with the editor settings. This holds the FlowKit-specific
 ## settings for a particular project.
 extends Resource
