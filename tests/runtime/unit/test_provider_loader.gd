@@ -44,3 +44,13 @@ func test_loader_filters_invalid_providers_and_reports_duplicates() -> void:
 	assert_true(diagnostics.contains("empty id"))
 	assert_true(diagnostics.contains("incompatible action provider type"))
 	assert_true(diagnostics.contains("Duplicate action provider id 'duplicate_action'"))
+
+func test_loader_detects_default_path_provider_types() -> void:
+	var loader := FKProviderLoader.new()
+	loader.provider_paths = {}
+	loader.default_provider_path = ACTION_FIXTURE_PATH
+
+	var result := loader.load_all()
+
+	assert_eq(result.action_providers.size(), 3)
+	assert_eq(result.condition_providers.size(), 1)
