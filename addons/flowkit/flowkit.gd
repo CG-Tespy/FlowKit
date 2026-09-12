@@ -20,8 +20,10 @@ func _disable_plugin() -> void:
 
 func _enter_tree() -> void:
 	_prep_editor_globals()
-	_prep_main_editor()
 	_prep_settings_window()
+	action_registry.set_project_settings(settings_window.get_project_settings())
+	action_registry.load_providers()
+	_prep_main_editor()
 	_prep_tool_submenu_entries()
 	_add_runtime_autoloads()
 	_register_as_main_screen_plugin()
@@ -38,7 +40,6 @@ func _prep_editor_globals():
 	# Some of its dependencies will be injected by us, 
 	# the rest by FKMainEditor later
 	action_registry = FKRegistry.new()
-	action_registry.load_providers()
 	
 	editor_interface = get_editor_interface()
 	generator = FKGenerator.new(editor_interface)
