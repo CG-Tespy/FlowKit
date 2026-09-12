@@ -31,9 +31,7 @@ func _find_path_fields():
 	for child_el in holds_path_fields.get_children():
 		if child_el is FKPathField:
 			_path_fields.append(child_el)
-			print("[FKProviderPathManager] Giving file dialog [" + file_dialog.name + "] to child " + child_el.name)
 			child_el.set_file_dialog(file_dialog)
-			print("[FKProviderPathManager] Legitimizing path field " + child_el.name)
 			child_el.legitimize(_signals)
 
 var _path_fields: Array[FKPathField] = []
@@ -60,7 +58,6 @@ func _toggle_subs(do_sub: bool):
 var _is_subbed := false
 
 func _on_add_button_pressed():
-	print("[FKProviderPathManager] On add button pressed")
 	_add_new_path_field()
 
 func _on_editor_path_removal_requested(requested_for: FKPathField):
@@ -96,7 +93,6 @@ func set_provider_paths(new_paths: Array[String], trigger_signals: bool = true):
 		if path_to_apply.is_empty():
 			continue
 		var to_apply_to := _path_fields[i]
-		print("[FKPRoviderPathManager] Going to apply %s to %s" % [path_to_apply, to_apply_to.name])
 		to_apply_to.set_path_chosen(path_to_apply, trigger_signals)
 
 func _ensure_path_field_count_min(min_amount: int):

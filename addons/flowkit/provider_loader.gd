@@ -5,13 +5,15 @@ const DEFAULT_MANIFEST_PATH := "res://addons/flowkit/saved/provider_manifest.tre
 const DEFAULT_PROVIDER_PATH = "res://addons/flowkit/providers"
 var manifest_path: String = DEFAULT_MANIFEST_PATH
 var default_provider_path: String = DEFAULT_PROVIDER_PATH
+var project_settings: FKProjectSettings
 
 func load_all() -> FKProviderLoadResult:
 	var result := FKProviderLoadResult.new()
 	if _load_from_manifest(result):
 		result.source = "manifest"
 	elif OS.has_feature("editor"):
-		_scan_directory_recursive(default_provider_path, result)
+		for provider_path in _get_provider_paths():
+			_scan_directory_recursive(provider_path, result)
 		result.source = "directory"
 	else:
 		result.source = "unavailable"
@@ -23,6 +25,16 @@ func load_all() -> FKProviderLoadResult:
 	_collect_duplicate_id_diagnostics(result.event_providers, "event", result)
 	_collect_duplicate_id_diagnostics(result.behavior_providers, "behavior", result)
 	_collect_duplicate_id_diagnostics(result.branch_providers, "branch", result)
+	return result
+
+func _get_provider_paths() -> Array[String]:
+	var result: Array[String] = []
+	if not default_provider_path.is_empty():
+		result.append(default_provider_path)
+	if project_settings:
+		for provider_path in project_settings.provider_paths:
+			if not provider_path.is_empty() and not result.has(provider_path):
+				result.append(provider_path)
 	return result
 
 func _load_from_manifest(result: FKProviderLoadResult) -> bool:

@@ -138,7 +138,10 @@ func _apply_provider_paths():
 
 func _save_project_settings():
 	ResourceSaver.save(_project_settings, _project_settings_path)
-	pass
+	_globals.registry.load_providers()
+
+func get_project_settings() -> FKProjectSettings:
+	return _project_settings
 
 func _on_close_requested():
 	hide()

@@ -4,4 +4,4 @@
 
 [resource]
 script = ExtResource("1_vlkpx")
-provider_paths = Array[String](["res://addons/flowkit/providers"])
+provider_paths = Array[String](["res://addons/flowkit/providers", "res://tests/providers"])
