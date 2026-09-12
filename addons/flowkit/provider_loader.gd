@@ -4,6 +4,7 @@ class_name FKProviderLoader
 const DEFAULT_MANIFEST_PATH := "res://addons/flowkit/saved/provider_manifest.tres"
 const DEFAULT_PROVIDER_PATH = "res://addons/flowkit/providers"
 var manifest_path: String = DEFAULT_MANIFEST_PATH
+var default_provider_path: String = DEFAULT_PROVIDER_PATH
 var provider_paths: Dictionary[String, String] = {
 	"action": "res://addons/flowkit/actions",
 	"condition": "res://addons/flowkit/conditions",
@@ -19,6 +20,7 @@ func load_all() -> FKProviderLoadResult:
 	elif OS.has_feature("editor"):
 		for kind in provider_paths:
 			_scan_directory_recursive(provider_paths[kind], kind, result)
+		_scan_directory_recursive(default_provider_path, "", result)
 		result.source = "directory"
 	else:
 		result.source = "unavailable"
@@ -87,6 +89,10 @@ func _try_add_provider(script: GDScript, kind: String, result: FKProviderLoadRes
 		result.diagnostics.append("Skipping %s provider with empty id: %s" % [kind, script.resource_path])
 		return
 
+	if kind.is_empty():
+		_try_add_provider_by_type(provider, script, result)
+		return
+
 	match kind:
 		"action":
 			if provider is FKAction:
@@ -113,6 +119,21 @@ func _try_add_provider(script: GDScript, kind: String, result: FKProviderLoadRes
 				result.branch_providers.append(provider)
 			else:
 				_add_wrong_kind_diagnostic(kind, script, result)
+
+func _try_add_provider_by_type(provider: FKProvider, script: GDScript, result: FKProviderLoadResult) -> void:
+	print("[FKProviderLoader] Trying add provider by type")
+	if provider is FKAction:
+		result.action_providers.append(provider)
+	elif provider is FKCondition:
+		result.condition_providers.append(provider)
+	elif provider is FKEvent:
+		result.event_providers.append(provider)
+	elif provider is FKBehavior:
+		result.behavior_providers.append(provider)
+	elif provider is FKBranch:
+		result.branch_providers.append(provider)
+	else:
+		result.diagnostics.append("Skipping provider with unsupported type: %s" % script.resource_path)
 
 func _add_wrong_kind_diagnostic(kind: String, script: GDScript, result: FKProviderLoadResult) -> void:
 	result.diagnostics.append("Skipping script with incompatible %s provider type: %s" % [kind, script.resource_path])
