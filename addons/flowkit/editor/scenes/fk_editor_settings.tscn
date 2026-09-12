@@ -15,7 +15,7 @@ maximize_disabled = true
 script = ExtResource("1_tn2p2")
 auto_save_toggle = NodePath("MainList/AutoSave/CheckButton")
 save_button = NodePath("SaveSettingsButton")
-holds_prov_paths = NodePath("MainList/MarginContainer/FKProviderPathManager")
+holds_prov_paths = NodePath("MainList/ProviderRootPaths/FKProviderPathManager")
 metadata/_custom_type_script = "uid://d2tcskuiujrg7"
 
 [node name="BG" type="ColorRect" parent="." unique_id=1156956499]
@@ -69,12 +69,13 @@ grow_vertical = 2
 button_pressed = true
 text = "Auto-Save Event Sheets"
 
-[node name="MarginContainer" type="MarginContainer" parent="MainList" unique_id=1620028257]
+[node name="ProviderRootPaths" type="MarginContainer" parent="MainList" unique_id=1620028257]
+custom_minimum_size = Vector2(0, 280)
 layout_mode = 2
 theme_override_constants/margin_left = 25
 theme_override_constants/margin_right = 25
 
-[node name="FKProviderPathManager" parent="MainList/MarginContainer" unique_id=1653078193 instance=ExtResource("3_d0tub")]
+[node name="FKProviderPathManager" parent="MainList/ProviderRootPaths" unique_id=1653078193 instance=ExtResource("3_d0tub")]
 layout_mode = 2
 
 [node name="SaveSettingsButton" type="Button" parent="." unique_id=911981487]
