@@ -1,5 +1,5 @@
 @tool
-extends VBoxContainer
+extends Control
 
 class_name FKProviderPathManager
 
@@ -65,6 +65,7 @@ func _on_add_button_pressed():
 
 func _on_editor_path_removal_requested(requested_for: FKPathField):
 	if not _path_fields.has(requested_for):
+		print("[FKProviderPathManager] Not responding to removal request for " + requested_for.name)
 		return
 
 	_path_fields.erase(requested_for)
@@ -110,5 +111,8 @@ func _add_new_path_field():
 	copy.set_removable(true, true)
 	copy.set_browsable(true, true)
 	copy.clear_path_chosen()
+	copy.set_file_dialog(file_dialog)
+	copy.legitimize(_signals)
 	holds_path_fields.add_child(copy)
 	_path_fields.append(copy)
+	

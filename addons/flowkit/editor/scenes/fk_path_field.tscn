@@ -1,6 +1,8 @@
 [gd_scene format=3 uid="uid://dvv71dsowqnlq"]
 
 [ext_resource type="Script" uid="uid://diwcfmifceu0f" path="res://addons/flowkit/editor/Ui/path_field.gd" id="1_yqj1a"]
+[ext_resource type="StyleBox" uid="uid://bkk2p5wksjuyc" path="res://addons/flowkit/editor/styles/path_field_read_only_style.tres" id="2_t8kao"]
+[ext_resource type="StyleBox" uid="uid://cavy3ud31hbam" path="res://addons/flowkit/editor/styles/path_field_normal_style.tres" id="2_w1cuu"]
 
 [node name="FKPathField" type="Control" unique_id=1801841937 node_paths=PackedStringArray("path_text_field", "browse_button", "removal_button")]
 custom_minimum_size = Vector2(0, 40)
@@ -29,6 +31,8 @@ layout_direction = 2
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_stretch_ratio = 5.0
+theme_override_styles/normal = ExtResource("2_w1cuu")
+theme_override_styles/read_only = ExtResource("2_t8kao")
 context_menu_enabled = false
 emoji_menu_enabled = false
 shortcut_keys_enabled = false
