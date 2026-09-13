@@ -2,8 +2,9 @@
 
 [ext_resource type="Script" uid="uid://d2tcskuiujrg7" path="res://addons/flowkit/editor/settings_window.gd" id="1_tn2p2"]
 [ext_resource type="Texture2D" uid="uid://dfw21gww7gdwq" path="res://addons/flowkit/assets/flowkitLogoAlt.png" id="2_1wusu"]
+[ext_resource type="PackedScene" uid="uid://cuxtanqksw6bx" path="res://addons/flowkit/editor/scenes/provider_path_manager.tscn" id="3_d0tub"]
 
-[node name="FKEditorSettings" type="Window" unique_id=813573723 node_paths=PackedStringArray("auto_save_toggle", "save_button")]
+[node name="FKEditorSettings" type="Window" unique_id=813573723 node_paths=PackedStringArray("auto_save_toggle", "save_button", "holds_prov_paths")]
 oversampling_override = 1.0
 title = "FlowKit Editor Settings"
 position = Vector2i(0, 36)
@@ -14,6 +15,7 @@ maximize_disabled = true
 script = ExtResource("1_tn2p2")
 auto_save_toggle = NodePath("MainList/AutoSave/CheckButton")
 save_button = NodePath("SaveSettingsButton")
+holds_prov_paths = NodePath("MainList/ProviderRootPaths/FKProviderPathManager")
 metadata/_custom_type_script = "uid://d2tcskuiujrg7"
 
 [node name="BG" type="ColorRect" parent="." unique_id=1156956499]
@@ -66,6 +68,15 @@ grow_horizontal = 2
 grow_vertical = 2
 button_pressed = true
 text = "Auto-Save Event Sheets"
+
+[node name="ProviderRootPaths" type="MarginContainer" parent="MainList" unique_id=1620028257]
+custom_minimum_size = Vector2(0, 280)
+layout_mode = 2
+theme_override_constants/margin_left = 25
+theme_override_constants/margin_right = 25
+
+[node name="FKProviderPathManager" parent="MainList/ProviderRootPaths" unique_id=1653078193 instance=ExtResource("3_d0tub")]
+layout_mode = 2
 
 [node name="SaveSettingsButton" type="Button" parent="." unique_id=911981487]
 anchors_preset = -1

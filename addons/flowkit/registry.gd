@@ -2,6 +2,7 @@ extends Node
 class_name FKRegistry
 
 var _provider_executor: FKProviderExecutor
+var project_settings: FKProjectSettings
 
 var action_providers: Array[FKAction] = []
 var condition_providers: Array[FKCondition] = []
@@ -52,6 +53,7 @@ func _provider_matches_id(provider: FKProvider, wanted_id: String) -> bool:
 
 func load_all() -> void:
 	var loader := FKProviderLoader.new()
+	loader.project_settings = project_settings
 	var result := loader.load_all()
 	action_providers = result.action_providers
 	condition_providers = result.condition_providers
@@ -71,6 +73,9 @@ func load_all() -> void:
 		behavior_providers.size(),
 		branch_providers.size()
 	])
+
+func set_project_settings(new_project_settings: FKProjectSettings) -> void:
+	project_settings = new_project_settings
 
 func load_providers() -> void:
 	# Alias for load_all() for backward compatibility

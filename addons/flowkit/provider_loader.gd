@@ -2,33 +2,39 @@ extends RefCounted
 class_name FKProviderLoader
 
 const DEFAULT_MANIFEST_PATH := "res://addons/flowkit/saved/provider_manifest.tres"
-
+const DEFAULT_PROVIDER_PATH = "res://addons/flowkit/providers"
 var manifest_path: String = DEFAULT_MANIFEST_PATH
-var provider_paths: Dictionary[String, String] = {
-	"action": "res://addons/flowkit/actions",
-	"condition": "res://addons/flowkit/conditions",
-	"event": "res://addons/flowkit/events",
-	"behavior": "res://addons/flowkit/behaviors",
-	"branch": "res://addons/flowkit/branches",
-}
+var default_provider_path: String = DEFAULT_PROVIDER_PATH
+var project_settings: FKProjectSettings
 
 func load_all() -> FKProviderLoadResult:
 	var result := FKProviderLoadResult.new()
 	if _load_from_manifest(result):
 		result.source = "manifest"
 	elif OS.has_feature("editor"):
-		for kind in provider_paths:
-			_scan_directory_recursive(provider_paths[kind], kind, result)
+		for provider_path in _get_provider_paths():
+			_scan_directory_recursive(provider_path, result)
 		result.source = "directory"
 	else:
 		result.source = "unavailable"
-		result.errors.append("No provider manifest found and directory scanning is not available in exported builds. Generate the manifest in the editor.")
+		result.errors.append("No provider manifest found and directory scanning is not available " +\
+		"in exported builds. Generate the manifest in the editor.")
 
 	_collect_duplicate_id_diagnostics(result.action_providers, "action", result)
 	_collect_duplicate_id_diagnostics(result.condition_providers, "condition", result)
 	_collect_duplicate_id_diagnostics(result.event_providers, "event", result)
 	_collect_duplicate_id_diagnostics(result.behavior_providers, "behavior", result)
 	_collect_duplicate_id_diagnostics(result.branch_providers, "branch", result)
+	return result
+
+func _get_provider_paths() -> Array[String]:
+	var result: Array[String] = []
+	if not default_provider_path.is_empty():
+		result.append(default_provider_path)
+	if project_settings:
+		for provider_path in project_settings.provider_paths:
+			if not provider_path.is_empty() and not result.has(provider_path):
+				result.append(provider_path)
 	return result
 
 func _load_from_manifest(result: FKProviderLoadResult) -> bool:
@@ -39,21 +45,62 @@ func _load_from_manifest(result: FKProviderLoadResult) -> bool:
 	if not manifest:
 		return false
 
-	_load_manifest_scripts(manifest.get("action_scripts"), "action", result)
-	_load_manifest_scripts(manifest.get("condition_scripts"), "condition", result)
-	_load_manifest_scripts(manifest.get("event_scripts"), "event", result)
-	_load_manifest_scripts(manifest.get("behavior_scripts"), "behavior", result)
-	_load_manifest_scripts(manifest.get("branch_scripts"), "branch", result)
-	return result.get_total_provider_count() > 0
+	_load_manifest_scripts(manifest.get("action_scripts"), result)
+	_load_manifest_scripts(manifest.get("condition_scripts"), result)
+	_load_manifest_scripts(manifest.get("event_scripts"), result)
+	_load_manifest_scripts(manifest.get("behavior_scripts"), result)
+	_load_manifest_scripts(manifest.get("branch_scripts"), result)
 
-func _load_manifest_scripts(scripts: Variant, kind: String, result: FKProviderLoadResult) -> void:
+	var any_provs_found: bool = result.get_total_provider_count() > 0
+	return any_provs_found
+
+func _load_manifest_scripts(scripts: Variant, result: FKProviderLoadResult) -> void:
 	if scripts == null:
 		return
-	for script in scripts:
-		if script is GDScript:
-			_try_add_provider(script, kind, result)
+	for script_el in scripts:
+		if script_el is GDScript:
+			_try_add_provider(script_el, result)
 
-func _scan_directory_recursive(path: String, kind: String, result: FKProviderLoadResult) -> void:
+func _try_add_provider(script: GDScript, result: FKProviderLoadResult) -> void:
+	var instance: Variant = script.new()
+	var diagnostics := result.diagnostics
+	if instance == null:
+		diagnostics.append("[FKProviderLoader] Skipping script that returned " +\
+		"null on new(): %s" % script.resource_path)
+		return
+	if not instance is FKProvider:
+		diagnostics.append("[FKProviderLoader] Skipping script that does not " +\
+		"extend FKProvider: %s" % script.resource_path)
+		return
+	if instance.is_abstract_provider():
+		return
+
+	var provider := instance as FKProvider
+	_register_provider_into(result, provider, script)
+
+func _register_provider_into(result: FKProviderLoadResult, provider: FKProvider, script: GDScript):
+	var diagnostics := result.diagnostics
+
+	if _provider_id_of(provider).is_empty():
+		diagnostics.append("[FKProviderLoader] Skipping provider with empty id: " +\
+		"%s" % script.resource_path)
+		return
+
+	if provider is FKAction:
+		result.action_providers.append(provider)
+	elif provider is FKCondition:
+		result.condition_providers.append(provider)
+	elif provider is FKEvent:
+		result.event_providers.append(provider)
+	elif provider is FKBehavior:
+		result.behavior_providers.append(provider)
+	elif provider is FKBranch:
+		result.branch_providers.append(provider)
+	else:
+		diagnostics.append("[FKProviderLoader] Skipping provider with unsupported " +\
+		"type: %s" % script.resource_path)
+
+func _scan_directory_recursive(path: String, result: FKProviderLoadResult) -> void:
 	var dir: DirAccess = DirAccess.open(path)
 	if not dir:
 		return
@@ -62,71 +109,32 @@ func _scan_directory_recursive(path: String, kind: String, result: FKProviderLoa
 	var file_name := dir.get_next()
 	while not file_name.is_empty():
 		var file_path := path.path_join(file_name)
-		if dir.current_is_dir() and not file_name.begins_with("."):
-			_scan_directory_recursive(file_path, kind, result)
-		elif file_name.ends_with(".gd") and not file_name.ends_with(".gd.uid"):
+		var found_subdir: bool = dir.current_is_dir() and not file_name.begins_with(".")
+		var found_script: bool = not found_subdir and (file_name.ends_with(".gd") and not \
+		file_name.ends_with(".gd.uid"))
+		if found_subdir:
+			_scan_directory_recursive(file_path, result)
+		elif found_script:
 			var script: Variant = load(file_path)
 			if script is GDScript:
-				_try_add_provider(script, kind, result)
+				_try_add_provider(script, result)
 		file_name = dir.get_next()
 	dir.list_dir_end()
 
-func _try_add_provider(script: GDScript, kind: String, result: FKProviderLoadResult) -> void:
-	var instance: Variant = script.new()
-	if instance == null:
-		result.diagnostics.append("Skipping provider that returned null on new(): %s" % script.resource_path)
-		return
-	if not instance is FKProvider:
-		result.diagnostics.append("Skipping %s script that does not extend FKProvider: %s" % [kind, script.resource_path])
-		return
-	if instance.is_abstract_provider():
-		return
 
-	var provider := instance as FKProvider
-	if _provider_id_of(provider).is_empty():
-		result.diagnostics.append("Skipping %s provider with empty id: %s" % [kind, script.resource_path])
-		return
-
-	match kind:
-		"action":
-			if provider is FKAction:
-				result.action_providers.append(provider)
-			else:
-				_add_wrong_kind_diagnostic(kind, script, result)
-		"condition":
-			if provider is FKCondition:
-				result.condition_providers.append(provider)
-			else:
-				_add_wrong_kind_diagnostic(kind, script, result)
-		"event":
-			if provider is FKEvent:
-				result.event_providers.append(provider)
-			else:
-				_add_wrong_kind_diagnostic(kind, script, result)
-		"behavior":
-			if provider is FKBehavior:
-				result.behavior_providers.append(provider)
-			else:
-				_add_wrong_kind_diagnostic(kind, script, result)
-		"branch":
-			if provider is FKBranch:
-				result.branch_providers.append(provider)
-			else:
-				_add_wrong_kind_diagnostic(kind, script, result)
-
-func _add_wrong_kind_diagnostic(kind: String, script: GDScript, result: FKProviderLoadResult) -> void:
-	result.diagnostics.append("Skipping script with incompatible %s provider type: %s" % [kind, script.resource_path])
 
 func _provider_id_of(provider: FKProvider) -> String:
 	var provider_id := provider.get_provider_id().strip_edges()
-	return provider.get_id().strip_edges() if provider_id.is_empty() else provider_id
+	return provider.get_id().strip_edges() if provider_id.is_empty() \
+	else provider_id
 
 func _collect_duplicate_id_diagnostics(providers: Array, kind: String, result: FKProviderLoadResult) -> void:
 	var sources_by_id: Dictionary[String, String] = {}
-	for provider in providers:
-		var provider_id := _provider_id_of(provider)
-		var source: String = provider.get_script().resource_path
+	for provider_el in providers:
+		var provider_id := _provider_id_of(provider_el)
+		var source: String = provider_el.get_script().resource_path
 		if sources_by_id.has(provider_id):
-			result.diagnostics.append("Duplicate %s provider id '%s' in %s and %s" % [kind, provider_id, sources_by_id[provider_id], source])
+			result.diagnostics.append("Duplicate %s provider id '%s' in %s and %s" % \
+			[kind, provider_id, sources_by_id[provider_id], source])
 		else:
 			sources_by_id[provider_id] = source

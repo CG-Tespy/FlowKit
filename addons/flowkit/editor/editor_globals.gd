@@ -30,6 +30,7 @@ var generator: FKGenerator
 var registry: FKRegistry 
 var modal_signals: FKModalSignals = FKModalSignals.new()
 var unit_ui_signals := FKUnitUiSignals.new()
+var settings_window_signals := FKSettingsWindowSignals.new()
 var current_scene_uid: int = 0
 
 ## Should return a SceneTree object. No args.

@@ -1,6 +1,7 @@
 extends GutTest
 
 const ACTION_FIXTURE_PATH := "res://tests/fixtures/providers/action"
+const PROJECT_SETTINGS_PATH := "res://addons/flowkit/editor/_fk_project_settings.tres"
 
 func test_loader_returns_fresh_non_accumulating_results() -> void:
 	var loader := FKProviderLoader.new()
@@ -33,14 +34,30 @@ func test_new_registry_can_dispatch_an_unknown_action() -> void:
 
 func test_loader_filters_invalid_providers_and_reports_duplicates() -> void:
 	var loader := FKProviderLoader.new()
-	loader.provider_paths = {"action": ACTION_FIXTURE_PATH}
+	loader.default_provider_path = ACTION_FIXTURE_PATH
 
 	var result := loader.load_all()
 	var diagnostics := "\n".join(result.diagnostics)
 
 	assert_eq(result.source, "directory")
 	assert_eq(result.action_providers.size(), 3)
+	assert_eq(result.condition_providers.size(), 1)
 	assert_true(diagnostics.contains("does not extend FKProvider"))
 	assert_true(diagnostics.contains("empty id"))
-	assert_true(diagnostics.contains("incompatible action provider type"))
 	assert_true(diagnostics.contains("Duplicate action provider id 'duplicate_action'"))
+
+func test_loader_uses_project_settings_provider_paths() -> void:
+	var settings := load(PROJECT_SETTINGS_PATH) as FKProjectSettings
+	var loader := FKProviderLoader.new()
+	loader.project_settings = settings
+
+	var result := loader.load_all()
+
+	assert_true(_has_provider_id(result.action_providers, "test_dummy_action"))
+	assert_true(_has_provider_id(result.condition_providers, "test_dummy_condition"))
+
+func _has_provider_id(providers: Array, provider_id: String) -> bool:
+	for provider in providers:
+		if provider.get_provider_id() == provider_id:
+			return true
+	return false
