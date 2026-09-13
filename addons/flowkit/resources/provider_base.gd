@@ -40,7 +40,8 @@ func get_name() -> String:
 	return "Invalid" 
 
 func get_display_name() -> String:
-	return get_name() # For backwards compat
+	return self.get_name() 
+	# ^For backwards compat. Needed to add in the "self" here so that it works properly with subclasses.
 
 func get_description() -> String:
 	return "No description provided."

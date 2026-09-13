@@ -226,7 +226,8 @@ func _show_add_action_context_menu() -> void:
 
 	for i in range(branches.size()):
 		var branch_provider = branches[i];
-		popup.add_item("Add %s" % branch_provider.get_display_name(), 100 + i)
+		var item_to_add := "Add %s" % branch_provider.get_display_name()
+		popup.add_item(item_to_add, 100 + i)
 
 	popup.id_pressed.connect(func(id):
 		if id == MenuChoices.ADD_EVENT_BELOW:
