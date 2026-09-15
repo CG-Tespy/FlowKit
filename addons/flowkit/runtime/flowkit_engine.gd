@@ -209,12 +209,6 @@ func _create_unit_providers(entry: SheetEntry) -> void:
 func _event_provider_key(sheet_uid: int, event_unit_id: int) -> String:
 	return "%d:%d" % [sheet_uid, event_unit_id]
 
-func _get_all_events(sheet: FKEventSheet) -> Array:
-	var events: Array = []
-	events.append_array(sheet.events)
-	_collect_events_from_groups(sheet.groups, events)
-	return events
-
 func _run_sheet(entry: SheetEntry) -> void:
 	var sheet: FKEventSheet = entry.sheet
 	var root_node: Node = entry.root
@@ -397,23 +391,6 @@ func _execute_unit(unit: FKEventUnit, current_root: Node) -> void:
 func _execute_actions_list(actions: Array, current_root: Node, unit_id: int) -> void:
 	await _branch_executor._execute_actions(actions, current_root, unit_id)
 	
-func _is_multi_frame_provider(provider: Variant) -> bool:
-	return provider and provider.has_method("requires_multi_frames") and provider.requires_multi_frames()
-
-func _collect_events_from_groups(groups: Array, out_events: Array) -> void:
-	for group in groups:
-		if group is FKGroupUnit:
-			for child_item in group.children:
-				var child_type: String = child_item.get("type", "")
-				var child_data: Variant = child_item.get("data", null)
-				
-				if child_type == "event" and child_data is FKEventUnit:
-					out_events.append(child_data)
-				elif child_type == "group" and child_data is FKGroupUnit:
-					# Recursively collect from nested groups
-					_collect_events_from_groups([child_data], out_events)
-
-
 # --- Behavior processing ---------------------------------------------------
 func _scan_and_activate_behaviors(scene_root: Node) -> void:
 	# Recursively scan all nodes in the scene for behaviors
