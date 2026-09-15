@@ -10,18 +10,6 @@ var event_providers: Array[FKEvent] = []
 var behavior_providers: Array[FKBehavior] = []
 var branch_providers: Array[FKBranch] = []
 
-var actions_by_id: Dictionary[String, FKAction] = {}
-var conditions_by_id: Dictionary[String, FKCondition] = {}
-var events_by_id: Dictionary[String, FKEvent] = {}
-var behaviors_by_id: Dictionary[String, FKBehavior] = {}
-var branches_by_id: Dictionary[String, FKBranch] = {}
-
-var action_alias_to_id: Dictionary[String, String] = {}
-var condition_alias_to_id: Dictionary[String, String] = {}
-var event_alias_to_id: Dictionary[String, String] = {}
-var behavior_alias_to_id: Dictionary[String, String] = {}
-var branch_alias_to_id: Dictionary[String, String] = {}
-
 func _init() -> void:
 	_provider_executor = FKProviderExecutor.new(self)
 
