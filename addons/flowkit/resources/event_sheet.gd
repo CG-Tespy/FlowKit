@@ -7,6 +7,7 @@ class_name FKEventSheet
 ## Each entry is: {"type": "event"|"comment"|"group", "index": int}
 ## The index refers to the position within that type's array (events, comments, or groups).
 
+## These are the top-level events. Others may be nested under groups.
 @export var events: Array[FKEventUnit] = []
 @export var standalone_conditions: Array[FKConditionUnit] = []
 @export var comments: Array[FKComment] = []
@@ -50,6 +51,10 @@ func get_all_events() -> Array:
 	events.append_array(self.events)
 	_collect_events_from_groups(self.groups, events)
 	return events
+
+## Returns the number of events in this sheet, including events nested in groups.
+func get_event_count() -> int:
+	return get_all_events().size()
 
 func _collect_events_from_groups(groups: Array, out_events: Array) -> void:
 	for group in groups:

@@ -142,7 +142,7 @@ func _load_sheets_for_scene(scene_root: Node) -> void:
 				_create_unit_providers(entry)
 				# Setup signal-based events so they can connect to node signals
 				_setup_signal_events(entry)
-				print("[FlowKit] Loaded event sheet for scene: ", scene_name, " (node: ", node_root.name, ") with ", sheet.events.size(), " events")
+				print("[FlowKit] Loaded event sheet for scene: ", scene_name, " (node: ", node_root.name, ") with ", sheet.get_event_count(), " events")
 			else:
 				print("[FlowKit] Failed to load sheet resource at: ", sheet_path)
 		else:
