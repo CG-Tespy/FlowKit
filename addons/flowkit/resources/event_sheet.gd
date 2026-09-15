@@ -73,30 +73,6 @@ func _collect_events_from_groups(groups: Array, out_events: Array) -> void:
 				# Recurse into nested groups
 				_collect_events_from_groups([unit], out_events)
 
-func get_ordered_items() -> Array:
-	"""Get all items in display order as an array of dictionaries with type and data."""
-	var items = []
-	
-	for order_entry in item_order:
-		var item_type = order_entry.get("type", "")
-		var item_index = order_entry.get("index", 0)
-		var data = null
-		
-		match item_type:
-			"event":
-				if item_index < events.size():
-					data = events[item_index]
-			"comment":
-				if item_index < comments.size():
-					data = comments[item_index]
-			"group":
-				if item_index < groups.size():
-					data = groups[item_index]
-		
-		if data:
-			items.append({"type": item_type, "data": data})
-	
-	return items
 
 static func from_units(units: Array[FKUnit]) -> FKEventSheet:
 	var sheet := FKEventSheet.new()
