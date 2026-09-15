@@ -50,8 +50,7 @@ scene_root: Node = null, unit_id: int = -1) -> Variant:
 
 	var context := scene_root if scene_root else node
 	var evaluated_inputs: Dictionary = FKExpressionEvaluator.evaluate_inputs(inputs, context, scene_root, node)
-	var is_multi_frame_action: bool = provider.has_method("requires_multi_frames") and \
-	provider.requires_multi_frames()
+	var is_multi_frame_action: bool = provider is FKAction and provider.may_need_multi_frames()
 	if is_multi_frame_action:
 		_waiting_on_action = true
 		provider.exec_completed.connect(_on_exec_completed)

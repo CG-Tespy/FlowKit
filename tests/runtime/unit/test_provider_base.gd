@@ -4,18 +4,12 @@ class Node2DProvider extends FKProvider:
 	func get_provider_id() -> String:
 		return "node_2d_provider"
 
-	func get_provider_kind() -> String:
-		return KIND_ACTION
-
 	func get_supported_types() -> Array[String]:
 		return ["Node2D"]
 
 class UniversalProvider extends FKProvider:
 	func get_provider_id() -> String:
 		return "universal_provider"
-
-	func get_provider_kind() -> String:
-		return KIND_EVENT
 
 	func get_supported_types() -> Array[String]:
 		return ["Node"]
