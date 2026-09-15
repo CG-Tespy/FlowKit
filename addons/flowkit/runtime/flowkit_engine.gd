@@ -202,7 +202,7 @@ func _create_unit_providers(entry: SheetEntry) -> void:
 
 		var key := _event_provider_key(sheet_uid, unit_id)
 		if not _event_unit_providers.has(key):
-			var instance = registry.create_event_instance(event_unit.event_id)
+			var instance := registry.create_event_instance(event_unit.event_id)
 			if instance:
 				_event_unit_providers[key] = instance
 
@@ -269,12 +269,12 @@ func _run_sheet(entry: SheetEntry) -> void:
 
 		# Lookup provider instance by (sheet uid + unit personal_id)
 		var key := _event_provider_key(sheet_uid, event_unit.uid)
-		var provider = _event_unit_providers.get(key, null)
+		var provider: FKEvent = _event_unit_providers.get(key, null)
 		if not provider:
 			continue
 
 		# Signal events fire via callback — skip them in the poll loop
-		if provider.has_method("is_signal_event") and provider.is_signal_event():
+		if provider.is_signal_event():
 			continue
 
 		# Skip events that belong to the wrong callback
@@ -316,11 +316,11 @@ func _setup_signal_events(entry: SheetEntry) -> void:
 			continue
 
 		var key := _event_provider_key(sheet_uid, event_unit.uid)
-		var provider = _event_unit_providers.get(key, null)
+		var provider: FKEvent = _event_unit_providers.get(key, null)
 		if not provider:
 			continue
 
-		if not (provider.has_method("is_signal_event") and provider.is_signal_event()):
+		if not provider.is_signal_event():
 			continue
 
 		var target := str(event_unit.target_node)
@@ -330,8 +330,7 @@ func _setup_signal_events(entry: SheetEntry) -> void:
 
 		# Build a trigger callback that runs this unit's conditions & actions
 		var trigger_cb: Callable = _make_trigger_callback(event_unit, root_node)
-		if provider.has_method("setup"):
-			provider.setup(node, trigger_cb, event_unit.uid)
+		provider.setup(node, trigger_cb, event_unit.uid)
 
 ## Teardown all signal events across every active sheet.
 func _teardown_all_signal_events() -> void:
@@ -350,7 +349,7 @@ func _teardown_all_signal_events() -> void:
 				continue
 
 			var key := _event_provider_key(sheet_uid, event_unit.uid)
-			var provider = _event_unit_providers.get(key, null)
+			var provider: FKEvent = _event_unit_providers.get(key, null)
 			if not provider:
 				continue
 
@@ -359,8 +358,7 @@ func _teardown_all_signal_events() -> void:
 			if not node:
 				continue
 
-			if provider.has_method("teardown"):
-				provider.teardown(node, event_unit.uid)
+			provider.teardown(node, event_unit.uid)
 
 ## Create a Callable that evaluates a unit's conditions and runs its actions.
 ## This is what signal events call when their signal fires.
@@ -463,7 +461,7 @@ func _process_behaviors(delta: float, is_physics: bool) -> void:
 		if behavior_id.is_empty():
 			continue
 		
-		var behavior: Variant = registry.get_behavior(behavior_id)
+		var behavior := registry.get_behavior(behavior_id)
 		if not behavior:
 			continue
 		

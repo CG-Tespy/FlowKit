@@ -39,12 +39,6 @@ func get_inputs() -> Array:
 func get_supported_types() -> Array[String]:
 	return []
 
-func get_canonical_id() -> String:
-	var pid := get_provider_id().strip_edges()
-	if pid.is_empty():
-		return ""
-	return "%s:%s" % [self.get_class(), pid]
-
 func supports_node(node: Node) -> bool:
 	if not node:
 		return false
