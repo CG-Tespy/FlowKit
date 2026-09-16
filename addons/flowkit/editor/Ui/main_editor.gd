@@ -1449,8 +1449,8 @@ func _update_event_inputs(expressions: Dictionary) -> void:
 		if data:
 			data.inputs = expressions
 			pending_target_row.update_display()
+			editor_globals.unit_ui_signals.unit_data_changed.emit(pending_target_row)
 	_reset_workflow()
-	_save_sheet()
 
 func _update_condition_inputs(expressions: Dictionary) -> void:
 	"""Update existing condition item with new inputs."""
@@ -1462,8 +1462,8 @@ func _update_condition_inputs(expressions: Dictionary) -> void:
 		if data:
 			data.inputs = expressions
 			pending_target_item.update_display()
+			editor_globals.unit_ui_signals.unit_data_changed.emit(pending_target_item)
 	_reset_workflow()
-	_save_sheet()
 
 func _update_action_inputs(expressions: Dictionary) -> void:
 	"""Update existing action item with new inputs."""
@@ -1475,8 +1475,8 @@ func _update_action_inputs(expressions: Dictionary) -> void:
 		if data:
 			data.inputs = expressions
 			pending_target_item.update_display()
+			editor_globals.unit_ui_signals.unit_data_changed.emit(pending_target_item)
 	_reset_workflow()
-	_save_sheet()
 
 func _replace_event(expressions: Dictionary) -> void:
 	"""Replace existing event row with new type."""
@@ -1531,8 +1531,8 @@ func _replace_event(expressions: Dictionary) -> void:
 		if parent_to_sync and parent_to_sync.has_method("_sync_children_to_data"):
 			parent_to_sync._sync_children_to_data()
 	
+	editor_globals.unit_ui_signals.unit_data_changed.emit(new_row)
 	_reset_workflow()
-	_save_sheet()
 
 func _replace_condition(expressions: Dictionary) -> void:
 	"""Replace condition is not used in GDevelop-style layout."""
@@ -1909,9 +1909,9 @@ func _update_branch_condition(expressions: Dictionary) -> void:
 			if input_type == "condition" and act_data.branch_condition:
 				act_data.branch_condition.inputs = expressions
 			pending_target_branch.update_display()
+			editor_globals.unit_ui_signals.unit_data_changed.emit(pending_target_branch)
 
 	_reset_workflow()
-	_save_sheet()
 
 func _finalize_branch_action_creation(inputs: Dictionary) -> void:
 	"""Add an action inside a branch."""
@@ -1982,9 +1982,9 @@ func _update_branch_evaluation(expressions: Dictionary) -> void:
 		if act_data:
 			act_data.branch_inputs = expressions
 			pending_target_branch.update_display()
+			editor_globals.unit_ui_signals.unit_data_changed.emit(pending_target_branch)
 
 	_reset_workflow()
-	_save_sheet()
 
 ## Create an ELSE IF for an evaluation-type branch chain.
 func _finalize_elseif_evaluation_creation(expressions: Dictionary) -> void:
