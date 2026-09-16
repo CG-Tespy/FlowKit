@@ -11,6 +11,7 @@ func get_class():
 	return "FKFadeColorInputModal"
 
 func _apply_input_state_to_ui():
+	super._apply_input_state_to_ui()
 	var color_input := _get_string_input("Target Color", "\"(255, 255, 255)\"")
 	color_picker.color = _string_to_color(color_input)
 	color_picker.color.a = _get_float_input("Alpha", 100.0) / 100.0

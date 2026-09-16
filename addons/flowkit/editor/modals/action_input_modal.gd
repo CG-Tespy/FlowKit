@@ -36,7 +36,7 @@ func _on_cancel_pressed():
 	hide()
 
 func _on_close_requested():
-	pass
+	_on_cancel_pressed()
 
 ## Sets this modal's ui fields based on the args passed.
 func populate_for_action(pop_args: FKActionInputPopulationArgs) -> void:
@@ -47,7 +47,7 @@ var _last_pop_args := FKActionInputPopulationArgs.new()
 
 ## Meant to be overridden by subclasses.
 func _apply_input_state_to_ui():
-	pass
+	title = _last_pop_args.action.get_display_name()
 
 func confirm_inputs(node_path: String, action_id: String, inputs: Dictionary) -> void:
 	_modal_signals.expressions_confirmed.emit(node_path, action_id, inputs)

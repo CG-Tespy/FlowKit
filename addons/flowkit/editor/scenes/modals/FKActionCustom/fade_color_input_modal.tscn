@@ -1,13 +1,15 @@
 [gd_scene format=3 uid="uid://ckq1tfc6bueg"]
 
 [ext_resource type="Script" uid="uid://bav3rj7euxjqt" path="res://addons/flowkit/editor/modals/fade_color_input_modal.gd" id="1_ioa3y"]
+[ext_resource type="StyleBox" uid="uid://tqqxoi1osov3" path="res://addons/flowkit/editor/styles/action_input_modal_bg_style.tres" id="2_arvqb"]
 
 [node name="fade_color_input_modal" type="Window" unique_id=1472292539 node_paths=PackedStringArray("color_picker", "alpha_only_checkbox", "duration_spin_box", "wait_for_finish_checkbox", "confirm_button", "cancel_button")]
 oversampling_override = 1.0
 title = "Fade Color Inputs"
 initial_position = 1
 size = Vector2i(500, 350)
-visible = true
+minimize_disabled = true
+maximize_disabled = true
 script = ExtResource("1_ioa3y")
 color_picker = NodePath("MarginContainer/VBoxContainer/HoldsInputFields/TargColor/ColorPickerButton")
 alpha_only_checkbox = NodePath("MarginContainer/VBoxContainer/HoldsInputFields/AlphaOnly/Checkbox")
@@ -16,6 +18,15 @@ wait_for_finish_checkbox = NodePath("MarginContainer/VBoxContainer/HoldsInputFie
 confirm_button = NodePath("MarginContainer/VBoxContainer/BottomRow/ConfirmButton")
 cancel_button = NodePath("MarginContainer/VBoxContainer/BottomRow/CancelButton")
 metadata/_custom_type_script = "uid://bav3rj7euxjqt"
+
+[node name="Background" type="Panel" parent="." unique_id=1365729896]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+theme_override_styles/panel = ExtResource("2_arvqb")
 
 [node name="MarginContainer" type="MarginContainer" parent="." unique_id=1058876199]
 anchors_preset = 15
@@ -38,6 +49,7 @@ layout_mode = 2
 [node name="Title" type="RichTextLabel" parent="MarginContainer/VBoxContainer" unique_id=1210069323]
 custom_minimum_size = Vector2(0, 25)
 layout_mode = 2
+bbcode_enabled = true
 text = "[wave]Fade Color[/wave]"
 horizontal_alignment = 1
 

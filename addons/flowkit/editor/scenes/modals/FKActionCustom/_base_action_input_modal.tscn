@@ -1,17 +1,28 @@
 [gd_scene format=3 uid="uid://cpekoiati6vtv"]
 
 [ext_resource type="Script" uid="uid://gn16hj8cjmww" path="res://addons/flowkit/editor/modals/action_input_modal.gd" id="1_a7jdl"]
+[ext_resource type="StyleBox" uid="uid://tqqxoi1osov3" path="res://addons/flowkit/editor/styles/action_input_modal_bg_style.tres" id="2_j58m5"]
 
 [node name="_base_action_input_modal" type="Window" unique_id=1003822804 node_paths=PackedStringArray("confirm_button", "cancel_button")]
 oversampling_override = 1.0
 title = "Fade Color Inputs"
 initial_position = 1
 size = Vector2i(500, 350)
-visible = true
+minimize_disabled = true
+maximize_disabled = true
 script = ExtResource("1_a7jdl")
 confirm_button = NodePath("MarginContainer/VBoxContainer/BottomRow/ConfirmButton")
 cancel_button = NodePath("MarginContainer/VBoxContainer/BottomRow/CancelButton")
 metadata/_custom_type_script = "uid://gn16hj8cjmww"
+
+[node name="Background" type="Panel" parent="." unique_id=576498753]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+theme_override_styles/panel = ExtResource("2_j58m5")
 
 [node name="MarginContainer" type="MarginContainer" parent="." unique_id=1058876199]
 anchors_preset = 15
