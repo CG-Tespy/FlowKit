@@ -7,6 +7,11 @@ func get_description() -> String:
 func get_inputs() -> Array[FKActionInput]:
 	return []
 
+## Returns an optional editor modal scene for configuring this action's inputs.
+## Return null to use FKExpressionEditorModal.
+func get_input_modal_scene() -> PackedScene:
+	return null
+
 ## Whether or not this Action might need more than one frame to finish doing its thing.
 func may_need_multi_frames() -> bool:
 	return false

@@ -1,0 +1,112 @@
+[gd_scene format=3 uid="uid://ckq1tfc6bueg"]
+
+[ext_resource type="Script" uid="uid://bav3rj7euxjqt" path="res://addons/flowkit/editor/modals/fade_color_input_modal.gd" id="1_ioa3y"]
+
+[node name="fade_color_input_modal" type="PopupPanel" unique_id=1472292539 node_paths=PackedStringArray("color_picker", "alpha_only_checkbox", "duration_spin_box", "wait_for_finish_checkbox", "confirm_button", "cancel_button")]
+oversampling_override = 1.0
+title = "Fade Color Inputs"
+initial_position = 1
+size = Vector2i(500, 350)
+visible = true
+script = ExtResource("1_ioa3y")
+color_picker = NodePath("MarginContainer/VBoxContainer/HoldsInputFields/TargColor/ColorPickerButton")
+alpha_only_checkbox = NodePath("MarginContainer/VBoxContainer/HoldsInputFields/AlphaOnly/Checkbox")
+duration_spin_box = NodePath("MarginContainer/VBoxContainer/HoldsInputFields/Duration/SpinBox")
+wait_for_finish_checkbox = NodePath("MarginContainer/VBoxContainer/HoldsInputFields/WaitForFinish/Checkbox")
+confirm_button = NodePath("MarginContainer/VBoxContainer/BottomRow/ConfirmButton")
+cancel_button = NodePath("MarginContainer/VBoxContainer/BottomRow/CancelButton")
+metadata/_custom_type_script = "uid://bav3rj7euxjqt"
+
+[node name="MarginContainer" type="MarginContainer" parent="." unique_id=1058876199]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 4.0
+offset_top = 4.0
+offset_right = -4.0
+offset_bottom = -4.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/margin_left = 10
+theme_override_constants/margin_top = 10
+theme_override_constants/margin_right = 10
+theme_override_constants/margin_bottom = 10
+
+[node name="VBoxContainer" type="VBoxContainer" parent="MarginContainer" unique_id=1249819617]
+layout_mode = 2
+
+[node name="Title" type="RichTextLabel" parent="MarginContainer/VBoxContainer" unique_id=1210069323]
+custom_minimum_size = Vector2(0, 25)
+layout_mode = 2
+text = "[wave]Fade Color[/wave]"
+horizontal_alignment = 1
+
+[node name="HoldsInputFields" type="VBoxContainer" parent="MarginContainer/VBoxContainer" unique_id=113936173]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="TargColor" type="HBoxContainer" parent="MarginContainer/VBoxContainer/HoldsInputFields" unique_id=707990513]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="MarginContainer/VBoxContainer/HoldsInputFields/TargColor" unique_id=996164022]
+custom_minimum_size = Vector2(150, 0)
+layout_mode = 2
+text = "Target Color"
+
+[node name="ColorPickerButton" type="ColorPickerButton" parent="MarginContainer/VBoxContainer/HoldsInputFields/TargColor" unique_id=1914371961]
+layout_mode = 2
+size_flags_horizontal = 3
+text = " "
+
+[node name="AlphaOnly" type="HBoxContainer" parent="MarginContainer/VBoxContainer/HoldsInputFields" unique_id=1975340098]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="MarginContainer/VBoxContainer/HoldsInputFields/AlphaOnly" unique_id=1140590631]
+custom_minimum_size = Vector2(150, 0)
+layout_mode = 2
+text = "Alpha Only"
+
+[node name="Checkbox" type="CheckBox" parent="MarginContainer/VBoxContainer/HoldsInputFields/AlphaOnly" unique_id=1256400931]
+layout_mode = 2
+
+[node name="Duration" type="HBoxContainer" parent="MarginContainer/VBoxContainer/HoldsInputFields" unique_id=1423174543]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="MarginContainer/VBoxContainer/HoldsInputFields/Duration" unique_id=934673788]
+custom_minimum_size = Vector2(150, 0)
+layout_mode = 2
+text = "Duration"
+
+[node name="SpinBox" type="SpinBox" parent="MarginContainer/VBoxContainer/HoldsInputFields/Duration" unique_id=1848537358]
+layout_mode = 2
+size_flags_horizontal = 3
+tooltip_text = "The fade duration in seconds. Set to 0 for an immediate change."
+step = 0.1
+allow_greater = true
+suffix = " s"
+
+[node name="WaitForFinish" type="HBoxContainer" parent="MarginContainer/VBoxContainer/HoldsInputFields" unique_id=1245069004]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="MarginContainer/VBoxContainer/HoldsInputFields/WaitForFinish" unique_id=1302715160]
+custom_minimum_size = Vector2(150, 0)
+layout_mode = 2
+text = "Wait For Finish"
+
+[node name="Checkbox" type="CheckBox" parent="MarginContainer/VBoxContainer/HoldsInputFields/WaitForFinish" unique_id=475884518]
+layout_mode = 2
+tooltip_text = "Pause the action list until the fade finishes."
+
+[node name="BottomRow" type="HBoxContainer" parent="MarginContainer/VBoxContainer" unique_id=1799415478]
+layout_mode = 2
+size_flags_horizontal = 4
+size_flags_vertical = 8
+alignment = 2
+
+[node name="ConfirmButton" type="Button" parent="MarginContainer/VBoxContainer/BottomRow" unique_id=903621558]
+layout_mode = 2
+text = "Confirm"
+
+[node name="CancelButton" type="Button" parent="MarginContainer/VBoxContainer/BottomRow" unique_id=1804249179]
+layout_mode = 2
+text = "Cancel"

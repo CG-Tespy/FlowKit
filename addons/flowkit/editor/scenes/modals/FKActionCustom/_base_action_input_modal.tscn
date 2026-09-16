@@ -1,0 +1,50 @@
+[gd_scene format=3 uid="uid://cpekoiati6vtv"]
+
+[ext_resource type="Script" uid="uid://gn16hj8cjmww" path="res://addons/flowkit/editor/modals/action_input_modal.gd" id="1_a7jdl"]
+
+[node name="_base_action_input_modal" type="PopupPanel" unique_id=1003822804 node_paths=PackedStringArray("confirm_button", "cancel_button")]
+oversampling_override = 1.0
+title = "Fade Color Inputs"
+initial_position = 1
+size = Vector2i(500, 350)
+visible = true
+script = ExtResource("1_a7jdl")
+confirm_button = NodePath("MarginContainer/VBoxContainer/BottomRow/ConfirmButton")
+cancel_button = NodePath("MarginContainer/VBoxContainer/BottomRow/CancelButton")
+metadata/_custom_type_script = "uid://gn16hj8cjmww"
+
+[node name="MarginContainer" type="MarginContainer" parent="." unique_id=1058876199]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 4.0
+offset_top = 4.0
+offset_right = -4.0
+offset_bottom = -4.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/margin_left = 10
+theme_override_constants/margin_top = 10
+theme_override_constants/margin_right = 10
+theme_override_constants/margin_bottom = 10
+
+[node name="VBoxContainer" type="VBoxContainer" parent="MarginContainer" unique_id=637345286]
+layout_mode = 2
+
+[node name="HoldsInputFields" type="VBoxContainer" parent="MarginContainer/VBoxContainer" unique_id=113936173]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="BottomRow" type="HBoxContainer" parent="MarginContainer/VBoxContainer" unique_id=703273020]
+layout_mode = 2
+size_flags_horizontal = 4
+size_flags_vertical = 8
+alignment = 2
+
+[node name="ConfirmButton" type="Button" parent="MarginContainer/VBoxContainer/BottomRow" unique_id=1129711776]
+layout_mode = 2
+text = "Confirm"
+
+[node name="CancelButton" type="Button" parent="MarginContainer/VBoxContainer/BottomRow" unique_id=1985159890]
+layout_mode = 2
+text = "Cancel"

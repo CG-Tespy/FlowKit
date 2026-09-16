@@ -10,6 +10,13 @@ func may_need_multi_frames() -> bool:
 func get_inputs() -> Array[FKActionInput]:
 	return [_targ_color_input, _alpha_input, _alpha_only_input, \
 	_duration_input, _wait_for_finish_input]
+
+const FADE_COLOR_INPUT_MODAL := preload(
+	"res://addons/flowkit/editor/scenes/modals/FKActionCustom/fade_color_input_modal.tscn"
+)
+
+func get_input_modal_scene() -> PackedScene:
+	return FADE_COLOR_INPUT_MODAL
 	
 static var _targ_color_input: FKActionInput:
 	get:
