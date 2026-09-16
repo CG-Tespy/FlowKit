@@ -14,9 +14,11 @@ func _toggle_subs(do_sub: bool):
 	if should_add_subs:
 		confirm_button.pressed.connect(_on_confirm_pressed)
 		cancel_button.pressed.connect(_on_cancel_pressed)
+		close_requested.connect(_on_close_requested)
 	elif should_remove_subs:
 		confirm_button.pressed.disconnect(_on_confirm_pressed)
 		cancel_button.pressed.disconnect(_on_cancel_pressed)
+		close_requested.disconnect(_on_close_requested)
 	else:
 		return
 
@@ -32,6 +34,9 @@ func _apply_ui_state_to_inputs():
 
 func _on_cancel_pressed():
 	hide()
+
+func _on_close_requested():
+	pass
 
 ## Sets this modal's ui fields based on the args passed.
 func populate_for_action(pop_args: FKActionInputPopulationArgs) -> void:

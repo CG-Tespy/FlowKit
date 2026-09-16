@@ -189,7 +189,7 @@ func _popup_centered_on_editor(popup: Window) -> void:
 	
 	if not editor_window:
 		# Fallback to default behavior if window not available
-		popup.popup_centered()
+		popup.show()
 		return
 	
 	var window_pos: Vector2i = editor_window.position
@@ -204,7 +204,7 @@ func _popup_centered_on_editor(popup: Window) -> void:
 	centered_pos.y = maxi(centered_pos.y, window_pos.y)
 	
 	popup.position = centered_pos
-	popup.popup()
+	popup.show()
 
 var editor_interface: EditorInterface:
 	get:
