@@ -106,11 +106,13 @@ func refresh():
 func _toggle_subs(on: bool):
 	if on and not _is_subbed:
 		_unit_ui_signals.contents_changed.connect(_on_unit_contents_changed)
+		_unit_ui_signals.unit_data_changed.connect(_on_unit_data_changed)
 		_unit_ui_signals.entered_sheet_ui.connect(_on_child_entered_block_container)
 		_unit_ui_signals.exiting_sheet_ui.connect(_on_child_exiting_block_container)
 		_unit_ui_signals.moved_in_sheet_ui.connect(_on_block_container_children_reordered)
 	elif _is_subbed and not on:
 		_unit_ui_signals.contents_changed.disconnect(_on_unit_contents_changed)
+		_unit_ui_signals.unit_data_changed.disconnect(_on_unit_data_changed)
 		_unit_ui_signals.entered_sheet_ui.disconnect(_on_child_entered_block_container)
 		_unit_ui_signals.exiting_sheet_ui.disconnect(_on_child_exiting_block_container)
 		_unit_ui_signals.moved_in_sheet_ui.disconnect(_on_block_container_children_reordered)
@@ -126,6 +128,9 @@ var _unit_ui_signals: FKUnitUiSignals:
 		return _globals.unit_ui_signals
 		
 func _on_unit_contents_changed(unit_ui: FKUnitUi):
+	_handle_save_as_needed()
+
+func _on_unit_data_changed(unit_ui: FKUnitUi):
 	_handle_save_as_needed()
 
 func _on_child_entered_block_container(child: FKUnitUi):

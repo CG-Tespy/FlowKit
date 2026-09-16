@@ -3,6 +3,7 @@ class_name FKUnitUiSignals
 
 signal before_contents_changed(unit_ui: FKUnitUi)
 signal contents_changed(unit_ui: FKUnitUi)
+signal unit_data_changed(unit_ui: FKUnitUi)
 signal entered_sheet_ui(unit_ui: FKUnitUi)
 signal exiting_sheet_ui(unit_ui: FKUnitUi)
 signal moved_in_sheet_ui(unit_ui: FKUnitUi)
