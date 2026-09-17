@@ -1,0 +1,51 @@
+extends GutTest
+
+const FLOAT_INPUT_SCENE := preload("res://addons/flowkit/editor/scenes/actionInputs/float_input.tscn")
+const INTEGER_INPUT_SCENE := preload("res://addons/flowkit/editor/scenes/actionInputs/integer_input.tscn")
+const BOOL_INPUT_SCENE := preload("res://addons/flowkit/editor/scenes/actionInputs/bool_input.tscn")
+const COLOR_INPUT_SCENE := preload("res://addons/flowkit/editor/scenes/actionInputs/color_input.tscn")
+
+func test_float_input_ui_uses_input_name_and_value():
+	var input_ui: Variant = FLOAT_INPUT_SCENE.instantiate()
+	add_child(input_ui)
+
+	input_ui.set_action_input(FKFloatActionInput.new("Speed", "", 1.0))
+	input_ui.set_value(2.5)
+
+	assert_eq(input_ui.input_label.text, "Speed")
+	assert_eq(input_ui.get_value(), 2.5)
+	input_ui.free()
+
+func test_integer_input_ui_uses_input_name_and_value():
+	var input_ui: Variant = INTEGER_INPUT_SCENE.instantiate()
+	add_child(input_ui)
+
+	input_ui.set_action_input(FKIntActionInput.new("Lives", "", 3))
+	input_ui.set_value(7.9)
+
+	assert_eq(input_ui.input_label.text, "Lives")
+	assert_eq(input_ui.get_value(), 7)
+	input_ui.free()
+
+func test_bool_input_ui_uses_input_name_and_value():
+	var input_ui: Variant = BOOL_INPUT_SCENE.instantiate()
+	add_child(input_ui)
+
+	input_ui.set_action_input(FKBoolActionInput.new("Enabled", "", false))
+	input_ui.set_value(true)
+
+	assert_eq(input_ui.input_label.text, "Enabled")
+	assert_true(input_ui.get_value())
+	input_ui.free()
+
+func test_color_input_ui_uses_input_name_and_value():
+	var input_ui: Variant = COLOR_INPUT_SCENE.instantiate()
+	var expected_color := Color(0.2, 0.4, 0.6, 0.8)
+	add_child(input_ui)
+
+	input_ui.set_action_input(FKActionInput.new("Tint", "Color"))
+	input_ui.set_value(expected_color)
+
+	assert_eq(input_ui.input_label.text, "Tint")
+	assert_eq(input_ui.get_value(), expected_color)
+	input_ui.free()

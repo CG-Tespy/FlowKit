@@ -1,0 +1,33 @@
+[gd_scene format=3 uid="uid://chprcg8gmycxb"]
+
+[ext_resource type="Script" uid="uid://b7gadu0n2t7pt" path="res://addons/flowkit/editor/Ui/actionInputs/float_input_ui.gd" id="1_float"]
+
+[node name="FloatInput" type="Control" unique_id=1961574866 node_paths=PackedStringArray("spin_box")]
+custom_minimum_size = Vector2(300, 30)
+layout_mode = 3
+anchors_preset = 0
+offset_right = 300.0
+offset_bottom = 30.0
+script = ExtResource("1_float")
+spin_box = NodePath("HBoxContainer/SpinBox")
+
+[node name="HBoxContainer" type="HBoxContainer" parent="." unique_id=2036236908]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Label" type="Label" parent="HBoxContainer" unique_id=870171986]
+custom_minimum_size = Vector2(150, 0)
+layout_mode = 2
+text = "Duration"
+
+[node name="SpinBox" type="SpinBox" parent="HBoxContainer" unique_id=1710331581]
+layout_mode = 2
+size_flags_horizontal = 3
+tooltip_text = "The fade duration in seconds. Set to 0 for an immediate change."
+step = 0.1
+allow_greater = true
+suffix = " s"

@@ -1,0 +1,28 @@
+[gd_scene format=3 uid="uid://bom422qu8lcuk"]
+
+[ext_resource type="Script" uid="uid://do2rn0ifssvqs" path="res://addons/flowkit/editor/Ui/actionInputs/bool_input_ui.gd" id="1_bool"]
+
+[node name="BoolInput" type="Control" unique_id=1297648323 node_paths=PackedStringArray("checkbox")]
+custom_minimum_size = Vector2(300, 30)
+layout_mode = 3
+anchors_preset = 0
+offset_right = 300.0
+offset_bottom = 30.0
+script = ExtResource("1_bool")
+checkbox = NodePath("HBoxContainer/Checkbox")
+
+[node name="HBoxContainer" type="HBoxContainer" parent="." unique_id=1897289525]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Label" type="Label" parent="HBoxContainer" unique_id=1173632293]
+custom_minimum_size = Vector2(150, 0)
+layout_mode = 2
+text = "Alpha Only"
+
+[node name="Checkbox" type="CheckBox" parent="HBoxContainer" unique_id=1918070434]
+layout_mode = 2

@@ -4,6 +4,7 @@ class_name FKActionInputModal
 
 @export var confirm_button: Button
 @export var cancel_button: Button
+@export var input_holder: Control
 
 func _toggle_subs(do_sub: bool):
 	super._toggle_subs(do_sub)

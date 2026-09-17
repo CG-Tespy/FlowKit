@@ -8,6 +8,10 @@ const ACTION_ITEM_SCENE_PATH := "res://addons/flowkit/editor/scenes/unitUis/acti
 const BRANCH_ITEM_SCENE_PATH := "res://addons/flowkit/editor/scenes/unitUis/branch_unit_ui.tscn"
 const GROUP_SCENE_PATH := "res://addons/flowkit/editor/scenes/unitUis/group_ui.tscn"
 const SETTINGS_WINDOW_SCENE_PATH := "res://addons/flowkit/editor/scenes/fk_editor_settings.tscn"
+const FLOAT_ACTION_INPUT_SCENE_PATH := "res://addons/flowkit/editor/scenes/actionInputs/float_input.tscn"
+const INTEGER_ACTION_INPUT_SCENE_PATH := "res://addons/flowkit/editor/scenes/actionInputs/integer_input.tscn"
+const BOOL_ACTION_INPUT_SCENE_PATH := "res://addons/flowkit/editor/scenes/actionInputs/bool_input.tscn"
+const COLOR_ACTION_INPUT_SCENE_PATH := "res://addons/flowkit/editor/scenes/actionInputs/color_input.tscn"
 const PATH_TO_EVENTS_FOLDER := "res://addons/flowkit/events"
 
 const MAIN_EDITOR_SCENE_PATH := "res://addons/flowkit/editor/scenes/main_editor.tscn"
@@ -18,6 +22,10 @@ const COMMENT_SCENE := preload(COMMENT_SCENE_PATH)
 const CONDITION_ITEM_SCENE := preload(CONDITION_SCENE_PATH)
 const ACTION_ITEM_SCENE := preload(ACTION_ITEM_SCENE_PATH)
 const BRANCH_ITEM_SCENE := preload(BRANCH_ITEM_SCENE_PATH)
+const FLOAT_ACTION_INPUT_SCENE := preload(FLOAT_ACTION_INPUT_SCENE_PATH)
+const INTEGER_ACTION_INPUT_SCENE := preload(INTEGER_ACTION_INPUT_SCENE_PATH)
+const BOOL_ACTION_INPUT_SCENE := preload(BOOL_ACTION_INPUT_SCENE_PATH)
+const COLOR_ACTION_INPUT_SCENE := preload(COLOR_ACTION_INPUT_SCENE_PATH)
 
 const AUTO_SAVE_TOGGLE_KEY = "flowkit/auto_save_enabled"
 
@@ -31,6 +39,7 @@ var registry: FKRegistry
 var modal_signals: FKModalSignals = FKModalSignals.new()
 var unit_ui_signals := FKUnitUiSignals.new()
 var settings_window_signals := FKSettingsWindowSignals.new()
+var action_input_ui_factory := FKActionInputUiFactory.new(self)
 var current_scene_uid: int = 0
 
 ## Should return a SceneTree object. No args.

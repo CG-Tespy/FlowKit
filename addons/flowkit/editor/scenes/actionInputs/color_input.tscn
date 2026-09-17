@@ -1,0 +1,30 @@
+[gd_scene format=3 uid="uid://bawjhhuyhegdc"]
+
+[ext_resource type="Script" uid="uid://b6l64g1k2krnw" path="res://addons/flowkit/editor/Ui/actionInputs/color_input_ui.gd" id="1_color"]
+
+[node name="ColorInput" type="Control" unique_id=1705070519 node_paths=PackedStringArray("color_picker_button")]
+custom_minimum_size = Vector2(300, 30)
+layout_mode = 3
+anchors_preset = 0
+offset_bottom = 30.0
+size_flags_horizontal = 3
+script = ExtResource("1_color")
+color_picker_button = NodePath("HBoxContainer/ColorPickerButton")
+
+[node name="HBoxContainer" type="HBoxContainer" parent="." unique_id=830825165]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Label" type="Label" parent="HBoxContainer" unique_id=1530245375]
+custom_minimum_size = Vector2(150, 0)
+layout_mode = 2
+text = "Target Color"
+
+[node name="ColorPickerButton" type="ColorPickerButton" parent="HBoxContainer" unique_id=493168238]
+layout_mode = 2
+size_flags_horizontal = 3
+text = " "

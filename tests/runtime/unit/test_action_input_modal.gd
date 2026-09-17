@@ -1,3 +1,4 @@
+@tool
 extends GutTest
 
 class TestAction extends FKAction:
