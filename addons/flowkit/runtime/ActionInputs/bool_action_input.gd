@@ -13,6 +13,8 @@ func get_val(dict: Dictionary) -> bool:
 	return super.get_val(dict)
 	
 func _convert(raw: Variant):
-	if (raw is String and raw == ""):
+	if raw == null or (raw is String and raw == ""):
 		return _default_value
-	return bool(raw)
+	if raw is String:
+		return raw.to_lower() == "true"
+	return raw

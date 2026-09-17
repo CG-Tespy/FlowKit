@@ -1286,6 +1286,7 @@ action_id: String, current_inputs: Dictionary) -> bool:
 	_action_pop_args.action = action_provider
 	_action_pop_args.node_path = node_path
 	_action_pop_args.action_id = action_id
+	_action_pop_args.action_inputs = action_provider.get_inputs()
 	_action_pop_args.inputs = current_inputs
 	custom_modal.populate_for_action(_action_pop_args)
 	_popup_centered_on_editor(custom_modal)

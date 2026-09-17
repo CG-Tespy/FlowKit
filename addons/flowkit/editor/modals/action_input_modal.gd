@@ -67,19 +67,21 @@ var _node_path: String:
 		return _last_pop_args.node_path
 
 
-# Value-Fetchers
+func _get_action_input(input_name: String) -> FKActionInput:
+	for action_input in _last_pop_args.action_inputs:
+		if action_input.name == input_name:
+			return action_input
+	push_error("[FlowKit] Custom input modal for '%s' requires undefined input '%s'." % [_action_id, input_name])
+	return null
 
-func _get_string_input(input_name: String, default_value: String) -> String:
-	return _inputs.get(input_name, default_value)
+func _get_input_value(action_input: FKActionInput) -> Variant:
+	if action_input == null:
+		return null
+	return action_input.get_val(_inputs)
 
-func _get_float_input(input_name: String, default_value: float) -> float:
-	var value = _inputs.get(input_name, default_value)
-	return float(value)
-
-func _get_bool_input(input_name: String, default_value: bool) -> bool:
-	var value = _inputs.get(input_name, default_value)
-	if value is String:
-		return value.to_lower() == "true"
-	return bool(value)
+func _set_input_value(action_input: FKActionInput, value: Variant) -> void:
+	if action_input == null:
+		return
+	action_input.set_val(_inputs, value)
 
 
