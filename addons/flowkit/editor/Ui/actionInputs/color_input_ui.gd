@@ -5,7 +5,7 @@ class_name FKColorActionInputUi
 @export var color_picker_button: ColorPickerButton
 
 func get_value() -> Variant:
-	return color_picker_button.color
+	return get_value_or_expression(color_picker_button.color)
 
 func _can_hold_value(val: Variant) -> bool:
 	return val is Color

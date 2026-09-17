@@ -5,7 +5,7 @@ class_name FKBoolActionInputUi
 @export var checkbox: CheckBox
 
 func get_value() -> Variant:
-	return checkbox.button_pressed
+	return get_value_or_expression(checkbox.button_pressed)
 
 func _can_hold_value(val: Variant) -> bool:
 	return val is bool

@@ -1786,6 +1786,11 @@ event_row: FKEventRowUi) -> void:
 	pending_block_type = "action_edit"
 	pending_id = act_data.get_resolved_provider_id()
 	pending_node_path = str(act_data.target_node)
+	if provider_inputs.is_empty():
+		print("[%s]: The %s action doesn't have any input options" % \
+		[self.get_class(), action_provider.get_display_name()])
+		return
+
 	if _show_custom_action_input_modal(
 		action_provider,
 		pending_node_path,
@@ -1802,8 +1807,6 @@ event_row: FKEventRowUi) -> void:
 			act_data.inputs
 		)
 		_popup_centered_on_editor(expression_modal)
-	else:
-		print("[FKMainEditor]: Action has no inputs to edit")
 
 func _finalize_branch_creation(inputs: Dictionary) -> void:
 	"""Create a condition-type branch and add it to the target's actions."""
@@ -2065,6 +2068,11 @@ func _on_action_edit_requested(action_item: FKActionUnitUi, bound_row: FKUnitUi)
 	pending_block_type = "action_edit"
 	pending_id = act_data.get_resolved_provider_id()
 	pending_node_path = str(act_data.target_node)
+	if provider_inputs.is_empty():
+		print("[%s]: The %s action doesn't have any input options" % \
+		[self.get_class(), action_provider.get_display_name()])
+		return
+
 	if _show_custom_action_input_modal(
 		action_provider,
 		pending_node_path,
@@ -2081,8 +2089,6 @@ func _on_action_edit_requested(action_item: FKActionUnitUi, bound_row: FKUnitUi)
 			act_data.inputs
 		)
 		_popup_centered_on_editor(expression_modal)
-	else:
-		print("[FKMainEditor]: Action has no inputs to edit")
 
 
 # === Drag and Drop Handlers ===

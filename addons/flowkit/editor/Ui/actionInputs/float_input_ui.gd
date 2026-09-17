@@ -5,7 +5,7 @@ class_name FKFloatActionInputUi
 @export var spin_box: SpinBox
 
 func get_value() -> Variant:
-	return spin_box.value
+	return get_value_or_expression(spin_box.value)
 
 func _can_hold_value(val: Variant) -> bool:
 	return val is float or val is int
