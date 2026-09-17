@@ -10,7 +10,11 @@ func get_inputs() -> Array[FKActionInput]:
 ## Returns an optional editor modal scene for configuring this action's inputs.
 ## Return null to use FKExpressionEditorModal.
 func get_input_modal_scene() -> PackedScene:
-	return null
+	return GENERAL_INPUT_MODAL
+
+const GENERAL_INPUT_MODAL := preload(
+	"res://addons/flowkit/editor/scenes/modals/FKActionCustom/general_action_input_modal.tscn"
+)
 
 ## Whether or not this Action might need more than one frame to finish doing its thing.
 func may_need_multi_frames() -> bool:

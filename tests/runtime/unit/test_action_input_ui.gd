@@ -4,13 +4,14 @@ const FLOAT_INPUT_SCENE := preload("res://addons/flowkit/editor/scenes/actionInp
 const INTEGER_INPUT_SCENE := preload("res://addons/flowkit/editor/scenes/actionInputs/integer_input.tscn")
 const BOOL_INPUT_SCENE := preload("res://addons/flowkit/editor/scenes/actionInputs/bool_input.tscn")
 const COLOR_INPUT_SCENE := preload("res://addons/flowkit/editor/scenes/actionInputs/color_input.tscn")
+const STRING_INPUT_SCENE := preload("res://addons/flowkit/editor/scenes/actionInputs/string_input.tscn")
 
 func test_float_input_ui_uses_input_name_and_value():
 	var input_ui: Variant = FLOAT_INPUT_SCENE.instantiate()
 	input_ui.legitimize(FKFloatActionInput.new("Speed", "", 1.0), FKEditorGlobals.new())
 	add_child(input_ui)
 
-	input_ui.set_value(2.5)
+	input_ui.try_set_value(2.5)
 
 	assert_eq(input_ui.input_label.text, "Speed")
 	assert_eq(input_ui.get_value(), 2.5)
@@ -21,7 +22,7 @@ func test_integer_input_ui_uses_input_name_and_value():
 	input_ui.legitimize(FKIntActionInput.new("Lives", "", 3), FKEditorGlobals.new())
 	add_child(input_ui)
 
-	input_ui.set_value(7.9)
+	input_ui.try_set_value(7.9)
 
 	assert_eq(input_ui.input_label.text, "Lives")
 	assert_eq(input_ui.get_value(), 7)
@@ -32,7 +33,7 @@ func test_bool_input_ui_uses_input_name_and_value():
 	input_ui.legitimize(FKBoolActionInput.new("Enabled", "", false), FKEditorGlobals.new())
 	add_child(input_ui)
 
-	input_ui.set_value(true)
+	input_ui.try_set_value(true)
 
 	assert_eq(input_ui.input_label.text, "Enabled")
 	assert_true(input_ui.get_value())
@@ -44,8 +45,19 @@ func test_color_input_ui_uses_input_name_and_value():
 	input_ui.legitimize(FKActionInput.new("Tint", "Color"), FKEditorGlobals.new())
 	add_child(input_ui)
 
-	input_ui.set_value(expected_color)
+	input_ui.try_set_value(expected_color)
 
 	assert_eq(input_ui.input_label.text, "Tint")
 	assert_eq(input_ui.get_value(), expected_color)
+	input_ui.free()
+
+func test_string_input_ui_uses_input_name_and_value():
+	var input_ui: Variant = STRING_INPUT_SCENE.instantiate()
+	input_ui.legitimize(FKStringActionInput.new("Message", "", "Hello"), FKEditorGlobals.new())
+	add_child(input_ui)
+
+	input_ui.try_set_value("Updated message")
+
+	assert_eq(input_ui.input_label.text, "Message")
+	assert_eq(input_ui.get_value(), "Updated message")
 	input_ui.free()

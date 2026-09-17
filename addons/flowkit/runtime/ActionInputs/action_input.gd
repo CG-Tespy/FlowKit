@@ -29,7 +29,7 @@ func get_val(dict: Dictionary) -> Variant:
 	var result = _convert(raw_result)
 	return result
 
-func set_val(dict: Dictionary, value: Variant) -> void:
+func set_val(dict: Dictionary, value) -> void:
 	dict[name] = value
 
 func _get_raw(dict: Dictionary) -> Variant:

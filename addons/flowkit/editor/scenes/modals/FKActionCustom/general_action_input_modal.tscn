@@ -3,7 +3,7 @@
 [ext_resource type="Script" uid="uid://bnwm1a7nj15s0" path="res://addons/flowkit/editor/modals/general_action_input_modal.gd" id="1_nemhc"]
 [ext_resource type="StyleBox" uid="uid://tqqxoi1osov3" path="res://addons/flowkit/editor/styles/action_input_modal_bg_style.tres" id="2_7f7ue"]
 
-[node name="_base_action_input_modal" type="Window" unique_id=1104245805 node_paths=PackedStringArray("confirm_button", "cancel_button", "input_holder")]
+[node name="general_action_input_modal" type="Window" unique_id=164736714 node_paths=PackedStringArray("confirm_button", "cancel_button", "input_holder")]
 oversampling_override = 1.0
 title = "Fade Color Inputs"
 initial_position = 1

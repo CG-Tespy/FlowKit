@@ -67,12 +67,12 @@ var _node_path: String:
 	get:
 		return _last_pop_args.node_path
 
-
 func _get_action_input(input_name: String) -> FKActionInput:
 	for action_input in _last_pop_args.action_inputs:
 		if action_input.name == input_name:
 			return action_input
-	push_error("[FlowKit] Custom input modal for '%s' requires undefined input '%s'." % [_action_id, input_name])
+	push_error("[%s] Custom input modal for '%s' requires undefined input '%s'." % \
+	[self.get_class(), _action_id, input_name])
 	return null
 
 func _get_input_value(action_input: FKActionInput) -> Variant:

@@ -7,5 +7,11 @@ class_name FKFloatActionInputUi
 func get_value() -> Variant:
 	return spin_box.value
 
-func set_value(value: Variant) -> void:
-	spin_box.value = float(value)
+func _can_hold_value(val: Variant) -> bool:
+	return val is float or val is int
+
+func _set_value(_value) -> void:
+	spin_box.value = float(_value)
+
+func get_class() -> String:
+	return "FKFloatActionInputUi"

@@ -2,17 +2,18 @@
 
 [ext_resource type="Script" uid="uid://b6l64g1k2krnw" path="res://addons/flowkit/editor/Ui/actionInputs/color_input_ui.gd" id="1_color"]
 
-[node name="ColorInput" type="Control" unique_id=1705070519 node_paths=PackedStringArray("input_label", "color_picker_button")]
-custom_minimum_size = Vector2(300, 30)
+[node name="ColorInput" type="Control" unique_id=1705070519 node_paths=PackedStringArray("color_picker_button", "input_label", "desc_label")]
+custom_minimum_size = Vector2(300, 60)
 layout_mode = 3
 anchors_preset = 0
 offset_bottom = 30.0
 size_flags_horizontal = 3
 script = ExtResource("1_color")
-input_label = NodePath("HBoxContainer/Label")
-color_picker_button = NodePath("HBoxContainer/ColorPickerButton")
+color_picker_button = NodePath("VBoxContainer/HBoxContainer/ColorPickerButton")
+input_label = NodePath("VBoxContainer/HBoxContainer/Label")
+desc_label = NodePath("VBoxContainer/Description")
 
-[node name="HBoxContainer" type="HBoxContainer" parent="." unique_id=830825165]
+[node name="VBoxContainer" type="VBoxContainer" parent="." unique_id=463601764]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -20,12 +21,20 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 
-[node name="Label" type="Label" parent="HBoxContainer" unique_id=1530245375]
+[node name="HBoxContainer" type="HBoxContainer" parent="VBoxContainer" unique_id=830825165]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="VBoxContainer/HBoxContainer" unique_id=1530245375]
 custom_minimum_size = Vector2(150, 0)
 layout_mode = 2
 text = "Target Color"
 
-[node name="ColorPickerButton" type="ColorPickerButton" parent="HBoxContainer" unique_id=493168238]
+[node name="ColorPickerButton" type="ColorPickerButton" parent="VBoxContainer/HBoxContainer" unique_id=493168238]
 layout_mode = 2
 size_flags_horizontal = 3
 text = " "
+
+[node name="Description" type="RichTextLabel" parent="VBoxContainer" unique_id=1381169388]
+layout_mode = 2
+size_flags_vertical = 3
+text = "Insert desc here"

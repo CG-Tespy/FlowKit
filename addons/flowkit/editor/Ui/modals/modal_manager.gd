@@ -1,3 +1,4 @@
+@tool
 ## For managing the creation and access of the modal windows of FlowKit's editor.
 extends Node
 class_name FKModalManager

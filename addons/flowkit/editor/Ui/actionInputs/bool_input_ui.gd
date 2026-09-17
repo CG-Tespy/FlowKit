@@ -7,5 +7,11 @@ class_name FKBoolActionInputUi
 func get_value() -> Variant:
 	return checkbox.button_pressed
 
-func set_value(value: Variant) -> void:
-	checkbox.button_pressed = value
+func _can_hold_value(val: Variant) -> bool:
+	return val is bool
+
+func _set_value(_value) -> void:
+	checkbox.button_pressed = _value
+
+func get_class() -> String:
+	return "FKBoolActionInputUi"

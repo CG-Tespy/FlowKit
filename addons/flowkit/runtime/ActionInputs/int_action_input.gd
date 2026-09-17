@@ -16,3 +16,6 @@ func _convert(raw):
 	if (raw is String and raw == ""):
 		return _default_value
 	return int(raw)
+
+func get_class() -> String:
+	return "FKIntActionInput"

@@ -12,6 +12,7 @@ const FLOAT_ACTION_INPUT_SCENE_PATH := "res://addons/flowkit/editor/scenes/actio
 const INTEGER_ACTION_INPUT_SCENE_PATH := "res://addons/flowkit/editor/scenes/actionInputs/integer_input.tscn"
 const BOOL_ACTION_INPUT_SCENE_PATH := "res://addons/flowkit/editor/scenes/actionInputs/bool_input.tscn"
 const COLOR_ACTION_INPUT_SCENE_PATH := "res://addons/flowkit/editor/scenes/actionInputs/color_input.tscn"
+const STRING_ACTION_INPUT_SCENE_PATH := "res://addons/flowkit/editor/scenes/actionInputs/string_input.tscn"
 const PATH_TO_EVENTS_FOLDER := "res://addons/flowkit/events"
 
 const MAIN_EDITOR_SCENE_PATH := "res://addons/flowkit/editor/scenes/main_editor.tscn"
@@ -26,6 +27,7 @@ const FLOAT_ACTION_INPUT_SCENE := preload(FLOAT_ACTION_INPUT_SCENE_PATH)
 const INTEGER_ACTION_INPUT_SCENE := preload(INTEGER_ACTION_INPUT_SCENE_PATH)
 const BOOL_ACTION_INPUT_SCENE := preload(BOOL_ACTION_INPUT_SCENE_PATH)
 const COLOR_ACTION_INPUT_SCENE := preload(COLOR_ACTION_INPUT_SCENE_PATH)
+const STRING_ACTION_INPUT_SCENE := preload(STRING_ACTION_INPUT_SCENE_PATH)
 
 const AUTO_SAVE_TOGGLE_KEY = "flowkit/auto_save_enabled"
 
@@ -40,6 +42,7 @@ var modal_signals: FKModalSignals = FKModalSignals.new()
 var unit_ui_signals := FKUnitUiSignals.new()
 var settings_window_signals := FKSettingsWindowSignals.new()
 var action_input_ui_factory := FKActionInputUiFactory.new(self)
+var action_input_ui_pool := FKActionInputUiPool.new(self, action_input_ui_factory)
 var current_scene_uid: int = 0
 
 ## Should return a SceneTree object. No args.

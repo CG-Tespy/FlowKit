@@ -1,15 +1,15 @@
-[gd_scene format=3 uid="uid://bom422qu8lcuk"]
+[gd_scene format=3 uid="uid://c1gthbpw8o40h"]
 
-[ext_resource type="Script" uid="uid://do2rn0ifssvqs" path="res://addons/flowkit/editor/Ui/actionInputs/bool_input_ui.gd" id="1_bool"]
+[ext_resource type="Script" uid="uid://do2rn0ifssvqs" path="res://addons/flowkit/editor/Ui/actionInputs/bool_input_ui.gd" id="1_1xkfv"]
 
-[node name="BoolInput" type="Control" unique_id=1297648323 node_paths=PackedStringArray("checkbox", "input_label", "desc_label")]
+[node name="BaseInput" type="Control" unique_id=1297648323 node_paths=PackedStringArray("checkbox", "input_label", "desc_label")]
 custom_minimum_size = Vector2(300, 60)
 layout_mode = 3
 anchors_preset = 0
 offset_right = 300.0
-offset_bottom = 30.0
+offset_bottom = 60.0
 size_flags_horizontal = 3
-script = ExtResource("1_bool")
+script = ExtResource("1_1xkfv")
 checkbox = NodePath("VBoxContainer/HBoxContainer/Checkbox")
 input_label = NodePath("VBoxContainer/HBoxContainer/Label")
 desc_label = NodePath("VBoxContainer/Description")

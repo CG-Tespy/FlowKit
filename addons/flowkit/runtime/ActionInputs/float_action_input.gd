@@ -16,3 +16,6 @@ func _convert(raw: Variant):
 	if (raw is String and raw == ""):
 		return _default_value
 	return float(raw)
+
+func get_class() -> String:
+	return "FKFloatActionInput"
