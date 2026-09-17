@@ -5,6 +5,7 @@ const INTEGER_INPUT_SCENE := preload("res://addons/flowkit/editor/scenes/actionI
 const BOOL_INPUT_SCENE := preload("res://addons/flowkit/editor/scenes/actionInputs/bool_input.tscn")
 const COLOR_INPUT_SCENE := preload("res://addons/flowkit/editor/scenes/actionInputs/color_input.tscn")
 const STRING_INPUT_SCENE := preload("res://addons/flowkit/editor/scenes/actionInputs/string_input.tscn")
+const VARIANT_INPUT_SCENE := preload("res://addons/flowkit/editor/scenes/actionInputs/variant_input.tscn")
 
 func test_float_input_ui_uses_input_name_and_value():
 	var input_ui: Variant = FLOAT_INPUT_SCENE.instantiate()
@@ -59,5 +60,16 @@ func test_string_input_ui_uses_input_name_and_value():
 	input_ui.try_set_value("Updated message")
 
 	assert_eq(input_ui.input_label.text, "Message")
-	assert_eq(input_ui.get_value(), "Updated message")
+	assert_eq(input_ui.get_value(), "\"Updated message\"")
+	input_ui.free()
+
+func test_variant_input_ui_preserves_expression_text():
+	var input_ui: Variant = VARIANT_INPUT_SCENE.instantiate()
+	input_ui.legitimize(FKActionInput.new("Value", "Variant"), FKEditorGlobals.new())
+	add_child(input_ui)
+
+	input_ui.try_set_value("node.position.x + 10")
+
+	assert_eq(input_ui.input_label.text, "Value")
+	assert_eq(input_ui.get_value(), "node.position.x + 10")
 	input_ui.free()

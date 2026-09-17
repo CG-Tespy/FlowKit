@@ -35,7 +35,7 @@ func _get_input_ui_class(action_input: FKActionInput) -> String:
 		return "FKStringActionInputUi"
 	if action_input.type == "Color":
 		return "FKColorActionInputUi"
-	return ""
+	return "FKVariantActionInputUi"
 
 func _on_action_input_ui_release_requested(input_ui: FKActionInputUi) -> void:
 	var parent := input_ui.get_parent()

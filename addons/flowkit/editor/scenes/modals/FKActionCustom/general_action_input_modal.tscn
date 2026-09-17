@@ -7,7 +7,7 @@
 oversampling_override = 1.0
 title = "Fade Color Inputs"
 initial_position = 1
-size = Vector2i(500, 350)
+size = Vector2i(750, 500)
 minimize_disabled = true
 maximize_disabled = true
 script = ExtResource("1_nemhc")

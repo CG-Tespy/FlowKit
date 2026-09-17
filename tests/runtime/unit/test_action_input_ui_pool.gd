@@ -2,18 +2,23 @@ extends GutTest
 
 func test_pool_reuses_released_input_ui_of_the_same_type():
 	var editor_globals := FKEditorGlobals.new()
-	var first_input := FKStringActionInput.new("First")
+	var first_input := FKStringActionInput.new("First", "First description")
 	var input_ui := editor_globals.action_input_ui_pool.acquire(first_input)
 	add_child(input_ui)
+	input_ui.try_set_value("First value")
 
 	input_ui.release()
 
-	var second_input := FKStringActionInput.new("Second")
+	var second_input := FKStringActionInput.new("Second", "Second description")
 	var reused_input_ui := editor_globals.action_input_ui_pool.acquire(second_input)
 	add_child(reused_input_ui)
+	reused_input_ui.try_set_value("Second value")
 
 	assert_same(reused_input_ui, input_ui)
 	assert_same(reused_input_ui.action_input, second_input)
+	assert_eq(reused_input_ui.input_label.text, "Second")
+	assert_eq(reused_input_ui.desc_label.text, "Second description")
+	assert_eq(reused_input_ui.line_edit.text, "Second value")
 	reused_input_ui.free()
 
 func test_pool_creates_a_different_ui_type_when_needed():

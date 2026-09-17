@@ -13,6 +13,7 @@ const INTEGER_ACTION_INPUT_SCENE_PATH := "res://addons/flowkit/editor/scenes/act
 const BOOL_ACTION_INPUT_SCENE_PATH := "res://addons/flowkit/editor/scenes/actionInputs/bool_input.tscn"
 const COLOR_ACTION_INPUT_SCENE_PATH := "res://addons/flowkit/editor/scenes/actionInputs/color_input.tscn"
 const STRING_ACTION_INPUT_SCENE_PATH := "res://addons/flowkit/editor/scenes/actionInputs/string_input.tscn"
+const VARIANT_ACTION_INPUT_SCENE_PATH := "res://addons/flowkit/editor/scenes/actionInputs/variant_input.tscn"
 const PATH_TO_EVENTS_FOLDER := "res://addons/flowkit/events"
 
 const MAIN_EDITOR_SCENE_PATH := "res://addons/flowkit/editor/scenes/main_editor.tscn"
@@ -28,8 +29,10 @@ const INTEGER_ACTION_INPUT_SCENE := preload(INTEGER_ACTION_INPUT_SCENE_PATH)
 const BOOL_ACTION_INPUT_SCENE := preload(BOOL_ACTION_INPUT_SCENE_PATH)
 const COLOR_ACTION_INPUT_SCENE := preload(COLOR_ACTION_INPUT_SCENE_PATH)
 const STRING_ACTION_INPUT_SCENE := preload(STRING_ACTION_INPUT_SCENE_PATH)
+const VARIANT_ACTION_INPUT_SCENE := preload(VARIANT_ACTION_INPUT_SCENE_PATH)
 
 const AUTO_SAVE_TOGGLE_KEY = "flowkit/auto_save_enabled"
+const AUTO_ENCLOSE_QUOTES_TOGGLE_KEY = "flowkit/auto_enclose_string_quotes"
 
 var editor_interface: EditorInterface
 var editor_settings: EditorSettings:

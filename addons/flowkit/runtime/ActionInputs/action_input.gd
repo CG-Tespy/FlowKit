@@ -29,9 +29,6 @@ func get_val(dict: Dictionary) -> Variant:
 	var result = _convert(raw_result)
 	return result
 
-func set_val(dict: Dictionary, value) -> void:
-	dict[name] = value
-
 func _get_raw(dict: Dictionary) -> Variant:
 	var result
 	if dict.has(name):
@@ -45,6 +42,11 @@ func _get_raw(dict: Dictionary) -> Variant:
 		return result
 	else:
 		return default_value
+
+func set_val(dict: Dictionary, value) -> void:
+	dict[name] = value
+
+
 
 func _is_valid(fetched_value):
 	return true

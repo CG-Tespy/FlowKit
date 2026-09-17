@@ -2,6 +2,7 @@ extends GutTest
 
 const ACTION_INPUT_UI_FACTORY := preload("res://addons/flowkit/editor/Ui/actionInputs/action_input_ui_factory.gd")
 const STRING_ACTION_INPUT_UI := preload("res://addons/flowkit/editor/Ui/actionInputs/string_input_ui.gd")
+const VARIANT_ACTION_INPUT_UI := preload("res://addons/flowkit/editor/Ui/actionInputs/variant_input_ui.gd")
 
 var factory = ACTION_INPUT_UI_FACTORY.new(FKEditorGlobals.new())
 
@@ -49,4 +50,13 @@ func test_factory_creates_string_input_ui():
 
 	assert_same(input_ui.get_script(), STRING_ACTION_INPUT_UI)
 	assert_eq(input_ui.input_label.text, "Message")
+	input_ui.free()
+
+func test_factory_creates_variant_input_ui():
+	var input := FKActionInput.new("Value", "Variant")
+	var input_ui: Variant = factory.create_from(input)
+	add_child(input_ui)
+
+	assert_same(input_ui.get_script(), VARIANT_ACTION_INPUT_UI)
+	assert_eq(input_ui.input_label.text, "Value")
 	input_ui.free()

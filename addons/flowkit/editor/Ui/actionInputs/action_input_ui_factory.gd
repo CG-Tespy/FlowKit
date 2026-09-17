@@ -27,4 +27,4 @@ func _get_scene_for(action_input: FKActionInput) -> PackedScene:
 		return _globals.STRING_ACTION_INPUT_SCENE
 	if action_input.type == "Color":
 		return _globals.COLOR_ACTION_INPUT_SCENE
-	return null
+	return _globals.VARIANT_ACTION_INPUT_SCENE

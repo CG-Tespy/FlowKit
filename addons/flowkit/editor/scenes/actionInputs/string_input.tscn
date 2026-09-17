@@ -3,13 +3,13 @@
 [ext_resource type="Script" uid="uid://dwin5fhlhjce5" path="res://addons/flowkit/editor/Ui/actionInputs/string_input_ui.gd" id="1_string"]
 
 [node name="StringInput" type="Control" unique_id=398668189 node_paths=PackedStringArray("line_edit", "input_label", "desc_label")]
-custom_minimum_size = Vector2(300, 60)
+custom_minimum_size = Vector2(300, 70)
 layout_mode = 3
 anchors_preset = 0
 offset_right = 300.0
 offset_bottom = 30.0
 size_flags_horizontal = 3
-size_flags_vertical = 2
+size_flags_vertical = 0
 script = ExtResource("1_string")
 line_edit = NodePath("VBoxContainer/HBoxContainer/LineEdit")
 input_label = NodePath("VBoxContainer/HBoxContainer/Label")

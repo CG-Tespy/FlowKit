@@ -51,7 +51,7 @@ func _apply_input_state_to_ui():
 	title = _last_pop_args.action.get_display_name()
 
 func confirm_inputs(node_path: String, action_id: String, inputs: Dictionary) -> void:
-	_modal_signals.expressions_confirmed.emit(node_path, action_id, inputs)
+	_modal_signals.expressions_confirmed.emit(node_path, action_id, inputs.duplicate(true))
 	hide()
 
 # Shorthands

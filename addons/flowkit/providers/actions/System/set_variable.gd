@@ -1,4 +1,5 @@
 extends FKAction
+class_name FKSetVariable
 
 func get_description() -> String:
 	return "Sets a scene variable that can be retrieved via system.get_var(\"variable_name\") in the expression editor."

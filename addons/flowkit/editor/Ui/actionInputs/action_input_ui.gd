@@ -34,7 +34,7 @@ func _ready() -> void:
 func set_action_input(value: FKActionInput) -> void:
 	if is_editor_preview:
 		return
-	action_input = value
+	self.action_input = value
 
 func get_value() -> Variant:
 	push_error("[FlowKit] FKActionInputUi subclasses must implement get_value().")
@@ -45,6 +45,8 @@ func get_value() -> Variant:
 func try_set_value(_value: Variant) -> void:
 	if not _can_hold_value(_value):
 		push_error("[%s] Cannot hold %s as a value." % [self.get_class()])
+		return
+	_set_value(_value)
 
 func _can_hold_value(val: Variant) -> bool:
 	return false 
@@ -59,7 +61,7 @@ func _set_value(_value) -> void:
 
 func _apply_action_input() -> void:
 	if not is_instance_valid(input_label) or action_input == null:
-		desc_label.text = ""
+		desc_label.text = "[Invalid. Please report to FlowKit devs.]"
 		return
 	input_label.text = action_input.name
 	desc_label.text = action_input.description
