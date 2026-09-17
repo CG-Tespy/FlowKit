@@ -7,9 +7,9 @@ const COLOR_INPUT_SCENE := preload("res://addons/flowkit/editor/scenes/actionInp
 
 func test_float_input_ui_uses_input_name_and_value():
 	var input_ui: Variant = FLOAT_INPUT_SCENE.instantiate()
+	input_ui.legitimize(FKFloatActionInput.new("Speed", "", 1.0), FKEditorGlobals.new())
 	add_child(input_ui)
 
-	input_ui.set_action_input(FKFloatActionInput.new("Speed", "", 1.0))
 	input_ui.set_value(2.5)
 
 	assert_eq(input_ui.input_label.text, "Speed")
@@ -18,9 +18,9 @@ func test_float_input_ui_uses_input_name_and_value():
 
 func test_integer_input_ui_uses_input_name_and_value():
 	var input_ui: Variant = INTEGER_INPUT_SCENE.instantiate()
+	input_ui.legitimize(FKIntActionInput.new("Lives", "", 3), FKEditorGlobals.new())
 	add_child(input_ui)
 
-	input_ui.set_action_input(FKIntActionInput.new("Lives", "", 3))
 	input_ui.set_value(7.9)
 
 	assert_eq(input_ui.input_label.text, "Lives")
@@ -29,9 +29,9 @@ func test_integer_input_ui_uses_input_name_and_value():
 
 func test_bool_input_ui_uses_input_name_and_value():
 	var input_ui: Variant = BOOL_INPUT_SCENE.instantiate()
+	input_ui.legitimize(FKBoolActionInput.new("Enabled", "", false), FKEditorGlobals.new())
 	add_child(input_ui)
 
-	input_ui.set_action_input(FKBoolActionInput.new("Enabled", "", false))
 	input_ui.set_value(true)
 
 	assert_eq(input_ui.input_label.text, "Enabled")
@@ -41,9 +41,9 @@ func test_bool_input_ui_uses_input_name_and_value():
 func test_color_input_ui_uses_input_name_and_value():
 	var input_ui: Variant = COLOR_INPUT_SCENE.instantiate()
 	var expected_color := Color(0.2, 0.4, 0.6, 0.8)
+	input_ui.legitimize(FKActionInput.new("Tint", "Color"), FKEditorGlobals.new())
 	add_child(input_ui)
 
-	input_ui.set_action_input(FKActionInput.new("Tint", "Color"))
 	input_ui.set_value(expected_color)
 
 	assert_eq(input_ui.input_label.text, "Tint")

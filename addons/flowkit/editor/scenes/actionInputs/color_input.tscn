@@ -2,13 +2,14 @@
 
 [ext_resource type="Script" uid="uid://b6l64g1k2krnw" path="res://addons/flowkit/editor/Ui/actionInputs/color_input_ui.gd" id="1_color"]
 
-[node name="ColorInput" type="Control" unique_id=1705070519 node_paths=PackedStringArray("color_picker_button")]
+[node name="ColorInput" type="Control" unique_id=1705070519 node_paths=PackedStringArray("input_label", "color_picker_button")]
 custom_minimum_size = Vector2(300, 30)
 layout_mode = 3
 anchors_preset = 0
 offset_bottom = 30.0
 size_flags_horizontal = 3
 script = ExtResource("1_color")
+input_label = NodePath("HBoxContainer/Label")
 color_picker_button = NodePath("HBoxContainer/ColorPickerButton")
 
 [node name="HBoxContainer" type="HBoxContainer" parent="." unique_id=830825165]

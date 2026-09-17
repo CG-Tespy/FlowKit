@@ -2,13 +2,14 @@
 
 [ext_resource type="Script" uid="uid://do2rn0ifssvqs" path="res://addons/flowkit/editor/Ui/actionInputs/bool_input_ui.gd" id="1_bool"]
 
-[node name="BoolInput" type="Control" unique_id=1297648323 node_paths=PackedStringArray("checkbox")]
+[node name="BoolInput" type="Control" unique_id=1297648323 node_paths=PackedStringArray("input_label", "checkbox")]
 custom_minimum_size = Vector2(300, 30)
 layout_mode = 3
 anchors_preset = 0
 offset_right = 300.0
 offset_bottom = 30.0
 script = ExtResource("1_bool")
+input_label = NodePath("HBoxContainer/Label")
 checkbox = NodePath("HBoxContainer/Checkbox")
 
 [node name="HBoxContainer" type="HBoxContainer" parent="." unique_id=1897289525]

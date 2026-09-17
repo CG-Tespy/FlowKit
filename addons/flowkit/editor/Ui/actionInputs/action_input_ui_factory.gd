@@ -13,7 +13,7 @@ func create_from(action_input: FKActionInput) -> FKActionInputUi:
 		return null
 
 	var input_ui := scene.instantiate() as FKActionInputUi
-	input_ui.set_action_input(action_input)
+	input_ui.legitimize(action_input, _globals)
 	return input_ui
 
 func _get_scene_for(action_input: FKActionInput) -> PackedScene:

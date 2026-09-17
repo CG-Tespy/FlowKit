@@ -2,13 +2,14 @@
 
 [ext_resource type="Script" uid="uid://b7gadu0n2t7pt" path="res://addons/flowkit/editor/Ui/actionInputs/float_input_ui.gd" id="1_float"]
 
-[node name="FloatInput" type="Control" unique_id=1961574866 node_paths=PackedStringArray("spin_box")]
+[node name="FloatInput" type="Control" unique_id=1961574866 node_paths=PackedStringArray("input_label", "spin_box")]
 custom_minimum_size = Vector2(300, 30)
 layout_mode = 3
 anchors_preset = 0
 offset_right = 300.0
 offset_bottom = 30.0
 script = ExtResource("1_float")
+input_label = NodePath("HBoxContainer/Label")
 spin_box = NodePath("HBoxContainer/SpinBox")
 
 [node name="HBoxContainer" type="HBoxContainer" parent="." unique_id=2036236908]
