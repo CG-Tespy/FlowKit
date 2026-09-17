@@ -1,39 +1,57 @@
 [gd_scene format=3 uid="uid://c1gthbpw8o40h"]
 
 [ext_resource type="Script" uid="uid://do2rn0ifssvqs" path="res://addons/flowkit/editor/Ui/actionInputs/bool_input_ui.gd" id="1_1xkfv"]
+[ext_resource type="StyleBox" uid="uid://4vsupaoluret" path="res://addons/flowkit/editor/styles/action_input_bg_style.tres" id="2_gogr8"]
 
 [node name="BaseInput" type="Control" unique_id=1297648323 node_paths=PackedStringArray("checkbox", "input_label", "desc_label")]
-custom_minimum_size = Vector2(300, 60)
+custom_minimum_size = Vector2(300, 80)
 layout_mode = 3
 anchors_preset = 0
 offset_right = 300.0
 offset_bottom = 60.0
 size_flags_horizontal = 3
 script = ExtResource("1_1xkfv")
-checkbox = NodePath("VBoxContainer/HBoxContainer/Checkbox")
-input_label = NodePath("VBoxContainer/HBoxContainer/Label")
-desc_label = NodePath("VBoxContainer/Description")
+checkbox = NodePath("MarginContainer/VBoxContainer/HBoxContainer/Checkbox")
+input_label = NodePath("MarginContainer/VBoxContainer/HBoxContainer/Label")
+desc_label = NodePath("MarginContainer/VBoxContainer/Description")
 
-[node name="VBoxContainer" type="VBoxContainer" parent="." unique_id=1233557972]
+[node name="Background" type="Panel" parent="." unique_id=2121676902]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
+mouse_filter = 2
+theme_override_styles/panel = ExtResource("2_gogr8")
 
-[node name="HBoxContainer" type="HBoxContainer" parent="VBoxContainer" unique_id=1897289525]
+[node name="MarginContainer" type="MarginContainer" parent="." unique_id=1342130203]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/margin_left = 10
+theme_override_constants/margin_top = 10
+theme_override_constants/margin_right = 10
+theme_override_constants/margin_bottom = 10
+
+[node name="VBoxContainer" type="VBoxContainer" parent="MarginContainer" unique_id=1233557972]
 layout_mode = 2
 
-[node name="Label" type="Label" parent="VBoxContainer/HBoxContainer" unique_id=1173632293]
+[node name="HBoxContainer" type="HBoxContainer" parent="MarginContainer/VBoxContainer" unique_id=1897289525]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="MarginContainer/VBoxContainer/HBoxContainer" unique_id=1173632293]
 custom_minimum_size = Vector2(150, 0)
 layout_mode = 2
 text = "Alpha Only"
 
-[node name="Checkbox" type="CheckBox" parent="VBoxContainer/HBoxContainer" unique_id=1918070434]
+[node name="Checkbox" type="CheckBox" parent="MarginContainer/VBoxContainer/HBoxContainer" unique_id=1918070434]
 layout_mode = 2
 
-[node name="Description" type="RichTextLabel" parent="VBoxContainer" unique_id=786983019]
+[node name="Description" type="RichTextLabel" parent="MarginContainer/VBoxContainer" unique_id=786983019]
 layout_mode = 2
 size_flags_vertical = 3
 text = "Insert desc here"
