@@ -32,7 +32,7 @@ const STRING_ACTION_INPUT_SCENE := preload(STRING_ACTION_INPUT_SCENE_PATH)
 const VARIANT_ACTION_INPUT_SCENE := preload(VARIANT_ACTION_INPUT_SCENE_PATH)
 
 const AUTO_SAVE_TOGGLE_KEY = "flowkit/auto_save_enabled"
-const AUTO_ENCLOSE_QUOTES_TOGGLE_KEY = "flowkit/auto_enclose_string_quotes"
+const EXPRESSION_TEXT_COLOR_KEY = "flowkit/expression_text_color"
 
 var editor_interface: EditorInterface
 var editor_settings: EditorSettings:

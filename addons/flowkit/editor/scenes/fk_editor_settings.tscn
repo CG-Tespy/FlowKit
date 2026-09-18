@@ -4,7 +4,7 @@
 [ext_resource type="Texture2D" uid="uid://dfw21gww7gdwq" path="res://addons/flowkit/assets/flowkitLogoAlt.png" id="2_1wusu"]
 [ext_resource type="PackedScene" uid="uid://cuxtanqksw6bx" path="res://addons/flowkit/editor/scenes/provider_path_manager.tscn" id="3_d0tub"]
 
-[node name="FKEditorSettings" type="Window" unique_id=813573723 node_paths=PackedStringArray("auto_save_toggle", "auto_enclose_quotes_toggle", "save_button", "holds_prov_paths")]
+[node name="FKEditorSettings" type="Window" unique_id=813573723 node_paths=PackedStringArray("auto_save_toggle", "expression_text_color_picker", "save_button", "holds_prov_paths")]
 oversampling_override = 1.0
 title = "FlowKit Editor Settings"
 position = Vector2i(0, 36)
@@ -14,7 +14,7 @@ minimize_disabled = true
 maximize_disabled = true
 script = ExtResource("1_tn2p2")
 auto_save_toggle = NodePath("MainList/AutoSave/CheckButton")
-auto_enclose_quotes_toggle = NodePath("MainList/AutoEncloseQuotes/CheckButton")
+expression_text_color_picker = NodePath("MainList/ExpressionTextColor/ColorPickerButton")
 save_button = NodePath("SaveSettingsButton")
 holds_prov_paths = NodePath("MainList/ProviderRootPaths/FKProviderPathManager")
 metadata/_custom_type_script = "uid://d2tcskuiujrg7"
@@ -70,27 +70,21 @@ grow_vertical = 2
 button_pressed = true
 text = "Auto-Save Event Sheets"
 
-[node name="AutoEncloseQuotes" type="Control" parent="MainList"]
+[node name="ExpressionTextColor" type="HBoxContainer" parent="MainList"]
 custom_minimum_size = Vector2(300, 50)
 layout_mode = 2
 size_flags_horizontal = 4
 
-[node name="CheckButton" type="CheckButton" parent="MainList/AutoEncloseQuotes"]
-tooltip_text = "Wrap text entered into string action inputs in quotes so it is evaluated as a literal string."
-layout_mode = 1
-anchors_preset = 8
-anchor_left = 0.5
-anchor_top = 0.5
-anchor_right = 0.5
-anchor_bottom = 0.5
-offset_left = -114.5
-offset_top = -15.5
-offset_right = 114.5
-offset_bottom = 15.5
-grow_horizontal = 2
-grow_vertical = 2
-button_pressed = true
-text = "Auto-Enclose String Quotes"
+[node name="Label" type="Label" parent="MainList/ExpressionTextColor"]
+custom_minimum_size = Vector2(150, 0)
+layout_mode = 2
+text = "Expression Text Color"
+
+[node name="ColorPickerButton" type="ColorPickerButton" parent="MainList/ExpressionTextColor"]
+layout_mode = 2
+size_flags_horizontal = 3
+color = Color(0.55, 0.85, 0.7, 1)
+text = " "
 
 [node name="ProviderRootPaths" type="MarginContainer" parent="MainList" unique_id=1620028257]
 custom_minimum_size = Vector2(0, 280)

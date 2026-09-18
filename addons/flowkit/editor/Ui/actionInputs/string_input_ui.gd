@@ -25,18 +25,6 @@ func _is_enclosed_in_quotes(str: String) -> bool:
 
 static var _enclosing_quote_mark = "\""
 
-var _ensure_enclose_quotes: bool:
-	get:
-		## We only want to ensure the enclosure when outside of expression mode.
-		if is_expression_mode:
-			return false
-		if _globals == null or _globals.editor_interface == null:
-			return true
-
-		var key := FKEditorGlobals.AUTO_ENCLOSE_QUOTES_TOGGLE_KEY
-		var as_per_editor_setting: bool = _editor_settings.get_setting(key)
-		return as_per_editor_setting
-
 func _can_hold_value(val: Variant) -> bool:
 	return val is String or val is NodePath
 

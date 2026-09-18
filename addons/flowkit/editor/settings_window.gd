@@ -3,7 +3,7 @@ extends Window
 class_name FKSettingsWindow
 
 @export var auto_save_toggle: CheckButton
-@export var auto_enclose_quotes_toggle: CheckButton
+@export var expression_text_color_picker: ColorPickerButton
 ## Saves the settings to a json file
 @export var save_button: Button
 @export var holds_prov_paths: FKProviderPathManager
@@ -59,33 +59,29 @@ func _ensure_settings_registered():
 	if not editor_settings.has_setting(_auto_save_toggle_key):
 		print("[FKSettingsWindow]: Initializing auto save setting.")
 		editor_settings.set_setting(_auto_save_toggle_key, auto_save_toggle.button_pressed)
-	if not editor_settings.has_setting(_auto_enclose_quotes_toggle_key):
-		print("[FKSettingsWindow]: Initializing auto enclose quotes setting.")
-		editor_settings.set_setting(
-			_auto_enclose_quotes_toggle_key,
-			auto_enclose_quotes_toggle.button_pressed
-		)
+	if not editor_settings.has_setting(_expression_text_color_key):
+		editor_settings.set_setting(_expression_text_color_key, expression_text_color_picker.color)
 	
 var _auto_save_toggle_key: String:
 	get:
 		return FKEditorGlobals.AUTO_SAVE_TOGGLE_KEY
 
-var _auto_enclose_quotes_toggle_key: String:
+var _expression_text_color_key: String:
 	get:
-		return FKEditorGlobals.AUTO_ENCLOSE_QUOTES_TOGGLE_KEY
+		return FKEditorGlobals.EXPRESSION_TEXT_COLOR_KEY
 		
 func _update_toggle():
 	var current: bool = _auto_save_toggle_setting
 	auto_save_toggle.button_pressed = current
-	auto_enclose_quotes_toggle.button_pressed = _auto_enclose_quotes_toggle_setting
+	expression_text_color_picker.color = _expression_text_color_setting
 
 var _auto_save_toggle_setting: bool:
 	get:
 		return editor_settings.get_setting(_auto_save_toggle_key)
 
-var _auto_enclose_quotes_toggle_setting: bool:
+var _expression_text_color_setting: Color:
 	get:
-		return editor_settings.get_setting(_auto_enclose_quotes_toggle_key)
+		return editor_settings.get_setting(_expression_text_color_key)
 		
 var editor_settings: EditorSettings:
 	get:
@@ -134,7 +130,7 @@ func _on_save_button_pressed() -> void:
 
 func _save_and_apply_editor_settings():
 	_apply_auto_save_setting()
-	_apply_auto_enclose_quotes_setting()
+	_apply_expression_text_color_setting()
 
 func _apply_auto_save_setting():
 	# This here goes into Editor settings, not proj ones. This way, 
@@ -145,11 +141,8 @@ func _apply_auto_save_setting():
 	editor_settings.set_setting(name, should_auto_save)
 	_update_sheet_auto_saver()
 
-func _apply_auto_enclose_quotes_setting():
-	editor_settings.set_setting(
-		_auto_enclose_quotes_toggle_key,
-		auto_enclose_quotes_toggle.button_pressed
-	)
+func _apply_expression_text_color_setting():
+	editor_settings.set_setting(_expression_text_color_key, expression_text_color_picker.color)
 
 func _apply_project_settings():
 	_apply_provider_paths()

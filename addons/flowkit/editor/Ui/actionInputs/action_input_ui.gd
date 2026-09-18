@@ -10,10 +10,7 @@ class_name FKActionInputUi
 @export var expression_line_edit: LineEdit
 @export var expression_toggle: Button
 
-@export_category("Styling")
-## To help make it easier to tell at a glance whether this is accepting
-## a literal hard-coded value or an expression.
-@export var expression_text_color := Color(0.55, 0.85, 0.7, 1)
+const DEFAULT_EXPRESSION_TEXT_COLOR := Color(0.55, 0.85, 0.7, 1)
 
 func legitimize(input: FKActionInput, editor_globals: FKEditorGlobals) -> void:
 	if not is_editor_preview:
@@ -98,7 +95,15 @@ func _ready() -> void:
 	_set_expression_mode(is_expression_mode)
 
 func _apply_styling():
-	expression_line_edit.add_theme_color_override("font_color", expression_text_color)
+	expression_line_edit.add_theme_color_override("font_color", _expression_text_color)
+
+var _expression_text_color: Color:
+	get:
+		if _globals == null or _globals.editor_interface == null:
+			return DEFAULT_EXPRESSION_TEXT_COLOR
+		if not _editor_settings.has_setting(FKEditorGlobals.EXPRESSION_TEXT_COLOR_KEY):
+			return DEFAULT_EXPRESSION_TEXT_COLOR
+		return _editor_settings.get_setting(FKEditorGlobals.EXPRESSION_TEXT_COLOR_KEY)
 
 func set_action_input(value: FKActionInput) -> void:
 	if is_editor_preview:
