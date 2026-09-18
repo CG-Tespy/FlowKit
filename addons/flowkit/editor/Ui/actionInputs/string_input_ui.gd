@@ -11,7 +11,6 @@ func get_value() -> Variant:
 func _enclosed_as_needed(str: String) -> String:
 	if is_expression_mode:
 		return str
-
 	var result := str
 	
 	var enclosed_already := _is_enclosed_in_quotes(result)
@@ -44,8 +43,8 @@ func _can_hold_value(val: Variant) -> bool:
 func _set_value(value: Variant) -> void:
 	line_edit.text = str(value)
 
-func _apply_action_input() -> void:
-	super._apply_action_input()
+func _apply_action_input_to_controls() -> void:
+	super._apply_action_input_to_controls()
 
 func get_class() -> String:
 	return "FKStringActionInputUi"

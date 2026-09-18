@@ -3,8 +3,8 @@
 [ext_resource type="Script" uid="uid://do2rn0ifssvqs" path="res://addons/flowkit/editor/Ui/actionInputs/bool_input_ui.gd" id="1_1xkfv"]
 [ext_resource type="StyleBox" uid="uid://4vsupaoluret" path="res://addons/flowkit/editor/styles/action_input_bg_style.tres" id="2_gogr8"]
 
-[node name="BaseInput" type="Control" unique_id=1297648323 node_paths=PackedStringArray("checkbox", "input_label", "desc_label")]
-custom_minimum_size = Vector2(300, 80)
+[node name="BaseInput" type="Control" unique_id=1297648323 node_paths=PackedStringArray("checkbox", "input_label", "desc_label", "literal_control", "expression_line_edit", "expression_toggle")]
+custom_minimum_size = Vector2(300, 85)
 layout_mode = 3
 anchors_preset = 0
 offset_right = 300.0
@@ -14,6 +14,9 @@ script = ExtResource("1_1xkfv")
 checkbox = NodePath("MarginContainer/VBoxContainer/HBoxContainer/Checkbox")
 input_label = NodePath("MarginContainer/VBoxContainer/HBoxContainer/Label")
 desc_label = NodePath("MarginContainer/VBoxContainer/Description")
+literal_control = NodePath("MarginContainer/VBoxContainer/HBoxContainer/Checkbox")
+expression_line_edit = NodePath("MarginContainer/VBoxContainer/HBoxContainer/ExpressionLineEdit")
+expression_toggle = NodePath("MarginContainer/VBoxContainer/HBoxContainer/ExpressionToggle")
 
 [node name="Background" type="Panel" parent="." unique_id=2121676902]
 layout_mode = 1
@@ -50,6 +53,19 @@ text = "Alpha Only"
 
 [node name="Checkbox" type="CheckBox" parent="MarginContainer/VBoxContainer/HBoxContainer" unique_id=1918070434]
 layout_mode = 2
+
+[node name="ExpressionLineEdit" type="LineEdit" parent="MarginContainer/VBoxContainer/HBoxContainer" unique_id=1006159985]
+visible = false
+layout_mode = 2
+size_flags_horizontal = 3
+placeholder_text = "Expression"
+
+[node name="ExpressionToggle" type="Button" parent="MarginContainer/VBoxContainer/HBoxContainer" unique_id=1525911418]
+custom_minimum_size = Vector2(28, 0)
+layout_mode = 2
+tooltip_text = "Use expression"
+toggle_mode = true
+text = "fx"
 
 [node name="Description" type="RichTextLabel" parent="MarginContainer/VBoxContainer" unique_id=786983019]
 layout_mode = 2

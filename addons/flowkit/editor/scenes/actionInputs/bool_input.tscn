@@ -3,7 +3,7 @@
 [ext_resource type="Script" uid="uid://do2rn0ifssvqs" path="res://addons/flowkit/editor/Ui/actionInputs/bool_input_ui.gd" id="1_bool"]
 
 [node name="BoolInput" type="Control" unique_id=1297648323 node_paths=PackedStringArray("checkbox", "input_label", "desc_label", "literal_control", "expression_line_edit", "expression_toggle")]
-custom_minimum_size = Vector2(300, 60)
+custom_minimum_size = Vector2(300, 85)
 layout_mode = 3
 anchors_preset = 0
 offset_right = 300.0
@@ -36,13 +36,13 @@ text = "Alpha Only"
 [node name="Checkbox" type="CheckBox" parent="VBoxContainer/HBoxContainer" unique_id=1918070434]
 layout_mode = 2
 
-[node name="ExpressionLineEdit" type="LineEdit" parent="VBoxContainer/HBoxContainer"]
+[node name="ExpressionLineEdit" type="LineEdit" parent="VBoxContainer/HBoxContainer" unique_id=1792745528]
 visible = false
 layout_mode = 2
 size_flags_horizontal = 3
 placeholder_text = "Expression"
 
-[node name="ExpressionToggle" type="Button" parent="VBoxContainer/HBoxContainer"]
+[node name="ExpressionToggle" type="Button" parent="VBoxContainer/HBoxContainer" unique_id=1449950812]
 custom_minimum_size = Vector2(28, 0)
 layout_mode = 2
 tooltip_text = "Use expression"

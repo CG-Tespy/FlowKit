@@ -4,9 +4,16 @@ class_name FKActionInputUi
 
 @export var input_label: Label
 @export var desc_label: RichTextLabel
+
+@export_category("Input Value Controls")
 @export var literal_control: Control
 @export var expression_line_edit: LineEdit
 @export var expression_toggle: Button
+
+@export_category("Styling")
+## To help make it easier to tell at a glance whether this is accepting
+## a literal hard-coded value or an expression.
+@export var expression_text_color := Color(0.55, 0.85, 0.7, 1)
 
 func legitimize(input: FKActionInput, editor_globals: FKEditorGlobals) -> void:
 	if not is_editor_preview:
@@ -23,26 +30,75 @@ var _original_value: Variant = null
 var _is_dirty := false
 var _is_populating := false
 
-func _enter_tree() -> void:
-	if is_editor_preview:
-		return
-
 var action_input: FKActionInput:
 	set(value):
 		action_input = value
-		_apply_action_input()
+		_apply_action_input_to_controls()
+
+func _apply_action_input_to_controls() -> void:
+	if action_input == null:
+		desc_label.text = "[Invalid. Please report to FlowKit devs.]"
+		return
+	input_label.text = action_input.name
+	desc_label.text = action_input.description
+
+func _enter_tree() -> void:
+	if is_editor_preview:
+		return
+	_toggle_subs(true)
+
+func _toggle_subs(on: bool):
+	if on and not _is_subbed:
+		expression_toggle.toggled.connect(_on_expression_toggle_toggled)
+		literal_control.gui_input.connect(_on_literal_control_gui_input)
+		expression_line_edit.text_changed.connect(_on_expression_text_changed)
+	elif _is_subbed and not on:
+		expression_toggle.toggled.disconnect(_on_expression_toggle_toggled)
+		literal_control.gui_input.disconnect(_on_literal_control_gui_input)
+		expression_line_edit.text_changed.disconnect(_on_expression_text_changed)
+	else:
+		return
+
+	_is_subbed = !_is_subbed
+
+var _is_subbed := false 
+
+func _on_expression_toggle_toggled(pressed: bool) -> void:
+	if not _is_populating:
+		_is_dirty = true
+	_set_expression_mode(pressed)
+
+func _set_expression_mode(enabled: bool) -> void:
+	is_expression_mode = enabled
+	_show_correct_input_controls()
+
+var is_expression_mode := false
+
+func _show_correct_input_controls():
+	## Since we need to decide based on whether we're in expression mode or not.
+	expression_toggle.button_pressed = is_expression_mode
+	expression_line_edit.visible = is_expression_mode
+
+	literal_control.visible = not is_expression_mode
+
+func _on_literal_control_gui_input(_event: InputEvent) -> void:
+	if not _is_populating:
+		_is_dirty = true
+
+func _on_expression_text_changed(_text: String) -> void:
+	if not _is_populating:
+		_is_dirty = true
 
 func _ready() -> void:
 	if is_editor_preview:
 		return
-	_apply_action_input()
-	if is_instance_valid(expression_toggle) and not expression_toggle.toggled.is_connected(_on_expression_toggle_toggled):
-		expression_toggle.toggled.connect(_on_expression_toggle_toggled)
-	if is_instance_valid(literal_control) and not literal_control.gui_input.is_connected(_on_literal_control_gui_input):
-		literal_control.gui_input.connect(_on_literal_control_gui_input)
-	if is_instance_valid(expression_line_edit) and not expression_line_edit.text_changed.is_connected(_on_expression_text_changed):
-		expression_line_edit.text_changed.connect(_on_expression_text_changed)
+	
+	_apply_styling()
+	_apply_action_input_to_controls()
 	_set_expression_mode(is_expression_mode)
+
+func _apply_styling():
+	expression_line_edit.add_theme_color_override("font_color", expression_text_color)
 
 func set_action_input(value: FKActionInput) -> void:
 	if is_editor_preview:
@@ -53,15 +109,14 @@ func get_value() -> Variant:
 	push_error("[FlowKit] FKActionInputUi subclasses must implement get_value().")
 	return null
 
-## Meant to be overridden by subclasses. Default implementation merely handles
-## validation of the passed value.
+## Meant to be overridden by subclasses. The default implementation updates
+## shared value state and expression mode.
 func try_set_value(_value: Variant) -> void:
 	_original_value = _value
 	_is_dirty = false
 	_is_populating = true
+	expression_line_edit.text = str(_value)
 	if _is_expression(_value):
-		if is_instance_valid(expression_line_edit):
-			expression_line_edit.text = str(_value)
 		_set_expression_mode(true)
 		_is_populating = false
 		return
@@ -76,50 +131,31 @@ func try_set_value(_value: Variant) -> void:
 	_is_populating = false
 
 func get_expression_value() -> String:
-	return expression_line_edit.text if is_instance_valid(expression_line_edit) else ""
+	return expression_line_edit.text
 
 func get_value_or_expression(literal_value: Variant) -> Variant:
 	if not _is_dirty:
 		return _original_value
 	return get_expression_value() if is_expression_mode else literal_value
 
-var is_expression_mode := false
-
-func _on_expression_toggle_toggled(pressed: bool) -> void:
-	if not _is_populating:
-		_is_dirty = true
-	_set_expression_mode(pressed)
-
-func _on_literal_control_gui_input(_event: InputEvent) -> void:
-	if not _is_populating:
-		_is_dirty = true
-
-func _on_expression_text_changed(_text: String) -> void:
-	if not _is_populating:
-		_is_dirty = true
-
-func _set_expression_mode(enabled: bool) -> void:
-	is_expression_mode = enabled
-	if is_instance_valid(expression_toggle):
-		expression_toggle.button_pressed = enabled
-	if is_instance_valid(literal_control):
-		literal_control.visible = not enabled
-	if is_instance_valid(expression_line_edit):
-		expression_line_edit.visible = enabled
-
 func _is_expression(value: Variant) -> bool:
 	if not value is String:
 		return false
 
-	var text := String(value).strip_edges()
+	var text := str(value).strip_edges()
 	if text.is_empty():
 		return false
 	if action_input is FKStringActionInput:
 		return text.begins_with("node.") or text.begins_with("scene_root.") or \
 		text.begins_with("system.") or text == "delta" or \
 		text.begins_with("ProjectSettings.") or text.begins_with("n_")
-	return not (text.is_valid_int() or text.is_valid_float() or \
-	text.to_lower() in ["true", "false", "null"])
+
+	var is_numeric_literal := text.is_valid_int() or text.is_valid_float()
+	var is_bool_or_null_literal := text.to_lower() in _bool_or_null
+	var result := not is_numeric_literal and not is_bool_or_null_literal
+	return result
+
+static var _bool_or_null := ["true", "false", "null"]
 
 func _get_literal_value(value: Variant) -> Variant:
 	if action_input == null:
@@ -142,13 +178,6 @@ func get_class() -> String:
 func _set_value(_value) -> void:
 	push_error("[%s] Needs _set_value overridden!")
 
-func _apply_action_input() -> void:
-	if not is_instance_valid(input_label) or action_input == null:
-		desc_label.text = "[Invalid. Please report to FlowKit devs.]"
-		return
-	input_label.text = action_input.name
-	desc_label.text = action_input.description
-
 func release():
 	_signals.action_input_ui_release_requested.emit(self)
 
@@ -159,3 +188,8 @@ var _signals: FKModalSignals:
 var _editor_settings: EditorSettings:
 	get:
 		return _globals.editor_settings
+
+func _exit_tree() -> void:
+	if is_editor_preview:
+		return
+	_toggle_subs(false)

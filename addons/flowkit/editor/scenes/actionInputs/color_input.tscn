@@ -3,7 +3,7 @@
 [ext_resource type="Script" uid="uid://b6l64g1k2krnw" path="res://addons/flowkit/editor/Ui/actionInputs/color_input_ui.gd" id="1_color"]
 
 [node name="ColorInput" type="Control" unique_id=1705070519 node_paths=PackedStringArray("color_picker_button", "input_label", "desc_label", "literal_control", "expression_line_edit", "expression_toggle")]
-custom_minimum_size = Vector2(300, 60)
+custom_minimum_size = Vector2(300, 85)
 layout_mode = 3
 anchors_preset = 0
 offset_bottom = 30.0
@@ -37,13 +37,13 @@ layout_mode = 2
 size_flags_horizontal = 3
 text = " "
 
-[node name="ExpressionLineEdit" type="LineEdit" parent="VBoxContainer/HBoxContainer"]
+[node name="ExpressionLineEdit" type="LineEdit" parent="VBoxContainer/HBoxContainer" unique_id=2031799829]
 visible = false
 layout_mode = 2
 size_flags_horizontal = 3
 placeholder_text = "Expression"
 
-[node name="ExpressionToggle" type="Button" parent="VBoxContainer/HBoxContainer"]
+[node name="ExpressionToggle" type="Button" parent="VBoxContainer/HBoxContainer" unique_id=1224099360]
 custom_minimum_size = Vector2(28, 0)
 layout_mode = 2
 tooltip_text = "Use expression"
