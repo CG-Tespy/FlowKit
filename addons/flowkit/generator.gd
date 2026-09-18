@@ -583,6 +583,7 @@ func _get_type_name(type: int) -> String:
 		TYPE_STRING: return "String"
 		TYPE_VECTOR2: return "Vector2"
 		TYPE_VECTOR3: return "Vector3"
+		TYPE_VECTOR4: return "Vector4"
 		TYPE_COLOR: return "Color"
 		TYPE_RECT2: return "Rect2"
 		TYPE_QUATERNION: return "Quaternion"
@@ -597,6 +598,7 @@ func _get_default_value(type: int) -> String:
 		TYPE_STRING: return '""'
 		TYPE_VECTOR2: return "Vector2.ZERO"
 		TYPE_VECTOR3: return "Vector3.ZERO"
+		TYPE_VECTOR4: return "Vector4.ZERO"
 		TYPE_COLOR: return "Color.WHITE"
 		TYPE_RECT2: return "Rect2()"
 		TYPE_QUATERNION: return "Quaternion.IDENTITY"
@@ -612,6 +614,12 @@ func _get_action_input_constructor(type: int, input_name: String, desc: String) 
 			return 'FKIntActionInput.new("%s", "%s")' % [input_name, desc]
 		TYPE_BOOL:
 			return 'FKBoolActionInput.new("%s", "%s")' % [input_name, desc]
+		TYPE_VECTOR2:
+			return 'FKVector2ActionInput.new("%s", "%s")' % [input_name, desc]
+		TYPE_VECTOR3:
+			return 'FKVector3ActionInput.new("%s", "%s")' % [input_name, desc]
+		TYPE_VECTOR4:
+			return 'FKVector4ActionInput.new("%s", "%s")' % [input_name, desc]
 		_:
 			var type_name = _get_type_name(type)
 			return 'FKActionInput.new("%s", "%s", "%s")' % [input_name, type_name, desc]

@@ -3,7 +3,7 @@
 [ext_resource type="Script" uid="uid://bav3rj7euxjqt" path="res://addons/flowkit/editor/modals/fade_color_input_modal.gd" id="1_ioa3y"]
 [ext_resource type="StyleBox" uid="uid://tqqxoi1osov3" path="res://addons/flowkit/editor/styles/action_input_modal_bg_style.tres" id="2_arvqb"]
 
-[node name="fade_color_input_modal" type="Window" unique_id=1472292539 node_paths=PackedStringArray("color_picker", "alpha_spin_box", "alpha_only_checkbox", "duration_spin_box", "wait_for_finish_checkbox", "target_color_expression", "alpha_expression", "alpha_only_expression", "duration_expression", "wait_for_finish_expression", "target_color_toggle", "alpha_toggle", "alpha_only_toggle", "duration_toggle", "wait_for_finish_toggle", "confirm_button", "cancel_button")]
+[node name="fade_color_input_modal" type="Window" unique_id=1472292539 node_paths=PackedStringArray("color_picker", "alpha_spin_box", "alpha_only_checkbox", "duration_spin_box", "wait_for_finish_checkbox", "target_color_expression", "alpha_expression", "alpha_only_expression", "duration_expression", "wait_for_finish_expression", "target_color_toggle", "alpha_toggle", "alpha_only_toggle", "duration_toggle", "wait_for_finish_toggle", "confirm_button", "cancel_button", "desc_label", "input_holder")]
 oversampling_override = 1.0
 title = "Fade Color Inputs"
 initial_position = 1
@@ -28,6 +28,8 @@ duration_toggle = NodePath("MarginContainer/VBoxContainer/HoldsInputFields/Durat
 wait_for_finish_toggle = NodePath("MarginContainer/VBoxContainer/HoldsInputFields/WaitForFinish/ExpressionToggle")
 confirm_button = NodePath("MarginContainer/VBoxContainer/BottomRow/ConfirmButton")
 cancel_button = NodePath("MarginContainer/VBoxContainer/BottomRow/CancelButton")
+desc_label = NodePath("MarginContainer/VBoxContainer/ActionDesc")
+input_holder = NodePath("MarginContainer/VBoxContainer/HoldsInputFields")
 metadata/_custom_type_script = "uid://bav3rj7euxjqt"
 
 [node name="Background" type="Panel" parent="." unique_id=1365729896]
@@ -64,6 +66,12 @@ bbcode_enabled = true
 text = "[wave]Fade Color[/wave]"
 horizontal_alignment = 1
 
+[node name="ActionDesc" type="Label" parent="MarginContainer/VBoxContainer" unique_id=280771280]
+custom_minimum_size = Vector2(0, 35)
+layout_mode = 2
+horizontal_alignment = 1
+autowrap_mode = 3
+
 [node name="HoldsInputFields" type="VBoxContainer" parent="MarginContainer/VBoxContainer" unique_id=113936173]
 layout_mode = 2
 size_flags_vertical = 3
@@ -81,40 +89,39 @@ layout_mode = 2
 size_flags_horizontal = 3
 text = " "
 
-[node name="ExpressionLineEdit" type="LineEdit" parent="MarginContainer/VBoxContainer/HoldsInputFields/TargColor"]
+[node name="ExpressionLineEdit" type="LineEdit" parent="MarginContainer/VBoxContainer/HoldsInputFields/TargColor" unique_id=1256164528]
 visible = false
 layout_mode = 2
 size_flags_horizontal = 3
 placeholder_text = "Expression"
 
-[node name="ExpressionToggle" type="Button" parent="MarginContainer/VBoxContainer/HoldsInputFields/TargColor"]
+[node name="ExpressionToggle" type="Button" parent="MarginContainer/VBoxContainer/HoldsInputFields/TargColor" unique_id=1848932995]
 custom_minimum_size = Vector2(28, 0)
 layout_mode = 2
 tooltip_text = "Use expression"
 toggle_mode = true
 text = "fx"
 
-[node name="Alpha" type="HBoxContainer" parent="MarginContainer/VBoxContainer/HoldsInputFields"]
+[node name="Alpha" type="HBoxContainer" parent="MarginContainer/VBoxContainer/HoldsInputFields" unique_id=166092506]
 layout_mode = 2
 
-[node name="Label" type="Label" parent="MarginContainer/VBoxContainer/HoldsInputFields/Alpha"]
+[node name="Label" type="Label" parent="MarginContainer/VBoxContainer/HoldsInputFields/Alpha" unique_id=1177101096]
 custom_minimum_size = Vector2(150, 0)
 layout_mode = 2
 text = "Alpha"
 
-[node name="SpinBox" type="SpinBox" parent="MarginContainer/VBoxContainer/HoldsInputFields/Alpha"]
+[node name="SpinBox" type="SpinBox" parent="MarginContainer/VBoxContainer/HoldsInputFields/Alpha" unique_id=1251133852]
 layout_mode = 2
 size_flags_horizontal = 3
-max_value = 100.0
 suffix = " %"
 
-[node name="ExpressionLineEdit" type="LineEdit" parent="MarginContainer/VBoxContainer/HoldsInputFields/Alpha"]
+[node name="ExpressionLineEdit" type="LineEdit" parent="MarginContainer/VBoxContainer/HoldsInputFields/Alpha" unique_id=553921479]
 visible = false
 layout_mode = 2
 size_flags_horizontal = 3
 placeholder_text = "Expression"
 
-[node name="ExpressionToggle" type="Button" parent="MarginContainer/VBoxContainer/HoldsInputFields/Alpha"]
+[node name="ExpressionToggle" type="Button" parent="MarginContainer/VBoxContainer/HoldsInputFields/Alpha" unique_id=1227800384]
 custom_minimum_size = Vector2(28, 0)
 layout_mode = 2
 tooltip_text = "Use expression"
@@ -132,13 +139,13 @@ text = "Alpha Only"
 [node name="Checkbox" type="CheckBox" parent="MarginContainer/VBoxContainer/HoldsInputFields/AlphaOnly" unique_id=1256400931]
 layout_mode = 2
 
-[node name="ExpressionLineEdit" type="LineEdit" parent="MarginContainer/VBoxContainer/HoldsInputFields/AlphaOnly"]
+[node name="ExpressionLineEdit" type="LineEdit" parent="MarginContainer/VBoxContainer/HoldsInputFields/AlphaOnly" unique_id=1073793942]
 visible = false
 layout_mode = 2
 size_flags_horizontal = 3
 placeholder_text = "Expression"
 
-[node name="ExpressionToggle" type="Button" parent="MarginContainer/VBoxContainer/HoldsInputFields/AlphaOnly"]
+[node name="ExpressionToggle" type="Button" parent="MarginContainer/VBoxContainer/HoldsInputFields/AlphaOnly" unique_id=300765503]
 custom_minimum_size = Vector2(28, 0)
 layout_mode = 2
 tooltip_text = "Use expression"
@@ -161,13 +168,13 @@ step = 0.1
 allow_greater = true
 suffix = " s"
 
-[node name="ExpressionLineEdit" type="LineEdit" parent="MarginContainer/VBoxContainer/HoldsInputFields/Duration"]
+[node name="ExpressionLineEdit" type="LineEdit" parent="MarginContainer/VBoxContainer/HoldsInputFields/Duration" unique_id=185525168]
 visible = false
 layout_mode = 2
 size_flags_horizontal = 3
 placeholder_text = "Expression"
 
-[node name="ExpressionToggle" type="Button" parent="MarginContainer/VBoxContainer/HoldsInputFields/Duration"]
+[node name="ExpressionToggle" type="Button" parent="MarginContainer/VBoxContainer/HoldsInputFields/Duration" unique_id=913238198]
 custom_minimum_size = Vector2(28, 0)
 layout_mode = 2
 tooltip_text = "Use expression"
@@ -186,13 +193,13 @@ text = "Wait For Finish"
 layout_mode = 2
 tooltip_text = "Pause the action list until the fade finishes."
 
-[node name="ExpressionLineEdit" type="LineEdit" parent="MarginContainer/VBoxContainer/HoldsInputFields/WaitForFinish"]
+[node name="ExpressionLineEdit" type="LineEdit" parent="MarginContainer/VBoxContainer/HoldsInputFields/WaitForFinish" unique_id=1300655961]
 visible = false
 layout_mode = 2
 size_flags_horizontal = 3
 placeholder_text = "Expression"
 
-[node name="ExpressionToggle" type="Button" parent="MarginContainer/VBoxContainer/HoldsInputFields/WaitForFinish"]
+[node name="ExpressionToggle" type="Button" parent="MarginContainer/VBoxContainer/HoldsInputFields/WaitForFinish" unique_id=134039085]
 custom_minimum_size = Vector2(28, 0)
 layout_mode = 2
 tooltip_text = "Use expression"

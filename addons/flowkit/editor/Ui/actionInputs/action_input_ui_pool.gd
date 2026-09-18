@@ -33,6 +33,12 @@ func _get_input_ui_class(action_input: FKActionInput) -> String:
 		return "FKFloatActionInputUi"
 	if action_input is FKStringActionInput:
 		return "FKStringActionInputUi"
+	if action_input is FKVector2ActionInput:
+		return "FKVector2ActionInputUi"
+	if action_input.type == "Vector3":
+		return "FKVector3ActionInputUi"
+	if action_input.type == "Vector4":
+		return "FKVector4ActionInputUi"
 	if action_input.type == "Color":
 		return "FKColorActionInputUi"
 	return "FKVariantActionInputUi"
