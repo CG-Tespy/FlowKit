@@ -12,6 +12,9 @@ const FLOAT_ACTION_INPUT_SCENE_PATH := "res://addons/flowkit/editor/scenes/actio
 const INTEGER_ACTION_INPUT_SCENE_PATH := "res://addons/flowkit/editor/scenes/actionInputs/integer_input.tscn"
 const BOOL_ACTION_INPUT_SCENE_PATH := "res://addons/flowkit/editor/scenes/actionInputs/bool_input.tscn"
 const COLOR_ACTION_INPUT_SCENE_PATH := "res://addons/flowkit/editor/scenes/actionInputs/color_input.tscn"
+const VECTOR2_ACTION_INPUT_SCENE_PATH := "res://addons/flowkit/editor/scenes/actionInputs/vector2_input.tscn"
+const VECTOR3_ACTION_INPUT_SCENE_PATH := "res://addons/flowkit/editor/scenes/actionInputs/vector3_input.tscn"
+const VECTOR4_ACTION_INPUT_SCENE_PATH := "res://addons/flowkit/editor/scenes/actionInputs/vector4_input.tscn"
 const STRING_ACTION_INPUT_SCENE_PATH := "res://addons/flowkit/editor/scenes/actionInputs/string_input.tscn"
 const VARIANT_ACTION_INPUT_SCENE_PATH := "res://addons/flowkit/editor/scenes/actionInputs/variant_input.tscn"
 const PATH_TO_EVENTS_FOLDER := "res://addons/flowkit/events"
@@ -28,11 +31,14 @@ const FLOAT_ACTION_INPUT_SCENE := preload(FLOAT_ACTION_INPUT_SCENE_PATH)
 const INTEGER_ACTION_INPUT_SCENE := preload(INTEGER_ACTION_INPUT_SCENE_PATH)
 const BOOL_ACTION_INPUT_SCENE := preload(BOOL_ACTION_INPUT_SCENE_PATH)
 const COLOR_ACTION_INPUT_SCENE := preload(COLOR_ACTION_INPUT_SCENE_PATH)
+const VECTOR2_ACTION_INPUT_SCENE := preload(VECTOR2_ACTION_INPUT_SCENE_PATH)
+const VECTOR3_ACTION_INPUT_SCENE := preload(VECTOR3_ACTION_INPUT_SCENE_PATH)
+const VECTOR4_ACTION_INPUT_SCENE := preload(VECTOR4_ACTION_INPUT_SCENE_PATH)
 const STRING_ACTION_INPUT_SCENE := preload(STRING_ACTION_INPUT_SCENE_PATH)
 const VARIANT_ACTION_INPUT_SCENE := preload(VARIANT_ACTION_INPUT_SCENE_PATH)
 
 const AUTO_SAVE_TOGGLE_KEY = "flowkit/auto_save_enabled"
-const AUTO_ENCLOSE_QUOTES_TOGGLE_KEY = "flowkit/auto_enclose_string_quotes"
+const EXPRESSION_TEXT_COLOR_KEY = "flowkit/expression_text_color"
 
 var editor_interface: EditorInterface
 var editor_settings: EditorSettings:

@@ -4,6 +4,7 @@ class_name FKActionInputModal
 
 @export var confirm_button: Button
 @export var cancel_button: Button
+@export var desc_label: Label
 @export var input_holder: Control
 
 func _toggle_subs(do_sub: bool):
@@ -42,6 +43,7 @@ func _on_close_requested():
 ## Sets this modal's ui fields based on the args passed.
 func populate_for_action(pop_args: FKActionInputPopulationArgs) -> void:
 	_last_pop_args.set_to(pop_args)
+	desc_label.text = pop_args.action.get_description()
 	_apply_input_state_to_ui()
 
 var _last_pop_args := FKActionInputPopulationArgs.new()

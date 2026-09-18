@@ -4,6 +4,12 @@ const FLOAT_INPUT_SCENE := preload("res://addons/flowkit/editor/scenes/actionInp
 const INTEGER_INPUT_SCENE := preload("res://addons/flowkit/editor/scenes/actionInputs/integer_input.tscn")
 const BOOL_INPUT_SCENE := preload("res://addons/flowkit/editor/scenes/actionInputs/bool_input.tscn")
 const COLOR_INPUT_SCENE := preload("res://addons/flowkit/editor/scenes/actionInputs/color_input.tscn")
+const VECTOR2_INPUT_SCENE := preload("res://addons/flowkit/editor/scenes/actionInputs/vector2_input.tscn")
+const VECTOR3_INPUT_SCENE := preload("res://addons/flowkit/editor/scenes/actionInputs/vector3_input.tscn")
+const VECTOR4_INPUT_SCENE := preload("res://addons/flowkit/editor/scenes/actionInputs/vector4_input.tscn")
+const VECTOR2_ACTION_INPUT := preload("res://addons/flowkit/runtime/ActionInputs/vector2_action_input.gd")
+const VECTOR3_ACTION_INPUT := preload("res://addons/flowkit/runtime/ActionInputs/vector3_action_input.gd")
+const VECTOR4_ACTION_INPUT := preload("res://addons/flowkit/runtime/ActionInputs/vector4_action_input.gd")
 const STRING_INPUT_SCENE := preload("res://addons/flowkit/editor/scenes/actionInputs/string_input.tscn")
 const VARIANT_INPUT_SCENE := preload("res://addons/flowkit/editor/scenes/actionInputs/variant_input.tscn")
 
@@ -62,6 +68,41 @@ func test_color_input_ui_uses_input_name_and_value():
 
 	assert_eq(input_ui.input_label.text, "Tint")
 	assert_eq(input_ui.get_value(), expected_color)
+	input_ui.free()
+
+func test_vector2_input_ui_uses_input_name_and_value():
+	var input_ui: Variant = VECTOR2_INPUT_SCENE.instantiate()
+	var expected_vector := Vector2(2.5, -7.0)
+	input_ui.legitimize(VECTOR2_ACTION_INPUT.new("Velocity"), FKEditorGlobals.new())
+	add_child(input_ui)
+
+	input_ui.try_set_value(expected_vector)
+
+	assert_eq(input_ui.input_label.text, "Velocity")
+	assert_eq(input_ui.get_value(), expected_vector)
+	input_ui.free()
+
+func test_vector3_input_ui_preserves_expression_text():
+	var input_ui: Variant = VECTOR3_INPUT_SCENE.instantiate()
+	input_ui.legitimize(VECTOR3_ACTION_INPUT.new("Position"), FKEditorGlobals.new())
+	add_child(input_ui)
+
+	input_ui.try_set_value("node.global_position + Vector3.UP")
+
+	assert_true(input_ui.is_expression_mode)
+	assert_eq(input_ui.get_value(), "node.global_position + Vector3.UP")
+	input_ui.free()
+
+func test_vector4_input_ui_uses_input_name_and_value():
+	var input_ui: Variant = VECTOR4_INPUT_SCENE.instantiate()
+	var expected_vector := Vector4(1.0, 2.5, -3.0, 4.25)
+	input_ui.legitimize(VECTOR4_ACTION_INPUT.new("Quaternion Values"), FKEditorGlobals.new())
+	add_child(input_ui)
+
+	input_ui.try_set_value(expected_vector)
+
+	assert_eq(input_ui.input_label.text, "Quaternion Values")
+	assert_eq(input_ui.get_value(), expected_vector)
 	input_ui.free()
 
 func test_string_input_ui_uses_input_name_and_value():

@@ -3,6 +3,9 @@ extends GutTest
 const ACTION_INPUT_UI_FACTORY := preload("res://addons/flowkit/editor/Ui/actionInputs/action_input_ui_factory.gd")
 const STRING_ACTION_INPUT_UI := preload("res://addons/flowkit/editor/Ui/actionInputs/string_input_ui.gd")
 const VARIANT_ACTION_INPUT_UI := preload("res://addons/flowkit/editor/Ui/actionInputs/variant_input_ui.gd")
+const VECTOR2_ACTION_INPUT := preload("res://addons/flowkit/runtime/ActionInputs/vector2_action_input.gd")
+const VECTOR3_ACTION_INPUT := preload("res://addons/flowkit/runtime/ActionInputs/vector3_action_input.gd")
+const VECTOR4_ACTION_INPUT := preload("res://addons/flowkit/runtime/ActionInputs/vector4_action_input.gd")
 
 var factory = ACTION_INPUT_UI_FACTORY.new(FKEditorGlobals.new())
 
@@ -41,6 +44,33 @@ func test_factory_creates_color_input_ui():
 
 	assert_true(input_ui is FKColorActionInputUi)
 	assert_eq(input_ui.input_label.text, "Tint")
+	input_ui.free()
+
+func test_factory_creates_vector2_input_ui():
+	var input := VECTOR2_ACTION_INPUT.new("Velocity")
+	var input_ui: Variant = factory.create_from(input)
+	add_child(input_ui)
+
+	assert_eq(input_ui.get_class(), "FKVector2ActionInputUi")
+	assert_eq(input_ui.input_label.text, "Velocity")
+	input_ui.free()
+
+func test_factory_creates_vector3_input_ui():
+	var input := VECTOR3_ACTION_INPUT.new("Position")
+	var input_ui: Variant = factory.create_from(input)
+	add_child(input_ui)
+
+	assert_eq(input_ui.get_class(), "FKVector3ActionInputUi")
+	assert_eq(input_ui.input_label.text, "Position")
+	input_ui.free()
+
+func test_factory_creates_vector4_input_ui():
+	var input := VECTOR4_ACTION_INPUT.new("Quaternion Values")
+	var input_ui: Variant = factory.create_from(input)
+	add_child(input_ui)
+
+	assert_eq(input_ui.get_class(), "FKVector4ActionInputUi")
+	assert_eq(input_ui.input_label.text, "Quaternion Values")
 	input_ui.free()
 
 func test_factory_creates_string_input_ui():

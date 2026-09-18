@@ -3,7 +3,7 @@
 [ext_resource type="Script" uid="uid://bnwm1a7nj15s0" path="res://addons/flowkit/editor/modals/general_action_input_modal.gd" id="1_nemhc"]
 [ext_resource type="StyleBox" uid="uid://tqqxoi1osov3" path="res://addons/flowkit/editor/styles/action_input_modal_bg_style.tres" id="2_7f7ue"]
 
-[node name="general_action_input_modal" type="Window" unique_id=164736714 node_paths=PackedStringArray("confirm_button", "cancel_button", "input_holder")]
+[node name="general_action_input_modal" type="Window" unique_id=164736714 node_paths=PackedStringArray("confirm_button", "cancel_button", "desc_label", "input_holder")]
 oversampling_override = 1.0
 title = "Fade Color Inputs"
 initial_position = 1
@@ -13,6 +13,7 @@ maximize_disabled = true
 script = ExtResource("1_nemhc")
 confirm_button = NodePath("MarginContainer/VBoxContainer/BottomRow/ConfirmButton")
 cancel_button = NodePath("MarginContainer/VBoxContainer/BottomRow/CancelButton")
+desc_label = NodePath("MarginContainer/VBoxContainer/ActionDesc")
 input_holder = NodePath("MarginContainer/VBoxContainer/HoldsInputFields")
 metadata/_custom_type_script = "uid://bnwm1a7nj15s0"
 
@@ -42,6 +43,13 @@ theme_override_constants/margin_bottom = 10
 
 [node name="VBoxContainer" type="VBoxContainer" parent="MarginContainer" unique_id=637345286]
 layout_mode = 2
+
+[node name="ActionDesc" type="Label" parent="MarginContainer/VBoxContainer" unique_id=730455540]
+custom_minimum_size = Vector2(0, 35)
+layout_mode = 2
+size_flags_vertical = 0
+horizontal_alignment = 1
+autowrap_mode = 3
 
 [node name="HoldsInputFields" type="VBoxContainer" parent="MarginContainer/VBoxContainer" unique_id=113936173]
 layout_mode = 2

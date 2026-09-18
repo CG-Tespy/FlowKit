@@ -17,6 +17,7 @@ class_name FKFadeColorInputModal
 @export var alpha_only_toggle: Button
 @export var duration_toggle: Button
 @export var wait_for_finish_toggle: Button
+@export var expression_text_color := Color(0.55, 0.85, 0.7, 1)
 
 var _expression_modes: Dictionary[String, bool] = {}
 
@@ -120,6 +121,7 @@ func _set_field_expression_mode(field_name: String, enabled: bool) -> void:
 	controls[0].visible = not enabled
 	controls[1].visible = enabled
 	controls[2].button_pressed = enabled
+	controls[1].add_theme_color_override("font_color", expression_text_color)
 
 func _get_field_value(field_name: String, literal_value: Variant) -> Variant:
 	if _expression_modes.get(field_name, false):
