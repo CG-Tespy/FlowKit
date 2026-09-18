@@ -12,7 +12,7 @@ func _apply_input_state_to_ui():
 		if input_ui == null:
 			continue
 		input_holder.add_child(input_ui)
-		input_ui.try_set_value(_get_input_value(elem))
+		input_ui.try_set_value(elem.get_raw_val(_inputs))
 
 func _clear_input_holder():
 	for child in input_holder.get_children():

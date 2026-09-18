@@ -5,7 +5,7 @@ class_name FKVariantActionInputUi
 @export var line_edit: LineEdit
 
 func get_value() -> Variant:
-	return line_edit.text
+	return get_value_or_expression(line_edit.text)
 
 func _can_hold_value(value: Variant) -> bool:
 	return true

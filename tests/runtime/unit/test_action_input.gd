@@ -4,6 +4,7 @@ func test_get_val_converts_lowercase_stored_value():
 	var input := FKFloatActionInput.new("Duration", "", 1.0)
 
 	assert_eq(input.get_val({"duration": "2.5"}), 2.5)
+	assert_eq(input.get_raw_val({"duration": "node.position.x + 10"}), "node.position.x + 10")
 
 func test_get_val_uses_default_when_value_is_missing():
 	var input := FKBoolActionInput.new("Wait For Finish", "", true)

@@ -29,6 +29,9 @@ func get_val(dict: Dictionary) -> Variant:
 	var result = _convert(raw_result)
 	return result
 
+func get_raw_val(dict: Dictionary) -> Variant:
+	return _get_raw(dict)
+
 func _get_raw(dict: Dictionary) -> Variant:
 	var result
 	if dict.has(name):

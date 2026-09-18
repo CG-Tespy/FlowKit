@@ -5,19 +5,38 @@ class_name FKStringActionInputUi
 @export var line_edit: LineEdit
 
 func get_value() -> Variant:
-	var result := line_edit.text
+	var result := _enclosed_as_needed(line_edit.text)
+	return get_value_or_expression(result)
+
+func _enclosed_as_needed(str: String) -> String:
+	if is_expression_mode:
+		return str
+
+	var result := str
 	
-	if _enclose_quotes:
+	var enclosed_already := _is_enclosed_in_quotes(result)
+	if not enclosed_already:
 		## Accounting for the parser here.
-		result = "\"%s\"" % [result]
+		result = "%s%s%s" % [_enclosing_quote_mark, result, _enclosing_quote_mark]
+		
 	return result
 
-var _enclose_quotes: bool:
+func _is_enclosed_in_quotes(str: String) -> bool:
+	return str.begins_with(_enclosing_quote_mark) and str.ends_with(_enclosing_quote_mark)
+
+static var _enclosing_quote_mark = "\""
+
+var _ensure_enclose_quotes: bool:
 	get:
+		## We only want to ensure the enclosure when outside of expression mode.
+		if is_expression_mode:
+			return false
 		if _globals == null or _globals.editor_interface == null:
 			return true
-		return _globals.editor_settings.get_setting(
-			FKEditorGlobals.AUTO_ENCLOSE_QUOTES_TOGGLE_KEY)
+
+		var key := FKEditorGlobals.AUTO_ENCLOSE_QUOTES_TOGGLE_KEY
+		var as_per_editor_setting: bool = _editor_settings.get_setting(key)
+		return as_per_editor_setting
 
 func _can_hold_value(val: Variant) -> bool:
 	return val is String or val is NodePath

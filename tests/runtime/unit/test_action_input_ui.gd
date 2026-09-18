@@ -29,6 +29,18 @@ func test_integer_input_ui_uses_input_name_and_value():
 	assert_eq(input_ui.get_value(), 7)
 	input_ui.free()
 
+func test_integer_input_ui_preserves_expression_text():
+	var input_ui: Variant = INTEGER_INPUT_SCENE.instantiate()
+	input_ui.legitimize(FKIntActionInput.new("Lives", "", 3), FKEditorGlobals.new())
+	add_child(input_ui)
+
+	input_ui.try_set_value("node.position.x + 10")
+
+	assert_true(input_ui.is_expression_mode)
+	assert_eq(input_ui.expression_line_edit.text, "node.position.x + 10")
+	assert_eq(input_ui.get_value(), "node.position.x + 10")
+	input_ui.free()
+
 func test_bool_input_ui_uses_input_name_and_value():
 	var input_ui: Variant = BOOL_INPUT_SCENE.instantiate()
 	input_ui.legitimize(FKBoolActionInput.new("Enabled", "", false), FKEditorGlobals.new())
@@ -61,6 +73,17 @@ func test_string_input_ui_uses_input_name_and_value():
 
 	assert_eq(input_ui.input_label.text, "Message")
 	assert_eq(input_ui.get_value(), "\"Updated message\"")
+	input_ui.free()
+
+func test_string_input_ui_preserves_untouched_quoted_literal():
+	var input_ui: Variant = STRING_INPUT_SCENE.instantiate()
+	input_ui.legitimize(FKStringActionInput.new("Message", "", "Hello"), FKEditorGlobals.new())
+	add_child(input_ui)
+
+	input_ui.try_set_value("\"Saved message\"")
+
+	assert_eq(input_ui.line_edit.text, "Saved message")
+	assert_eq(input_ui.get_value(), "\"Saved message\"")
 	input_ui.free()
 
 func test_variant_input_ui_preserves_expression_text():
