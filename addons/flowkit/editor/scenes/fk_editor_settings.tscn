@@ -4,7 +4,7 @@
 [ext_resource type="Texture2D" uid="uid://dfw21gww7gdwq" path="res://addons/flowkit/assets/flowkitLogoAlt.png" id="2_1wusu"]
 [ext_resource type="PackedScene" uid="uid://cuxtanqksw6bx" path="res://addons/flowkit/editor/scenes/provider_path_manager.tscn" id="3_d0tub"]
 
-[node name="FKEditorSettings" type="Window" unique_id=813573723 node_paths=PackedStringArray("auto_save_toggle", "expression_text_color_picker", "save_button", "holds_prov_paths")]
+[node name="FKEditorSettings" type="Window" unique_id=813573723 node_paths=PackedStringArray("auto_save_toggle", "exp_text_color", "auto_enclose_strings", "save_button", "holds_prov_paths")]
 oversampling_override = 1.0
 title = "FlowKit Editor Settings"
 position = Vector2i(0, 36)
@@ -14,7 +14,8 @@ minimize_disabled = true
 maximize_disabled = true
 script = ExtResource("1_tn2p2")
 auto_save_toggle = NodePath("MainList/AutoSave/CheckButton")
-expression_text_color_picker = NodePath("MainList/ExpressionTextColor/ColorPickerButton")
+exp_text_color = NodePath("MainList/ExpressionTextColor/ColorPickerButton")
+auto_enclose_strings = NodePath("MainList/AutoEncloseStringInputs/CheckButton")
 save_button = NodePath("SaveSettingsButton")
 holds_prov_paths = NodePath("MainList/ProviderRootPaths/FKProviderPathManager")
 metadata/_custom_type_script = "uid://d2tcskuiujrg7"
@@ -67,28 +68,54 @@ offset_right = 114.5
 offset_bottom = 15.5
 grow_horizontal = 2
 grow_vertical = 2
+tooltip_text = "Whether or not FlowKit will automatically save an event sheet whenever you make a change to it (like adding an Action or changing an input)."
 button_pressed = true
 text = "Auto-Save Event Sheets"
 
-[node name="ExpressionTextColor" type="HBoxContainer" parent="MainList"]
+[node name="AutoEncloseStringInputs" type="Control" parent="MainList" unique_id=1193549580]
 custom_minimum_size = Vector2(300, 50)
 layout_mode = 2
 size_flags_horizontal = 4
 
-[node name="Label" type="Label" parent="MainList/ExpressionTextColor"]
+[node name="CheckButton" type="CheckButton" parent="MainList/AutoEncloseStringInputs" unique_id=2007559505]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -114.5
+offset_top = -15.5
+offset_right = 114.5
+offset_bottom = 15.5
+grow_horizontal = 2
+grow_vertical = 2
+tooltip_text = "Whether or not string action inputs (after you click Confirm) get auto-wrapped in enclosing quotes. Never applies when the inputs are already enclosed."
+button_pressed = true
+text = "Auto-Enclose String Inputs"
+
+[node name="ExpressionTextColor" type="HBoxContainer" parent="MainList" unique_id=119563022]
+custom_minimum_size = Vector2(300, 50)
+layout_mode = 2
+size_flags_horizontal = 4
+tooltip_text = "The color that expressions in action inputs will go by. This is\\n to make it easier to tell (at a glance) whether or not an input is in expression mode."
+
+[node name="Label" type="Label" parent="MainList/ExpressionTextColor" unique_id=1973583980]
 custom_minimum_size = Vector2(150, 0)
 layout_mode = 2
+mouse_filter = 1
 text = "Expression Text Color"
 
-[node name="ColorPickerButton" type="ColorPickerButton" parent="MainList/ExpressionTextColor"]
+[node name="ColorPickerButton" type="ColorPickerButton" parent="MainList/ExpressionTextColor" unique_id=17100100]
 layout_mode = 2
 size_flags_horizontal = 3
-color = Color(0.55, 0.85, 0.7, 1)
 text = " "
+color = Color(0.55, 0.85, 0.7, 1)
 
 [node name="ProviderRootPaths" type="MarginContainer" parent="MainList" unique_id=1620028257]
 custom_minimum_size = Vector2(0, 280)
 layout_mode = 2
+tooltip_text = "Paths that FlowKit (outside its own folder) will look at to find custom providers."
 theme_override_constants/margin_left = 25
 theme_override_constants/margin_right = 25
 
@@ -101,4 +128,5 @@ anchor_left = 0.3
 anchor_top = 0.9
 anchor_right = 0.7
 anchor_bottom = 0.98
+tooltip_text = "After clicking this, best close this window and then reload the project."
 text = "Save Settings"

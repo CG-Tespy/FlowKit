@@ -40,4 +40,6 @@ func _apply_ui_state_to_inputs():
 		var input_ui: FKActionInputUi = child if child is FKActionInputUi else null
 		if input_ui == null or input_ui.action_input == null:
 			continue
+
+		print("[%s] Applying input value: %s" % [self.get_class(), input_ui.get_value()])
 		_set_input_value(input_ui.action_input, input_ui.get_value())
