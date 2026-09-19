@@ -13,3 +13,9 @@ func _convert(raw):
 	if raw == null:
 		return _default_value
 	return str(raw)
+
+func get_class() -> String:
+	return "FKStringActionInput"
+
+func get_real_class() -> String:
+	return "FKStringActionInput"

@@ -15,3 +15,9 @@ func _convert(raw: Variant):
 	if raw is String:
 		return raw.to_lower() == "true"
 	return raw
+
+func get_class() -> String:
+	return "FKBoolActionInput"
+
+func get_real_class() -> String:
+	return "FKBoolActionInput"

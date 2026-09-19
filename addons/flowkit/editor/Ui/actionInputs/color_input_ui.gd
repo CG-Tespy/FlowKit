@@ -15,3 +15,6 @@ func _set_value(_value) -> void:
 
 func get_class() -> String:
 	return "FKColorActionInputUi"
+
+func get_real_class() -> String:
+	return self.get_class()

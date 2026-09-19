@@ -10,10 +10,10 @@ func _init(init_name: String = "", init_type: String = "Variant",
 	name = init_name
 	_type = init_type
 	description = init_desc
+	_default_value = init_default
 
 	if description.is_empty():
 		description = "As it says on the tin."
-	_default_value = init_default
 
 var type: String:
 	get:
@@ -52,10 +52,15 @@ func _get_raw(dict: Dictionary) -> Variant:
 func set_val(dict: Dictionary, value) -> void:
 	dict[name] = value
 
+func get_class() -> String:
+	return "FKActionInput"
+
+func get_real_class() -> String:
+	return self.get_class()
 
 
 func _is_valid(fetched_value):
-	return true
+	return fetched_value != null
 
 func _convert(input):
 	return input

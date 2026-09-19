@@ -16,3 +16,6 @@ func _convert(raw):
 
 func get_class() -> String:
 	return "FKIntActionInput"
+
+func get_real_class() -> String:
+	return "FKIntActionInput"

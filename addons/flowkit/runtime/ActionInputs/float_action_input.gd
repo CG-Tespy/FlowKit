@@ -16,3 +16,6 @@ func _convert(raw: Variant):
 
 func get_class() -> String:
 	return "FKFloatActionInput"
+
+func get_real_class() -> String:
+	return "FKFloatActionInput"

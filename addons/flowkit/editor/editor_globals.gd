@@ -41,6 +41,7 @@ const VARIANT_ACTION_INPUT_SCENE := preload(VARIANT_ACTION_INPUT_SCENE_PATH)
 
 const AUTO_SAVE_TOGGLE_KEY = "flowkit/auto_save_enabled"
 const EXPRESSION_TEXT_COLOR_KEY = "flowkit/expression_text_color"
+const AUTO_ENCLOSE_STRING_INPUTS_KEY = "flowkit/auto_enclose_string_inputs"
 
 static var is_action_input_modal_visible := false
 

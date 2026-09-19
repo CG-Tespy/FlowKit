@@ -164,6 +164,17 @@ func test_string_input_ui_preserves_untouched_quoted_literal():
 	assert_eq(input_ui.get_value(), "\"Saved message\"")
 	input_ui.free()
 
+func test_string_input_ui_does_not_double_enclose_edited_quoted_literal():
+	var input_ui: Variant = STRING_INPUT_SCENE.instantiate()
+	input_ui.legitimize(FKStringActionInput.new("Message", "", "Hello"), FKEditorGlobals.new())
+	add_child(input_ui)
+
+	input_ui.try_set_value("Original")
+	input_ui.line_edit.text = "\"Updated message\""
+
+	assert_eq(input_ui.get_value(), "\"Updated message\"")
+	input_ui.free()
+
 func test_variant_input_ui_preserves_expression_text():
 	var input_ui: Variant = VARIANT_INPUT_SCENE.instantiate()
 	input_ui.legitimize(FKActionInput.new("Value", "Variant"), FKEditorGlobals.new())
@@ -173,4 +184,26 @@ func test_variant_input_ui_preserves_expression_text():
 
 	assert_eq(input_ui.input_label.text, "Value")
 	assert_eq(input_ui.get_value(), "node.position.x + 10")
+	input_ui.free()
+
+func test_variant_input_ui_encloses_literal_text():
+	var input_ui: Variant = VARIANT_INPUT_SCENE.instantiate()
+	input_ui.legitimize(FKActionInput.new("Value", "Variant"), FKEditorGlobals.new())
+	add_child(input_ui)
+
+	input_ui.try_set_value("Original")
+	input_ui.line_edit.text = "Updated value"
+
+	assert_eq(input_ui.get_value(), "\"Updated value\"")
+	input_ui.free()
+
+func test_variant_input_ui_does_not_double_enclose_literal_text():
+	var input_ui: Variant = VARIANT_INPUT_SCENE.instantiate()
+	input_ui.legitimize(FKActionInput.new("Value", "Variant"), FKEditorGlobals.new())
+	add_child(input_ui)
+
+	input_ui.try_set_value("Original")
+	input_ui.line_edit.text = "\"Updated value\""
+
+	assert_eq(input_ui.get_value(), "\"Updated value\"")
 	input_ui.free()
