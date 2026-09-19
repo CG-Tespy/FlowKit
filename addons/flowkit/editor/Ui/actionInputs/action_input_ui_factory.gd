@@ -31,6 +31,8 @@ func _get_scene_for(action_input: FKActionInput) -> PackedScene:
 		return _globals.VECTOR3_ACTION_INPUT_SCENE
 	if action_input.type == "Vector4":
 		return _globals.VECTOR4_ACTION_INPUT_SCENE
+	if action_input.type == "AudioStream":
+		return _globals.AUDIO_STREAM_ACTION_INPUT_SCENE
 	if action_input.type == "Color":
 		return _globals.COLOR_ACTION_INPUT_SCENE
 	return _globals.VARIANT_ACTION_INPUT_SCENE

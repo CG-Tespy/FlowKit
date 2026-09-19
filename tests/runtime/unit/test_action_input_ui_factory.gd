@@ -6,6 +6,7 @@ const VARIANT_ACTION_INPUT_UI := preload("res://addons/flowkit/editor/Ui/actionI
 const VECTOR2_ACTION_INPUT := preload("res://addons/flowkit/runtime/ActionInputs/vector2_action_input.gd")
 const VECTOR3_ACTION_INPUT := preload("res://addons/flowkit/runtime/ActionInputs/vector3_action_input.gd")
 const VECTOR4_ACTION_INPUT := preload("res://addons/flowkit/runtime/ActionInputs/vector4_action_input.gd")
+const AUDIO_STREAM_ACTION_INPUT := preload("res://addons/flowkit/runtime/ActionInputs/audio_stream_action_input.gd")
 
 var factory = ACTION_INPUT_UI_FACTORY.new(FKEditorGlobals.new())
 
@@ -71,6 +72,15 @@ func test_factory_creates_vector4_input_ui():
 
 	assert_eq(input_ui.get_class(), "FKVector4ActionInputUi")
 	assert_eq(input_ui.input_label.text, "Quaternion Values")
+	input_ui.free()
+
+func test_factory_creates_audio_stream_input_ui():
+	var input := AUDIO_STREAM_ACTION_INPUT.new("Correct Answer")
+	var input_ui: Variant = factory.create_from(input)
+	add_child(input_ui)
+
+	assert_eq(input_ui.get_class(), "FKAudioStreamActionInputUi")
+	assert_eq(input_ui.input_label.text, "Correct Answer")
 	input_ui.free()
 
 func test_factory_creates_string_input_ui():

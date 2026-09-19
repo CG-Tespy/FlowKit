@@ -154,6 +154,9 @@ func update_display() -> void:
 func show_context_menu(global_pos: Vector2) -> void:
 	_alert_need_for_override("show_context_menu")
 
+func _can_begin_drag() -> bool:
+	return not FKEditorGlobals.is_action_input_modal_visible
+
 func _get_drag_data(_pos: Vector2) -> FKDragData: return null
 func _can_drop_data(_pos: Vector2, _data) -> bool: return false
 func _drop_data(_pos: Vector2, _data): pass

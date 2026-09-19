@@ -3,10 +3,7 @@ extends FKActionInput
 class_name FKVector3ActionInput
 
 func _init(init_name: String = "", init_desc: String = "", init_default: Vector3 = Vector3.ZERO):
-	name = init_name
-	_type = "Vector3"
-	description = init_desc
-	_default_value = init_default
+	super._init(init_name, "Vector3", init_desc, init_default)
 
 func get_val(dict: Dictionary) -> Vector3:
 	return super.get_val(dict)

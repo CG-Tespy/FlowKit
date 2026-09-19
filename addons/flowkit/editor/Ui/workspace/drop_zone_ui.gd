@@ -8,6 +8,9 @@ signal item_dropped(drag_data: Dictionary)
 # ^DragTarget.Type.CONDITION_ITEM or DragTarget.Type.ACTION_ITEM
 
 func _can_drop_data(at_position: Vector2, data) -> bool:
+	if FKEditorGlobals.is_action_input_modal_visible:
+		return false
+		
 	if data is not FKDragData:
 		printerr("DropZoneUi _can_drop_data not given an FKDragData. It got: " \
 		+ str(data))

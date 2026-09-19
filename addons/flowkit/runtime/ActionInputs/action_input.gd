@@ -10,6 +10,9 @@ func _init(init_name: String = "", init_type: String = "Variant",
 	name = init_name
 	_type = init_type
 	description = init_desc
+
+	if description.is_empty():
+		description = "As it says on the tin."
 	_default_value = init_default
 
 var type: String:

@@ -39,6 +39,8 @@ func _get_input_ui_class(action_input: FKActionInput) -> String:
 		return "FKVector3ActionInputUi"
 	if action_input.type == "Vector4":
 		return "FKVector4ActionInputUi"
+	if action_input.type == "AudioStream":
+		return "FKAudioStreamActionInputUi"
 	if action_input.type == "Color":
 		return "FKColorActionInputUi"
 	return "FKVariantActionInputUi"

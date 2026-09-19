@@ -1,5 +1,7 @@
 extends GutTest
 
+const AUDIO_STREAM_ACTION_INPUT := preload("res://addons/flowkit/runtime/ActionInputs/audio_stream_action_input.gd")
+
 func test_get_val_converts_lowercase_stored_value():
 	var input := FKFloatActionInput.new("Duration", "", 1.0)
 
@@ -18,3 +20,10 @@ func test_set_val_stores_value_under_definition_name():
 	input.set_val(values, "\"(20, 40, 60)\"")
 
 	assert_eq(values, {"Target Color": "\"(20, 40, 60)\""})
+
+func test_audio_stream_input_loads_resource_path():
+	var input := AUDIO_STREAM_ACTION_INPUT.new("Audio Stream")
+	var stream := input.get_val({"Audio Stream": "res://addons/flowkit/assets/correct.ogg"})
+
+	assert_not_null(stream)
+	assert_true(stream is AudioStream)
