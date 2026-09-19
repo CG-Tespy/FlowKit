@@ -20,6 +20,17 @@ class TestModal extends FKActionInputModal:
 	func get_values() -> Dictionary:
 		return _inputs
 
+func test_modal_visibility_updates_shared_drag_guard():
+	var modal := TestModal.new()
+
+	modal._on_visibility_changed()
+	assert_true(FKEditorGlobals.is_action_input_modal_visible)
+
+	modal.hide()
+	modal._on_visibility_changed()
+	assert_false(FKEditorGlobals.is_action_input_modal_visible)
+	modal.free()
+
 func test_modal_reads_values_through_action_input_definition():
 	var action := TestAction.new()
 	var args := FKActionInputPopulationArgs.new()

@@ -372,7 +372,7 @@ func _on_sub_action_reorder(source_item, target_item, drop_above: bool) -> void:
 # ---------------------------------------------------------
 
 func _get_drag_data(at_position: Vector2) -> FKDragData:
-	if not _action:
+	if not _can_begin_drag() or not _action:
 		return null
 
 	var preview := _create_drag_preview()

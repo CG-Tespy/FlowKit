@@ -7,9 +7,11 @@ const COLOR_INPUT_SCENE := preload("res://addons/flowkit/editor/scenes/actionInp
 const VECTOR2_INPUT_SCENE := preload("res://addons/flowkit/editor/scenes/actionInputs/vector2_input.tscn")
 const VECTOR3_INPUT_SCENE := preload("res://addons/flowkit/editor/scenes/actionInputs/vector3_input.tscn")
 const VECTOR4_INPUT_SCENE := preload("res://addons/flowkit/editor/scenes/actionInputs/vector4_input.tscn")
+const AUDIO_STREAM_INPUT_SCENE := preload("res://addons/flowkit/editor/scenes/actionInputs/audio_stream_input.tscn")
 const VECTOR2_ACTION_INPUT := preload("res://addons/flowkit/runtime/ActionInputs/vector2_action_input.gd")
 const VECTOR3_ACTION_INPUT := preload("res://addons/flowkit/runtime/ActionInputs/vector3_action_input.gd")
 const VECTOR4_ACTION_INPUT := preload("res://addons/flowkit/runtime/ActionInputs/vector4_action_input.gd")
+const AUDIO_STREAM_ACTION_INPUT := preload("res://addons/flowkit/runtime/ActionInputs/audio_stream_action_input.gd")
 const STRING_INPUT_SCENE := preload("res://addons/flowkit/editor/scenes/actionInputs/string_input.tscn")
 const VARIANT_INPUT_SCENE := preload("res://addons/flowkit/editor/scenes/actionInputs/variant_input.tscn")
 
@@ -103,6 +105,41 @@ func test_vector4_input_ui_uses_input_name_and_value():
 
 	assert_eq(input_ui.input_label.text, "Quaternion Values")
 	assert_eq(input_ui.get_value(), expected_vector)
+	input_ui.free()
+
+func test_audio_stream_input_ui_uses_input_name_and_value():
+	var input_ui: Variant = AUDIO_STREAM_INPUT_SCENE.instantiate()
+	var expected_stream := load("res://addons/flowkit/assets/correct.ogg") as AudioStream
+	input_ui.legitimize(AUDIO_STREAM_ACTION_INPUT.new("Correct Answer"), FKEditorGlobals.new())
+	add_child(input_ui)
+
+	input_ui.try_set_value(expected_stream)
+
+	assert_eq(input_ui.input_label.text, "Correct Answer")
+	assert_eq(input_ui.line_edit.text, expected_stream.resource_path)
+	assert_same(input_ui.get_value(), expected_stream)
+	input_ui.free()
+
+func test_audio_stream_input_ui_accepts_file_system_audio_stream_drops():
+	var input_ui: Variant = AUDIO_STREAM_INPUT_SCENE.instantiate()
+	input_ui.legitimize(AUDIO_STREAM_ACTION_INPUT.new("Correct Answer"), FKEditorGlobals.new())
+	add_child(input_ui)
+	var drop_data := {"files": PackedStringArray(["res://addons/flowkit/assets/correct.ogg"])}
+
+	assert_true(input_ui._can_drop_data(Vector2.ZERO, drop_data))
+	input_ui._drop_data(Vector2.ZERO, drop_data)
+
+	assert_eq(input_ui.line_edit.text, "res://addons/flowkit/assets/correct.ogg")
+	assert_true(input_ui.get_value() is AudioStream)
+	input_ui.free()
+
+func test_audio_stream_input_ui_rejects_non_audio_file_drops():
+	var input_ui: Variant = AUDIO_STREAM_INPUT_SCENE.instantiate()
+	input_ui.legitimize(AUDIO_STREAM_ACTION_INPUT.new("Correct Answer"), FKEditorGlobals.new())
+	add_child(input_ui)
+	var drop_data := {"files": PackedStringArray(["res://addons/flowkit/assets/icon.svg"])}
+
+	assert_false(input_ui._can_drop_data(Vector2.ZERO, drop_data))
 	input_ui.free()
 
 func test_string_input_ui_uses_input_name_and_value():

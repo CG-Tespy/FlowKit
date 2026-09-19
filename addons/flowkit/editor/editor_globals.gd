@@ -15,6 +15,7 @@ const COLOR_ACTION_INPUT_SCENE_PATH := "res://addons/flowkit/editor/scenes/actio
 const VECTOR2_ACTION_INPUT_SCENE_PATH := "res://addons/flowkit/editor/scenes/actionInputs/vector2_input.tscn"
 const VECTOR3_ACTION_INPUT_SCENE_PATH := "res://addons/flowkit/editor/scenes/actionInputs/vector3_input.tscn"
 const VECTOR4_ACTION_INPUT_SCENE_PATH := "res://addons/flowkit/editor/scenes/actionInputs/vector4_input.tscn"
+const AUDIO_STREAM_ACTION_INPUT_SCENE_PATH := "res://addons/flowkit/editor/scenes/actionInputs/audio_stream_input.tscn"
 const STRING_ACTION_INPUT_SCENE_PATH := "res://addons/flowkit/editor/scenes/actionInputs/string_input.tscn"
 const VARIANT_ACTION_INPUT_SCENE_PATH := "res://addons/flowkit/editor/scenes/actionInputs/variant_input.tscn"
 const PATH_TO_EVENTS_FOLDER := "res://addons/flowkit/events"
@@ -34,11 +35,14 @@ const COLOR_ACTION_INPUT_SCENE := preload(COLOR_ACTION_INPUT_SCENE_PATH)
 const VECTOR2_ACTION_INPUT_SCENE := preload(VECTOR2_ACTION_INPUT_SCENE_PATH)
 const VECTOR3_ACTION_INPUT_SCENE := preload(VECTOR3_ACTION_INPUT_SCENE_PATH)
 const VECTOR4_ACTION_INPUT_SCENE := preload(VECTOR4_ACTION_INPUT_SCENE_PATH)
+const AUDIO_STREAM_ACTION_INPUT_SCENE := preload(AUDIO_STREAM_ACTION_INPUT_SCENE_PATH)
 const STRING_ACTION_INPUT_SCENE := preload(STRING_ACTION_INPUT_SCENE_PATH)
 const VARIANT_ACTION_INPUT_SCENE := preload(VARIANT_ACTION_INPUT_SCENE_PATH)
 
 const AUTO_SAVE_TOGGLE_KEY = "flowkit/auto_save_enabled"
 const EXPRESSION_TEXT_COLOR_KEY = "flowkit/expression_text_color"
+
+static var is_action_input_modal_visible := false
 
 var editor_interface: EditorInterface
 var editor_settings: EditorSettings:

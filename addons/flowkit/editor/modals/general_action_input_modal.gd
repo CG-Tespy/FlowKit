@@ -2,6 +2,17 @@
 extends FKActionInputModal
 class_name FKGeneralActionInputModal
 
+func _enter_tree() -> void:
+	super._enter_tree()
+	if is_editor_preview:
+		return
+
+	# Windows cannot combine a transient child window with always-on-top.
+	# A non-exclusive topmost window still permits FileSystem dock drags.
+	transient = false
+	exclusive = false
+	always_on_top = true
+
 func _apply_input_state_to_ui():
 	super._apply_input_state_to_ui()
 

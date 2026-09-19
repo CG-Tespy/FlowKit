@@ -17,14 +17,21 @@ func _toggle_subs(do_sub: bool):
 		confirm_button.pressed.connect(_on_confirm_pressed)
 		cancel_button.pressed.connect(_on_cancel_pressed)
 		close_requested.connect(_on_close_requested)
+		visibility_changed.connect(_on_visibility_changed)
+		_on_visibility_changed()
 	elif should_remove_subs:
 		confirm_button.pressed.disconnect(_on_confirm_pressed)
 		cancel_button.pressed.disconnect(_on_cancel_pressed)
 		close_requested.disconnect(_on_close_requested)
+		visibility_changed.disconnect(_on_visibility_changed)
+		FKEditorGlobals.is_action_input_modal_visible = false
 	else:
 		return
 
 	_is_subbed = !_is_subbed
+
+func _on_visibility_changed() -> void:
+	FKEditorGlobals.is_action_input_modal_visible = visible
 
 func _on_confirm_pressed():
 	_apply_ui_state_to_inputs()
@@ -43,10 +50,17 @@ func _on_close_requested():
 ## Sets this modal's ui fields based on the args passed.
 func populate_for_action(pop_args: FKActionInputPopulationArgs) -> void:
 	_last_pop_args.set_to(pop_args)
-	desc_label.text = pop_args.action.get_description()
+	_update_desc_label()
 	_apply_input_state_to_ui()
 
 var _last_pop_args := FKActionInputPopulationArgs.new()
+
+func _update_desc_label():
+	var desc := _last_pop_args.action.get_description().strip_edges()
+	if desc.is_empty():
+		desc = "No desc here."
+
+	desc_label.text = desc
 
 ## Meant to be overridden by subclasses.
 func _apply_input_state_to_ui():
