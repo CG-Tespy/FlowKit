@@ -15,3 +15,6 @@ func _convert(raw: Variant) -> Vector3:
 
 func get_class() -> String:
 	return "FKVector3ActionInput"
+
+func get_real_class() -> String:
+	return "FKVector3ActionInput"

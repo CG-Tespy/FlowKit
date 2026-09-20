@@ -18,3 +18,6 @@ func _convert(raw: Variant) -> AudioStream:
 
 func get_class() -> String:
 	return "FKAudioStreamActionInput"
+
+func get_real_class() -> String:
+	return "FKAudioStreamActionInput"

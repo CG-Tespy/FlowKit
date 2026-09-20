@@ -19,3 +19,6 @@ func _set_value(value: Variant) -> void:
 
 func get_class() -> String:
 	return "FKVector3ActionInputUi"
+
+func get_real_class() -> String:
+	return self.get_class()

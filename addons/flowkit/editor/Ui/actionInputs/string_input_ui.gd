@@ -53,3 +53,6 @@ func _apply_action_input_to_controls() -> void:
 
 func get_class() -> String:
 	return "FKStringActionInputUi"
+
+func get_real_class() -> String:
+	return self.get_class()
