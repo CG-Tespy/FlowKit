@@ -17,6 +17,10 @@ class TestAction extends FKAction:
 class TestModal extends FKActionInputModal:
 	var apply_count := 0
 
+	func _init():
+		desc_label = Label.new()
+		add_child(desc_label)
+
 	func get_input_value(input_name: String) -> Variant:
 		return _get_input_value(_get_action_input(input_name))
 
@@ -164,10 +168,8 @@ func test_empty_action_description_uses_fallback_text():
 	args.action = action
 	args.action_inputs = action.get_inputs()
 	var modal := TestModal.new()
-	modal.desc_label = Label.new()
 
 	modal.populate_for_action(args)
 
 	assert_eq(modal.desc_label.text, "No desc here.")
-	modal.desc_label.free()
 	modal.free()

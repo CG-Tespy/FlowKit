@@ -8,7 +8,6 @@ func get_inputs() -> Array[FKActionInput]:
 	return []
 
 ## Returns an optional editor modal scene for configuring this action's inputs.
-## Return null to use FKExpressionEditorModal.
 func get_input_modal_scene() -> PackedScene:
 	return GENERAL_INPUT_MODAL
 

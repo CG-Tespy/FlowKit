@@ -100,5 +100,3 @@ func _set_input_value(action_input: FKActionInput, value: Variant) -> void:
 	if action_input == null:
 		return
 	action_input.set_val(_inputs, value)
-
-

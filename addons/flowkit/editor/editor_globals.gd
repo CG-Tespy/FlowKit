@@ -48,7 +48,17 @@ static var is_action_input_modal_visible := false
 var editor_interface: EditorInterface
 var editor_settings: EditorSettings:
 	get:
+		if editor_interface == null:
+			return null
 		return editor_interface.get_editor_settings()
+
+func should_auto_enclose_string_inputs() -> bool:
+	var settings := editor_settings
+	if settings == null:
+		return true
+	if not settings.has_setting(AUTO_ENCLOSE_STRING_INPUTS_KEY):
+		return true
+	return settings.get_setting(AUTO_ENCLOSE_STRING_INPUTS_KEY)
 		
 var generator: FKGenerator
 var registry: FKRegistry 

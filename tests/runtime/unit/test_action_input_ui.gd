@@ -15,9 +15,20 @@ const AUDIO_STREAM_ACTION_INPUT := preload("res://addons/flowkit/runtime/ActionI
 const STRING_INPUT_SCENE := preload("res://addons/flowkit/editor/scenes/actionInputs/string_input.tscn")
 const VARIANT_INPUT_SCENE := preload("res://addons/flowkit/editor/scenes/actionInputs/variant_input.tscn")
 
+class TestEditorGlobals extends FKEditorGlobals:
+	var auto_enclose_strings := false
+
+	func should_auto_enclose_string_inputs() -> bool:
+		return auto_enclose_strings
+
+func _new_editor_globals(auto_enclose_strings := false) -> FKEditorGlobals:
+	var editor_globals := TestEditorGlobals.new()
+	editor_globals.auto_enclose_strings = auto_enclose_strings
+	return editor_globals
+
 func test_float_input_ui_uses_input_name_and_value():
-	var input_ui: Variant = FLOAT_INPUT_SCENE.instantiate()
-	input_ui.legitimize(FKFloatActionInput.new("Speed", "", 1.0), FKEditorGlobals.new())
+	var input_ui: FKActionInputUi = FLOAT_INPUT_SCENE.instantiate()
+	input_ui.legitimize(FKFloatActionInput.new("Speed", "", 1.0), _new_editor_globals())
 	add_child(input_ui)
 
 	input_ui.try_set_value(2.5)
@@ -28,18 +39,19 @@ func test_float_input_ui_uses_input_name_and_value():
 
 func test_integer_input_ui_uses_input_name_and_value():
 	var input_ui: Variant = INTEGER_INPUT_SCENE.instantiate()
-	input_ui.legitimize(FKIntActionInput.new("Lives", "", 3), FKEditorGlobals.new())
+	input_ui.legitimize(FKIntActionInput.new("Lives", "", 3), _new_editor_globals())
 	add_child(input_ui)
 
 	input_ui.try_set_value(7.9)
 
 	assert_eq(input_ui.input_label.text, "Lives")
-	assert_eq(input_ui.get_value(), 7)
+	assert_eq(input_ui.spin_box.value, 7.0)
+	assert_eq(input_ui.get_value(), 7.9)
 	input_ui.free()
 
 func test_integer_input_ui_preserves_expression_text():
-	var input_ui: Variant = INTEGER_INPUT_SCENE.instantiate()
-	input_ui.legitimize(FKIntActionInput.new("Lives", "", 3), FKEditorGlobals.new())
+	var input_ui: FKActionInputUi = INTEGER_INPUT_SCENE.instantiate()
+	input_ui.legitimize(FKIntActionInput.new("Lives", "", 3), _new_editor_globals())
 	add_child(input_ui)
 
 	input_ui.try_set_value("node.position.x + 10")
@@ -50,8 +62,8 @@ func test_integer_input_ui_preserves_expression_text():
 	input_ui.free()
 
 func test_bool_input_ui_uses_input_name_and_value():
-	var input_ui: Variant = BOOL_INPUT_SCENE.instantiate()
-	input_ui.legitimize(FKBoolActionInput.new("Enabled", "", false), FKEditorGlobals.new())
+	var input_ui: FKActionInputUi = BOOL_INPUT_SCENE.instantiate()
+	input_ui.legitimize(FKBoolActionInput.new("Enabled", "", false), _new_editor_globals())
 	add_child(input_ui)
 
 	input_ui.try_set_value(true)
@@ -61,9 +73,9 @@ func test_bool_input_ui_uses_input_name_and_value():
 	input_ui.free()
 
 func test_color_input_ui_uses_input_name_and_value():
-	var input_ui: Variant = COLOR_INPUT_SCENE.instantiate()
+	var input_ui: FKActionInputUi = COLOR_INPUT_SCENE.instantiate()
 	var expected_color := Color(0.2, 0.4, 0.6, 0.8)
-	input_ui.legitimize(FKActionInput.new("Tint", "Color"), FKEditorGlobals.new())
+	input_ui.legitimize(FKActionInput.new("Tint", "Color"), _new_editor_globals())
 	add_child(input_ui)
 
 	input_ui.try_set_value(expected_color)
@@ -73,9 +85,9 @@ func test_color_input_ui_uses_input_name_and_value():
 	input_ui.free()
 
 func test_vector2_input_ui_uses_input_name_and_value():
-	var input_ui: Variant = VECTOR2_INPUT_SCENE.instantiate()
+	var input_ui: FKActionInputUi = VECTOR2_INPUT_SCENE.instantiate()
 	var expected_vector := Vector2(2.5, -7.0)
-	input_ui.legitimize(VECTOR2_ACTION_INPUT.new("Velocity"), FKEditorGlobals.new())
+	input_ui.legitimize(VECTOR2_ACTION_INPUT.new("Velocity"), _new_editor_globals())
 	add_child(input_ui)
 
 	input_ui.try_set_value(expected_vector)
@@ -85,8 +97,8 @@ func test_vector2_input_ui_uses_input_name_and_value():
 	input_ui.free()
 
 func test_vector3_input_ui_preserves_expression_text():
-	var input_ui: Variant = VECTOR3_INPUT_SCENE.instantiate()
-	input_ui.legitimize(VECTOR3_ACTION_INPUT.new("Position"), FKEditorGlobals.new())
+	var input_ui: FKActionInputUi = VECTOR3_INPUT_SCENE.instantiate()
+	input_ui.legitimize(VECTOR3_ACTION_INPUT.new("Position"), _new_editor_globals())
 	add_child(input_ui)
 
 	input_ui.try_set_value("node.global_position + Vector3.UP")
@@ -96,9 +108,9 @@ func test_vector3_input_ui_preserves_expression_text():
 	input_ui.free()
 
 func test_vector4_input_ui_uses_input_name_and_value():
-	var input_ui: Variant = VECTOR4_INPUT_SCENE.instantiate()
+	var input_ui: FKActionInputUi = VECTOR4_INPUT_SCENE.instantiate()
 	var expected_vector := Vector4(1.0, 2.5, -3.0, 4.25)
-	input_ui.legitimize(VECTOR4_ACTION_INPUT.new("Quaternion Values"), FKEditorGlobals.new())
+	input_ui.legitimize(VECTOR4_ACTION_INPUT.new("Quaternion Values"), _new_editor_globals())
 	add_child(input_ui)
 
 	input_ui.try_set_value(expected_vector)
@@ -108,9 +120,9 @@ func test_vector4_input_ui_uses_input_name_and_value():
 	input_ui.free()
 
 func test_audio_stream_input_ui_uses_input_name_and_value():
-	var input_ui: Variant = AUDIO_STREAM_INPUT_SCENE.instantiate()
+	var input_ui: FKActionInputUi = AUDIO_STREAM_INPUT_SCENE.instantiate()
 	var expected_stream := load("res://addons/flowkit/assets/correct.ogg") as AudioStream
-	input_ui.legitimize(AUDIO_STREAM_ACTION_INPUT.new("Correct Answer"), FKEditorGlobals.new())
+	input_ui.legitimize(AUDIO_STREAM_ACTION_INPUT.new("Correct Answer"), _new_editor_globals())
 	add_child(input_ui)
 
 	input_ui.try_set_value(expected_stream)
@@ -121,8 +133,8 @@ func test_audio_stream_input_ui_uses_input_name_and_value():
 	input_ui.free()
 
 func test_audio_stream_input_ui_accepts_file_system_audio_stream_drops():
-	var input_ui: Variant = AUDIO_STREAM_INPUT_SCENE.instantiate()
-	input_ui.legitimize(AUDIO_STREAM_ACTION_INPUT.new("Correct Answer"), FKEditorGlobals.new())
+	var input_ui: FKActionInputUi = AUDIO_STREAM_INPUT_SCENE.instantiate()
+	input_ui.legitimize(AUDIO_STREAM_ACTION_INPUT.new("Correct Answer"), _new_editor_globals())
 	add_child(input_ui)
 	var drop_data := {"files": PackedStringArray(["res://addons/flowkit/assets/correct.ogg"])}
 
@@ -134,8 +146,8 @@ func test_audio_stream_input_ui_accepts_file_system_audio_stream_drops():
 	input_ui.free()
 
 func test_audio_stream_input_ui_rejects_non_audio_file_drops():
-	var input_ui: Variant = AUDIO_STREAM_INPUT_SCENE.instantiate()
-	input_ui.legitimize(AUDIO_STREAM_ACTION_INPUT.new("Correct Answer"), FKEditorGlobals.new())
+	var input_ui: FKActionInputUi = AUDIO_STREAM_INPUT_SCENE.instantiate()
+	input_ui.legitimize(AUDIO_STREAM_ACTION_INPUT.new("Correct Answer"), _new_editor_globals())
 	add_child(input_ui)
 	var drop_data := {"files": PackedStringArray(["res://addons/flowkit/assets/icon.svg"])}
 
@@ -143,19 +155,31 @@ func test_audio_stream_input_ui_rejects_non_audio_file_drops():
 	input_ui.free()
 
 func test_string_input_ui_uses_input_name_and_value():
-	var input_ui: Variant = STRING_INPUT_SCENE.instantiate()
-	input_ui.legitimize(FKStringActionInput.new("Message", "", "Hello"), FKEditorGlobals.new())
+	var input_ui: FKActionInputUi = STRING_INPUT_SCENE.instantiate()
+	input_ui.legitimize(FKStringActionInput.new("Message", "", "Hello"), _new_editor_globals())
 	add_child(input_ui)
 
 	input_ui.try_set_value("Updated message")
 
 	assert_eq(input_ui.input_label.text, "Message")
+	assert_eq(input_ui.get_value(), "Updated message")
+	input_ui.free()
+
+func test_string_input_ui_auto_encloses_when_enabled():
+	var input_ui: FKActionInputUi = STRING_INPUT_SCENE.instantiate()
+	input_ui.legitimize(FKStringActionInput.new("Message", "", "Hello"), _new_editor_globals(true))
+	add_child(input_ui)
+
+	input_ui.try_set_value("Original")
+	input_ui.line_edit.text = "Updated message"
+	input_ui._on_literal_control_gui_input(null)
+
 	assert_eq(input_ui.get_value(), "\"Updated message\"")
 	input_ui.free()
 
 func test_string_input_ui_preserves_untouched_quoted_literal():
-	var input_ui: Variant = STRING_INPUT_SCENE.instantiate()
-	input_ui.legitimize(FKStringActionInput.new("Message", "", "Hello"), FKEditorGlobals.new())
+	var input_ui: FKActionInputUi = STRING_INPUT_SCENE.instantiate()
+	input_ui.legitimize(FKStringActionInput.new("Message", "", "Hello"), _new_editor_globals())
 	add_child(input_ui)
 
 	input_ui.try_set_value("\"Saved message\"")
@@ -165,19 +189,20 @@ func test_string_input_ui_preserves_untouched_quoted_literal():
 	input_ui.free()
 
 func test_string_input_ui_does_not_double_enclose_edited_quoted_literal():
-	var input_ui: Variant = STRING_INPUT_SCENE.instantiate()
-	input_ui.legitimize(FKStringActionInput.new("Message", "", "Hello"), FKEditorGlobals.new())
+	var input_ui: FKActionInputUi = STRING_INPUT_SCENE.instantiate()
+	input_ui.legitimize(FKStringActionInput.new("Message", "", "Hello"), _new_editor_globals())
 	add_child(input_ui)
 
 	input_ui.try_set_value("Original")
 	input_ui.line_edit.text = "\"Updated message\""
+	input_ui._on_literal_control_gui_input(null)
 
 	assert_eq(input_ui.get_value(), "\"Updated message\"")
 	input_ui.free()
 
 func test_variant_input_ui_preserves_expression_text():
-	var input_ui: Variant = VARIANT_INPUT_SCENE.instantiate()
-	input_ui.legitimize(FKActionInput.new("Value", "Variant"), FKEditorGlobals.new())
+	var input_ui: FKActionInputUi = VARIANT_INPUT_SCENE.instantiate()
+	input_ui.legitimize(FKActionInput.new("Value", "Variant"), _new_editor_globals())
 	add_child(input_ui)
 
 	input_ui.try_set_value("node.position.x + 10")
@@ -187,23 +212,25 @@ func test_variant_input_ui_preserves_expression_text():
 	input_ui.free()
 
 func test_variant_input_ui_encloses_literal_text():
-	var input_ui: Variant = VARIANT_INPUT_SCENE.instantiate()
-	input_ui.legitimize(FKActionInput.new("Value", "Variant"), FKEditorGlobals.new())
+	var input_ui: FKActionInputUi = VARIANT_INPUT_SCENE.instantiate()
+	input_ui.legitimize(FKActionInput.new("Value", "Variant"), _new_editor_globals(true))
 	add_child(input_ui)
 
-	input_ui.try_set_value("Original")
+	input_ui.try_set_value(1)
 	input_ui.line_edit.text = "Updated value"
+	input_ui._on_literal_control_gui_input(null)
 
 	assert_eq(input_ui.get_value(), "\"Updated value\"")
 	input_ui.free()
 
 func test_variant_input_ui_does_not_double_enclose_literal_text():
-	var input_ui: Variant = VARIANT_INPUT_SCENE.instantiate()
-	input_ui.legitimize(FKActionInput.new("Value", "Variant"), FKEditorGlobals.new())
+	var input_ui: FKActionInputUi = VARIANT_INPUT_SCENE.instantiate()
+	input_ui.legitimize(FKActionInput.new("Value", "Variant"), _new_editor_globals(true))
 	add_child(input_ui)
 
-	input_ui.try_set_value("Original")
+	input_ui.try_set_value(1)
 	input_ui.line_edit.text = "\"Updated value\""
+	input_ui._on_literal_control_gui_input(null)
 
 	assert_eq(input_ui.get_value(), "\"Updated value\"")
 	input_ui.free()
