@@ -18,15 +18,7 @@ func _enclosed_as_needed(str: String) -> String:
 	return result
 
 func _should_auto_enclose(str: String) -> bool:
-	var globals_ready := _globals != null and _globals.editor_interface != null
-	if not globals_ready:
-		return true
-
-	var settings := _globals.editor_interface.get_editor_settings()
-	if not settings.has_setting(_enclosure_setting_key()):
-		return true
-
-	var setting_on := settings.get_setting(_enclosure_setting_key())
+	var setting_on := _globals.should_auto_enclose_string_inputs()
 	var enclosed_already := _is_enclosed_in_quotes(str)
 	return setting_on and not enclosed_already
 
