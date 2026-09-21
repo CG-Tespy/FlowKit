@@ -3,7 +3,6 @@
 [ext_resource type="Script" uid="uid://d2tcskuiujrg7" path="res://addons/flowkit/editor/settings_window.gd" id="1_tn2p2"]
 [ext_resource type="Texture2D" uid="uid://dfw21gww7gdwq" path="res://addons/flowkit/assets/flowkitLogoAlt.png" id="2_1wusu"]
 [ext_resource type="PackedScene" uid="uid://cuxtanqksw6bx" path="res://addons/flowkit/editor/scenes/provider_path_manager.tscn" id="3_d0tub"]
-[ext_resource type="Script" uid="uid://bys18rjuthmd" path="res://addons/flowkit/editor/Ui/control_size_scaler.gd" id="4_1x2ax"]
 
 [node name="FKEditorSettings" type="Window" unique_id=813573723 node_paths=PackedStringArray("auto_save_toggle", "exp_text_color", "auto_enclose_strings", "save_button", "holds_prov_paths")]
 oversampling_override = 1.0
@@ -133,8 +132,12 @@ theme_override_constants/margin_right = 15
 visible = false
 custom_minimum_size = Vector2(0, 255)
 
-[node name="SizeScaler" parent="MainList/FKProviderPathManager" index="2" unique_id=827541751]
+[node name="Scaler" parent="MainList/FKProviderPathManager/FoldableContainer" parent_id_path=PackedInt32Array(1604285312, 1767715980) index="1" unique_id=353188948 node_paths=PackedStringArray("_scale_timer")]
+_scale_timer = NodePath("@Timer@20975")
+
+[node name="PathManagerSizeScaler" parent="MainList/FKProviderPathManager" index="2" unique_id=827541751 node_paths=PackedStringArray("_scale_timer")]
 _last_chosen_size = Vector2(800, 35)
+_scale_timer = NodePath("@Timer@20976")
 
 [node name="SaveSettingsButton" type="Button" parent="." unique_id=911981487]
 anchors_preset = -1
@@ -144,11 +147,6 @@ anchor_right = 0.7
 anchor_bottom = 0.98
 tooltip_text = "After clicking this, best close this window and then reload the project."
 text = "Save Settings"
-
-[node name="Scaler" type="Node" parent="." unique_id=1093150520 node_paths=PackedStringArray("contents")]
-process_mode = 4
-script = ExtResource("4_1x2ax")
-contents = [null, null]
 
 [editable path="MainList/FKProviderPathManager"]
 [editable path="MainList/FKProviderPathManager/FoldableContainer"]
