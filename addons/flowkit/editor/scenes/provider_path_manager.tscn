@@ -26,10 +26,12 @@ offset_right = 0.0
 offset_bottom = 0.0
 grow_horizontal = 2
 
-[node name="Scaler" parent="FoldableContainer" index="1" unique_id=353188948 node_paths=PackedStringArray("target")]
+[node name="Scaler" parent="FoldableContainer" index="1" unique_id=353188948 node_paths=PackedStringArray("target", "contents", "_scale_timer")]
 process_mode = 4
 target = NodePath("../..")
+contents = [NodePath("../MarginContainer/VBoxContainer/Header"), NodePath("../MarginContainer/VBoxContainer/HoldsContents")]
 scale_y = false
+_scale_timer = NodePath("@Timer@21767")
 
 [node name="FileDialog" type="FileDialog" parent="." unique_id=137929853]
 oversampling_override = 1.0
@@ -37,13 +39,14 @@ title = "Open a Directory"
 dialog_hide_on_ok = true
 file_mode = 2
 
-[node name="SizeScaler" type="Node" parent="." unique_id=827541751 node_paths=PackedStringArray("target", "contents")]
+[node name="PathManagerSizeScaler" type="Node" parent="." unique_id=827541751 node_paths=PackedStringArray("target", "contents", "_scale_timer")]
 script = ExtResource("3_dcf8n")
 target = NodePath("..")
 contents = [NodePath("../FoldableContainer/MarginContainer/VBoxContainer/Header"), NodePath("../FoldableContainer/MarginContainer/VBoxContainer/HoldsContents")]
 scale_y = true
 cumulative_y = true
 _last_chosen_size = Vector2(500, 285)
+_scale_timer = NodePath("@Timer@21768")
 metadata/_custom_type_script = "uid://bys18rjuthmd"
 
 [editable path="FoldableContainer"]
