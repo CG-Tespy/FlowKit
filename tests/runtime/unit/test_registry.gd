@@ -72,3 +72,16 @@ func test_node_class_queries_return_only_compatible_providers() -> void:
 	assert_true(actions.has(universal_action))
 	assert_true(actions.has(control_action))
 	assert_eq(events, [timer_event])
+
+func test_color_rect_queries_include_fade_color() -> void:
+	var registry := FKRegistry.new()
+	registry.load_all()
+	var actions := registry.get_actions_for_node_class("ColorRect")
+
+	assert_true(_has_provider_id(actions, "Fade Color"))
+
+func _has_provider_id(providers: Array[FKAction], provider_id: String) -> bool:
+	for provider in providers:
+		if provider.get_provider_id() == provider_id:
+			return true
+	return false

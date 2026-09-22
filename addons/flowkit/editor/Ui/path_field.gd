@@ -199,6 +199,8 @@ func _is_path_valid(path: String) -> bool:
 	return dir_exists
 
 func _report_invalid_path(to_report: String):
+	if to_report == FKProviderLoader.DEFAULT_TEST_PROVIDER_PATH:
+		return
 	var log_message := "Path %s is not a valid path_chosen." % [to_report]
 	printerr(log_message)
 

@@ -1,0 +1,75 @@
+[gd_scene format=3 uid="uid://djyrbx3jfcch6"]
+
+[ext_resource type="Script" uid="uid://ck6twurqbl5fy" path="res://addons/flowkit/editor/Ui/toggle_visibility.gd" id="1_5qp4s"]
+[ext_resource type="StyleBox" uid="uid://4vsupaoluret" path="res://addons/flowkit/editor/styles/action_input_bg_style.tres" id="2_frm6w"]
+[ext_resource type="Script" uid="uid://bys18rjuthmd" path="res://addons/flowkit/editor/Ui/control_size_scaler.gd" id="4_sh8pe"]
+
+[node name="FoldableContainer" type="Control" unique_id=1767715980]
+custom_minimum_size = Vector2(500, 35)
+layout_mode = 3
+anchors_preset = 0
+offset_right = 500.0
+offset_bottom = 35.0
+size_flags_horizontal = 3
+tooltip_text = "Paths that FlowKit will look at to find providers. If you have custom ones, best put them in their own folder. Then, add that folder's path here."
+
+[node name="MarginContainer" type="MarginContainer" parent="." unique_id=73345217]
+layout_mode = 1
+anchors_preset = 10
+anchor_right = 1.0
+offset_bottom = 35.0
+grow_horizontal = 2
+
+[node name="VBoxContainer" type="VBoxContainer" parent="MarginContainer" unique_id=499335436]
+layout_mode = 2
+
+[node name="Header" type="Control" parent="MarginContainer/VBoxContainer" unique_id=2062367264]
+custom_minimum_size = Vector2(0, 35)
+layout_mode = 2
+
+[node name="Button" type="Button" parent="MarginContainer/VBoxContainer/Header" unique_id=2013833391]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 1
+text = "Insert Header Here"
+
+[node name="HeaderOutline" type="Panel" parent="MarginContainer/VBoxContainer/Header" unique_id=901280352]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+size_flags_vertical = 3
+mouse_filter = 2
+theme_override_styles/panel = ExtResource("2_frm6w")
+
+[node name="HoldsContents" type="MarginContainer" parent="MarginContainer/VBoxContainer" unique_id=1130337238]
+visible = false
+custom_minimum_size = Vector2(0, 250)
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="Outline" type="Panel" parent="MarginContainer/VBoxContainer/HoldsContents" unique_id=1176634726]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+theme_override_styles/panel = ExtResource("2_frm6w")
+
+[node name="Scaler" type="Node" parent="." unique_id=353188948 node_paths=PackedStringArray("target", "contents")]
+process_mode = 3
+script = ExtResource("4_sh8pe")
+target = NodePath("..")
+contents = [NodePath("../MarginContainer/VBoxContainer/Header"), NodePath("../MarginContainer/VBoxContainer/HoldsContents")]
+scale_y = true
+cumulative_y = true
+_last_chosen_size = Vector2(500, 35)
+
+[node name="VisibilityToggler" type="Node" parent="." unique_id=273357576 node_paths=PackedStringArray("clickable", "to_toggle_for")]
+script = ExtResource("1_5qp4s")
+clickable = NodePath("../MarginContainer/VBoxContainer/Header/Button")
+to_toggle_for = [NodePath("../MarginContainer/VBoxContainer/HoldsContents")]
