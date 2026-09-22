@@ -1263,13 +1263,16 @@ func _on_action_selected_in_modal(node_path: String, action_id: String, inputs: 
 	select_action_modal.hide()
 	
 	var action_provider := registry.get_action_provider(action_id)
-	if _show_custom_action_input_modal(action_provider, node_path, action_id, {}):
+	var has_inputs := inputs.size() > 0
+	if has_inputs and _show_action_input_modal(action_provider, node_path, action_id, {}):
 		return
 
-	if inputs.size() > 0:
+	if has_inputs:
 		expression_modal.populate_inputs(node_path, action_id, inputs)
 		_popup_centered_on_editor(expression_modal)
 	else:
+		var action_name := action_provider.get_display_name()
+		print("[FKMainEditor]: Added FKAction %s. It has no input options, so..." % action_name)
 		if pending_block_type == "action_replace":
 			_replace_action({})
 		elif pending_block_type == "branch_action":
@@ -1277,7 +1280,8 @@ func _on_action_selected_in_modal(node_path: String, action_id: String, inputs: 
 		else:
 			_finalize_action_creation({})
 
-func _show_custom_action_input_modal(action_provider: FKAction, node_path: String, \
+## Returns true on success, false otherwise.
+func _show_action_input_modal(action_provider: FKAction, node_path: String, \
 action_id: String, current_inputs: Dictionary) -> bool:
 	var custom_modal := modal_manager.get_action_input_modal(action_provider)
 	if custom_modal == null:
@@ -1791,7 +1795,7 @@ event_row: FKEventRowUi) -> void:
 		[self.get_class(), action_provider.get_display_name()])
 		return
 
-	if _show_custom_action_input_modal(
+	if _show_action_input_modal(
 		action_provider,
 		pending_node_path,
 		pending_id,
@@ -2073,7 +2077,7 @@ func _on_action_edit_requested(action_item: FKActionUnitUi, bound_row: FKUnitUi)
 		[self.get_class(), action_provider.get_display_name()])
 		return
 
-	if _show_custom_action_input_modal(
+	if _show_action_input_modal(
 		action_provider,
 		pending_node_path,
 		pending_id,

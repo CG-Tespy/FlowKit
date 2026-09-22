@@ -68,6 +68,15 @@ func test_loader_loads_default_test_providers() -> void:
 	assert_eq(result.source, "directory")
 	assert_true(_has_provider_id(result.action_providers, "test_dummy_action"))
 	assert_true(_has_provider_id(result.condition_providers, "test_dummy_condition"))
+	assert_eq(loader._get_provider_paths(), [FKProviderLoader.DEFAULT_TEST_PROVIDER_PATH])
+
+func test_loader_recognizes_inherited_provider_scripts() -> void:
+	var loader := FKProviderLoader.new()
+	var mouse_event := load("res://addons/flowkit/providers/events/System/on_mouse_button_pressed.gd")
+	var scene_ready_event := load("res://addons/flowkit/providers/events/System/on_scene_ready.gd")
+
+	assert_true(loader._script_extends_provider(mouse_event))
+	assert_true(loader._script_extends_provider(scene_ready_event))
 
 func test_loader_uses_project_settings_provider_paths() -> void:
 	var settings := load(PROJECT_SETTINGS_PATH) as FKProjectSettings

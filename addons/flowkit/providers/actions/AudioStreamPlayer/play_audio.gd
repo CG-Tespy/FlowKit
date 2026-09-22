@@ -1,5 +1,8 @@
 extends FKAction
 
+## For playing audio from all three AudioStreamPlayer types.
+class_name FKPlayAudioGeneral
+
 func get_description() -> String:
 	return "Starts playing the selected Audio Stream."
 
