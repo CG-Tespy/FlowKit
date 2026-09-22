@@ -2,9 +2,11 @@ extends RefCounted
 class_name FKProviderLoader
 
 const DEFAULT_MANIFEST_PATH := "res://addons/flowkit/saved/provider_manifest.tres"
-const DEFAULT_PROVIDER_PATH = "res://addons/flowkit/providers"
+const DEFAULT_PROVIDER_PATH := "res://addons/flowkit/providers"
+const DEFAULT_TEST_PROVIDER_PATH := "res://tests/providers"
 var manifest_path: String = DEFAULT_MANIFEST_PATH
 var default_provider_path: String = DEFAULT_PROVIDER_PATH
+var default_test_path := DEFAULT_TEST_PROVIDER_PATH
 var project_settings: FKProjectSettings
 
 func load_all() -> FKProviderLoadResult:
@@ -28,9 +30,8 @@ func load_all() -> FKProviderLoadResult:
 	return result
 
 func _get_provider_paths() -> Array[String]:
-	var result: Array[String] = []
-	if not default_provider_path.is_empty():
-		result.append(default_provider_path)
+	var result: Array[String] = [default_provider_path, default_test_path]
+
 	if project_settings:
 		for provider_path in project_settings.provider_paths:
 			if not provider_path.is_empty() and not result.has(provider_path):
