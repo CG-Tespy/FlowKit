@@ -646,6 +646,9 @@ func _on_header_gui_input_mouse_motion(event: InputEventMouseMotion):
 # ---------------------------------------------------------
 
 func _start_group_drag() -> void:
+	if not _can_begin_drag() or not _group:
+		return
+
 	var preview := _prep_preview()
 	var drag_data := FKDragData.new(DragTarget.Type.GROUP, self, _group)
 	force_drag(drag_data, preview)
@@ -659,7 +662,7 @@ func _prep_preview() -> Control:
 static var _preview_color := Color(0.6, 0.8, 1.0, 0.9)
 
 func _get_drag_data(_at_position: Vector2) -> FKDragData:
-	if not _group:
+	if not _can_begin_drag() or not _group:
 		return null
 	var preview := _prep_preview()
 	set_drag_preview(preview)

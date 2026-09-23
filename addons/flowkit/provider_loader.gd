@@ -2,19 +2,22 @@ extends RefCounted
 class_name FKProviderLoader
 
 const DEFAULT_MANIFEST_PATH := "res://addons/flowkit/saved/provider_manifest.tres"
-const DEFAULT_PROVIDER_PATH = "res://addons/flowkit/providers"
+const DEFAULT_PROVIDER_PATH := "res://addons/flowkit/providers"
+const DEFAULT_TEST_PROVIDER_PATH := "res://tests/providers"
 var manifest_path: String = DEFAULT_MANIFEST_PATH
 var default_provider_path: String = DEFAULT_PROVIDER_PATH
+var default_test_path := DEFAULT_TEST_PROVIDER_PATH
 var project_settings: FKProjectSettings
 
 func load_all() -> FKProviderLoadResult:
 	var result := FKProviderLoadResult.new()
-	if _load_from_manifest(result):
-		result.source = "manifest"
-	elif OS.has_feature("editor"):
+	
+	if OS.has_feature("editor"):
 		for provider_path in _get_provider_paths():
 			_scan_directory_recursive(provider_path, result)
 		result.source = "directory"
+	elif _load_from_manifest(result):
+		result.source = "manifest"
 	else:
 		result.source = "unavailable"
 		result.errors.append("No provider manifest found and directory scanning is not available " +\
@@ -29,8 +32,10 @@ func load_all() -> FKProviderLoadResult:
 
 func _get_provider_paths() -> Array[String]:
 	var result: Array[String] = []
-	if not default_provider_path.is_empty():
-		result.append(default_provider_path)
+	for provider_path in [default_provider_path, default_test_path]:
+		if not provider_path.is_empty() and not result.has(provider_path):
+			result.append(provider_path)
+
 	if project_settings:
 		for provider_path in project_settings.provider_paths:
 			if not provider_path.is_empty() and not result.has(provider_path):
@@ -62,15 +67,16 @@ func _load_manifest_scripts(scripts: Variant, result: FKProviderLoadResult) -> v
 			_try_add_provider(script_el, result)
 
 func _try_add_provider(script: GDScript, result: FKProviderLoadResult) -> void:
-	var instance: Variant = script.new()
 	var diagnostics := result.diagnostics
+	if not _script_extends_provider(script):
+		diagnostics.append("[FKProviderLoader] Skipping script that does not " +\
+		"extend FKProvider: %s" % script.resource_path)
+		return
+
+	var instance: Variant = script.new()
 	if instance == null:
 		diagnostics.append("[FKProviderLoader] Skipping script that returned " +\
 		"null on new(): %s" % script.resource_path)
-		return
-	if not instance is FKProvider:
-		diagnostics.append("[FKProviderLoader] Skipping script that does not " +\
-		"extend FKProvider: %s" % script.resource_path)
 		return
 	if instance.is_abstract_provider():
 		return
@@ -122,6 +128,13 @@ func _scan_directory_recursive(path: String, result: FKProviderLoadResult) -> vo
 	dir.list_dir_end()
 
 
+func _script_extends_provider(script: GDScript) -> bool:
+	var current: GDScript = script
+	while current != null:
+		if current.get_global_name() == &"FKProvider":
+			return true
+		current = current.get_base_script()
+	return false
 
 func _provider_id_of(provider: FKProvider) -> String:
 	var provider_id := provider.get_provider_id().strip_edges()

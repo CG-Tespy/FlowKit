@@ -12,6 +12,9 @@ func _init(init_name: String = "", init_type: String = "Variant",
 	description = init_desc
 	_default_value = init_default
 
+	if description.is_empty():
+		description = "As it says on the tin."
+
 var type: String:
 	get:
 		return _type
@@ -29,6 +32,9 @@ func get_val(dict: Dictionary) -> Variant:
 	var result = _convert(raw_result)
 	return result
 
+func get_raw_val(dict: Dictionary) -> Variant:
+	return _get_raw(dict)
+
 func _get_raw(dict: Dictionary) -> Variant:
 	var result
 	if dict.has(name):
@@ -43,8 +49,18 @@ func _get_raw(dict: Dictionary) -> Variant:
 	else:
 		return default_value
 
+func set_val(dict: Dictionary, value) -> void:
+	dict[name] = value
+
+func get_class() -> String:
+	return "FKActionInput"
+
+func get_real_class() -> String:
+	return self.get_class()
+
+
 func _is_valid(fetched_value):
-	return true
+	return fetched_value != null
 
 func _convert(input):
 	return input

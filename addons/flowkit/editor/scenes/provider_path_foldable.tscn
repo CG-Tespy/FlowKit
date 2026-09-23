@@ -1,0 +1,132 @@
+[gd_scene format=3 uid="uid://dbveggdwl7a8x"]
+
+[ext_resource type="Script" uid="uid://ck6twurqbl5fy" path="res://addons/flowkit/editor/Ui/toggle_visibility.gd" id="1_xhjfn"]
+[ext_resource type="StyleBox" uid="uid://4vsupaoluret" path="res://addons/flowkit/editor/styles/action_input_bg_style.tres" id="2_qabhu"]
+[ext_resource type="PackedScene" uid="uid://dvv71dsowqnlq" path="res://addons/flowkit/editor/scenes/fk_path_field.tscn" id="3_rs8hg"]
+[ext_resource type="Script" uid="uid://bys18rjuthmd" path="res://addons/flowkit/editor/Ui/control_size_scaler.gd" id="4_2tk4q"]
+
+[node name="ProviderPathFoldable" type="Control" unique_id=1767715980 node_paths=PackedStringArray("clickable", "to_toggle_for")]
+custom_minimum_size = Vector2(500, 285)
+layout_mode = 3
+anchors_preset = 0
+offset_right = 500.0
+offset_bottom = 285.0
+size_flags_horizontal = 3
+tooltip_text = "Paths that FlowKit will look at to find providers. If you have custom ones, best put them in their own folder. Then, add that folder's path here."
+script = ExtResource("1_xhjfn")
+clickable = NodePath("MarginContainer/VBoxContainer/Header/Button")
+to_toggle_for = [NodePath("MarginContainer/VBoxContainer/HoldsContents")]
+
+[node name="MarginContainer" type="MarginContainer" parent="." unique_id=1950874240]
+layout_mode = 1
+anchors_preset = 10
+anchor_right = 1.0
+offset_bottom = 289.0
+grow_horizontal = 2
+
+[node name="VBoxContainer" type="VBoxContainer" parent="MarginContainer" unique_id=499335436]
+layout_mode = 2
+
+[node name="Header" type="Control" parent="MarginContainer/VBoxContainer" unique_id=2062367264]
+custom_minimum_size = Vector2(0, 35)
+layout_mode = 2
+
+[node name="Button" type="Button" parent="MarginContainer/VBoxContainer/Header" unique_id=2013833391]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 1
+text = "Provider Root Paths"
+
+[node name="HeaderOutline" type="Panel" parent="MarginContainer/VBoxContainer/Header" unique_id=901280352]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+size_flags_vertical = 3
+mouse_filter = 2
+theme_override_styles/panel = ExtResource("2_qabhu")
+
+[node name="HoldsContents" type="MarginContainer" parent="MarginContainer/VBoxContainer" unique_id=1130337238]
+custom_minimum_size = Vector2(0, 250)
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="VBoxContainer" type="VBoxContainer" parent="MarginContainer/VBoxContainer/HoldsContents" unique_id=666499402]
+layout_mode = 2
+
+[node name="ScrollContainer" type="ScrollContainer" parent="MarginContainer/VBoxContainer/HoldsContents/VBoxContainer" unique_id=2125827191]
+custom_minimum_size = Vector2(0, 210)
+layout_mode = 2
+size_flags_vertical = 0
+follow_focus = true
+draw_focus_border = true
+horizontal_scroll_mode = 0
+vertical_scroll_mode = 2
+
+[node name="HoldsPathFields" type="VBoxContainer" parent="MarginContainer/VBoxContainer/HoldsContents/VBoxContainer/ScrollContainer" unique_id=1786787996]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
+[node name="DefaultFKPathField" parent="MarginContainer/VBoxContainer/HoldsContents/VBoxContainer/ScrollContainer/HoldsPathFields" unique_id=1801841937 instance=ExtResource("3_rs8hg")]
+layout_mode = 2
+browsable = false
+removable = false
+lock_browsability = true
+lock_removability = true
+
+[node name="BrowseButton" parent="MarginContainer/VBoxContainer/HoldsContents/VBoxContainer/ScrollContainer/HoldsPathFields/DefaultFKPathField/HBoxContainer" parent_id_path=PackedInt32Array(1801841937, 797557857) index="1" unique_id=1028192853]
+disabled = true
+
+[node name="RemovalButton" parent="MarginContainer/VBoxContainer/HoldsContents/VBoxContainer/ScrollContainer/HoldsPathFields/DefaultFKPathField/HBoxContainer" parent_id_path=PackedInt32Array(1801841937, 797557857) index="2" unique_id=319062141]
+layout_direction = 2
+disabled = true
+
+[node name="DefaultTestPathField" parent="MarginContainer/VBoxContainer/HoldsContents/VBoxContainer/ScrollContainer/HoldsPathFields" unique_id=294386846 instance=ExtResource("3_rs8hg")]
+layout_mode = 2
+browsable = false
+removable = false
+lock_browsability = true
+lock_removability = true
+
+[node name="BrowseButton" parent="MarginContainer/VBoxContainer/HoldsContents/VBoxContainer/ScrollContainer/HoldsPathFields/DefaultTestPathField/HBoxContainer" parent_id_path=PackedInt32Array(294386846, 797557857) index="1" unique_id=1028192853]
+disabled = true
+
+[node name="RemovalButton" parent="MarginContainer/VBoxContainer/HoldsContents/VBoxContainer/ScrollContainer/HoldsPathFields/DefaultTestPathField/HBoxContainer" parent_id_path=PackedInt32Array(294386846, 797557857) index="2" unique_id=319062141]
+layout_direction = 2
+disabled = true
+
+[node name="ButtonSection" type="MarginContainer" parent="MarginContainer/VBoxContainer/HoldsContents/VBoxContainer" unique_id=2020433548]
+layout_mode = 2
+theme_override_constants/margin_left = 5
+theme_override_constants/margin_right = 5
+
+[node name="AddButton" type="Button" parent="MarginContainer/VBoxContainer/HoldsContents/VBoxContainer/ButtonSection" unique_id=752197797]
+layout_mode = 2
+size_flags_vertical = 8
+text = "Add"
+
+[node name="Bg2" type="Panel" parent="MarginContainer/VBoxContainer/HoldsContents" unique_id=1176634726]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+theme_override_styles/panel = ExtResource("2_qabhu")
+
+[node name="Scaler" type="Node" parent="." unique_id=353188948 node_paths=PackedStringArray("target", "contents", "_scale_timer")]
+process_mode = 3
+script = ExtResource("4_2tk4q")
+target = NodePath("..")
+contents = [NodePath("../MarginContainer/VBoxContainer/Header"), NodePath("../MarginContainer/VBoxContainer/HoldsContents")]
+scale_y = true
+cumulative_y = true
+_last_chosen_size = Vector2(500, 285)
+_scale_timer = NodePath("@Timer@20974")
+
+[editable path="MarginContainer/VBoxContainer/HoldsContents/VBoxContainer/ScrollContainer/HoldsPathFields/DefaultFKPathField"]
+[editable path="MarginContainer/VBoxContainer/HoldsContents/VBoxContainer/ScrollContainer/HoldsPathFields/DefaultTestPathField"]

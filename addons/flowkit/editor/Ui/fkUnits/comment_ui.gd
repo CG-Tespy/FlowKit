@@ -157,7 +157,7 @@ func _on_contents_changed(node: FKUnitUi):
 	super._on_contents_changed(node)
 	
 func _get_drag_data(_at_position: Vector2) -> FKDragData:
-	if edit_mode_on:
+	if not _can_begin_drag() or edit_mode_on:
 		return null
 	
 	var preview := _create_drag_preview()

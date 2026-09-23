@@ -312,7 +312,7 @@ func _connect_nested_branch_signals(nested: FKBranchUnitUi) -> void:
 	nested.add_else_requested.connect(func(i): add_else_requested.emit(i))
 	nested.add_branch_action_requested.connect(func(i): add_branch_action_requested.emit(i))
 	nested.branch_action_edit_requested.connect(func(ai, bi): branch_action_edit_requested.emit(ai, bi))
-	nested.branch_action_selected.connect(func(): branch_action_selected.emit(nested))
+	nested.branch_action_selected.connect(func(action_item): branch_action_selected.emit(action_item))
 	nested.add_nested_branch_requested.connect(func(i, bid): add_nested_branch_requested.emit(i, bid))
 	nested.reorder_requested.connect(_on_sub_action_reorder)
 	nested.action_cross_reorder_requested.connect(func(sd, td, above, tb): action_cross_reorder_requested.emit(sd, td, above, tb))
@@ -372,7 +372,7 @@ func _on_sub_action_reorder(source_item, target_item, drop_above: bool) -> void:
 # ---------------------------------------------------------
 
 func _get_drag_data(at_position: Vector2) -> FKDragData:
-	if not _action:
+	if not _can_begin_drag() or not _action:
 		return null
 
 	var preview := _create_drag_preview()

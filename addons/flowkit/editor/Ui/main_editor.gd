@@ -189,7 +189,7 @@ func _popup_centered_on_editor(popup: Window) -> void:
 	
 	if not editor_window:
 		# Fallback to default behavior if window not available
-		popup.popup_centered()
+		popup.show()
 		return
 	
 	var window_pos: Vector2i = editor_window.position
@@ -204,7 +204,7 @@ func _popup_centered_on_editor(popup: Window) -> void:
 	centered_pos.y = maxi(centered_pos.y, window_pos.y)
 	
 	popup.position = centered_pos
-	popup.popup()
+	popup.show()
 
 var editor_interface: EditorInterface:
 	get:
@@ -1262,16 +1262,41 @@ func _on_action_selected_in_modal(node_path: String, action_id: String, inputs: 
 	pending_id = action_id
 	select_action_modal.hide()
 	
-	if inputs.size() > 0:
+	var action_provider := registry.get_action_provider(action_id)
+	var has_inputs := inputs.size() > 0
+	if has_inputs and _show_action_input_modal(action_provider, node_path, action_id, {}):
+		return
+
+	if has_inputs:
 		expression_modal.populate_inputs(node_path, action_id, inputs)
 		_popup_centered_on_editor(expression_modal)
 	else:
+		var action_name := action_provider.get_display_name()
+		print("[FKMainEditor]: Added FKAction %s. It has no input options, so..." % action_name)
 		if pending_block_type == "action_replace":
 			_replace_action({})
 		elif pending_block_type == "branch_action":
 			_finalize_branch_action_creation({})
 		else:
 			_finalize_action_creation({})
+
+## Returns true on success, false otherwise.
+func _show_action_input_modal(action_provider: FKAction, node_path: String, \
+action_id: String, current_inputs: Dictionary) -> bool:
+	var custom_modal := modal_manager.get_action_input_modal(action_provider)
+	if custom_modal == null:
+		return false
+	
+	_action_pop_args.action = action_provider
+	_action_pop_args.node_path = node_path
+	_action_pop_args.action_id = action_id
+	_action_pop_args.action_inputs = action_provider.get_inputs()
+	_action_pop_args.inputs = current_inputs
+	custom_modal.populate_for_action(_action_pop_args)
+	_popup_centered_on_editor(custom_modal)
+	return true
+
+var _action_pop_args: FKActionInputPopulationArgs = FKActionInputPopulationArgs.new()
 
 func _on_expressions_confirmed(_node_path: String, _id: String, expressions: Dictionary) -> void:
 	"""Expressions entered."""
@@ -1759,13 +1784,26 @@ event_row: FKEventRowUi) -> void:
 	if action_provider:
 		provider_inputs = action_provider.get_inputs()
 
+	pending_target_row = event_row
+	pending_target_item = action_item
+	pending_target_branch = branch_item
+	pending_block_type = "action_edit"
+	pending_id = act_data.get_resolved_provider_id()
+	pending_node_path = str(act_data.target_node)
+	if provider_inputs.is_empty():
+		print("[%s]: The %s action doesn't have any input options" % \
+		[self.get_class(), action_provider.get_display_name()])
+		return
+
+	if _show_action_input_modal(
+		action_provider,
+		pending_node_path,
+		pending_id,
+		act_data.inputs
+	):
+		return
+
 	if provider_inputs.size() > 0:
-		pending_target_row = event_row
-		pending_target_item = action_item
-		pending_target_branch = branch_item
-		pending_block_type = "action_edit"
-		pending_id = act_data.get_resolved_provider_id()
-		pending_node_path = str(act_data.target_node)
 		expression_modal.populate_inputs(
 			pending_node_path,
 			pending_id,
@@ -1773,8 +1811,6 @@ event_row: FKEventRowUi) -> void:
 			act_data.inputs
 		)
 		_popup_centered_on_editor(expression_modal)
-	else:
-		print("[FKMainEditor]: Action has no inputs to edit")
 
 func _finalize_branch_creation(inputs: Dictionary) -> void:
 	"""Create a condition-type branch and add it to the target's actions."""
@@ -2031,13 +2067,25 @@ func _on_action_edit_requested(action_item: FKActionUnitUi, bound_row: FKUnitUi)
 	if action_provider:
 		provider_inputs = action_provider.get_inputs()
 
-	if provider_inputs.size() > 0:
-		pending_target_row = bound_row
-		pending_target_item = action_item
-		pending_block_type = "action_edit"
-		pending_id = act_data.get_resolved_provider_id()
-		pending_node_path = str(act_data.target_node)
+	pending_target_row = bound_row
+	pending_target_item = action_item
+	pending_block_type = "action_edit"
+	pending_id = act_data.get_resolved_provider_id()
+	pending_node_path = str(act_data.target_node)
+	if provider_inputs.is_empty():
+		print("[%s]: The %s action doesn't have any input options" % \
+		[self.get_class(), action_provider.get_display_name()])
+		return
 
+	if _show_action_input_modal(
+		action_provider,
+		pending_node_path,
+		pending_id,
+		act_data.inputs
+	):
+		return
+
+	if provider_inputs.size() > 0:
 		expression_modal.populate_inputs(
 			pending_node_path,
 			pending_id,
@@ -2045,8 +2093,6 @@ func _on_action_edit_requested(action_item: FKActionUnitUi, bound_row: FKUnitUi)
 			act_data.inputs
 		)
 		_popup_centered_on_editor(expression_modal)
-	else:
-		print("[FKMainEditor]: Action has no inputs to edit")
 
 
 # === Drag and Drop Handlers ===

@@ -40,11 +40,43 @@ func test_loader_filters_invalid_providers_and_reports_duplicates() -> void:
 	var diagnostics := "\n".join(result.diagnostics)
 
 	assert_eq(result.source, "directory")
-	assert_eq(result.action_providers.size(), 3)
-	assert_eq(result.condition_providers.size(), 1)
+	assert_eq(result.action_providers.size(), 4)
+	assert_eq(result.condition_providers.size(), 2)
 	assert_true(diagnostics.contains("does not extend FKProvider"))
 	assert_true(diagnostics.contains("empty id"))
 	assert_true(diagnostics.contains("Duplicate action provider id 'duplicate_action'"))
+
+func test_loader_registers_default_test_provider_path() -> void:
+	var settings := load(PROJECT_SETTINGS_PATH) as FKProjectSettings
+	var loader := FKProviderLoader.new()
+	loader.project_settings = settings
+
+	var paths := loader._get_provider_paths()
+
+	assert_eq(paths, [
+		FKProviderLoader.DEFAULT_PROVIDER_PATH,
+		FKProviderLoader.DEFAULT_TEST_PROVIDER_PATH,
+	])
+	assert_eq(paths.count(FKProviderLoader.DEFAULT_TEST_PROVIDER_PATH), 1)
+
+func test_loader_loads_default_test_providers() -> void:
+	var loader := FKProviderLoader.new()
+	loader.default_provider_path = ""
+
+	var result := loader.load_all()
+
+	assert_eq(result.source, "directory")
+	assert_true(_has_provider_id(result.action_providers, "test_dummy_action"))
+	assert_true(_has_provider_id(result.condition_providers, "test_dummy_condition"))
+	assert_eq(loader._get_provider_paths(), [FKProviderLoader.DEFAULT_TEST_PROVIDER_PATH])
+
+func test_loader_recognizes_inherited_provider_scripts() -> void:
+	var loader := FKProviderLoader.new()
+	var mouse_event := load("res://addons/flowkit/providers/events/System/on_mouse_button_pressed.gd")
+	var scene_ready_event := load("res://addons/flowkit/providers/events/System/on_scene_ready.gd")
+
+	assert_true(loader._script_extends_provider(mouse_event))
+	assert_true(loader._script_extends_provider(scene_ready_event))
 
 func test_loader_uses_project_settings_provider_paths() -> void:
 	var settings := load(PROJECT_SETTINGS_PATH) as FKProjectSettings

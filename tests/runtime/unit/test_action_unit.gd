@@ -1,5 +1,10 @@
 extends GutTest
 
+func test_action_defaults_to_standard_input_modal():
+	var action := FKAction.new()
+
+	assert_same(action.get_input_modal_scene(), FKAction.GENERAL_INPUT_MODAL)
+
 func test_action_basic_serialization():
 	var act := FKActionUnit.new()
 	act.action_id = "Move"

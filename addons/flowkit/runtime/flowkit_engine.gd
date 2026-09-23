@@ -21,9 +21,14 @@ var active_behavior_nodes: Array = []  # Track nodes with active behaviors
 var _event_unit_providers: Dictionary = {}  # FKUnit uid -> per-unit event provider instance
 var _branch_executor := FKBranchExecutor.new()
 
+const PROJECT_SETTINGS_PATH := "res://addons/flowkit/editor/_fk_project_settings.tres"
+
 func _ready() -> void:
 	# Load registry
 	registry = FKRegistry.new()
+	var project_settings := ResourceLoader.load(PROJECT_SETTINGS_PATH) as FKProjectSettings
+	if project_settings:
+		registry.set_project_settings(project_settings)
 	registry.load_all()
 	_branch_executor.fk_engine = self
 	_branch_executor.registry = registry

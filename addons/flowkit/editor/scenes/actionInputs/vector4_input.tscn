@@ -1,0 +1,97 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://addons/flowkit/editor/Ui/actionInputs/vector4_input_ui.gd" id="1_vector4"]
+[ext_resource type="StyleBox" uid="uid://4vsupaoluret" path="res://addons/flowkit/editor/styles/action_input_bg_style.tres" id="2_background"]
+
+[node name="Vector4Input" type="Control" node_paths=PackedStringArray("x_spin_box", "y_spin_box", "z_spin_box", "w_spin_box", "input_label", "desc_label", "literal_control", "expression_line_edit", "expression_toggle")]
+custom_minimum_size = Vector2(300, 85)
+layout_mode = 3
+anchors_preset = 0
+offset_right = 300.0
+offset_bottom = 85.0
+size_flags_horizontal = 3
+script = ExtResource("1_vector4")
+x_spin_box = NodePath("MarginContainer/VBoxContainer/HBoxContainer/VectorComponents/XSpinBox")
+y_spin_box = NodePath("MarginContainer/VBoxContainer/HBoxContainer/VectorComponents/YSpinBox")
+z_spin_box = NodePath("MarginContainer/VBoxContainer/HBoxContainer/VectorComponents/ZSpinBox")
+w_spin_box = NodePath("MarginContainer/VBoxContainer/HBoxContainer/VectorComponents/WSpinBox")
+input_label = NodePath("MarginContainer/VBoxContainer/HBoxContainer/Label")
+desc_label = NodePath("MarginContainer/VBoxContainer/Description")
+literal_control = NodePath("MarginContainer/VBoxContainer/HBoxContainer/VectorComponents")
+expression_line_edit = NodePath("MarginContainer/VBoxContainer/HBoxContainer/ExpressionLineEdit")
+expression_toggle = NodePath("MarginContainer/VBoxContainer/HBoxContainer/ExpressionToggle")
+
+[node name="Background" type="Panel" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+theme_override_styles/panel = ExtResource("2_background")
+
+[node name="MarginContainer" type="MarginContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/margin_left = 10
+theme_override_constants/margin_top = 10
+theme_override_constants/margin_right = 10
+theme_override_constants/margin_bottom = 10
+
+[node name="VBoxContainer" type="VBoxContainer" parent="MarginContainer"]
+layout_mode = 2
+
+[node name="HBoxContainer" type="HBoxContainer" parent="MarginContainer/VBoxContainer"]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="MarginContainer/VBoxContainer/HBoxContainer"]
+custom_minimum_size = Vector2(60, 0)
+layout_mode = 2
+text = "Value"
+
+[node name="VectorComponents" type="HBoxContainer" parent="MarginContainer/VBoxContainer/HBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="XSpinBox" type="SpinBox" parent="MarginContainer/VBoxContainer/HBoxContainer/VectorComponents"]
+layout_mode = 2
+size_flags_horizontal = 3
+allow_greater = true
+
+[node name="YSpinBox" type="SpinBox" parent="MarginContainer/VBoxContainer/HBoxContainer/VectorComponents"]
+layout_mode = 2
+size_flags_horizontal = 3
+allow_greater = true
+
+[node name="ZSpinBox" type="SpinBox" parent="MarginContainer/VBoxContainer/HBoxContainer/VectorComponents"]
+layout_mode = 2
+size_flags_horizontal = 3
+allow_greater = true
+
+[node name="WSpinBox" type="SpinBox" parent="MarginContainer/VBoxContainer/HBoxContainer/VectorComponents"]
+layout_mode = 2
+size_flags_horizontal = 3
+allow_greater = true
+
+[node name="ExpressionLineEdit" type="LineEdit" parent="MarginContainer/VBoxContainer/HBoxContainer"]
+visible = false
+layout_mode = 2
+size_flags_horizontal = 3
+placeholder_text = "Expression"
+
+[node name="ExpressionToggle" type="Button" parent="MarginContainer/VBoxContainer/HBoxContainer"]
+custom_minimum_size = Vector2(28, 0)
+layout_mode = 2
+tooltip_text = "Use expression"
+toggle_mode = true
+text = "fx"
+
+[node name="Description" type="RichTextLabel" parent="MarginContainer/VBoxContainer"]
+layout_mode = 2
+size_flags_vertical = 3
+text = "Insert desc here"

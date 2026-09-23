@@ -463,7 +463,7 @@ func _on_branch_action_edit_requested(action_item, branch: FKBranchUnitUi):
 func _on_branch_action_selected(action_item: FKActionUnitUi):
 	action_selected.emit(action_item)
 	
-func _on_branch_before_contents_changed(branch: FKBranchUnitUi):
+func _on_branch_before_contents_changed(_unit_ui: FKUnitUi):
 	before_contents_changed.emit(self)
 
 func _on_nested_branch_requested(requester: FKBranchUnitUi, branch_id: String):
@@ -715,6 +715,9 @@ func add_action(action_data: FKActionUnit) -> void:
 # ---------------------------------------------------------
 
 func _get_drag_data(at_position: Vector2) -> FKDragData:
+	if not _can_begin_drag():
+		return null
+
 	var drag_preview := _create_drag_preview()
 	set_drag_preview(drag_preview)
 	return FKDragData.new(DragTarget.Type.EVENT_ROW, self)
@@ -734,6 +737,9 @@ func _create_drag_preview() -> Control:
 	return preview_margin
 
 func _can_drop_data(at_position: Vector2, data) -> bool:
+	if not _can_begin_drag():
+		return false
+		
 	if data is not FKDragData:
 		printerr("FKEventRowUi _can_drop_data was not passed an FKDragData. " +\
 		"It was given: " + str(data))

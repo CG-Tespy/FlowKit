@@ -177,7 +177,7 @@ func _on_mouse_exited() -> void:
 # ---------------------------------------------------------
 
 func _get_drag_data(at_position: Vector2) -> FKDragData:
-	if not _unit:
+	if not _can_begin_drag() or not _unit:
 		return null
 
 	var preview := _create_drag_preview()

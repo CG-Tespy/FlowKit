@@ -1,3 +1,4 @@
+@tool
 ## For managing the creation and access of the modal windows of FlowKit's editor.
 extends Node
 class_name FKModalManager
@@ -40,6 +41,7 @@ var _select_event_modal: FKSelectEventModal
 var _select_condition_modal: FKSelectConditionModal
 var _select_action_modal: FKSelectActionModal
 var _expression_modal: FKExpressionEditorModal
+var _action_input_modals: Dictionary[String, FKActionInputModal] = {}
 
 func _create_and_parent_modal(path_to_scene: String) -> FKModalWindow:
 	var scene: PackedScene = load(path_to_scene)
@@ -65,6 +67,36 @@ func _hide_modals():
 func _legitimize_modals():
 	for child in _modals:
 		child.legitimize()
+
+func get_action_input_modal(action_provider: FKAction) -> FKActionInputModal:
+	if action_provider == null:
+		return null
+
+	var scene := action_provider.get_input_modal_scene()
+	if scene == null:
+		return null
+
+	var cache_key := scene.resource_path
+	if cache_key.is_empty():
+		cache_key = str(scene.get_instance_id())
+
+	if _action_input_modals.has(cache_key):
+		return _action_input_modals[cache_key]
+
+	var instance := scene.instantiate()
+	var modal := instance as FKActionInputModal
+	if modal == null:
+		instance.queue_free()
+		printerr("FKModalManager: Action input modal for %s must extend FKActionInputModal" % \
+			action_provider.get_provider_id())
+		return null
+
+	modal.editor_globals = editor_globals
+	add_child(modal)
+	modal.visible = false
+	modal.legitimize()
+	_action_input_modals[cache_key] = modal
+	return modal
 
 # Modal Accessors
 var select_node_modal: FKSelectNodeModal:

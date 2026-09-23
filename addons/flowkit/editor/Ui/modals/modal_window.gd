@@ -1,4 +1,4 @@
-extends PopupPanel
+extends Window
 class_name FKModalWindow
 
 func _enter_tree() -> void:
@@ -9,6 +9,8 @@ func _enter_tree() -> void:
 	
 	if is_editor_preview or is_fully_legit:
 		return
+	transient = true
+	exclusive = true;
 	_toggle_subs(true)
 
 var is_fully_legit: bool:

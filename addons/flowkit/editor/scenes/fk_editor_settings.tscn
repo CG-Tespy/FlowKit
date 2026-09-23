@@ -4,18 +4,20 @@
 [ext_resource type="Texture2D" uid="uid://dfw21gww7gdwq" path="res://addons/flowkit/assets/flowkitLogoAlt.png" id="2_1wusu"]
 [ext_resource type="PackedScene" uid="uid://cuxtanqksw6bx" path="res://addons/flowkit/editor/scenes/provider_path_manager.tscn" id="3_d0tub"]
 
-[node name="FKEditorSettings" type="Window" unique_id=813573723 node_paths=PackedStringArray("auto_save_toggle", "save_button", "holds_prov_paths")]
+[node name="FKEditorSettings" type="Window" unique_id=813573723 node_paths=PackedStringArray("auto_save_toggle", "exp_text_color", "auto_enclose_strings", "save_button", "holds_prov_paths")]
 oversampling_override = 1.0
 title = "FlowKit Editor Settings"
 position = Vector2i(0, 36)
-size = Vector2i(800, 500)
+size = Vector2i(800, 525)
 unresizable = true
 minimize_disabled = true
 maximize_disabled = true
 script = ExtResource("1_tn2p2")
 auto_save_toggle = NodePath("MainList/AutoSave/CheckButton")
+exp_text_color = NodePath("MainList/ExpressionTextColor/Layout/MarginContainer/ColorPickerButton")
+auto_enclose_strings = NodePath("MainList/AutoEncloseStringInputs/CheckButton")
 save_button = NodePath("SaveSettingsButton")
-holds_prov_paths = NodePath("MainList/ProviderRootPaths/FKProviderPathManager")
+holds_prov_paths = NodePath("MainList/FKProviderPathManager")
 metadata/_custom_type_script = "uid://d2tcskuiujrg7"
 
 [node name="BG" type="ColorRect" parent="." unique_id=1156956499]
@@ -27,7 +29,7 @@ grow_vertical = 2
 mouse_filter = 2
 color = Color(0.16078432, 0.16078432, 0.16078432, 1)
 
-[node name="TextureRect" type="TextureRect" parent="." unique_id=1413048301]
+[node name="Logo" type="TextureRect" parent="." unique_id=1413048301]
 modulate = Color(1, 1, 1, 0.5)
 custom_minimum_size = Vector2(455, 100)
 anchors_preset = 15
@@ -51,7 +53,6 @@ grow_vertical = 2
 [node name="AutoSave" type="Control" parent="MainList" unique_id=1735561752]
 custom_minimum_size = Vector2(300, 50)
 layout_mode = 2
-size_flags_horizontal = 4
 
 [node name="CheckButton" type="CheckButton" parent="MainList/AutoSave" unique_id=1536943101]
 layout_mode = 1
@@ -66,17 +67,77 @@ offset_right = 114.5
 offset_bottom = 15.5
 grow_horizontal = 2
 grow_vertical = 2
+tooltip_text = "Whether or not FlowKit will automatically save an event sheet whenever you make a change to it (like adding an Action or changing an input)."
 button_pressed = true
 text = "Auto-Save Event Sheets"
 
-[node name="ProviderRootPaths" type="MarginContainer" parent="MainList" unique_id=1620028257]
-custom_minimum_size = Vector2(0, 280)
+[node name="AutoEncloseStringInputs" type="Control" parent="MainList" unique_id=1193549580]
+custom_minimum_size = Vector2(300, 50)
 layout_mode = 2
-theme_override_constants/margin_left = 25
-theme_override_constants/margin_right = 25
 
-[node name="FKProviderPathManager" parent="MainList/ProviderRootPaths" unique_id=1653078193 instance=ExtResource("3_d0tub")]
+[node name="CheckButton" type="CheckButton" parent="MainList/AutoEncloseStringInputs" unique_id=2007559505]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -114.5
+offset_top = -15.5
+offset_right = 114.5
+offset_bottom = 15.5
+grow_horizontal = 2
+grow_vertical = 2
+tooltip_text = "Whether or not string action inputs (after you click Confirm) get auto-wrapped in enclosing quotes. Never applies when the inputs are already enclosed."
+button_pressed = true
+text = "Auto-Enclose String Inputs"
+
+[node name="ExpressionTextColor" type="MarginContainer" parent="MainList" unique_id=1184716757]
 layout_mode = 2
+theme_override_constants/margin_left = 200
+theme_override_constants/margin_right = 200
+
+[node name="Layout" type="HBoxContainer" parent="MainList/ExpressionTextColor" unique_id=119563022]
+custom_minimum_size = Vector2(300, 50)
+layout_mode = 2
+tooltip_text = "The color that expressions in action inputs will go by. This is\\n to make it easier to tell (at a glance) whether or not an input is in expression mode."
+
+[node name="Label" type="Label" parent="MainList/ExpressionTextColor/Layout" unique_id=1973583980]
+layout_mode = 2
+mouse_filter = 1
+text = "Expression Text Color"
+
+[node name="MarginContainer" type="MarginContainer" parent="MainList/ExpressionTextColor/Layout" unique_id=2119230482]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/margin_top = 10
+theme_override_constants/margin_right = 0
+theme_override_constants/margin_bottom = 10
+
+[node name="ColorPickerButton" type="ColorPickerButton" parent="MainList/ExpressionTextColor/Layout/MarginContainer" unique_id=17100100]
+layout_mode = 2
+size_flags_horizontal = 3
+text = " "
+color = Color(0.55, 0.85, 0.7, 1)
+
+[node name="FKProviderPathManager" parent="MainList" unique_id=1604285312 instance=ExtResource("3_d0tub")]
+custom_minimum_size = Vector2(800, 35)
+layout_mode = 2
+
+[node name="MarginContainer" parent="MainList/FKProviderPathManager/FoldableContainer" parent_id_path=PackedInt32Array(1604285312, 1767715980) index="0" unique_id=1950874240]
+theme_override_constants/margin_left = 15
+theme_override_constants/margin_right = 15
+
+[node name="HoldsContents" parent="MainList/FKProviderPathManager/FoldableContainer/MarginContainer/VBoxContainer" parent_id_path=PackedInt32Array(1604285312, 1767715980, 499335436) index="1" unique_id=1130337238]
+visible = false
+custom_minimum_size = Vector2(0, 255)
+
+[node name="Scaler" parent="MainList/FKProviderPathManager/FoldableContainer" parent_id_path=PackedInt32Array(1604285312, 1767715980) index="1" unique_id=353188948 node_paths=PackedStringArray("_scale_timer")]
+_scale_timer = NodePath("@Timer@20975")
+
+[node name="PathManagerSizeScaler" parent="MainList/FKProviderPathManager" index="2" unique_id=827541751 node_paths=PackedStringArray("_scale_timer")]
+_last_chosen_size = Vector2(800, 35)
+_scale_timer = NodePath("@Timer@20976")
 
 [node name="SaveSettingsButton" type="Button" parent="." unique_id=911981487]
 anchors_preset = -1
@@ -84,4 +145,10 @@ anchor_left = 0.3
 anchor_top = 0.9
 anchor_right = 0.7
 anchor_bottom = 0.98
+tooltip_text = "After clicking this, best close this window and then reload the project."
 text = "Save Settings"
+
+[editable path="MainList/FKProviderPathManager"]
+[editable path="MainList/FKProviderPathManager/FoldableContainer"]
+[editable path="MainList/FKProviderPathManager/FoldableContainer/MarginContainer/VBoxContainer/HoldsContents/VBoxContainer/ScrollContainer/HoldsPathFields/DefaultFKPathField"]
+[editable path="MainList/FKProviderPathManager/FoldableContainer/MarginContainer/VBoxContainer/HoldsContents/VBoxContainer/ScrollContainer/HoldsPathFields/DefaultTestPathField"]

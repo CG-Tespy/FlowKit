@@ -1,0 +1,75 @@
+[gd_scene format=3 uid="uid://cppmkrp6bjflo"]
+
+[ext_resource type="Script" uid="uid://dwin5fhlhjce5" path="res://addons/flowkit/editor/Ui/actionInputs/string_input_ui.gd" id="1_string"]
+[ext_resource type="StyleBox" uid="uid://4vsupaoluret" path="res://addons/flowkit/editor/styles/action_input_bg_style.tres" id="2_0d0b7"]
+
+[node name="StringInput" type="Control" unique_id=398668189 node_paths=PackedStringArray("line_edit", "input_label", "desc_label", "literal_control", "expression_line_edit", "expression_toggle")]
+custom_minimum_size = Vector2(300, 85)
+layout_mode = 3
+anchors_preset = 0
+offset_right = 300.0
+offset_bottom = 30.0
+size_flags_horizontal = 3
+size_flags_vertical = 0
+script = ExtResource("1_string")
+line_edit = NodePath("MarginContainer/VBoxContainer/HBoxContainer/LineEdit")
+input_label = NodePath("MarginContainer/VBoxContainer/HBoxContainer/Label")
+desc_label = NodePath("MarginContainer/VBoxContainer/Description")
+literal_control = NodePath("MarginContainer/VBoxContainer/HBoxContainer/LineEdit")
+expression_line_edit = NodePath("MarginContainer/VBoxContainer/HBoxContainer/ExpressionLineEdit")
+expression_toggle = NodePath("MarginContainer/VBoxContainer/HBoxContainer/ExpressionToggle")
+
+[node name="Background" type="Panel" parent="." unique_id=866499253]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+theme_override_styles/panel = ExtResource("2_0d0b7")
+
+[node name="MarginContainer" type="MarginContainer" parent="." unique_id=1839139249]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/margin_left = 10
+theme_override_constants/margin_top = 10
+theme_override_constants/margin_right = 10
+theme_override_constants/margin_bottom = 10
+
+[node name="VBoxContainer" type="VBoxContainer" parent="MarginContainer" unique_id=1864799854]
+layout_mode = 2
+
+[node name="HBoxContainer" type="HBoxContainer" parent="MarginContainer/VBoxContainer" unique_id=2034234990]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="MarginContainer/VBoxContainer/HBoxContainer" unique_id=1993706123]
+custom_minimum_size = Vector2(150, 0)
+layout_mode = 2
+text = "Value"
+
+[node name="LineEdit" type="LineEdit" parent="MarginContainer/VBoxContainer/HBoxContainer" unique_id=1037292920]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="ExpressionLineEdit" type="LineEdit" parent="MarginContainer/VBoxContainer/HBoxContainer" unique_id=1729048018]
+visible = false
+layout_mode = 2
+size_flags_horizontal = 3
+placeholder_text = "Expression"
+
+[node name="ExpressionToggle" type="Button" parent="MarginContainer/VBoxContainer/HBoxContainer" unique_id=1646318321]
+custom_minimum_size = Vector2(28, 0)
+layout_mode = 2
+tooltip_text = "Use expression"
+toggle_mode = true
+text = "fx"
+
+[node name="Description" type="RichTextLabel" parent="MarginContainer/VBoxContainer" unique_id=607376062]
+layout_mode = 2
+size_flags_vertical = 3
+text = "Insert desc here"

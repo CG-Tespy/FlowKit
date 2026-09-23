@@ -7,3 +7,4 @@ signal action_selected(node_path: String, action_id: String, action_inputs: Arra
 signal condition_selected(node_path: String, condition_id: String, condition_inputs: Array)
 signal expressions_confirmed(node_path: String, action_id: String, expressions: Dictionary)
 signal before_contents_changed(node: FKUnitUi)
+signal action_input_ui_release_requested(input_ui: FKActionInputUi)
