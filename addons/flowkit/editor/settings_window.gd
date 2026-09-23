@@ -175,6 +175,8 @@ func _apply_provider_paths():
 func _save_project_settings():
 	ResourceSaver.save(_project_settings, _project_settings_path)
 	_globals.registry.load_providers()
+	_globals.variable_editor_registry.set_project_settings(_project_settings)
+	_globals.variable_editor_registry.load_providers()
 
 func get_project_settings() -> FKProjectSettings:
 	return _project_settings

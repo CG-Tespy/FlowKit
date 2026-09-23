@@ -1,0 +1,84 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://addons/flowkit/editor/Ui/Variables/fk_node_variable_ui.gd" id="1"]
+
+[node name="NodeVariableEditor" type="HBoxContainer" node_paths=PackedStringArray("name_field", "access_scope_field", "value_field")]
+custom_minimum_size = Vector2(0, 32)
+size_flags_horizontal = 3
+script = ExtResource("1")
+name_field = NodePath("Name")
+access_scope_field = NodePath("AccessScopeHolder/AccessScope")
+value_field = NodePath("ValueHolder/Value")
+
+[node name="TypeHolder" type="Control" parent="."]
+custom_minimum_size = Vector2(100, 0)
+layout_mode = 2
+
+[node name="TypeBgColor" type="ColorRect" parent="TypeHolder"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.27450982, 0.27450982, 0.27450982, 1)
+
+[node name="TypeName" type="Label" parent="TypeHolder"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+text = "Node"
+vertical_alignment = 1
+
+[node name="Name" type="LineEdit" parent="."]
+custom_minimum_size = Vector2(160, 0)
+layout_mode = 2
+placeholder_text = "Variable name"
+
+[node name="ValueHolder" type="Control" parent="."]
+custom_minimum_size = Vector2(160, 0)
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="ValueBgColor" type="ColorRect" parent="ValueHolder"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.27387273, 0.27387273, 0.27387273, 1)
+
+[node name="Value" type="LineEdit" parent="ValueHolder"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+placeholder_text = "Relative node path"
+
+[node name="AccessScopeHolder" type="Control" parent="."]
+custom_minimum_size = Vector2(100, 0)
+layout_mode = 2
+
+[node name="AccessScopeBgColor" type="ColorRect" parent="AccessScopeHolder"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.27387273, 0.27387273, 0.27387273, 1)
+
+[node name="AccessScope" type="MenuButton" parent="AccessScopeHolder"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+text = "Scope"

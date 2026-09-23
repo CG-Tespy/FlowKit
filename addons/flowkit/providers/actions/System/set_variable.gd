@@ -8,7 +8,7 @@ func get_id() -> String:
 	return "set_variable"
 
 func get_display_name() -> String:
-	return "Set Variable"
+	return "Set Scene Variable (Old)"
 
 func get_inputs() -> Array[FKActionInput]:
 	return [_name_input, _val_input]

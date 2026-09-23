@@ -67,6 +67,8 @@ var unit_ui_signals := FKUnitUiSignals.new()
 var settings_window_signals := FKSettingsWindowSignals.new()
 var action_input_ui_factory := FKActionInputUiFactory.new(self)
 var action_input_ui_pool := FKActionInputUiPool.new(self, action_input_ui_factory)
+var variable_editor_registry := FKVariableEditorRegistry.new()
+var variable_editor_factory := FKVariableEditorFactory.new(variable_editor_registry)
 var current_scene_uid: int = 0
 
 ## Should return a SceneTree object. No args.

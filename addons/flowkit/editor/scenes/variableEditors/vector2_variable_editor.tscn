@@ -1,0 +1,96 @@
+[gd_scene format=3 uid="uid://bsvvngsha10n"]
+
+[ext_resource type="Script" uid="uid://c1444m2lxpi6m" path="res://addons/flowkit/editor/Ui/Variables/fk_vector2_variable_ui.gd" id="1"]
+
+[node name="Vector2VariableEditor" type="HBoxContainer" unique_id=374479839 node_paths=PackedStringArray("x_field", "y_field", "name_field", "access_scope_field")]
+custom_minimum_size = Vector2(600, 32)
+size_flags_horizontal = 3
+script = ExtResource("1")
+x_field = NodePath("ValueHolder/Components/X")
+y_field = NodePath("ValueHolder/Components/Y")
+name_field = NodePath("Name")
+access_scope_field = NodePath("AccessScopeHolder/AccessScope")
+
+[node name="TypeHolder" type="Control" parent="." unique_id=1547061291]
+custom_minimum_size = Vector2(100, 0)
+layout_mode = 2
+
+[node name="TypeBgColor" type="ColorRect" parent="TypeHolder" unique_id=1536810116]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.27450982, 0.27450982, 0.27450982, 1)
+
+[node name="TypeName" type="Label" parent="TypeHolder" unique_id=39592687]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+text = "Vector2"
+vertical_alignment = 1
+
+[node name="Name" type="LineEdit" parent="." unique_id=2141483411]
+custom_minimum_size = Vector2(160, 0)
+layout_mode = 2
+placeholder_text = "Variable name"
+
+[node name="ValueHolder" type="Control" parent="." unique_id=681013589]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_stretch_ratio = 2.0
+
+[node name="ValueBgColor" type="ColorRect" parent="ValueHolder" unique_id=596262980]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.27387273, 0.27387273, 0.27387273, 1)
+
+[node name="Components" type="HBoxContainer" parent="ValueHolder" unique_id=697306734]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="X" type="SpinBox" parent="ValueHolder/Components" unique_id=460605571]
+layout_mode = 2
+size_flags_horizontal = 3
+allow_greater = true
+allow_lesser = true
+
+[node name="Y" type="SpinBox" parent="ValueHolder/Components" unique_id=2105783454]
+layout_mode = 2
+size_flags_horizontal = 3
+allow_greater = true
+allow_lesser = true
+
+[node name="AccessScopeHolder" type="Control" parent="." unique_id=753656372]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="AccessScopeBgColor" type="ColorRect" parent="AccessScopeHolder" unique_id=1197635612]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.27387273, 0.27387273, 0.27387273, 1)
+
+[node name="AccessScope" type="MenuButton" parent="AccessScopeHolder" unique_id=1864507467]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+text = "Scope"

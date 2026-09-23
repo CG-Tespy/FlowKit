@@ -23,6 +23,8 @@ func _enter_tree() -> void:
 	_prep_settings_window()
 	action_registry.set_project_settings(settings_window.get_project_settings())
 	action_registry.load_providers()
+	editor_globals.variable_editor_registry.set_project_settings(settings_window.get_project_settings())
+	editor_globals.variable_editor_registry.load_providers()
 	_prep_main_editor()
 	_prep_tool_submenu_entries()
 	_add_runtime_autoloads()
