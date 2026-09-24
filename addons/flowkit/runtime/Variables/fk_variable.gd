@@ -37,11 +37,14 @@ func var_name() -> String:
 func get_value() -> Variant:
 	return null
 
+## If the value was accepted, returns true. If not, returns false.
 func set_value(new_val: Variant) -> bool:
+	# Since what we were given might not be valid...
 	if not compatible_with_type_of(new_val):
 		_report_val_incompatibility(new_val)
 		return false
 
+	# At this point, we can be sure that the new val is valid.
 	_set_for_our_type(new_val)
 	emit_changed()
 	return true

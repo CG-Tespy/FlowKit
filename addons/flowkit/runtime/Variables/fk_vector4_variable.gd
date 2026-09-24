@@ -5,9 +5,21 @@ class_name FKVector4Variable
 
 func category() -> String:
 	return "Numeric/Structured"
-	
+
 func get_value() -> Vector4:
 	return value
+
+func x() -> float:
+	return value.x
+
+func y() -> float:
+	return value.y
+
+func z() -> float:
+	return value.z 
+
+func w() -> float:
+	return value.w
 
 func compatible_with_type_of(new_val: Variant) -> bool:
 	return new_val is Vector4

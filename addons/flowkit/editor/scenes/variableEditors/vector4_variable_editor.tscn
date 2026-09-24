@@ -11,9 +11,9 @@ x_field = NodePath("ValueHolder/Components/X")
 y_field = NodePath("ValueHolder/Components/Y")
 z_field = NodePath("ValueHolder/Components/Z")
 w_field = NodePath("ValueHolder/Components/W")
-type_display_name = "VecFour"
 name_field = NodePath("NameMargin/Name")
 access_scope_field = NodePath("AccessScopeMargin/AccessScopeHolder/AccessScope")
+type_display_name = "VecFour"
 
 [node name="TypeHolderMargin" type="MarginContainer" parent="." unique_id=1652528467]
 layout_mode = 2

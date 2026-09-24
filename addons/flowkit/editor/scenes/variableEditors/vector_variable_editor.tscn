@@ -1,0 +1,153 @@
+[gd_scene format=3 uid="uid://cs4cevi3cerld"]
+
+[ext_resource type="Script" uid="uid://cai4ky4n7l8sc" path="res://addons/flowkit/editor/Ui/Variables/fk_vector_variable_ui.gd" id="1_2do87"]
+[ext_resource type="StyleBox" uid="uid://cvovw3ks5tvxg" path="res://addons/flowkit/editor/styles/numeric_var_ui_type_name_style.tres" id="2_2nthd"]
+
+[node name="VectorVariableEditor" type="Control" unique_id=944322280 node_paths=PackedStringArray("x_field", "y_field", "z_field", "w_field", "axis_count_field", "whole_nums_only", "name_field", "access_scope_field")]
+layout_mode = 3
+anchors_preset = 0
+offset_right = 680.0
+offset_bottom = 75.0
+size_flags_horizontal = 3
+script = ExtResource("1_2do87")
+x_field = NodePath("VBoxContainer/ValueHolder/Components/X")
+y_field = NodePath("VBoxContainer/ValueHolder/Components/Y")
+z_field = NodePath("VBoxContainer/ValueHolder/Components/Z")
+w_field = NodePath("VBoxContainer/ValueHolder/Components/W")
+axis_count_field = NodePath("VBoxContainer/FirstRow/AxisCount")
+whole_nums_only = NodePath("VBoxContainer/FirstRow/CheckBox")
+name_field = NodePath("VBoxContainer/FirstRow/Name")
+access_scope_field = NodePath("VBoxContainer/FirstRow/AccessScopeHolder/AccessScope")
+
+[node name="VBoxContainer" type="VBoxContainer" parent="." unique_id=565552434]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="FirstRow" type="HBoxContainer" parent="VBoxContainer" unique_id=1830671689]
+custom_minimum_size = Vector2(500, 0)
+layout_mode = 2
+size_flags_horizontal = 0
+
+[node name="TypeHolder" type="Control" parent="VBoxContainer/FirstRow" unique_id=1461301226]
+custom_minimum_size = Vector2(100, 0)
+layout_mode = 2
+
+[node name="TypeBgColor" type="Panel" parent="VBoxContainer/FirstRow/TypeHolder" unique_id=1523766659]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_styles/panel = ExtResource("2_2nthd")
+
+[node name="MarginContainer" type="MarginContainer" parent="VBoxContainer/FirstRow/TypeHolder" unique_id=1437752228]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/margin_left = 5
+
+[node name="TypeName" type="Label" parent="VBoxContainer/FirstRow/TypeHolder/MarginContainer" unique_id=1760214183]
+layout_mode = 2
+text = "Vector"
+vertical_alignment = 1
+
+[node name="Name" type="LineEdit" parent="VBoxContainer/FirstRow" unique_id=1530576940]
+custom_minimum_size = Vector2(160, 0)
+layout_mode = 2
+placeholder_text = "Variable name"
+
+[node name="AccessScopeHolder" type="Control" parent="VBoxContainer/FirstRow" unique_id=381096323]
+custom_minimum_size = Vector2(100, 0)
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_stretch_ratio = 0.7
+
+[node name="AccessScopeBgColor" type="ColorRect" parent="VBoxContainer/FirstRow/AccessScopeHolder" unique_id=1481214970]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.27387273, 0.27387273, 0.27387273, 1)
+
+[node name="AccessScope" type="MenuButton" parent="VBoxContainer/FirstRow/AccessScopeHolder" unique_id=1220755329]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+text = "Scope"
+
+[node name="AxisCount" type="SpinBox" parent="VBoxContainer/FirstRow" unique_id=719299871]
+custom_minimum_size = Vector2(55, 0)
+layout_mode = 2
+size_flags_horizontal = 3
+min_value = 2.0
+max_value = 4.0
+value = 3.0
+prefix = "Axes:"
+
+[node name="CheckBox" type="CheckBox" parent="VBoxContainer/FirstRow" unique_id=780103042]
+layout_mode = 2
+text = "Whole Nums Only?"
+
+[node name="ValueHolder" type="Control" parent="VBoxContainer" unique_id=718673776]
+custom_minimum_size = Vector2(160, 35)
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="ValueBgColor" type="ColorRect" parent="VBoxContainer/ValueHolder" unique_id=1036374294]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.27387273, 0.27387273, 0.27387273, 1)
+
+[node name="Components" type="HBoxContainer" parent="VBoxContainer/ValueHolder" unique_id=1521422700]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="X" type="SpinBox" parent="VBoxContainer/ValueHolder/Components" unique_id=2060172230]
+layout_mode = 2
+size_flags_horizontal = 3
+allow_greater = true
+allow_lesser = true
+prefix = "X"
+
+[node name="Y" type="SpinBox" parent="VBoxContainer/ValueHolder/Components" unique_id=1478019528]
+layout_mode = 2
+size_flags_horizontal = 3
+allow_greater = true
+allow_lesser = true
+prefix = "Y"
+
+[node name="Z" type="SpinBox" parent="VBoxContainer/ValueHolder/Components" unique_id=748527338]
+layout_mode = 2
+size_flags_horizontal = 3
+allow_greater = true
+allow_lesser = true
+prefix = "Z"
+
+[node name="W" type="SpinBox" parent="VBoxContainer/ValueHolder/Components" unique_id=974449524]
+visible = false
+layout_mode = 2
+size_flags_horizontal = 3
+allow_greater = true
+allow_lesser = true
+prefix = "W"
