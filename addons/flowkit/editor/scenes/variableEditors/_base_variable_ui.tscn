@@ -3,7 +3,7 @@
 [ext_resource type="Script" uid="uid://cqvyxj0pnalc7" path="res://addons/flowkit/editor/Ui/Variables/fk_bool_variable_ui.gd" id="1"]
 
 [node name="BaseVariableUi" type="HBoxContainer" unique_id=67729021 node_paths=PackedStringArray("value_field", "name_field", "access_scope_field")]
-custom_minimum_size = Vector2(600, 32)
+custom_minimum_size = Vector2(680, 32)
 offset_right = 134.0
 offset_bottom = 32.0
 size_flags_horizontal = 3
@@ -68,6 +68,7 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 size_flags_horizontal = 3
+text = "Off"
 
 [node name="AccessScopeHolder" type="Control" parent="." unique_id=1139663145]
 custom_minimum_size = Vector2(100, 0)

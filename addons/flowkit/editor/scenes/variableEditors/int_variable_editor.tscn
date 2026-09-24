@@ -1,20 +1,20 @@
-[gd_scene format=3]
+[gd_scene format=3 uid="uid://w4kpa5oi2o13"]
 
-[ext_resource type="Script" path="res://addons/flowkit/editor/Ui/Variables/fk_int_variable_ui.gd" id="1"]
+[ext_resource type="Script" uid="uid://bv1hkgmkwmudq" path="res://addons/flowkit/editor/Ui/Variables/fk_int_variable_ui.gd" id="1"]
 
-[node name="IntVariableEditor" type="HBoxContainer" node_paths=PackedStringArray("name_field", "access_scope_field", "value_field")]
-custom_minimum_size = Vector2(0, 32)
+[node name="IntVariableEditor" type="HBoxContainer" unique_id=347497364 node_paths=PackedStringArray("value_field", "name_field", "access_scope_field")]
+custom_minimum_size = Vector2(600, 32)
 size_flags_horizontal = 3
 script = ExtResource("1")
+value_field = NodePath("ValueHolder/Value")
 name_field = NodePath("Name")
 access_scope_field = NodePath("AccessScopeHolder/AccessScope")
-value_field = NodePath("ValueHolder/Value")
 
-[node name="TypeHolder" type="Control" parent="."]
+[node name="TypeHolder" type="Control" parent="." unique_id=1702680093]
 custom_minimum_size = Vector2(100, 0)
 layout_mode = 2
 
-[node name="TypeBgColor" type="ColorRect" parent="TypeHolder"]
+[node name="TypeBgColor" type="ColorRect" parent="TypeHolder" unique_id=650692399]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -23,7 +23,7 @@ grow_horizontal = 2
 grow_vertical = 2
 color = Color(0.27450982, 0.27450982, 0.27450982, 1)
 
-[node name="MarginContainer" type="MarginContainer" parent="TypeHolder"]
+[node name="MarginContainer" type="MarginContainer" parent="TypeHolder" unique_id=1959168259]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -32,23 +32,24 @@ grow_horizontal = 2
 grow_vertical = 2
 theme_override_constants/margin_left = 5
 
-[node name="TypeName" type="Label" parent="TypeHolder/MarginContainer"]
+[node name="TypeName" type="Label" parent="TypeHolder/MarginContainer" unique_id=1682868133]
 layout_mode = 2
 text = "Int"
 vertical_alignment = 1
 
-[node name="Name" type="LineEdit" parent="."]
+[node name="Name" type="LineEdit" parent="." unique_id=407713936]
 custom_minimum_size = Vector2(160, 0)
 layout_mode = 2
 placeholder_text = "Variable name"
 caret_blink = true
 
-[node name="ValueHolder" type="Control" parent="."]
+[node name="ValueHolder" type="Control" parent="." unique_id=1497768276]
 custom_minimum_size = Vector2(160, 0)
 layout_mode = 2
 size_flags_horizontal = 3
+size_flags_stretch_ratio = 2.0
 
-[node name="ValueBgColor" type="ColorRect" parent="ValueHolder"]
+[node name="ValueBgColor" type="ColorRect" parent="ValueHolder" unique_id=948242513]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -57,22 +58,24 @@ grow_horizontal = 2
 grow_vertical = 2
 color = Color(0.27387273, 0.27387273, 0.27387273, 1)
 
-[node name="Value" type="SpinBox" parent="ValueHolder"]
+[node name="Value" type="SpinBox" parent="ValueHolder" unique_id=1857805179]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
+rounded = true
 allow_greater = true
 allow_lesser = true
-rounded = true
 
-[node name="AccessScopeHolder" type="Control" parent="."]
+[node name="AccessScopeHolder" type="Control" parent="." unique_id=522111402]
 custom_minimum_size = Vector2(100, 0)
 layout_mode = 2
+size_flags_horizontal = 3
+size_flags_stretch_ratio = 0.7
 
-[node name="AccessScopeBgColor" type="ColorRect" parent="AccessScopeHolder"]
+[node name="AccessScopeBgColor" type="ColorRect" parent="AccessScopeHolder" unique_id=530982609]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -81,7 +84,7 @@ grow_horizontal = 2
 grow_vertical = 2
 color = Color(0.27387273, 0.27387273, 0.27387273, 1)
 
-[node name="AccessScope" type="MenuButton" parent="AccessScopeHolder"]
+[node name="AccessScope" type="MenuButton" parent="AccessScopeHolder" unique_id=1475498656]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
