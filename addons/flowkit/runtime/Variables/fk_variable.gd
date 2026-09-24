@@ -6,11 +6,28 @@ class_name FKVariable
 
 ## Name of the variable.
 @export var key: String = ""
+
+## Helps control what can access this.
 @export var scope := FKAccessScope.Keys.PRIVATE
 
 ## Helps uniquely identify this FKVariable relative to the others owned
 ## by the same owner.
 @export var id: int
+
+## Class-specific metadata for the editor.
+
+## Helps sort this in the var-type-selection menu.
+func category() -> String:
+	return ""
+
+## For variable types that are outdated, test-only, or that otherwise shouldn't be 
+## used in projects outside FK's repo.
+func hide_from_users() -> bool:
+	return false
+
+func type_display_name() -> String:
+	printerr("[%s] Needs to override type_display_name." % self.get_class())
+	return ""
 
 ## Alias for the key
 func var_name() -> String:
@@ -89,3 +106,5 @@ func _to_string() -> String:
 func get_class() -> String:
 	return "FKVariable"
 
+func get_real_class():
+	return self.get_class()

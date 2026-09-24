@@ -3,6 +3,12 @@ class_name FKVector2Variable
 
 @export var value: Vector2 = Vector2.ZERO
 
+func category() -> String:
+	return "Numeric/Structured"
+
+func hide_from_users() -> bool:
+	return true
+	
 func get_value() -> Vector2:
 	return value
 

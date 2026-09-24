@@ -3,8 +3,14 @@ class_name FKIntVariable
 
 @export var value: int = 0
 
+func category() -> String:
+	return "Numeric"
+
 func get_value() -> int:
 	return value
+
+func hide_from_users() -> bool:
+	return true
 
 func compatible_with_type_of(new_val: Variant) -> bool:
 	return new_val is int or new_val is float

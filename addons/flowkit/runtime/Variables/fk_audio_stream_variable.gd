@@ -3,6 +3,12 @@ class_name FKAudioStreamVariable
 
 @export var value: AudioStream
 
+func category() -> String:
+	return "Audio"
+
+func type_display_name() -> String:
+	return "AudioStream"
+
 func get_value() -> AudioStream:
 	return value
 

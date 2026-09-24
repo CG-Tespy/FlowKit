@@ -3,6 +3,12 @@ class_name FKStringVariable
 
 @export var value: String = ""
 
+func category() -> String:
+	return "Graphics"
+
+func type_display_name() -> String:
+	return "String"
+
 func get_value() -> String:
 	return value
 

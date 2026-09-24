@@ -3,6 +3,12 @@ class_name FKBoolVariable
 
 @export var value: bool = false
 
+func category() -> String:
+	return "Numeric"
+
+func type_display_name() -> String:
+	return "Bool"
+
 func get_value() -> bool:
 	return value
 

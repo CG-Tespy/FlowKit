@@ -3,6 +3,12 @@ class_name FKNodeVariable
 
 @export var value: NodePath = NodePath()
 
+func category() -> String:
+	return "General"
+
+func type_display_name() -> String:
+	return "Node"
+
 func get_value() -> Node:
 	var owner := get_owner() as Node
 	if owner == null or value.is_empty():

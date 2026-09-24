@@ -1,0 +1,79 @@
+[gd_scene format=3 uid="uid://bu8lvpv4guh73"]
+
+[ext_resource type="Script" uid="uid://h2bu77q1c4y4" path="res://addons/flowkit/editor/Ui/modals/variable_editor_modal.gd" id="1_ajk4l"]
+
+[node name="VariableEditorModal" type="Window" unique_id=396292969 node_paths=PackedStringArray("var_ui_holder", "add_button", "save_button", "cancel_button")]
+oversampling_override = 1.0
+title = "Variables"
+initial_position = 1
+size = Vector2i(700, 500)
+script = ExtResource("1_ajk4l")
+var_ui_holder = NodePath("LayoutMargin/OuterLayout/Scroll/VarUiHolder")
+add_button = NodePath("LayoutMargin/OuterLayout/BottomSection/AddVarButton")
+save_button = NodePath("LayoutMargin/OuterLayout/BottomSection/SaveChangesButton")
+cancel_button = NodePath("LayoutMargin/OuterLayout/BottomSection/CancelButton")
+
+[node name="LayoutMargin" type="MarginContainer" parent="." unique_id=833217069]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/margin_left = 5
+theme_override_constants/margin_top = 5
+theme_override_constants/margin_right = 5
+theme_override_constants/margin_bottom = 5
+
+[node name="OuterLayout" type="VBoxContainer" parent="LayoutMargin" unique_id=194679157]
+layout_mode = 2
+
+[node name="Scroll" type="ScrollContainer" parent="LayoutMargin/OuterLayout" unique_id=1140479621]
+custom_minimum_size = Vector2(0, 450)
+layout_mode = 2
+
+[node name="VarUiHolder" type="VBoxContainer" parent="LayoutMargin/OuterLayout/Scroll" unique_id=510828074]
+custom_minimum_size = Vector2(0, 450)
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 6
+
+[node name="BottomSection" type="HBoxContainer" parent="LayoutMargin/OuterLayout" unique_id=1390796407]
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_constants/separation = 12
+
+[node name="CancelButton" type="Button" parent="LayoutMargin/OuterLayout/BottomSection" unique_id=1230522465]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_stretch_ratio = 0.5
+text = "Cancel"
+
+[node name="SaveChangesButton" type="MenuButton" parent="LayoutMargin/OuterLayout/BottomSection" unique_id=692716608]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Save Changes"
+
+[node name="SaveChangesBg" type="Panel" parent="LayoutMargin/OuterLayout/BottomSection/SaveChangesButton" unique_id=661751746]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="Label" type="Label" parent="LayoutMargin/OuterLayout/BottomSection/SaveChangesButton" unique_id=1416414964]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+text = "Save Changes"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="AddVarButton" type="Button" parent="LayoutMargin/OuterLayout/BottomSection" unique_id=794529088]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Add"

@@ -2,8 +2,13 @@
 extends Control
 class_name FKVariableUi
 
+@export_category("Controls")
 @export var name_field: LineEdit
 @export var access_scope_field: MenuButton
+
+@export_category("Metadata")
+## Shown when selecting a var type to add to a holder
+@export var type_display_name: String = ""
 
 func legitimize() -> void:
 	if not _is_editor_preview:

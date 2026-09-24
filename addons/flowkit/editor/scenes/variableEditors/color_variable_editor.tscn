@@ -1,12 +1,14 @@
 [gd_scene format=3 uid="uid://x7k1wkn3tmlt"]
 
 [ext_resource type="Script" uid="uid://c5y6pr5lwy8gw" path="res://addons/flowkit/editor/Ui/Variables/fk_color_variable_ui.gd" id="1"]
+[ext_resource type="StyleBox" uid="uid://dtc3xhc885ld8" path="res://addons/flowkit/editor/styles/graphical_var_ui_type_name_style.tres" id="2_cufet"]
 
 [node name="ColorVariableEditor" type="HBoxContainer" unique_id=1579864267 node_paths=PackedStringArray("value_field", "name_field", "access_scope_field")]
 custom_minimum_size = Vector2(680, 32)
 size_flags_horizontal = 3
 script = ExtResource("1")
 value_field = NodePath("ValueHolder/Value")
+type_display_name = "Color"
 name_field = NodePath("Name")
 access_scope_field = NodePath("AccessScopeHolder/AccessScope")
 
@@ -14,14 +16,14 @@ access_scope_field = NodePath("AccessScopeHolder/AccessScope")
 custom_minimum_size = Vector2(100, 0)
 layout_mode = 2
 
-[node name="TypeBgColor" type="ColorRect" parent="TypeHolder" unique_id=1431292631]
+[node name="TypeBgColor" type="Panel" parent="TypeHolder" unique_id=1978697364]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-color = Color(0.27450982, 0.27450982, 0.27450982, 1)
+theme_override_styles/panel = ExtResource("2_cufet")
 
 [node name="MarginContainer" type="MarginContainer" parent="TypeHolder" unique_id=1277179554]
 layout_mode = 1

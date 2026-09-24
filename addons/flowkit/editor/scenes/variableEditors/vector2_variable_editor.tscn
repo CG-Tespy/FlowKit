@@ -1,6 +1,7 @@
 [gd_scene format=3 uid="uid://bsvvngsha10n"]
 
 [ext_resource type="Script" uid="uid://c1444m2lxpi6m" path="res://addons/flowkit/editor/Ui/Variables/fk_vector2_variable_ui.gd" id="1"]
+[ext_resource type="StyleBox" uid="uid://cvovw3ks5tvxg" path="res://addons/flowkit/editor/styles/numeric_var_ui_type_name_style.tres" id="2_30jn0"]
 
 [node name="Vector2VariableEditor" type="HBoxContainer" unique_id=374479839 node_paths=PackedStringArray("x_field", "y_field", "name_field", "access_scope_field")]
 custom_minimum_size = Vector2(600, 32)
@@ -8,6 +9,7 @@ size_flags_horizontal = 3
 script = ExtResource("1")
 x_field = NodePath("ValueHolder/Components/X")
 y_field = NodePath("ValueHolder/Components/Y")
+type_display_name = "VecTwo"
 name_field = NodePath("Name")
 access_scope_field = NodePath("AccessScopeHolder/AccessScope")
 
@@ -15,14 +17,14 @@ access_scope_field = NodePath("AccessScopeHolder/AccessScope")
 custom_minimum_size = Vector2(100, 0)
 layout_mode = 2
 
-[node name="TypeBgColor" type="ColorRect" parent="TypeHolder" unique_id=1536810116]
+[node name="TypeBgColor" type="Panel" parent="TypeHolder" unique_id=1928820835]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-color = Color(0.27450982, 0.27450982, 0.27450982, 1)
+theme_override_styles/panel = ExtResource("2_30jn0")
 
 [node name="MarginContainer" type="MarginContainer" parent="TypeHolder" unique_id=147240738]
 layout_mode = 1
@@ -35,7 +37,7 @@ theme_override_constants/margin_left = 5
 
 [node name="TypeName" type="Label" parent="TypeHolder/MarginContainer" unique_id=39592687]
 layout_mode = 2
-text = "Vector2"
+text = "VecTwo"
 vertical_alignment = 1
 
 [node name="Name" type="LineEdit" parent="." unique_id=2141483411]

@@ -1,6 +1,7 @@
 [gd_scene format=3 uid="uid://bopt7m5eig6rp"]
 
 [ext_resource type="Script" uid="uid://cs38q44xqqhya" path="res://addons/flowkit/editor/Ui/Variables/fk_vector4_variable_ui.gd" id="1"]
+[ext_resource type="StyleBox" uid="uid://cvovw3ks5tvxg" path="res://addons/flowkit/editor/styles/numeric_var_ui_type_name_style.tres" id="2_io68v"]
 
 [node name="Vector4VariableEditor" type="HBoxContainer" unique_id=1698249114 node_paths=PackedStringArray("x_field", "y_field", "z_field", "w_field", "name_field", "access_scope_field")]
 custom_minimum_size = Vector2(680, 32)
@@ -10,6 +11,7 @@ x_field = NodePath("ValueHolder/Components/X")
 y_field = NodePath("ValueHolder/Components/Y")
 z_field = NodePath("ValueHolder/Components/Z")
 w_field = NodePath("ValueHolder/Components/W")
+type_display_name = "VecFour"
 name_field = NodePath("NameMargin/Name")
 access_scope_field = NodePath("AccessScopeMargin/AccessScopeHolder/AccessScope")
 
@@ -21,14 +23,14 @@ theme_override_constants/margin_bottom = 45
 custom_minimum_size = Vector2(100, 0)
 layout_mode = 2
 
-[node name="TypeBgColor" type="ColorRect" parent="TypeHolderMargin/TypeHolder" unique_id=1160919334]
+[node name="TypeBgColor" type="Panel" parent="TypeHolderMargin/TypeHolder" unique_id=1523766659]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-color = Color(0.27450982, 0.27450982, 0.27450982, 1)
+theme_override_styles/panel = ExtResource("2_io68v")
 
 [node name="MarginContainer" type="MarginContainer" parent="TypeHolderMargin/TypeHolder" unique_id=1437752228]
 layout_mode = 1
@@ -41,7 +43,7 @@ theme_override_constants/margin_left = 5
 
 [node name="TypeName" type="Label" parent="TypeHolderMargin/TypeHolder/MarginContainer" unique_id=1760214183]
 layout_mode = 2
-text = "Vector4"
+text = "VecFour"
 vertical_alignment = 1
 
 [node name="NameMargin" type="MarginContainer" parent="." unique_id=1248748321]

@@ -1,12 +1,14 @@
 [gd_scene format=3 uid="uid://ds2wq0eowx2e2"]
 
 [ext_resource type="Script" uid="uid://c71ostkxoac8q" path="res://addons/flowkit/editor/Ui/Variables/fk_float_variable_ui.gd" id="1"]
+[ext_resource type="StyleBox" uid="uid://cvovw3ks5tvxg" path="res://addons/flowkit/editor/styles/numeric_var_ui_type_name_style.tres" id="2_2nypv"]
 
 [node name="FloatVariableEditor" type="HBoxContainer" unique_id=943776813 node_paths=PackedStringArray("value_field", "name_field", "access_scope_field")]
 custom_minimum_size = Vector2(600, 32)
 size_flags_horizontal = 3
 script = ExtResource("1")
 value_field = NodePath("ValueHolder/Value")
+type_display_name = "Float"
 name_field = NodePath("Name")
 access_scope_field = NodePath("AccessScopeHolder/AccessScope")
 
@@ -14,14 +16,14 @@ access_scope_field = NodePath("AccessScopeHolder/AccessScope")
 custom_minimum_size = Vector2(100, 0)
 layout_mode = 2
 
-[node name="TypeBgColor" type="ColorRect" parent="TypeHolder" unique_id=855297549]
+[node name="TypeBgColor" type="Panel" parent="TypeHolder" unique_id=258018094]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-color = Color(0.27450982, 0.27450982, 0.27450982, 1)
+theme_override_styles/panel = ExtResource("2_2nypv")
 
 [node name="MarginContainer" type="MarginContainer" parent="TypeHolder" unique_id=1013421034]
 layout_mode = 1

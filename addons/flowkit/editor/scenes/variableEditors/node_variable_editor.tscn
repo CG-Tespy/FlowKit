@@ -7,6 +7,7 @@ custom_minimum_size = Vector2(600, 32)
 size_flags_horizontal = 3
 script = ExtResource("1")
 value_field = NodePath("ValueHolder/Value")
+type_display_name = "Node"
 name_field = NodePath("Name")
 access_scope_field = NodePath("AccessScopeHolder/AccessScope")
 

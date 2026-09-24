@@ -3,6 +3,9 @@ class_name FKVector4Variable
 
 @export var value: Vector4 = Vector4.ZERO
 
+func category() -> String:
+	return "Numeric/Structured"
+	
 func get_value() -> Vector4:
 	return value
 

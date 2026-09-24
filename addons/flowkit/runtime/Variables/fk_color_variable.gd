@@ -3,6 +3,12 @@ class_name FKColorVariable
 
 @export var value: Color = Color.WHITE
 
+func category() -> String:
+	return "Graphics"
+
+func type_display_name() -> String:
+	return "Color"
+
 func get_value() -> Color:
 	return value
 
