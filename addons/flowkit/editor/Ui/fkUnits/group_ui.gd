@@ -4,8 +4,8 @@ class_name FKGroupUi
 
 ## Collapsible group block for organizing events, comments, and nested groups.
 
-signal add_event_requested(group_node)
-signal add_comment_requested(group_node)
+signal add_event_requested(group_node: FKGroupUi)
+signal add_comment_requested(group_node: FKGroupUi)
 
 signal condition_edit_requested(condition_item, row)
 signal action_edit_requested(action_item, row)
@@ -530,7 +530,7 @@ func _on_context_menu_id_pressed(id: int) -> void:
 	match id:
 		MenuChoices.START_TITLE_EDIT: _start_title_edit()
 		MenuChoices.SHOW_COLOR_PICKER: _show_color_picker()
-		MenuChoices.DELETE_REQUESTED: delete_requested.emit()
+		MenuChoices.DELETE_REQUESTED: delete_requested.emit(self)
 		MenuChoices.ADD_EVENT_REQUESTED: add_event_requested.emit(self)
 		MenuChoices.ADD_COMMENT_TO_GROUP: _add_comment_to_group()
 
