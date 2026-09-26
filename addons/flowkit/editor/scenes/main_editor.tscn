@@ -1,7 +1,7 @@
 [gd_scene format=3 uid="uid://d1uy22pv42td3"]
 
 [ext_resource type="Script" uid="uid://bwh2bhg4rvhcx" path="res://addons/flowkit/editor/Ui/main_editor.gd" id="1_gkvd7"]
-[ext_resource type="Script" uid="uid://dg46wtoo70ju2" path="res://addons/flowkit/editor/Ui/menu_bar.gd" id="2_cq0bt"]
+[ext_resource type="Script" uid="uid://dg46wtoo70ju2" path="res://addons/flowkit/editor/Ui/sheet_editor_menu_bar.gd" id="2_cq0bt"]
 [ext_resource type="Script" uid="uid://d3kkt2ew5wf7j" path="res://addons/flowkit/editor/Ui/blocks_container_ui.gd" id="3_xf0se"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_bg"]
@@ -64,13 +64,19 @@ theme_override_constants/margin_bottom = 0
 layout_mode = 2
 theme_override_constants/separation = 8
 
-[node name="MenuBar" type="MenuBar" parent="OuterVBox/TopMargin/TopBar" unique_id=538833993]
+[node name="MenuBar" type="MenuBar" parent="OuterVBox/TopMargin/TopBar" unique_id=538833993 node_paths=PackedStringArray("file_menu", "edit_menu", "variable_menu", "add_comment_btn", "add_group_btn")]
 layout_mode = 2
+size_flags_horizontal = 3
 script = ExtResource("2_cq0bt")
+file_menu = NodePath("File")
+edit_menu = NodePath("Edit")
+variable_menu = NodePath("Variables")
+add_comment_btn = NodePath("AddCommentButton")
+add_group_btn = NodePath("AddGroupButton")
 
 [node name="File" type="PopupMenu" parent="OuterVBox/TopMargin/TopBar/MenuBar" unique_id=696855516]
 oversampling_override = 1.0
-size = Vector2i(150, 120)
+size = Vector2i(172, 120)
 item_count = 2
 item_0/text = "New Event Sheet"
 item_0/id = 0
@@ -79,29 +85,40 @@ item_1/id = 1
 
 [node name="Edit" type="PopupMenu" parent="OuterVBox/TopMargin/TopBar/MenuBar" unique_id=341846292]
 oversampling_override = 1.0
-size = Vector2i(150, 180)
+size = Vector2i(478, 180)
 item_count = 5
 item_0/text = "Undo (Ctrl+Z)"
 item_0/id = 0
 item_1/text = "Redo (Ctrl+Shift+Z)"
 item_1/id = 1
+item_2/text = "　　　　　　"
 item_2/id = -1
+item_2/disabled = true
 item_2/separator = true
 item_3/text = "Generate Events/Conditions/Actions (MAY BE UNSTABLE)"
 item_3/id = 2
 item_4/text = "Generate Provider Manifest (for Export)"
 item_4/id = 3
 
-[node name="AddCommentButton" type="Button" parent="OuterVBox/TopMargin/TopBar" unique_id=1151977613]
-layout_mode = 2
+[node name="Variables" type="PopupMenu" parent="OuterVBox/TopMargin/TopBar/MenuBar" unique_id=1582286416]
+title = "Variables"
+
+[node name="AddCommentButton" type="Button" parent="OuterVBox/TopMargin/TopBar/MenuBar" unique_id=1151977613]
+layout_mode = 0
+offset_left = 1060.0
+offset_right = 1090.0
+offset_bottom = 31.0
 tooltip_text = "Add Comment"
 theme_override_colors/font_color = Color(0.85, 0.75, 0.2, 1)
 theme_override_font_sizes/font_size = 16
 text = "📝"
 flat = true
 
-[node name="AddGroupButton" type="Button" parent="OuterVBox/TopMargin/TopBar" unique_id=647018670]
-layout_mode = 2
+[node name="AddGroupButton" type="Button" parent="OuterVBox/TopMargin/TopBar/MenuBar" unique_id=647018670]
+layout_mode = 0
+offset_left = 1098.0
+offset_right = 1128.0
+offset_bottom = 31.0
 tooltip_text = "Add Group"
 theme_override_colors/font_color = Color(0.4, 0.7, 1, 1)
 theme_override_font_sizes/font_size = 16
@@ -158,14 +175,3 @@ theme_override_styles/normal = SubResource("StyleBoxFlat_button")
 theme_override_styles/pressed = SubResource("StyleBoxFlat_button")
 theme_override_styles/hover = SubResource("StyleBoxFlat_button")
 text = "➕ Add Event"
-
-[connection signal="generate_manifest" from="OuterVBox/TopMargin/TopBar/MenuBar" to="." method="_on_generate_manifest"]
-[connection signal="generate_providers" from="OuterVBox/TopMargin/TopBar/MenuBar" to="." method="_on_generate_providers"]
-[connection signal="new_sheet" from="OuterVBox/TopMargin/TopBar/MenuBar" to="." method="_on_new_sheet"]
-[connection signal="redo_requested" from="OuterVBox/TopMargin/TopBar/MenuBar" to="." method="_redo"]
-[connection signal="save_sheet" from="OuterVBox/TopMargin/TopBar/MenuBar" to="." method="_on_save_sheet"]
-[connection signal="undo_requested" from="OuterVBox/TopMargin/TopBar/MenuBar" to="." method="_undo"]
-[connection signal="id_pressed" from="OuterVBox/TopMargin/TopBar/MenuBar/File" to="OuterVBox/TopMargin/TopBar/MenuBar" method="_on_file_id_pressed"]
-[connection signal="id_pressed" from="OuterVBox/TopMargin/TopBar/MenuBar/Edit" to="OuterVBox/TopMargin/TopBar/MenuBar" method="_on_edit_id_pressed"]
-[connection signal="pressed" from="OuterVBox/TopMargin/TopBar/AddCommentButton" to="." method="_on_add_comment_button_pressed"]
-[connection signal="pressed" from="OuterVBox/TopMargin/TopBar/AddGroupButton" to="." method="_on_add_group_button_pressed"]

@@ -12,7 +12,7 @@ class_name FKMainEditor
 @export var blocks_container: FKUnitContainerUi
 @export var empty_label: Label
 @export var add_event_btn: Button
-@export var menu_bar: FKMenuBar
+@export var menu_bar: FKSheetEditorMenuBar
 
 # Drag spacer state
 var drag_spacer_top: Control = null  # Temporary spacer at top during drag
@@ -138,12 +138,30 @@ func _toggle_subs(on: bool):
 		# For undo state on drag-and-drop reorder
 		visibility_changed.connect(_on_visibility_changed)
 		blocks_container.before_unit_moved.connect(_push_undo_state)
-		menu_bar.save_sheet.connect(_save_sheet)
+
+		menu_bar.save_sheet_requested.connect(_save_sheet)
+		menu_bar.add_comment_requested.connect(_on_add_comment_button_pressed)
+		menu_bar.add_group_requested.connect(_on_add_group_button_pressed)
+		menu_bar.manifest_generation_requested.connect(_on_generate_manifest)
+		menu_bar.provider_generation_requested.connect(_on_generate_providers)
+		menu_bar.new_sheet_requested.connect(_on_new_sheet)
+		menu_bar.redo_requested.connect(redo)
+		menu_bar.undo_requested.connect(_undo)
+
 		add_event_btn.pressed.connect(_on_add_event_button_pressed)
 	elif !on and _is_subbed:
 		visibility_changed.disconnect(_on_visibility_changed)
 		blocks_container.before_unit_moved.disconnect(_push_undo_state)
-		menu_bar.save_sheet.disconnect(_save_sheet)
+
+		menu_bar.save_sheet_requested.disconnect(_save_sheet)
+		menu_bar.add_comment_requested.disconnect(_on_add_comment_button_pressed)
+		menu_bar.add_group_requested.disconnect(_on_add_group_button_pressed)
+		menu_bar.manifest_generation_requested.disconnect(_on_generate_manifest)
+		menu_bar.provider_generation_requested.disconnect(_on_generate_providers)
+		menu_bar.new_sheet_requested.disconnect(_on_new_sheet)
+		menu_bar.redo_requested.disconnect(redo)
+		menu_bar.undo_requested.disconnect(_undo)
+
 		add_event_btn.pressed.disconnect(_on_add_event_button_pressed)
 	else:
 		return
