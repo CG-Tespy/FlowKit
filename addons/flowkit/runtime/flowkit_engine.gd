@@ -292,11 +292,9 @@ func _run_sheet(entry: SheetEntry) -> void:
 # --- Signal event lifecycle -------------------------------------------------
 
 ## Set up signal-based events for a loaded sheet entry.
-## For each FKEventUnit, calls registry.setup_event() with a trigger callback
-## so signal events can connect to Godot signals and fire immediately.
-## Set up signal-based events for a loaded sheet entry.
-## For each FKEventUnit, calls provider.setup() with a trigger callback
-## so signal events can connect to Godot signals and fire immediately.
+## For each FKEventUnit, evaluates its configured inputs and calls
+## provider.setup_with_inputs() with a trigger callback so signal events can
+## connect to Godot signals and fire immediately.
 func _setup_signal_events(entry: SheetEntry) -> void:
 	var sheet: FKEventSheet = entry.sheet
 	var root_node: Node = entry.root
@@ -327,7 +325,12 @@ func _setup_signal_events(entry: SheetEntry) -> void:
 
 		# Build a trigger callback that runs this unit's conditions & actions
 		var trigger_cb: Callable = _make_trigger_callback(event_unit, root_node)
-		provider.setup(node, trigger_cb, event_unit.uid)
+		var evaluated_inputs: Dictionary = ExpressionEvaluator.evaluate_inputs(
+			event_unit.inputs,
+			node,
+			root_node
+		)
+		provider.setup_with_inputs(node, evaluated_inputs, trigger_cb, event_unit.uid)
 
 ## Teardown all signal events across every active sheet.
 func _teardown_all_signal_events() -> void:
