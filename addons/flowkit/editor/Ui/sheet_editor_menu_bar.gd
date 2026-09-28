@@ -11,9 +11,6 @@ class_name FKSheetEditorMenuBar
 @export var add_comment_btn: Button 
 @export var add_group_btn: Button
 
-
-
-
 func _enter_tree() -> void:
 	_set_subs(true)
 
@@ -21,12 +18,14 @@ func _set_subs(wants_subs_active: bool):
 	if wants_subs_active and not _is_subbed:
 		file_menu.id_pressed.connect(_on_file_id_pressed)
 		edit_menu.id_pressed.connect(_on_edit_id_pressed)
+		variable_menu.id_pressed.connect(_on_var_menu_id_pressed)
 
 		add_comment_btn.pressed.connect(_on_add_comment_btn_pressed)
 		add_group_btn.pressed.connect(_on_add_group_btn_pressed)
 	elif _is_subbed and not wants_subs_active:
 		file_menu.id_pressed.disconnect(_on_file_id_pressed)
 		edit_menu.id_pressed.disconnect(_on_edit_id_pressed)
+		variable_menu.id_pressed.disconnect(_on_var_menu_id_pressed)
 
 		add_comment_btn.pressed.disconnect(_on_add_comment_btn_pressed)
 		add_group_btn.pressed.disconnect(_on_add_group_btn_pressed)
@@ -72,6 +71,15 @@ func _on_add_group_btn_pressed():
 	add_group_requested.emit()
 
 signal add_group_requested
+
+func _on_var_menu_id_pressed(id: int):
+	if id == 0:
+		local_var_view_requested.emit()
+	elif id == 1:
+		global_var_view_requested.emit()
+
+signal local_var_view_requested
+signal global_var_view_requested
 
 func _exit_tree() -> void:
 	_set_subs(false)

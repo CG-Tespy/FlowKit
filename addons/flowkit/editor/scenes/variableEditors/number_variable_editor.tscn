@@ -1,0 +1,109 @@
+[gd_scene format=3 uid="uid://ds2wq0eowx2e2"]
+
+[ext_resource type="Script" uid="uid://c71ostkxoac8q" path="res://addons/flowkit/editor/Ui/Variables/fk_number_variable_ui.gd" id="1_nyxcj"]
+[ext_resource type="StyleBox" uid="uid://cvovw3ks5tvxg" path="res://addons/flowkit/editor/styles/numeric_var_ui_type_name_style.tres" id="2_2nypv"]
+
+[node name="NumberVariableEditor" type="HBoxContainer" unique_id=943776813 node_paths=PackedStringArray("value_field", "whole_nums_only", "name_field", "access_scope_field")]
+custom_minimum_size = Vector2(600, 64)
+size_flags_horizontal = 3
+script = ExtResource("1_nyxcj")
+value_field = NodePath("VBoxContainer/FirstRow/ValueHolder/Value")
+whole_nums_only = NodePath("VBoxContainer/SecondRow/WholeNumsOnly")
+name_field = NodePath("VBoxContainer/FirstRow/Name")
+access_scope_field = NodePath("VBoxContainer/FirstRow/AccessScopeHolder/AccessScope")
+
+[node name="VBoxContainer" type="VBoxContainer" parent="." unique_id=157769133]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="FirstRow" type="HBoxContainer" parent="VBoxContainer" unique_id=804046660]
+layout_mode = 2
+
+[node name="TypeHolder" type="Control" parent="VBoxContainer/FirstRow" unique_id=462653488]
+custom_minimum_size = Vector2(100, 0)
+layout_mode = 2
+
+[node name="TypeBgColor" type="Panel" parent="VBoxContainer/FirstRow/TypeHolder" unique_id=258018094]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_styles/panel = ExtResource("2_2nypv")
+
+[node name="MarginContainer" type="MarginContainer" parent="VBoxContainer/FirstRow/TypeHolder" unique_id=1013421034]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/margin_left = 5
+
+[node name="TypeName" type="Label" parent="VBoxContainer/FirstRow/TypeHolder/MarginContainer" unique_id=1026742819]
+layout_mode = 2
+text = "Number"
+vertical_alignment = 1
+
+[node name="Name" type="LineEdit" parent="VBoxContainer/FirstRow" unique_id=1871584464]
+custom_minimum_size = Vector2(160, 0)
+layout_mode = 2
+placeholder_text = "Variable name"
+
+[node name="ValueHolder" type="Control" parent="VBoxContainer/FirstRow" unique_id=1627249059]
+custom_minimum_size = Vector2(160, 0)
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_stretch_ratio = 2.0
+
+[node name="ValueBgColor" type="ColorRect" parent="VBoxContainer/FirstRow/ValueHolder" unique_id=1409547154]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.27387273, 0.27387273, 0.27387273, 1)
+
+[node name="Value" type="SpinBox" parent="VBoxContainer/FirstRow/ValueHolder" unique_id=1094171197]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+step = 0.1
+allow_greater = true
+allow_lesser = true
+
+[node name="AccessScopeHolder" type="Control" parent="VBoxContainer/FirstRow" unique_id=1176721675]
+custom_minimum_size = Vector2(100, 0)
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_stretch_ratio = 0.7
+
+[node name="AccessScopeBgColor" type="ColorRect" parent="VBoxContainer/FirstRow/AccessScopeHolder" unique_id=1634033128]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.27387273, 0.27387273, 0.27387273, 1)
+
+[node name="AccessScope" type="MenuButton" parent="VBoxContainer/FirstRow/AccessScopeHolder" unique_id=1062666229]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+text = "Scope"
+
+[node name="SecondRow" type="HBoxContainer" parent="VBoxContainer" unique_id=254890670]
+layout_mode = 2
+
+[node name="WholeNumsOnly" type="CheckBox" parent="VBoxContainer/SecondRow" unique_id=22267069]
+layout_mode = 2
+text = "Whole Nums Only"

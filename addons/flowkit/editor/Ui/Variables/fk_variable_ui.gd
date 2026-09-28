@@ -1,5 +1,7 @@
 @tool
 extends Control
+## Meant to represent individual FKVariables in the Variable Editor Modal, accessible
+## through the Event Sheet editor.
 class_name FKVariableUi
 
 @export_category("Controls")

@@ -1,7 +1,7 @@
 extends GutTest
 
-func test_int_variable_converts_numeric_values() -> void:
-	var variable := FKIntVariable.new()
+func test_number_variable_converts_numeric_values() -> void:
+	var variable := FKNumberVariable.new()
 
 	assert_true(variable.set_value(3.8))
 	assert_eq(variable.get_value(), 3)

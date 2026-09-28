@@ -1,4 +1,5 @@
 extends Window
+class_name FKVariableEditorModal
 
 @export var var_ui_holder: Control
 @export var add_button: Button 
@@ -45,8 +46,7 @@ func _on_save_button_pressed():
 	pass
 
 func _on_cancel_button_pressed():
-	pass
-
+	close_requested.emit()
 
 func _exit_tree() -> void:
 	if _is_editor_preview:

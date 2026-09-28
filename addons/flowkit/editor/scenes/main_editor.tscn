@@ -102,6 +102,11 @@ item_4/id = 3
 
 [node name="Variables" type="PopupMenu" parent="OuterVBox/TopMargin/TopBar/MenuBar" unique_id=1582286416]
 title = "Variables"
+item_count = 2
+item_0/text = "Local"
+item_0/id = 0
+item_1/text = "Global"
+item_1/id = 1
 
 [node name="AddCommentButton" type="Button" parent="OuterVBox/TopMargin/TopBar/MenuBar" unique_id=1151977613]
 layout_mode = 0

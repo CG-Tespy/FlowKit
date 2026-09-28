@@ -2,6 +2,7 @@
 extends EditorPlugin
 
 var action_registry: FKRegistry = FKRegistry.new()
+var var_editor_registry := FKVariableEditorRegistry.new()
 var generator: FKGenerator = null
 var inspector_plugin
 var export_plugin
@@ -21,10 +22,8 @@ func _disable_plugin() -> void:
 func _enter_tree() -> void:
 	_prep_editor_globals()
 	_prep_settings_window()
-	action_registry.set_project_settings(settings_window.get_project_settings())
-	action_registry.load_providers()
-	editor_globals.variable_editor_registry.set_project_settings(settings_window.get_project_settings())
-	editor_globals.variable_editor_registry.load_providers()
+	_prep_registries()
+
 	_prep_main_editor()
 	_prep_tool_submenu_entries()
 	_add_runtime_autoloads()
@@ -48,6 +47,7 @@ func _prep_editor_globals():
 
 	editor_globals = FKEditorGlobals.new()
 	editor_globals.registry = action_registry
+	editor_globals.variable_editor_registry = var_editor_registry
 	editor_globals.editor_interface = editor_interface
 	editor_globals.generator = generator
 
@@ -74,6 +74,15 @@ func _prep_settings_window():
 	
 var settings_window: FKSettingsWindow
 
+func _prep_registries():
+	var proj_settings := settings_window.get_project_settings()
+
+	action_registry.set_project_settings(proj_settings)
+	var_editor_registry.set_project_settings(proj_settings)
+
+	action_registry.load_providers()
+	var_editor_registry.load_providers()
+
 func _prep_tool_submenu_entries():
 	_base_popup = PopupMenu.new()
 	_base_popup.add_item("Settings", MENU_ITEM_SETTINGS)
@@ -81,12 +90,11 @@ func _prep_tool_submenu_entries():
 	add_tool_submenu_item("FlowKit", _base_popup)
 	
 var _base_popup: PopupMenu
+const MENU_ITEM_SETTINGS := 0
 
 func _on_base_popup_id_pressed(id: int):
 	if id == MENU_ITEM_SETTINGS:
 		settings_window.popup_centered()
-
-const MENU_ITEM_SETTINGS := 0
 
 func _add_runtime_autoloads():
 	add_autoload_singleton(

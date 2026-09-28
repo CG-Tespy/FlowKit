@@ -1,8 +1,9 @@
 @tool
 extends FKVariableUi
-class_name FKFloatVariableUi
+class_name FKNumberVariableUi
 
 @export var value_field: SpinBox
+@export var whole_nums_only: CheckBox
 
 func _on_value_field_changed(new_value: float) -> void:
 	_commit_value(new_value)
