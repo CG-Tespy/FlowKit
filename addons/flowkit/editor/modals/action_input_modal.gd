@@ -24,6 +24,7 @@ func _toggle_subs(do_sub: bool):
 		cancel_button.pressed.disconnect(_on_cancel_pressed)
 		close_requested.disconnect(_on_close_requested)
 		visibility_changed.disconnect(_on_visibility_changed)
+		
 		FKEditorGlobals.is_action_input_modal_visible = false
 	else:
 		return

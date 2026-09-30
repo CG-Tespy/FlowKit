@@ -206,8 +206,6 @@ func _report_invalid_path(to_report: String):
 
 func _exit_tree() -> void:
 	if _is_editor_preview:
-		var log_message := "[FlowKit]: FKPathField exiting the Scene View."
-		print(log_message)
 		return
 
 	var inputs_are_fine := _validate_inputs()

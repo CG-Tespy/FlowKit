@@ -71,6 +71,9 @@ func _try_add_variable_type(script: GDScript, result: FKVariableTypeLoadResult) 
 		diagnostics.append("[FKVariableTypeLoader] Skipping script that returned " +\
 		"null on new(): %s" % script.resource_path)
 		return
+	if instance.get_real_class() == "FKVariable":
+		diagnostics.append("[%s] Found base FKVariable script. Skipping it, as it's meant to be abstract.")
+		return 
 
 	var type_name := instance.type_display_name()
 	if type_name.is_empty():
@@ -122,3 +125,5 @@ func _collect_duplicate_name_diagnostics(variable_types: Array, result: FKVariab
 		else:
 			sources_by_name[type_name] = source
 
+func get_class() -> String:
+	return "FKVariableTypeLoader"

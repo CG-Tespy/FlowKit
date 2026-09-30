@@ -4,6 +4,9 @@ class_name FKVectorVariable
 @export var value: Vector4 = Vector4.ZERO
 @export var whole_nums_only := false 
 
+func type_display_name() -> String:
+	return "Vector"
+	
 func category() -> String:
 	return "Numeric"
 	

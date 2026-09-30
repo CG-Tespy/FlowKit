@@ -67,3 +67,9 @@ func _ready() -> void:
 	
 func _get_registry() -> FKRegistry:
 	return editor_globals.registry if editor_globals else null
+
+func get_class() -> String:
+	return "FKModalWindow"
+
+func get_real_class() -> String:
+	return self.get_class()

@@ -195,3 +195,6 @@ func _on_recent_item_activated(index: int) -> void:
 	" for node: ", selected_node_path);
 	_modal_signals.condition_selected.emit(selected_node_path, condition_id, condition_inputs);
 	hide();
+
+func get_class() -> String:
+	return "FKSelectConditionModal"

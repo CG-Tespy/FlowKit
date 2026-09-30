@@ -185,7 +185,9 @@ func _set_menu_bar_subs(wants_subs_active: bool):
 		menu_bar.global_var_view_requested.disconnect(_on_global_var_view_requested)
 
 func _on_local_var_view_requested():
-	pass
+	# Bring up the local var view modal
+	var modal := modal_manager.get_variable_editor_modal(_current_sheet)
+	_popup_centered_on_editor(modal)
 	
 func _on_global_var_view_requested():
 	print("[%s] Global var view not implemented yet.")
@@ -773,12 +775,13 @@ func _save_sheet() -> FKEventSheet:
 	var result: FKEventSheet = null
 	if err == OK:
 		print("[FKMainEditor]: ✓ Event sheet saved")
+		_current_sheet = sheet
 		result = sheet
 	else:
 		push_error("[FKMainEditor]: Failed to save event sheet: ", err)
 	
 	return result
-	
+
 # Refreshes the Event Sheet Ui based on the sheet passed. If none is passed, 
 # this goes for the sheet tied to the current scene uid.
 func _refresh_ui(sheet: FKEventSheet = null):
@@ -790,6 +793,9 @@ func _refresh_ui(sheet: FKEventSheet = null):
 		
 	_refresh_sheet_ui(sheet)
 	_on_ui_restoration_done()
+	_current_sheet = sheet
+
+var _current_sheet: FKEventSheet
 	
 func _refresh_sheet_ui(sheet: FKEventSheet):
 	blocks_container.clear_unit_nodes()
@@ -2130,7 +2136,7 @@ func _on_action_edit_requested(action_item: FKActionUnitUi, bound_row: FKUnitUi)
 			provider_inputs,
 			act_data.inputs
 		)
-		_popup_centered_on_editor(expression_modal)
+	_popup_centered_on_editor(expression_modal)
 
 
 # === Drag and Drop Handlers ===

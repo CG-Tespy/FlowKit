@@ -21,13 +21,18 @@ func category() -> String:
 	return ""
 
 ## For variable types that are outdated, test-only, or that otherwise shouldn't be 
-## used in projects outside FK's repo.
+## used in projects outside FK's repo. The base implementation of this only 
+## returns false when self is abstract.
 func hide_from_users() -> bool:
-	return false
+	return not self.is_abstract()
 
 func type_display_name() -> String:
-	printerr("[%s] Needs to override type_display_name." % self.get_class())
+	if self.is_abstract(): # Why self? In case users make their own abstract FKVariable subclasses.
+		printerr("[%s] Needs to override type_display_name." % self.get_class())
 	return ""
+
+func is_abstract(): # In which case, they'd want to override this here.
+	return self.get_class() == "FKVariable"
 
 ## Alias for the key
 func var_name() -> String:

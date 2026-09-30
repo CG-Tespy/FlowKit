@@ -7,3 +7,5 @@ const SELECT_ACTION_MODAL := "res://addons/flowkit/editor/scenes/modals/select_a
 const EXPRESSION_EDITOR_MODAL := "res://addons/flowkit/editor/scenes/modals/expression_editor_modal.tscn"
 const SELECT_CONDITION_MODAL := "res://addons/flowkit/editor/scenes/modals/select_condition_modal.tscn"
 const SELECT_EVENT_MODAL := "res://addons/flowkit/editor/scenes/modals/select_event_modal.tscn"
+
+const VARIABLE_EDITOR_MODAL := "res://addons/flowkit/editor/scenes/variable_editor_modal.tscn"

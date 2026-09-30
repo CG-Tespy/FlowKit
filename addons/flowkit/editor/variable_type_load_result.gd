@@ -2,6 +2,8 @@ extends RefCounted
 class_name FKVariableTypeLoadResult
 
 var variable_types: Array[String] = []
+
+## These map variable type strings to the GDScripts for the appropriate FKVariables
 var variable_type_scripts: Dictionary[String, GDScript] = {}
 var source: String = "unavailable"
 var errors: Array[String] = []

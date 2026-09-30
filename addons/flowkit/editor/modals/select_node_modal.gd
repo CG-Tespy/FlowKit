@@ -203,3 +203,7 @@ func _on_recent_item_activated(index: int) -> void:
 	print("[FKSelectNodeModal]: Recent node selected: ", node_path_str, " (", node_class, ")")
 	_modal_signals.node_selected.emit(node_path_str, node_class)
 	hide()
+
+func get_class() -> String:
+	return "FKSelectNodeModal"
+

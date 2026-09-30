@@ -30,11 +30,15 @@ func _create_and_parent_all_our_modals():
 	path = FKModalPaths.SELECT_CONDITION_MODAL
 	_select_condition_modal = _create_and_parent_modal(path)
 		
-	path = FKModalPaths	.SELECT_ACTION_MODAL
+	path = FKModalPaths.SELECT_ACTION_MODAL
 	_select_action_modal = _create_and_parent_modal(path)
 	
 	path = FKModalPaths.EXPRESSION_EDITOR_MODAL
 	_expression_modal = _create_and_parent_modal(path)
+
+	path = FKModalPaths.VARIABLE_EDITOR_MODAL
+	_var_edit_modal = _create_and_parent_modal(path)
+
 
 var _select_node_modal: FKSelectNodeModal
 var _select_event_modal: FKSelectEventModal
@@ -42,6 +46,7 @@ var _select_condition_modal: FKSelectConditionModal
 var _select_action_modal: FKSelectActionModal
 var _expression_modal: FKExpressionEditorModal
 var _action_input_modals: Dictionary[String, FKActionInputModal] = {}
+var _var_edit_modal: FKVariableEditorModal
 
 func _create_and_parent_modal(path_to_scene: String) -> FKModalWindow:
 	var scene: PackedScene = load(path_to_scene)
@@ -118,3 +123,12 @@ var select_action_modal: FKSelectActionModal:
 var expression_modal: FKExpressionEditorModal:
 	get:
 		return _expression_modal
+
+var variable_editor_modal: FKVariableEditorModal:
+	get:
+		return _var_edit_modal
+
+func get_variable_editor_modal(variable_holder) -> FKVariableEditorModal:
+	variable_editor_modal.set_for(variable_holder)
+	variable_editor_modal.show()
+	return variable_editor_modal

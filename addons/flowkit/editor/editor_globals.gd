@@ -62,6 +62,7 @@ func should_auto_enclose_string_inputs() -> bool:
 		
 var generator: FKGenerator
 var registry: FKRegistry 
+var var_type_registry: FKVariableTypeRegistry
 var modal_signals: FKModalSignals = FKModalSignals.new()
 var unit_ui_signals := FKUnitUiSignals.new()
 var settings_window_signals := FKSettingsWindowSignals.new()

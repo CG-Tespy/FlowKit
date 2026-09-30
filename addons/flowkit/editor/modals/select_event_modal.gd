@@ -195,3 +195,6 @@ func _on_recent_item_activated(index: int) -> void:
 	selected_node_path)
 	_modal_signals.event_selected.emit(selected_node_path, event_id, event_inputs)
 	hide()
+
+func get_class() -> String:
+	return "FKSelectEventModal"

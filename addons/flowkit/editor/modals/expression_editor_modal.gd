@@ -357,3 +357,5 @@ func _confirm() -> void:
 func _on_cancel_button_pressed() -> void:
 	hide()
 	
+func get_class() -> String:
+	return "FKExpressionEditorModal"

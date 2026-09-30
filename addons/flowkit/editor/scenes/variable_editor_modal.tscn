@@ -2,7 +2,7 @@
 
 [ext_resource type="Script" uid="uid://h2bu77q1c4y4" path="res://addons/flowkit/editor/Ui/modals/variable_editor_modal.gd" id="1_ajk4l"]
 
-[node name="VariableEditorModal" type="Window" unique_id=396292969 node_paths=PackedStringArray("var_ui_holder", "add_button", "save_button", "cancel_button")]
+[node name="VariableEditorModal" type="Window" unique_id=435599890 node_paths=PackedStringArray("var_ui_holder", "add_button", "save_button", "cancel_button", "var_type_popup")]
 oversampling_override = 1.0
 title = "Variables"
 initial_position = 1
@@ -12,6 +12,8 @@ var_ui_holder = NodePath("LayoutMargin/OuterLayout/Scroll/VarUiHolder")
 add_button = NodePath("LayoutMargin/OuterLayout/BottomSection/AddVarButton")
 save_button = NodePath("LayoutMargin/OuterLayout/BottomSection/SaveChangesButton")
 cancel_button = NodePath("LayoutMargin/OuterLayout/BottomSection/CancelButton")
+var_type_popup = NodePath("VarTypeChoices")
+metadata/_custom_type_script = "uid://h2bu77q1c4y4"
 
 [node name="LayoutMargin" type="MarginContainer" parent="." unique_id=833217069]
 anchors_preset = 15
@@ -48,32 +50,14 @@ size_flags_horizontal = 3
 size_flags_stretch_ratio = 0.5
 text = "Cancel"
 
-[node name="SaveChangesButton" type="MenuButton" parent="LayoutMargin/OuterLayout/BottomSection" unique_id=692716608]
+[node name="SaveChangesButton" type="Button" parent="LayoutMargin/OuterLayout/BottomSection" unique_id=922767505]
 layout_mode = 2
 size_flags_horizontal = 3
 text = "Save Changes"
-
-[node name="SaveChangesBg" type="Panel" parent="LayoutMargin/OuterLayout/BottomSection/SaveChangesButton" unique_id=661751746]
-layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-mouse_filter = 2
-
-[node name="Label" type="Label" parent="LayoutMargin/OuterLayout/BottomSection/SaveChangesButton" unique_id=1416414964]
-layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-text = "Save Changes"
-horizontal_alignment = 1
-vertical_alignment = 1
 
 [node name="AddVarButton" type="Button" parent="LayoutMargin/OuterLayout/BottomSection" unique_id=794529088]
 layout_mode = 2
 size_flags_horizontal = 3
 text = "Add"
+
+[node name="VarTypeChoices" type="PopupMenu" parent="." unique_id=1346241216]
