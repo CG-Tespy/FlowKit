@@ -1,0 +1,2 @@
+extends FKVariableSignals
+class_name FKEditorVariableSignals

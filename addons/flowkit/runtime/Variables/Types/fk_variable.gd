@@ -51,8 +51,11 @@ func set_value(new_val: Variant) -> bool:
 
 	# At this point, we can be sure that the new val is valid.
 	_set_for_our_type(new_val)
+	value_changed.emit(self)
 	emit_changed()
 	return true
+
+signal value_changed(fk_var: FKVariable)
 
 ## Meant to be overridden.
 func compatible_with_type_of(value: Variant) -> bool:
@@ -107,6 +110,12 @@ var _owner: Variant
 func set_owner(new_owner: Variant) -> void:
 	_owner = new_owner
 	emit_changed()
+
+## Use when you want to return this to the pool. Editor-Only.
+func release() -> void:
+	release_requested.emit(self)
+
+signal release_requested(fk_var: FKVariable)
 
 func _to_string() -> String:
 	return "%s named %s, w/value %s" % [self.get_class(), key, str(get_value())]

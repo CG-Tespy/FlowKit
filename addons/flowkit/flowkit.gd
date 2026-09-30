@@ -3,7 +3,7 @@ extends EditorPlugin
 
 var action_registry: FKRegistry = FKRegistry.new()
 var var_editor_registry := FKVariableEditorRegistry.new()
-var var_type_registry := FKVariableTypeRegistry.new()
+var var_registry := FKVariableRegistry.new()
 var generator: FKGenerator = null
 var inspector_plugin
 var export_plugin
@@ -48,7 +48,7 @@ func _prep_editor_globals():
 
 	editor_globals = FKEditorGlobals.new()
 	editor_globals.registry = action_registry
-	editor_globals.var_type_registry = var_type_registry
+	editor_globals.var_type_registry = var_registry
 	editor_globals.variable_editor_registry = var_editor_registry
 	editor_globals.editor_interface = editor_interface
 	editor_globals.generator = generator
@@ -84,7 +84,8 @@ func _prep_registries():
 
 	action_registry.load_providers()
 	var_editor_registry.load_providers()
-	var_type_registry.load_types()
+	var_registry.load_types()
+	var_registry.set_editor_globals(editor_globals)
 	
 
 func _prep_tool_submenu_entries():
@@ -116,7 +117,6 @@ func _register_as_main_screen_plugin():
 	editor_main_screen.add_child(editor)
 	
 func _create_and_add_custom_inspector():
-	# Create and add custom inspector
 	inspector_plugin = FKEditorInspectorPlugin.new()
 	inspector_plugin.set_registry(action_registry)
 	inspector_plugin.set_editor_interface(editor_interface)

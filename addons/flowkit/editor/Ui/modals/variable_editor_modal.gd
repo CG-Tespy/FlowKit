@@ -23,11 +23,12 @@ func _toggle_subs(wants_subs_active: bool):
 		add_button.pressed.connect(_on_add_button_pressed)
 		save_button.pressed.connect(_on_save_button_pressed)
 		cancel_button.pressed.connect(_on_cancel_button_pressed)
-		pass
+		var_type_popup.id_pressed.connect(_on_var_type_id_pressed)
 	elif _is_subbed and not wants_subs_active:
 		add_button.pressed.disconnect(_on_add_button_pressed)
 		save_button.pressed.disconnect(_on_save_button_pressed)
 		cancel_button.pressed.disconnect(_on_cancel_button_pressed)
+		var_type_popup.id_pressed.disconnect(_on_var_type_id_pressed)
 	else:
 		return
 
@@ -70,6 +71,31 @@ func set_for(variable_holder):
 	elif variable_holder is FKEventSheet:
 		var sheet := variable_holder as FKEventSheet
 		self.title = sheet.resource_name
+		_last_holder = variable_holder
+		_refresh_var_cache()
+
+var _last_holder
+
+func _refresh_var_cache():
+	if not _last_holder:
+		return
+	_var_cache.clear()
+	var holder_vars: Array[FKVariable] = _last_holder.variables
+	for elem in holder_vars:
+		var dupe := elem.duplicate_deep()
+		_var_cache.append(dupe)
+
+## Stores copies of the vars to make it easier to only change the 
+## real stuff when appropriate.
+var _var_cache: Array[FKVariable] = []
+
+func _on_var_type_id_pressed(id: int):
+	var type_we_want := var_type_popup.get_item_text(id)
+	var new_var := _type_registry().get_variable_of_type(type_we_want)
+	pass
+
+func _type_registry() -> FKVariableRegistry:
+	return editor_globals.var_type_registry
 
 func get_class() -> String:
 	return "FKVariableEditorModal"

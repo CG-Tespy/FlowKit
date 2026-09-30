@@ -16,6 +16,25 @@ class_name FKEventSheet
 ## Stores the display order: [{"type": "event"|"comment"|"group", "index": int}, ...]
 @export var item_order: Array[Dictionary] = []
 @export_storage var _id_assigner: FKIdAssigner
+@export_storage var _var_id_assigner: FKIdAssigner
+
+## For mutating this, best use funcs like remove_variable_with_id
+@export var variables: Array[FKVariable] = []
+
+func remove_variable_with_id(id: int) -> bool:
+	var result := false 
+	var to_remove: FKVariable
+	for elem in variables:
+		if elem.id == id:
+			to_remove = elem
+			break
+
+	if to_remove:
+		variables.erase(to_remove)
+	
+	result = to_remove == null
+	return result
+
 
 ## Returns an array of the top-level FKUnits in the order they were
 ## appended to this sheet.
