@@ -26,8 +26,8 @@ func _pre_legitimize_enter_tree():
 	_pre_legitimize_toggle_subs(true)
 
 func _enter_tree() -> void:
+	_pre_legitimize_enter_tree()
 	if _is_editor_preview:
-		_pre_legitimize_enter_tree()
 		return
 	_toggle_subs(true)
 
@@ -107,8 +107,8 @@ func refresh() -> void:
 	_is_refreshing = false
 
 func _exit_tree() -> void:
+	_pre_legitimize_exit_tree()
 	if _is_editor_preview:
-		_pre_legitimize_exit_tree()
 		return
 	_toggle_subs(false)
 
