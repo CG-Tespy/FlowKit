@@ -14,20 +14,22 @@ func _enter_tree() -> void:
 	
 	super._enter_tree()
 	_register_type_names()
-	# transient = false
-	# exclusive = false
-	# always_on_top = true
+	transient = false
+	exclusive = false
+	always_on_top = true
 
-func _toggle_subs(wants_subs_active: bool):
+func _set_subs(wants_subs_active: bool):
 	if wants_subs_active and not _is_subbed:
 		add_button.pressed.connect(_on_add_button_pressed)
 		save_button.pressed.connect(_on_save_button_pressed)
 		cancel_button.pressed.connect(_on_cancel_button_pressed)
+		close_requested.connect(_on_cancel_button_pressed)
 		add_var_popup.id_pressed.connect(_on_var_type_id_pressed)
 	elif _is_subbed and not wants_subs_active:
 		add_button.pressed.disconnect(_on_add_button_pressed)
 		save_button.pressed.disconnect(_on_save_button_pressed)
 		cancel_button.pressed.disconnect(_on_cancel_button_pressed)
+		close_requested.disconnect(_on_cancel_button_pressed)
 		add_var_popup.id_pressed.disconnect(_on_var_type_id_pressed)
 	else:
 		return
@@ -101,12 +103,13 @@ var _var_registry: FKVariableRegistry:
 		return editor_globals.var_registry
 
 func _add_entry_for(to_add_for: FKVariable):
-	# Gonna need the editor factory for this
-	var ui_entry := var_ed_factory.create_from(to_add_for)
+	var ui_entry := var_ui_pool.acquire(to_add_for)
+	if ui_entry == null:
+		return
 	var_ui_holder.add_child(ui_entry)
 
-var var_ed_factory: FKVariableEditorFactory:
+var var_ui_pool: FKVariableUiPool:
 	get:
-		return editor_globals.variable_editor_factory
+		return editor_globals.variable_ui_pool
 func get_class() -> String:
 	return "FKVariableEditorModal"

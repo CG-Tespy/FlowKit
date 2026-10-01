@@ -21,4 +21,6 @@ func _toggle_subs(wants_subs_active: bool) -> void:
 func _set_value(value: Variant) -> void:
 	value_field.button_pressed = bool(value)
 	_update_value_field_text()
+	if _variable:
+		_variable.set_value(value_field.button_pressed, false)
 	

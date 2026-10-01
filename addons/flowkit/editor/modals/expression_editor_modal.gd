@@ -28,7 +28,7 @@ func _enter_tree() -> void:
 		
 	_setup_node_tree.call_deferred()
 
-func _toggle_subs(on: bool):
+func _set_subs(on: bool):
 	if on and not _is_subbed:
 		node_tree.item_selected.connect(_on_node_selected)
 		item_list.item_activated.connect(_on_item_activated)

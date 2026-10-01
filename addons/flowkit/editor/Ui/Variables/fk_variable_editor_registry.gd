@@ -74,11 +74,9 @@ func _create_builtin_audio_providers() -> Array[FKVariableEditorProvider]:
 	]
 
 func get_provider_for(variable: FKVariable) -> FKVariableEditorProvider:
-	print("Seeking provider for %s. Our registered prov count: %s" % [variable.get_real_class(), str(_providers.size())])
 	var best_provider: FKVariableEditorProvider
 	for provider in _providers:
 		if not provider.supports(variable):
-			print("Provider does not support var of type %s" % [variable.type_display_name()])
 			continue
 		if (best_provider == null or provider.get_priority() > best_provider.get_priority()):
 			best_provider = provider

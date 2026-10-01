@@ -16,6 +16,8 @@ func _set_value(value: Variant) -> void:
 	w_field.value = value.w
 
 	_ensure_proper_sync_with_var()
+	if _variable:
+		_variable.set_value(value, false)
 
 func _ensure_proper_sync_with_var():
 	if not _variable:
@@ -83,25 +85,18 @@ func _on_whole_nums_toggled(is_on: bool):
 
 func _toggle_subs(wants_subs_active: bool) -> void:
 	if wants_subs_active and not _is_subbed:
-		x_field.value_changed.connect(_on_component_changed)
-		y_field.value_changed.connect(_on_component_changed)
-		z_field.value_changed.connect(_on_component_changed)
-		w_field.value_changed.connect(_on_component_changed)
-		
+		for field in [x_field, y_field, z_field, w_field]:
+			_toggle_spinbox_commit(field, _on_component_edit_finished, true)
 	elif not wants_subs_active and _is_subbed:
-		x_field.value_changed.disconnect(_on_component_changed)
-		y_field.value_changed.disconnect(_on_component_changed)
-		z_field.value_changed.disconnect(_on_component_changed)
-		w_field.value_changed.disconnect(_on_component_changed)
+		for field in [x_field, y_field, z_field, w_field]:
+			_toggle_spinbox_commit(field, _on_component_edit_finished, false)
 	super._toggle_subs(wants_subs_active)
 
 
-
-func _on_component_changed(_component: float) -> void:
+func _on_component_edit_finished() -> void:
 	var to_commit := Vector4(x_field.value, y_field.value, z_field.value, w_field.value)
 	_commit_value(to_commit)
 
 func _commit_value(value: Variant) -> void:
 	super._commit_value(value) 
 	_ensure_proper_sync_with_var()
-
