@@ -6,14 +6,22 @@ class_name FKNodeVariableUi
 
 func _toggle_subs(wants_subs_active: bool) -> void:
 	if wants_subs_active and not _is_subbed:
-		value_field.text_changed.connect(_on_path_changed)
+		value_field.text_submitted.connect(_on_path_changed)
+		value_field.focus_exited.connect(_on_path_edit_finished)
 	elif not wants_subs_active and _is_subbed:
-		value_field.text_changed.disconnect(_on_path_changed)
+		value_field.text_submitted.disconnect(_on_path_changed)
+		value_field.focus_exited.disconnect(_on_path_edit_finished)
 	super._toggle_subs(wants_subs_active)
 
-func _set_value(_value: Variant) -> void:
+func _on_path_edit_finished() -> void:
+	_on_path_changed(value_field.text)
+
+func _set_value(value: Variant) -> void:
 	var variable := get_variable() as FKNodeVariable
 	value_field.text = str(variable.get_node_path()) if variable else ""
+
+	if _variable:
+		_variable.set_value(value, false)
 
 func _on_path_changed(new_path: String) -> void:
 	if _is_refreshing:

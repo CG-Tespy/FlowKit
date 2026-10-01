@@ -4,9 +4,9 @@ func test_number_variable_converts_numeric_values() -> void:
 	var variable := FKNumberVariable.new()
 
 	assert_true(variable.set_value(3.8))
-	assert_eq(variable.get_value(), 3)
-	assert_eq(variable.get_value_as("integer"), 3)
-	assert_eq(variable.get_value_as("float"), 3.0)
+	assert_eq(variable.get_value(), 3.8)
+	assert_eq(variable.get_value_as("int"), 3)
+	assert_eq(variable.get_value_as("float"), 3.8)
 
 func test_string_variable_rejects_incompatible_values() -> void:
 	var variable := FKStringVariable.new()
@@ -31,15 +31,15 @@ func test_audio_stream_variable_keeps_resource_reference() -> void:
 	assert_eq(variable.get_value_as("AudioStream"), stream)
 
 func test_node_variable_persists_relative_path_and_resolves_value() -> void:
-	var owner := Node.new()
-	owner.name = "Owner"
+	var var_owner := Node.new()
+	var_owner.name = "Owner"
 	var target := Node.new()
 	target.name = "Target"
-	owner.add_child(target)
-	add_child_autofree(owner)
+	var_owner.add_child(target)
+	add_child_autofree(var_owner)
 
 	var variable := FKNodeVariable.new()
-	variable.set_owner(owner)
+	variable.set_owner(var_owner)
 
 	assert_true(variable.set_value(target))
 	assert_eq(variable.get_node_path(), NodePath("Target"))

@@ -43,7 +43,7 @@ func get_value() -> Variant:
 	return null
 
 ## If the value was accepted, returns true. If not, returns false.
-func set_value(new_val: Variant) -> bool:
+func set_value(new_val: Variant, send_signals: bool = true) -> bool:
 	# Since what we were given might not be valid...
 	if not compatible_with_type_of(new_val):
 		_report_val_incompatibility(new_val)
@@ -51,8 +51,9 @@ func set_value(new_val: Variant) -> bool:
 
 	# At this point, we can be sure that the new val is valid.
 	_set_for_our_type(new_val)
-	value_changed.emit(self)
-	emit_changed()
+	if send_signals:
+		value_changed.emit(self)
+		emit_changed()
 	return true
 
 signal value_changed(fk_var: FKVariable)
@@ -78,6 +79,7 @@ func get_value_as(target_type: String) -> Variant:
 	if not _can_hold_of_type(normalized_type):
 		_report_type_incompatibility(normalized_type)
 	else:
+		print("Converting to target type")
 		result = _convert_to_target_type(normalized_type)
 
 	return result

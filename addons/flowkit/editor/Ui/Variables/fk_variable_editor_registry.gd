@@ -28,6 +28,7 @@ func _create_builtin_providers() -> Array[FKVariableEditorProvider]:
 	var builtin_audio := _create_builtin_audio_providers()
 	
 	var result: Array[FKVariableEditorProvider] = []
+	result.append(node_provider)
 	result.append_array(builtin_numerics)
 	result.append_array(builtin_graphics)
 	result.append_array(builtin_audio)
@@ -74,11 +75,9 @@ func _create_builtin_audio_providers() -> Array[FKVariableEditorProvider]:
 	]
 
 func get_provider_for(variable: FKVariable) -> FKVariableEditorProvider:
-	print("Seeking provider for %s. Our registered prov count: %s" % [variable.get_real_class(), str(_providers.size())])
 	var best_provider: FKVariableEditorProvider
 	for provider in _providers:
 		if not provider.supports(variable):
-			print("Provider does not support var of type %s" % [variable.type_display_name()])
 			continue
 		if (best_provider == null or provider.get_priority() > best_provider.get_priority()):
 			best_provider = provider
