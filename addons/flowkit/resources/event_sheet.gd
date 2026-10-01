@@ -35,7 +35,17 @@ func remove_variable_with_id(id: int) -> bool:
 	result = to_remove == null
 	return result
 
+## Returns a defensive copy 
+func get_variables() -> Array[FKVariable]:
+	return variables.duplicate()
 
+func clear_variables():
+	variables.clear()
+
+func add_variable(to_add: FKVariable):
+	if not variables.has(to_add):
+		variables.append(to_add)
+		
 ## Returns an array of the top-level FKUnits in the order they were
 ## appended to this sheet.
 var ordered_items: Array[FKUnit]:
