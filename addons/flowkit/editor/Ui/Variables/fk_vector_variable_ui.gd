@@ -14,9 +14,6 @@ func _set_value(value: Variant) -> void:
 	y_field.value = value.y
 	z_field.value = value.z
 	w_field.value = value.w
-	
-	if _variable:
-		_variable.set_value(value)
 
 	_ensure_proper_sync_with_var()
 

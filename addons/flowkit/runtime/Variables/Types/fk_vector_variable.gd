@@ -38,6 +38,18 @@ func _can_hold_of_type(type: String) -> bool:
 func _convert_to_target_type(_target_type: String) -> Variant:
 	return value
 
+func x() -> float:
+	return value.x
+
+func y() -> float:
+	return value.y
+
+func z() -> float:
+	return value.z
+
+func w() -> float:
+	return value.w
+
 func get_class() -> String:
 	return "FKVectorVariable"
 

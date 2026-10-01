@@ -4,14 +4,14 @@
 [ext_resource type="StyleBox" uid="uid://b8qtdvqpjx7k4" path="res://addons/flowkit/editor/styles/audio_var_ui_type_name_style.tres" id="2_xy7qc"]
 
 [node name="AudioStreamVariableEditor" type="HBoxContainer" unique_id=623768857 node_paths=PackedStringArray("value_field", "name_field", "access_scope_field", "removal_button")]
-custom_minimum_size = Vector2(600, 32)
+custom_minimum_size = Vector2(680, 32)
 size_flags_horizontal = 3
 script = ExtResource("1")
 value_field = NodePath("ValueHolder/Value")
-type_display_name = "AudioStream"
 name_field = NodePath("Name")
 access_scope_field = NodePath("AccessScopeHolder/AccessScope")
 removal_button = NodePath("RemovalButton")
+type_display_name = "AudioStream"
 
 [node name="TypeHolder" type="Control" parent="." unique_id=217671130]
 custom_minimum_size = Vector2(100, 0)
@@ -73,6 +73,7 @@ base_type = "AudioStream"
 custom_minimum_size = Vector2(100, 0)
 layout_mode = 2
 size_flags_horizontal = 3
+size_flags_stretch_ratio = 0.7
 
 [node name="AccessScopeBgColor" type="ColorRect" parent="AccessScopeHolder" unique_id=1401451426]
 layout_mode = 1
@@ -92,6 +93,6 @@ grow_horizontal = 2
 grow_vertical = 2
 text = "Scope"
 
-[node name="RemovalButton" type="Button" parent="."]
+[node name="RemovalButton" type="Button" parent="." unique_id=878209593]
 layout_mode = 2
 text = "   -   "

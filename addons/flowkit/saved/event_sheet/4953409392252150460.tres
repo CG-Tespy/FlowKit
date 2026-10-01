@@ -7,6 +7,7 @@
 [ext_resource type="Script" uid="uid://bmaxurgrsv4ct" path="res://addons/flowkit/runtime/Units/condition_unit.gd" id="3_6310v"]
 [ext_resource type="Script" uid="uid://bumsyiqkp46l1" path="res://addons/flowkit/resources/event_sheet.gd" id="4_1iq3u"]
 [ext_resource type="Script" path="res://addons/flowkit/runtime/Units/group_unit.gd" id="5_1iq3u"]
+[ext_resource type="Script" uid="uid://bql6wdr0b4bt1" path="res://addons/flowkit/runtime/Variables/Types/fk_variable.gd" id="8_cbhwn"]
 
 [sub_resource type="Resource" id="Resource_1iq3u"]
 script = ExtResource("1_1iq3u")

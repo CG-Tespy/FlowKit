@@ -6,7 +6,7 @@
 oversampling_override = 1.0
 title = "Variables"
 initial_position = 1
-size = Vector2i(700, 500)
+size = Vector2i(750, 500)
 script = ExtResource("1_ajk4l")
 var_ui_holder = NodePath("LayoutMargin/OuterLayout/Scroll/VarUiHolder")
 add_button = NodePath("LayoutMargin/OuterLayout/BottomSection/AddVarButton")

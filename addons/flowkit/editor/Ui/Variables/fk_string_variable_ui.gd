@@ -13,5 +13,3 @@ func _toggle_subs(wants_subs_active: bool) -> void:
 
 func _set_value(value: Variant) -> void:
 	value_field.text = str(value)
-	if _variable:
-		_variable.set_value(value)
