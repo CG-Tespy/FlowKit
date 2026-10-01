@@ -3,7 +3,7 @@
 [ext_resource type="Script" uid="uid://cqvyxj0pnalc7" path="res://addons/flowkit/editor/Ui/Variables/fk_bool_variable_ui.gd" id="1"]
 [ext_resource type="StyleBox" uid="uid://cvovw3ks5tvxg" path="res://addons/flowkit/editor/styles/numeric_var_ui_type_name_style.tres" id="2_finhj"]
 
-[node name="BoolVariableEditor" type="HBoxContainer" unique_id=1378473796 node_paths=PackedStringArray("value_field", "name_field", "access_scope_field")]
+[node name="BoolVariableEditor" type="HBoxContainer" unique_id=1378473796 node_paths=PackedStringArray("value_field", "name_field", "access_scope_field", "removal_button")]
 custom_minimum_size = Vector2(680, 32)
 size_flags_horizontal = 3
 script = ExtResource("1")
@@ -11,6 +11,7 @@ value_field = NodePath("ValueHolder/Value")
 type_display_name = "Bool"
 name_field = NodePath("Name")
 access_scope_field = NodePath("AccessScopeHolder/AccessScope")
+removal_button = NodePath("RemovalButton")
 
 [node name="TypeHolder" type="Control" parent="." unique_id=1726857818]
 custom_minimum_size = Vector2(100, 0)
@@ -91,3 +92,7 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 text = "Scope"
+
+[node name="RemovalButton" type="Button" parent="."]
+layout_mode = 2
+text = "   -   "

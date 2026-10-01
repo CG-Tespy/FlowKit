@@ -2,7 +2,7 @@
 
 [ext_resource type="Script" uid="uid://h2bu77q1c4y4" path="res://addons/flowkit/editor/Ui/modals/variable_editor_modal.gd" id="1_ajk4l"]
 
-[node name="VariableEditorModal" type="Window" unique_id=435599890 node_paths=PackedStringArray("var_ui_holder", "add_button", "save_button", "cancel_button", "var_type_popup")]
+[node name="VariableEditorModal" type="Window" unique_id=435599890 node_paths=PackedStringArray("var_ui_holder", "add_button", "save_button", "cancel_button", "add_var_popup")]
 oversampling_override = 1.0
 title = "Variables"
 initial_position = 1
@@ -12,7 +12,7 @@ var_ui_holder = NodePath("LayoutMargin/OuterLayout/Scroll/VarUiHolder")
 add_button = NodePath("LayoutMargin/OuterLayout/BottomSection/AddVarButton")
 save_button = NodePath("LayoutMargin/OuterLayout/BottomSection/SaveChangesButton")
 cancel_button = NodePath("LayoutMargin/OuterLayout/BottomSection/CancelButton")
-var_type_popup = NodePath("VarTypeChoices")
+add_var_popup = NodePath("VarTypeChoices")
 metadata/_custom_type_script = "uid://h2bu77q1c4y4"
 
 [node name="LayoutMargin" type="MarginContainer" parent="." unique_id=833217069]

@@ -3,7 +3,7 @@
 [ext_resource type="Script" uid="uid://c71ostkxoac8q" path="res://addons/flowkit/editor/Ui/Variables/fk_number_variable_ui.gd" id="1_nyxcj"]
 [ext_resource type="StyleBox" uid="uid://cvovw3ks5tvxg" path="res://addons/flowkit/editor/styles/numeric_var_ui_type_name_style.tres" id="2_2nypv"]
 
-[node name="NumberVariableEditor" type="HBoxContainer" unique_id=943776813 node_paths=PackedStringArray("value_field", "whole_nums_only", "name_field", "access_scope_field")]
+[node name="NumberVariableEditor" type="HBoxContainer" unique_id=943776813 node_paths=PackedStringArray("value_field", "whole_nums_only", "name_field", "access_scope_field", "removal_button")]
 custom_minimum_size = Vector2(600, 64)
 size_flags_horizontal = 3
 script = ExtResource("1_nyxcj")
@@ -11,6 +11,7 @@ value_field = NodePath("VBoxContainer/FirstRow/ValueHolder/Value")
 whole_nums_only = NodePath("VBoxContainer/SecondRow/WholeNumsOnly")
 name_field = NodePath("VBoxContainer/FirstRow/Name")
 access_scope_field = NodePath("VBoxContainer/FirstRow/AccessScopeHolder/AccessScope")
+removal_button = NodePath("RemovalButton")
 
 [node name="VBoxContainer" type="VBoxContainer" parent="." unique_id=157769133]
 layout_mode = 2
@@ -107,3 +108,7 @@ layout_mode = 2
 [node name="WholeNumsOnly" type="CheckBox" parent="VBoxContainer/SecondRow" unique_id=22267069]
 layout_mode = 2
 text = "Whole Nums Only"
+
+[node name="RemovalButton" type="Button" parent="."]
+layout_mode = 2
+text = "   -   "

@@ -1,5 +1,8 @@
 @tool
 extends RefCounted
+
+## Keeps track of the var-editor providers in a way that allows users 
+## to set up their own outside of FK's own folder.
 class_name FKVariableEditorRegistry
 
 var _providers: Array[FKVariableEditorProvider] = []
@@ -12,8 +15,9 @@ func load_providers() -> void:
 	_providers = _create_builtin_providers()
 	var loader := FKVariableEditorProviderLoader.new()
 	loader.project_settings = _project_settings
-	for provider in loader.load_all():
-		_register_provider(provider)
+	var third_party_providers := loader.load_all()
+	for elem in third_party_providers:
+		_register_provider(elem)
 
 func _create_builtin_providers() -> Array[FKVariableEditorProvider]:
 	var node_ed_scene: PackedScene = preload("res://addons/flowkit/editor/scenes/variableEditors/node_variable_editor.tscn")
@@ -27,6 +31,9 @@ func _create_builtin_providers() -> Array[FKVariableEditorProvider]:
 	result.append_array(builtin_numerics)
 	result.append_array(builtin_graphics)
 	result.append_array(builtin_audio)
+
+	for elem in result:
+		print("[%s] Created provider %s" % [self.get_class(), elem.get_id()])
 	
 	return result
 
@@ -67,9 +74,13 @@ func _create_builtin_audio_providers() -> Array[FKVariableEditorProvider]:
 	]
 
 func get_provider_for(variable: FKVariable) -> FKVariableEditorProvider:
+	print("Seeking provider for %s. Our registered prov count: %s" % [variable.get_real_class(), str(_providers.size())])
 	var best_provider: FKVariableEditorProvider
 	for provider in _providers:
-		if provider.supports(variable) and (best_provider == null or provider.get_priority() > best_provider.get_priority()):
+		if not provider.supports(variable):
+			print("Provider does not support var of type %s" % [variable.type_display_name()])
+			continue
+		if (best_provider == null or provider.get_priority() > best_provider.get_priority()):
 			best_provider = provider
 	return best_provider
 
@@ -92,3 +103,6 @@ func _register_provider(to_register: FKVariableEditorProvider) -> void:
 	_providers.append(to_register)
 
 static var _invalid_editor_provider_message := "[FlowKit] Ignoring invalid variable editor provider."
+
+func get_class() -> String:
+	return "FKVariableEditorRegistry"

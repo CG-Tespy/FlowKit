@@ -3,7 +3,7 @@
 [ext_resource type="Script" uid="uid://cs38q44xqqhya" path="res://addons/flowkit/editor/Ui/Variables/fk_vector4_variable_ui.gd" id="1"]
 [ext_resource type="StyleBox" uid="uid://cvovw3ks5tvxg" path="res://addons/flowkit/editor/styles/numeric_var_ui_type_name_style.tres" id="2_io68v"]
 
-[node name="Vector4VariableEditor" type="HBoxContainer" unique_id=1698249114 node_paths=PackedStringArray("x_field", "y_field", "z_field", "w_field", "name_field", "access_scope_field")]
+[node name="Vector4VariableEditor" type="HBoxContainer" unique_id=1698249114 node_paths=PackedStringArray("x_field", "y_field", "z_field", "w_field", "name_field", "access_scope_field", "removal_button")]
 custom_minimum_size = Vector2(680, 32)
 size_flags_horizontal = 3
 script = ExtResource("1")
@@ -14,6 +14,7 @@ w_field = NodePath("ValueHolder/Components/W")
 name_field = NodePath("NameMargin/Name")
 access_scope_field = NodePath("AccessScopeMargin/AccessScopeHolder/AccessScope")
 type_display_name = "VecFour"
+removal_button = NodePath("RemovalButton")
 
 [node name="TypeHolderMargin" type="MarginContainer" parent="." unique_id=1652528467]
 layout_mode = 2
@@ -153,3 +154,7 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 text = "Scope"
+
+[node name="RemovalButton" type="Button" parent="."]
+layout_mode = 2
+text = "   -   "

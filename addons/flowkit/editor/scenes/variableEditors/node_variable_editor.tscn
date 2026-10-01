@@ -2,7 +2,7 @@
 
 [ext_resource type="Script" uid="uid://bf2i0rv51e0j5" path="res://addons/flowkit/editor/Ui/Variables/fk_node_variable_ui.gd" id="1"]
 
-[node name="NodeVariableEditor" type="HBoxContainer" unique_id=1351464796 node_paths=PackedStringArray("value_field", "name_field", "access_scope_field")]
+[node name="NodeVariableEditor" type="HBoxContainer" unique_id=1351464796 node_paths=PackedStringArray("value_field", "name_field", "access_scope_field", "removal_button")]
 custom_minimum_size = Vector2(600, 32)
 size_flags_horizontal = 3
 script = ExtResource("1")
@@ -10,6 +10,7 @@ value_field = NodePath("ValueHolder/Value")
 type_display_name = "Node"
 name_field = NodePath("Name")
 access_scope_field = NodePath("AccessScopeHolder/AccessScope")
+removal_button = NodePath("RemovalButton")
 
 [node name="TypeHolder" type="Control" parent="." unique_id=1573218698]
 custom_minimum_size = Vector2(100, 0)
@@ -90,3 +91,7 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 text = "Scope"
+
+[node name="RemovalButton" type="Button" parent="."]
+layout_mode = 2
+text = "   -   "

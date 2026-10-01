@@ -15,7 +15,17 @@ func get_id() -> String:
 	return _id
 
 func supports(variable: FKVariable) -> bool:
-	return variable != null and variable.get_script() == _variable_script
+	var log_message := ""
+	if variable == null:
+		log_message = "[%s] Cannot support a null FKVariable." % self.get_class()
+		push_error(log_message)
+		return false
+
+	var their_var_script := variable.get_script()
+	log_message = "Editor provider with script %s checking compatibility with %s" %\
+	[str(_variable_script), their_var_script]
+	
+	return variable.get_script() == _variable_script
 
 func get_editor_scene() -> PackedScene:
 	return _editor_scene

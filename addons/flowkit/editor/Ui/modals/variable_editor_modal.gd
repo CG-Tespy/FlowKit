@@ -6,7 +6,7 @@ class_name FKVariableEditorModal
 @export var add_button: Button 
 @export var save_button: Button 
 @export var cancel_button: Button
-@export var var_type_popup: PopupMenu
+@export var add_var_popup: PopupMenu
 
 func _enter_tree() -> void:
 	if _is_editor_preview:
@@ -23,37 +23,37 @@ func _toggle_subs(wants_subs_active: bool):
 		add_button.pressed.connect(_on_add_button_pressed)
 		save_button.pressed.connect(_on_save_button_pressed)
 		cancel_button.pressed.connect(_on_cancel_button_pressed)
-		var_type_popup.id_pressed.connect(_on_var_type_id_pressed)
+		add_var_popup.id_pressed.connect(_on_var_type_id_pressed)
 	elif _is_subbed and not wants_subs_active:
 		add_button.pressed.disconnect(_on_add_button_pressed)
 		save_button.pressed.disconnect(_on_save_button_pressed)
 		cancel_button.pressed.disconnect(_on_cancel_button_pressed)
-		var_type_popup.id_pressed.disconnect(_on_var_type_id_pressed)
+		add_var_popup.id_pressed.disconnect(_on_var_type_id_pressed)
 	else:
 		return
 
 	_is_subbed = !_is_subbed
 
 func _register_type_names():
-	_type_names = editor_globals.var_type_registry.get_type_names()
+	_type_names = editor_globals.var_registry.get_type_names()
 
 var _type_names: Array[String]
 
 func _on_add_button_pressed():
 	_refresh_var_type_popup()
 	_position_popup_at_mouse()
-	var_type_popup.show()
+	add_var_popup.show()
 
 func _refresh_var_type_popup():
-	var_type_popup.clear()
+	add_var_popup.clear()
 	for elem in _type_names:
-		var_type_popup.add_item(elem)
+		add_var_popup.add_item(elem)
 
 func _position_popup_at_mouse():
 	var mouse_pos := add_button.get_global_mouse_position()
 	mouse_pos.x += self.position.x
 	mouse_pos.y += self.position.y
-	var_type_popup.position = mouse_pos
+	add_var_popup.position = mouse_pos
 
 func _on_var_type_popup_id_pressed(id: int):
 	push_warning("[%s] Variable-adding not yet implemented." % self.get_class())
@@ -90,12 +90,23 @@ func _refresh_var_cache():
 var _var_cache: Array[FKVariable] = []
 
 func _on_var_type_id_pressed(id: int):
-	var type_we_want := var_type_popup.get_item_text(id)
-	var new_var := _type_registry().get_variable_of_type(type_we_want)
+	var type_we_want := add_var_popup.get_item_text(id)
+	var new_var := _var_registry.get_variable_of_type(type_we_want)
+	_var_cache.append(new_var)
+	_add_entry_for(new_var)
 	pass
 
-func _type_registry() -> FKVariableRegistry:
-	return editor_globals.var_type_registry
+var _var_registry: FKVariableRegistry:
+	get:
+		return editor_globals.var_registry
 
+func _add_entry_for(to_add_for: FKVariable):
+	# Gonna need the editor factory for this
+	var ui_entry := var_ed_factory.create_from(to_add_for)
+	var_ui_holder.add_child(ui_entry)
+
+var var_ed_factory: FKVariableEditorFactory:
+	get:
+		return editor_globals.variable_editor_factory
 func get_class() -> String:
 	return "FKVariableEditorModal"

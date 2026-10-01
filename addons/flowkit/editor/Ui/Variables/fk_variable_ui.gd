@@ -7,6 +7,7 @@ class_name FKVariableUi
 @export_category("Controls")
 @export var name_field: LineEdit
 @export var access_scope_field: MenuButton
+@export var removal_button: Button
 
 @export_category("Metadata")
 ## Shown when selecting a var type to add to a holder
@@ -46,15 +47,24 @@ func _toggle_subs(wants_subs_active: bool):
 	if wants_subs_active and not _is_subbed:
 		name_field.text_changed.connect(_on_name_changed)
 		access_scope_field.get_popup().id_pressed.connect(_on_access_scope_selected)
+		removal_button.pressed.connect(_on_removal_button_pressed)
+
 		_toggle_var_subs(wants_subs_active)
 	elif _is_subbed and not wants_subs_active:
 		name_field.text_changed.disconnect(_on_name_changed)
 		access_scope_field.get_popup().id_pressed.disconnect(_on_access_scope_selected)
+		removal_button.pressed.disconnect(_on_removal_button_pressed)
+
 		_toggle_var_subs(wants_subs_active)
 	else:
 		return
 
 	_is_subbed = !_is_subbed
+
+func _on_removal_button_pressed():
+	removal_requested.emit(self)
+
+signal removal_requested(requester: FKVariableUi)
 
 func _toggle_var_subs(wants_subs_active: bool):
 	if _variable == null:

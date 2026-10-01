@@ -1,5 +1,8 @@
 @tool
 extends RefCounted
+
+## For getting the right editor scene for displaying a variable in FK's
+## editor controls.
 class_name FKVariableEditorProvider
 
 func get_id() -> String:
@@ -13,3 +16,9 @@ func supports(_variable: FKVariable) -> bool:
 
 func get_editor_scene() -> PackedScene:
 	return null
+
+func get_class() -> String:
+	return "FKEditorProvider"
+
+func get_real_class() -> String:
+	return self.get_class()

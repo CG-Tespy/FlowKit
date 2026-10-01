@@ -64,9 +64,10 @@ var _var_signals: FKEditorVariableSignals:
 		if not _globals:
 			push_error("[%s] Cannot access var signals without globals registered.")
 			return null
-		return _globals._var_signals
+		return _globals.variable_signals
 
 func _on_var_release_requested(the_var: FKVariable):
+	print("On var release requested")
 	_set_subs_for(the_var, false)
 	_var_pool.append(the_var)
 	_var_signals.released.emit(the_var)

@@ -10,7 +10,7 @@ var _registry: FKVariableEditorRegistry
 func create_from(variable: FKVariable) -> FKVariableUi:
 	var provider := _registry.get_provider_for(variable)
 	if provider == null:
-		push_warning("[FlowKit] No variable editor is available for '%s'." % variable.get_class())
+		push_warning("[FlowKit] No variable editor is available for '%s'." % variable.get_real_class())
 		return null
 	var editor_ui := provider.get_editor_scene().instantiate() as FKVariableUi
 	if editor_ui == null:
