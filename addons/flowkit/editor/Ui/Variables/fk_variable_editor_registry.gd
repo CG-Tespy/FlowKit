@@ -28,6 +28,7 @@ func _create_builtin_providers() -> Array[FKVariableEditorProvider]:
 	var builtin_audio := _create_builtin_audio_providers()
 	
 	var result: Array[FKVariableEditorProvider] = []
+	result.append(node_provider)
 	result.append_array(builtin_numerics)
 	result.append_array(builtin_graphics)
 	result.append_array(builtin_audio)
