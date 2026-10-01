@@ -22,15 +22,17 @@ func _set_subs(wants_subs_active: bool):
 	if wants_subs_active and not _is_subbed:
 		add_button.pressed.connect(_on_add_button_pressed)
 		save_button.pressed.connect(_on_save_button_pressed)
-		cancel_button.pressed.connect(_on_cancel_button_pressed)
-		close_requested.connect(_on_cancel_button_pressed)
+		cancel_button.pressed.connect(_on_close_attempt)
+		close_requested.connect(_on_close_attempt)
 		add_var_popup.id_pressed.connect(_on_var_type_id_pressed)
+		visibility_changed.connect(_on_visibility_changed)
 	elif _is_subbed and not wants_subs_active:
 		add_button.pressed.disconnect(_on_add_button_pressed)
 		save_button.pressed.disconnect(_on_save_button_pressed)
-		cancel_button.pressed.disconnect(_on_cancel_button_pressed)
-		close_requested.disconnect(_on_cancel_button_pressed)
+		cancel_button.pressed.disconnect(_on_close_attempt)
+		close_requested.disconnect(_on_close_attempt)
 		add_var_popup.id_pressed.disconnect(_on_var_type_id_pressed)
+		visibility_changed.disconnect(_on_visibility_changed)
 	else:
 		return
 
@@ -57,59 +59,86 @@ func _position_popup_at_mouse():
 	mouse_pos.y += self.position.y
 	add_var_popup.position = mouse_pos
 
-func _on_var_type_popup_id_pressed(id: int):
-	push_warning("[%s] Variable-adding not yet implemented." % self.get_class())
-
 func _on_save_button_pressed():
 	push_warning("[%s] Variable-saving not yet implemented." % self.get_class())
 
-
-func _on_cancel_button_pressed():
+func _on_close_attempt():
 	hide()
-
-func set_for(variable_holder):
-	if variable_holder == null:
-		self.title = "[No Variable Holder Selected]"
-	elif variable_holder is FKEventSheet:
-		var sheet := variable_holder as FKEventSheet
-		self.title = sheet.resource_name
-		_last_holder = variable_holder
-		_refresh_var_cache()
-
-var _last_holder
-
-func _refresh_var_cache():
-	if not _last_holder:
-		return
-	_var_cache.clear()
-	var holder_vars: Array[FKVariable] = _last_holder.variables
-	for elem in holder_vars:
-		var dupe := elem.duplicate_deep()
-		_var_cache.append(dupe)
-
-## Stores copies of the vars to make it easier to only change the 
-## real stuff when appropriate.
-var _var_cache: Array[FKVariable] = []
 
 func _on_var_type_id_pressed(id: int):
 	var type_we_want := add_var_popup.get_item_text(id)
 	var new_var := _var_registry.get_variable_of_type(type_we_want)
 	_var_cache.append(new_var)
 	_add_entry_for(new_var)
-	pass
 
 var _var_registry: FKVariableRegistry:
 	get:
 		return editor_globals.var_registry
+
+## Stores copies of the vars to make it easier to only change the 
+## real stuff when appropriate.
+var _var_cache: Array[FKVariable] = []
 
 func _add_entry_for(to_add_for: FKVariable):
 	var ui_entry := var_ui_pool.acquire(to_add_for)
 	if ui_entry == null:
 		return
 	var_ui_holder.add_child(ui_entry)
+	_active_var_uis.append(ui_entry)
 
 var var_ui_pool: FKVariableUiPool:
 	get:
 		return editor_globals.variable_ui_pool
+
+## The FKVariableUis currently displayed in var_ui_holder.
+var _active_var_uis: Array[FKVariableUi] = []
+
+func _on_visibility_changed():
+	if not visible:
+		return
+	# Showing always starts from a clean slate of UIs, rebuilt from the cache
+	# (set_for is typically called right before show()).
+	_refresh_based_on_holder()
+
+func _release_var_uis():
+	var_ui_pool.release_all(_active_var_uis)
+	_active_var_uis.clear()
+
+func _populate_var_uis():
+	for elem in _var_cache:
+		_add_entry_for(elem)
+
+func set_for(variable_holder):
+	_last_holder = null
+	if variable_holder == null:
+		self.title = "[No Variable Holder Selected]"
+	elif variable_holder is FKEventSheet:
+		var sheet := variable_holder as FKEventSheet
+		self.title = sheet.resource_name
+		_last_holder = variable_holder
+	else:
+		push_warning("[%s] Unsupported variable holder: %s" % [get_class(), variable_holder])
+		self.title = "[Unsupported Variable Holder]"
+
+	_refresh_based_on_holder()
+
+var _last_holder
+
+func _refresh_based_on_holder():
+	_refresh_var_cache()
+	_release_var_uis()
+	_populate_var_uis()
+
+func _refresh_var_cache():
+	_var_cache.clear()
+	if not _last_holder:
+		return
+	var holder_vars: Array[FKVariable] = _last_holder.get_variables()
+	for elem in holder_vars:
+		if elem == null:
+			continue
+		var dupe := elem.duplicate_deep()
+		_var_cache.append(dupe)
+
 func get_class() -> String:
 	return "FKVariableEditorModal"

@@ -125,5 +125,5 @@ func _to_string() -> String:
 func get_class() -> String:
 	return "FKVariable"
 
-func get_real_class():
+func get_real_class() -> String:
 	return self.get_class()
