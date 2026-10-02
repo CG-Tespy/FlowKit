@@ -1,64 +1,48 @@
 extends Resource
-## Main container and manager of FKVariables.
+## Main container and manager of FKVariables. Runtime-safe: it knows nothing about
+## the editor. Creating variables of a given type is the editor registry's job
+## (see FKVariableRegistry.add_var_of_type); this just takes ownership of them.
 class_name FKVariableManager
 
-@export var vars: Array[FKVariable]
+@export var fk_variables: Array[FKVariable] = []
+@export_storage var id_assigner: FKIdAssigner = FKIdAssigner.new()
 
-func _init() -> void:
-
-	pass
-
-var _content_type_to_creation_func: Dictionary[String, Callable] = {
-	"int": Callable(self, "_add_number_var"),
-	"float": Callable(self, "_add_number_var"),
-	"number": Callable(self, "_add_number_var"),
-	"bool": Callable(self, "_add_bool_var"),
-
-	"vector2": Callable(self, "_add_vector_var"),
-	"vector3": Callable(self, "_add_vector_var"),
-	"vector4": Callable(self, "_add_vector_var"),
-	"vector": Callable(self, "_add_vector_var"),
-
-	"string": Callable(self, "_add_string_var"),
-	"color": Callable(self, "_add_color_var"),
-
-}
-
-func _add_number_var() -> FKNumberVariable:
-	var to_add := FKNumberVariable.new()
-	to_add._owner = self._owner
-	return to_add
-
-func _add_bool_var() -> FKBoolVariable:
-	var to_add := FKBoolVariable.new()
-	to_add._owner = self._owner 
-	return to_add
-
-func _add_vector_var() -> FKVectorVariable:
-	var vec_var := FKVectorVariable.new()
-	vec_var._owner = self._owner
-	return vec_var
-
-func _add_string_var():
-	var to_add := FKStringVariable.new()
-	to_add._owner = self._owner
-
-func _add_color_var():
-	var to_add := FKStringVariable.new()
-	to_add._owner = self._owner
+## Returns a defensive copy.
+func get_variables() -> Array[FKVariable]:
+	return fk_variables.duplicate()
 
 func set_owner(new_owner):
 	_owner = new_owner 
-	for elem in vars:
+	for elem in fk_variables:
 		elem.set_owner(new_owner)
 
 var _owner 
 
-func _add_audio_stream_var():
-	pass
+## Takes ownership of the variable, giving it an id that's unique among ours.
+## Returns false if the variable was null or already managed here.
+func add_var(fk_var: FKVariable) -> bool:
+	if fk_var == null or fk_variables.has(fk_var):
+		return false
 
-func _add_node_var():
-	pass 
+	fk_variables.append(fk_var)
+	fk_var.set_owner(_owner)
+	_refresh_ids()
+	return true
 
-func add_var_of_content_type(content_type: String):
-	pass
+## Returns false if the variable isn't managed here.
+func remove_var(fk_var: FKVariable) -> bool:
+	var ind := fk_variables.find(fk_var)
+	if ind < 0:
+		return false
+
+	fk_variables.remove_at(ind)
+	fk_var.set_owner(null)
+	return true
+
+func _refresh_ids() -> void:
+	if not id_assigner:
+		id_assigner = FKIdAssigner.new()
+		id_assigner.prop_name = "id"
+
+	id_assigner.reset_taken_caches()
+	id_assigner.refresh_for(fk_variables)

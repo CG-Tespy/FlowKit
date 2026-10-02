@@ -43,7 +43,22 @@ func get_variable_of_type(type_name: String) -> FKVariable:
 	var script := _var_types_to_scripts[type_name]
 	var new_var: FKVariable = script.new()
 	_set_subs_for(new_var, true)
-	_var_pool.append(new_var)
+	return new_var
+
+## Creates a variable of the given type and hands it to the manager, which assigns
+## its id and owner. Returns null if the type is invalid or the manager rejects it.
+func add_var_of_type(manager: FKVariableManager, type_name: String) -> FKVariable:
+	if manager == null:
+		push_error("[%s] Cannot add a variable without a manager." % self.get_class())
+		return null
+
+	var new_var := get_variable_of_type(type_name)
+	if new_var == null:
+		return null
+
+	if not manager.add_var(new_var):
+		_set_subs_for(new_var, false)
+		return null
 	return new_var
 
 func _set_subs_for(fk_var: FKVariable, wants_subs_active: bool):
@@ -62,7 +77,7 @@ func _on_var_value_changed(the_var: FKVariable):
 var _var_signals: FKEditorVariableSignals:
 	get:
 		if not _globals:
-			push_error("[%s] Cannot access var signals without globals registered.")
+			push_error("[%s] Cannot access var signals without globals registered." % self.get_class())
 			return null
 		return _globals.variable_signals
 
