@@ -42,7 +42,8 @@ func remove_var(fk_var: FKVariable) -> bool:
 func _refresh_ids() -> void:
 	if not id_assigner:
 		id_assigner = FKIdAssigner.new()
-		id_assigner.prop_name = "id"
 
+	# Set every time, since the default-constructed assigner starts with no prop name.
+	id_assigner.prop_name = "id"
 	id_assigner.reset_taken_caches()
 	id_assigner.refresh_for(fk_variables)

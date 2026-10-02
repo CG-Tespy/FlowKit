@@ -15,22 +15,22 @@ func _set_value(value: Variant) -> void:
 	z_field.value = value.z
 	w_field.value = value.w
 
-	_ensure_proper_sync_with_var()
-	if _variable:
-		_variable.set_value(value, false)
+func refresh() -> void:
+	super.refresh()
 
-func _ensure_proper_sync_with_var():
-	if not _variable:
+	if _variable == null:
 		return
 
-	# It might've integerized itself after we committed a value to it. To make sure 
-	# we're representing it properly, we need to update our fields.
 	var vec_var := _variable as FKVectorVariable
+	whole_nums_only.button_pressed = vec_var.whole_nums_only
 
-	x_field.set_value_no_signal(vec_var.x())
-	y_field.set_value_no_signal(vec_var.y())
-	z_field.set_value_no_signal(vec_var.z())
-	w_field.set_value_no_signal(vec_var.w())
+func _apply_value_to_variable() -> bool:
+	for field in _component_fields:
+		field.apply() # In case text was typed in without being confirmed
+
+	var vec_var := _variable as FKVectorVariable
+	vec_var.whole_nums_only = whole_nums_only.button_pressed # Before the value, which it affects
+	return vec_var.set_value(Vector4(x_field.value, y_field.value, z_field.value, w_field.value))
 
 # We want to be able to see the changes in the axis-count-field display even in
 # Scene View, so...
@@ -49,10 +49,8 @@ var _component_fields: Array[SpinBox] = []
 func _pre_legitimize_toggle_subs(wants_subs_active: bool):
 	if wants_subs_active and not _is_pre_subbed:
 		axis_count_field.value_changed.connect(_on_axis_count_changed)
-		whole_nums_only.toggled.connect(_on_whole_nums_toggled)
 	elif _is_pre_subbed and not wants_subs_active:
 		axis_count_field.value_changed.disconnect(_on_axis_count_changed)
-		whole_nums_only.toggled.disconnect(_on_whole_nums_toggled)
 	else:
 		return
 
@@ -76,27 +74,3 @@ func _show_component_fields_for_axis_count():
 		var field := _component_fields[ind]
 		if field:
 			field.visible = true
-
-func _on_whole_nums_toggled(is_on: bool):
-	if not _variable:
-		return
-	var vec_var := _variable as FKVectorVariable
-	vec_var.whole_nums_only = is_on
-
-func _toggle_subs(wants_subs_active: bool) -> void:
-	if wants_subs_active and not _is_subbed:
-		for field in [x_field, y_field, z_field, w_field]:
-			_toggle_spinbox_commit(field, _on_component_edit_finished, true)
-	elif not wants_subs_active and _is_subbed:
-		for field in [x_field, y_field, z_field, w_field]:
-			_toggle_spinbox_commit(field, _on_component_edit_finished, false)
-	super._toggle_subs(wants_subs_active)
-
-
-func _on_component_edit_finished() -> void:
-	var to_commit := Vector4(x_field.value, y_field.value, z_field.value, w_field.value)
-	_commit_value(to_commit)
-
-func _commit_value(value: Variant) -> void:
-	super._commit_value(value) 
-	_ensure_proper_sync_with_var()

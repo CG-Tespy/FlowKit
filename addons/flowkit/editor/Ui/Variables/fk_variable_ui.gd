@@ -45,15 +45,11 @@ var _is_editor_preview := true
 
 func _toggle_subs(wants_subs_active: bool):
 	if wants_subs_active and not _is_subbed:
-		name_field.text_submitted.connect(_on_name_changed)
-		name_field.focus_exited.connect(_on_name_edit_finished)
 		access_scope_field.get_popup().id_pressed.connect(_on_access_scope_selected)
 		removal_button.pressed.connect(_on_removal_button_pressed)
 
 		_toggle_var_subs(wants_subs_active)
 	elif _is_subbed and not wants_subs_active:
-		name_field.text_submitted.disconnect(_on_name_changed)
-		name_field.focus_exited.disconnect(_on_name_edit_finished)
 		access_scope_field.get_popup().id_pressed.disconnect(_on_access_scope_selected)
 		removal_button.pressed.disconnect(_on_removal_button_pressed)
 
@@ -86,7 +82,9 @@ func get_variable() -> FKVariable:
 
 ## The one that this ui represents.
 var _variable: FKVariable
-var _is_refreshing := false
+
+## The scope picked in access_scope_field, which only shows its name.
+var _selected_scope := FKAccessScope.Keys.PRIVATE
 
 func set_variable(new_var: FKVariable) -> void:
 	if _variable == new_var:
@@ -97,16 +95,16 @@ func set_variable(new_var: FKVariable) -> void:
 	_toggle_subs(true)
 	refresh()
 
+## Resets the widgets to match the variable, discarding any edits not yet applied.
 func refresh() -> void:
 	if _variable == null:
 		name_field.text = "[Null]"
 		return
 
-	_is_refreshing = true
 	name_field.text = _variable.key
-	access_scope_field.text = _access_scope_name(_variable.scope)
+	_selected_scope = _variable.scope
+	access_scope_field.text = _access_scope_name(_selected_scope)
 	_set_value(_variable.get_value())
-	_is_refreshing = false
 
 func _exit_tree() -> void:
 	_pre_legitimize_exit_tree()
@@ -117,20 +115,9 @@ func _exit_tree() -> void:
 func _pre_legitimize_exit_tree():
 	_pre_legitimize_toggle_subs(false)
 
-func _on_name_changed(new_name: String) -> void:
-	if _variable == null or _is_refreshing or _variable.key == new_name:
-		return
-	_variable.key = new_name
-	_variable.emit_changed()
-
-func _on_name_edit_finished() -> void:
-	_on_name_changed(name_field.text)
-
 func _on_access_scope_selected(scope_id: int) -> void:
-	if _variable == null or _is_refreshing:
-		return
-	_variable.scope = scope_id as FKAccessScope.Keys
-	_variable.emit_changed()
+	_selected_scope = scope_id as FKAccessScope.Keys
+	access_scope_field.text = _access_scope_name(_selected_scope)
 
 func _access_scope_name(scope: FKAccessScope.Keys) -> String:
 	match scope:
@@ -143,42 +130,25 @@ func _access_scope_name(scope: FKAccessScope.Keys) -> String:
 		_:
 			return "Scope"
 
+## Shows the value in the widgets. Must not write to the variable.
 func _set_value(_value: Variant) -> void:
 	push_error("[FlowKit] FKVariableUi subclasses must implement _set_value().")
 
-func _toggle_spinbox_commit(field: SpinBox, finished: Callable, connect_signals: bool) -> void:
-	var line_edit := field.get_line_edit()
-	var submitted := _on_spinbox_text_submitted.bind(field, finished)
-	var focus_finished := _on_spinbox_focus_exited.bind(field, finished)
-	var mouse_input := _on_spinbox_mouse_input.bind(finished)
-	var key_input := _on_spinbox_key_input.bind(finished)
-	if connect_signals:
-		line_edit.text_submitted.connect(submitted)
-		line_edit.focus_exited.connect(focus_finished)
-		line_edit.gui_input.connect(key_input)
-		field.gui_input.connect(mouse_input)
-	else:
-		line_edit.text_submitted.disconnect(submitted)
-		line_edit.focus_exited.disconnect(focus_finished)
-		line_edit.gui_input.disconnect(key_input)
-		field.gui_input.disconnect(mouse_input)
+## Writes what the widgets currently hold into the variable this ui represents.
+## Edits only reach the variable through this (e.g. when the modal's Save is pressed).
+## Returns false if there's no variable or it rejected the value.
+func apply_to_variable() -> bool:
+	if _variable == null:
+		return false
 
-func _on_spinbox_text_submitted(_text: String, field: SpinBox, finished: Callable) -> void:
-	field.apply()
-	finished.call()
+	_variable.key = name_field.text
+	_variable.scope = _selected_scope
+	var value_accepted := _apply_value_to_variable()
+	_variable.emit_changed() # Also makes us refresh, to show what the variable settled on
+	return value_accepted
 
-func _on_spinbox_focus_exited(field: SpinBox, finished: Callable) -> void:
-	field.apply()
-	finished.call()
-
-func _on_spinbox_mouse_input(event: InputEvent, finished: Callable) -> void:
-	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT and not event.pressed:
-		finished.call()
-
-func _on_spinbox_key_input(event: InputEvent, finished: Callable) -> void:
-	if event is InputEventKey and not event.pressed and event.keycode in [KEY_UP, KEY_DOWN]:
-		finished.call()
-
-func _commit_value(value: Variant) -> void:
-	if _variable != null and not _is_refreshing and _variable.get_value() != value:
-		_variable.set_value(value)
+## Meant to be overridden. Reads the value widgets and sets them on _variable,
+## returning whether the variable accepted it.
+func _apply_value_to_variable() -> bool:
+	push_error("[FlowKit] FKVariableUi subclasses must implement _apply_value_to_variable().")
+	return false

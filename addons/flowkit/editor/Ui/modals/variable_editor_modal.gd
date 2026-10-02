@@ -60,7 +60,24 @@ func _position_popup_at_mouse():
 	add_var_popup.position = mouse_pos
 
 func _on_save_button_pressed():
-	push_warning("[%s] Variable-saving not yet implemented." % self.get_class())
+	if _var_manager == null:
+		return
+
+	for var_ui in _active_var_uis:
+		if _pending_removals.has(var_ui.get_variable()):
+			continue
+		if not var_ui.apply_to_variable():
+			push_warning("[%s] Could not apply all of the edits for %s." % [get_class(), var_ui.get_variable()])
+
+	for new_var in _new_vars:
+		_var_manager.add_var(new_var)
+	for removed_var in _pending_removals:
+		_var_registry.remove_var_from(_var_manager, removed_var)
+
+	# Those are all in their final places now, so they shouldn't be discarded on hide.
+	_new_vars.clear()
+	_pending_removals.clear()
+	hide()
 
 func _on_close_attempt():
 	hide()
@@ -68,23 +85,39 @@ func _on_close_attempt():
 func _on_var_type_id_pressed(id: int):
 	var type_we_want := add_var_popup.get_item_text(id)
 	var new_var := _var_registry.get_variable_of_type(type_we_want)
-	_var_cache.append(new_var)
+	if new_var == null:
+		return
+	_new_vars.append(new_var)
 	_add_entry_for(new_var)
 
 var _var_registry: FKVariableRegistry:
 	get:
 		return editor_globals.var_registry
 
-## Stores copies of the vars to make it easier to only change the 
-## real stuff when appropriate.
-var _var_cache: Array[FKVariable] = []
+## Variables made here that aren't in the holder's manager yet (they are, once saved).
+var _new_vars: Array[FKVariable] = []
+
+## Variables in the holder that the user asked to remove, which happens on save.
+var _pending_removals: Array[FKVariable] = []
 
 func _add_entry_for(to_add_for: FKVariable):
 	var ui_entry := var_ui_pool.acquire(to_add_for)
 	if ui_entry == null:
 		return
+	ui_entry.removal_requested.connect(_on_var_ui_removal_requested)
 	var_ui_holder.add_child(ui_entry)
 	_active_var_uis.append(ui_entry)
+
+func _on_var_ui_removal_requested(requester: FKVariableUi):
+	var to_remove := requester.get_variable()
+	if _new_vars.has(to_remove):
+		# It was never in the holder, so there's nothing to save or undo.
+		_new_vars.erase(to_remove)
+		_release_var_ui(requester)
+		to_remove.release()
+	else:
+		_pending_removals.append(to_remove)
+		requester.hide()
 
 var var_ui_pool: FKVariableUiPool:
 	get:
@@ -95,18 +128,37 @@ var _active_var_uis: Array[FKVariableUi] = []
 
 func _on_visibility_changed():
 	if not visible:
+		_discard_unsaved_changes()
 		return
-	# Showing always starts from a clean slate of UIs, rebuilt from the cache
+	# Showing always starts from a clean slate of UIs, rebuilt from the holder
 	# (set_for is typically called right before show()).
 	_refresh_based_on_holder()
 
 func _release_var_uis():
-	var_ui_pool.release_all(_active_var_uis)
-	_active_var_uis.clear()
+	for var_ui in _active_var_uis.duplicate():
+		_release_var_ui(var_ui)
+
+func _release_var_ui(var_ui: FKVariableUi):
+	var_ui.removal_requested.disconnect(_on_var_ui_removal_requested)
+	var_ui.show() # It may have been hidden due to a pending removal
+	var_ui_pool.release(var_ui)
+	_active_var_uis.erase(var_ui)
+
+# Edits live in the UIs' widgets, so releasing the UIs gets rid of those. What's left
+# is what the modal itself is tracking.
+func _discard_unsaved_changes():
+	_release_var_uis()
+	for new_var in _new_vars:
+		new_var.release()
+	_new_vars.clear()
+	_pending_removals.clear()
 
 func _populate_var_uis():
-	for elem in _var_cache:
-		_add_entry_for(elem)
+	if not _var_manager:
+		return
+	for elem in _var_manager.get_variables():
+		if elem != null:
+			_add_entry_for(elem)
 
 func set_for(variable_holder):
 	_last_holder = null
@@ -124,21 +176,15 @@ func set_for(variable_holder):
 
 var _last_holder
 
-func _refresh_based_on_holder():
-	_refresh_var_cache()
-	_release_var_uis()
-	_populate_var_uis()
+var _var_manager: FKVariableManager:
+	get:
+		if _last_holder is FKEventSheet:
+			return (_last_holder as FKEventSheet).variable_manager
+		return null
 
-func _refresh_var_cache():
-	_var_cache.clear()
-	if not _last_holder:
-		return
-	var holder_vars: Array[FKVariable] = _last_holder.get_variables()
-	for elem in holder_vars:
-		if elem == null:
-			continue
-		var dupe := elem.duplicate_deep()
-		_var_cache.append(dupe)
+func _refresh_based_on_holder():
+	_discard_unsaved_changes()
+	_populate_var_uis()
 
 func get_class() -> String:
 	return "FKVariableEditorModal"
