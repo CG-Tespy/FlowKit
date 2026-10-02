@@ -16,36 +16,11 @@ class_name FKEventSheet
 ## Stores the display order: [{"type": "event"|"comment"|"group", "index": int}, ...]
 @export var item_order: Array[Dictionary] = []
 @export_storage var _id_assigner: FKIdAssigner
-@export_storage var _var_id_assigner: FKIdAssigner
 
-## For mutating this, best use funcs like remove_variable_with_id
-@export var variables: Array[FKVariable] = []
+## Manages the variables this sheet holds, including their ids and persistence.
+## Variables should be added and removed through this.
+@export var variable_manager: FKVariableManager = FKVariableManager.new()
 
-func remove_variable_with_id(id: int) -> bool:
-	var result := false 
-	var to_remove: FKVariable
-	for elem in variables:
-		if elem.id == id:
-			to_remove = elem
-			break
-
-	if to_remove:
-		variables.erase(to_remove)
-	
-	result = to_remove == null
-	return result
-
-## Returns a defensive copy 
-func get_variables() -> Array[FKVariable]:
-	return variables.duplicate()
-
-func clear_variables():
-	variables.clear()
-
-func add_variable(to_add: FKVariable):
-	if not variables.has(to_add):
-		variables.append(to_add)
-		
 ## Returns an array of the top-level FKUnits in the order they were
 ## appended to this sheet.
 var ordered_items: Array[FKUnit]:
@@ -178,6 +153,7 @@ func rebuild_order_from_items(ordered_items: Array) -> void:
 
 func on_loaded_from_disk():
 	print("[FKEventSheet]: on_loaded_from_disk called")
+	variable_manager.set_owner(self)
 	_call_child_on_loaded_from_disk(events)
 	_call_child_on_loaded_from_disk(standalone_conditions)
 	_call_child_on_loaded_from_disk(comments)
@@ -193,7 +169,7 @@ func _call_child_on_loaded_from_disk(children: Array):
 func refresh():
 	if not _id_assigner:
 		_id_assigner = FKIdAssigner.new()
-		
+	
 	_id_assigner.prop_name = "uid"
 	_id_assigner._append_array_as_invalid([0, FKUnit.INVALID_ID])
 

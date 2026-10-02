@@ -135,3 +135,19 @@ func test_release_all_returns_every_ui_to_the_pool():
 	assert_true(second_reuse == first_ui or second_reuse == second_ui)
 	first_reuse.free()
 	second_reuse.free()
+
+func test_reacquiring_the_same_variable_drops_unapplied_widget_edits():
+	var string_var := _make_string_var("Greeting", "Hello")
+	var var_ui := _pool().acquire(string_var) as FKStringVariableUi
+	add_child(var_ui)
+	var_ui.name_field.text = "Edited"
+	var_ui.value_field.text = "Edited value"
+
+	_pool().release(var_ui)
+	var reused := _pool().acquire(string_var) as FKStringVariableUi
+	add_child(reused)
+
+	assert_same(reused, var_ui)
+	assert_eq(reused.name_field.text, "Greeting")
+	assert_eq(reused.value_field.text, "Hello")
+	reused.free()

@@ -25,6 +25,7 @@ func acquire(variable: FKVariable) -> FKVariableUi:
 
 	var var_ui := available_var_uis.pop_back() as FKVariableUi
 	var_ui.set_variable(variable)
+	var_ui.refresh() # set_variable skips refreshing when the variable is the same, which could leave stale widget edits
 	return var_ui
 
 func _get_pool_key(variable: FKVariable) -> String:

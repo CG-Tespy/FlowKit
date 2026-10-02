@@ -17,7 +17,8 @@ var _type_loader := FKVariableTypeLoader.new()
 ## These map variable type strings to the GDScripts for the appropriate FKVariables
 var _var_types_to_scripts: Dictionary[String, GDScript]
 
-var _var_pool: Array[FKVariable] = []
+# Holds variables made in the editor, or rendered ownerless, for reuse.
+var _var_pool := FKVariablePool.new()
 
 func _report_var_types_loaded():
 	var log_message := "[%s] Variable types loaded:" % self.get_class()
@@ -40,8 +41,10 @@ func get_variable_of_type(type_name: String) -> FKVariable:
 		printerr(log_message)
 		return
 
-	var script := _var_types_to_scripts[type_name]
-	var new_var: FKVariable = script.new()
+	var new_var := _var_pool.acquire(_var_types_to_scripts[type_name])
+	if new_var == null:
+		return null
+
 	_set_subs_for(new_var, true)
 	return new_var
 
@@ -57,9 +60,18 @@ func add_var_of_type(manager: FKVariableManager, type_name: String) -> FKVariabl
 		return null
 
 	if not manager.add_var(new_var):
-		_set_subs_for(new_var, false)
+		_release_to_pool(new_var)
 		return null
 	return new_var
+
+## Takes the variable out of the manager and, now that it's ownerless, pools it.
+## Returns false if the manager didn't have it.
+func remove_var_from(manager: FKVariableManager, fk_var: FKVariable) -> bool:
+	if manager == null or not manager.remove_var(fk_var):
+		return false
+
+	_release_to_pool(fk_var)
+	return true
 
 func _set_subs_for(fk_var: FKVariable, wants_subs_active: bool):
 	var already_connected = fk_var.value_changed.is_connected(_on_var_value_changed)
@@ -82,13 +94,13 @@ var _var_signals: FKEditorVariableSignals:
 		return _globals.variable_signals
 
 func _on_var_release_requested(the_var: FKVariable):
-	print("On var release requested")
-	_set_subs_for(the_var, false)
-	_var_pool.append(the_var)
-	_var_signals.released.emit(the_var)
+	_release_to_pool(the_var)
 
-func get_duplicate_of(to_dupe: FKVariable) -> FKVariable:
-	return null
+func _release_to_pool(the_var: FKVariable):
+	_set_subs_for(the_var, false)
+	if _var_pool.release(the_var) and _globals:
+		_globals.variable_signals.released.emit(the_var)
 
 func get_type_names() -> Array[String]:
 	return _var_types_to_scripts.keys()
+

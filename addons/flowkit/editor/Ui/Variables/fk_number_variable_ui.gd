@@ -5,20 +5,8 @@ class_name FKNumberVariableUi
 @export var value_field: SpinBox
 @export var whole_nums_only: CheckBox
 
-func _on_value_edit_finished() -> void:
-	_commit_value(value_field.value)
-
-func _toggle_subs(wants_subs_active: bool) -> void:
-	if wants_subs_active and not _is_subbed:
-		_toggle_spinbox_commit(value_field, _on_value_edit_finished, true)
-	elif not wants_subs_active and _is_subbed:
-		_toggle_spinbox_commit(value_field, _on_value_edit_finished, false)
-	super._toggle_subs(wants_subs_active)
-
 func _set_value(value: Variant) -> void:
 	value_field.value = float(value)
-	if _variable:
-		_variable.set_value(value_field.value, false)
 
 func refresh() -> void:
 	super.refresh()
@@ -28,3 +16,9 @@ func refresh() -> void:
 
 	var num_var := _variable as FKNumberVariable
 	whole_nums_only.button_pressed = num_var.whole_nums_only
+
+func _apply_value_to_variable() -> bool:
+	value_field.apply() # In case text was typed in without being confirmed
+	var num_var := _variable as FKNumberVariable
+	num_var.whole_nums_only = whole_nums_only.button_pressed # Before the value, which it affects
+	return num_var.set_value(value_field.value)
