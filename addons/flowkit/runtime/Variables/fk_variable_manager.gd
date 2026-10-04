@@ -1,3 +1,4 @@
+@tool
 extends Resource
 ## Main container and manager of FKVariables. Runtime-safe: it knows nothing about
 ## the editor. Creating variables of a given type is the editor registry's job

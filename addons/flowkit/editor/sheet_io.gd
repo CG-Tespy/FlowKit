@@ -17,7 +17,9 @@ func load_sheet(scene_uid: int) -> FKEventSheet:
 	if sheet_path == "" or not FileAccess.file_exists(sheet_path):
 		return null
 
-	var sheet := ResourceLoader.load(sheet_path)
+	var sheet := ResourceLoader.load(sheet_path, "", ResourceLoader.CACHE_MODE_IGNORE)
+	# ^Ignoring the cache, as a sheet saved from a new instance would otherwise leave
+	# an older, outdated one to be loaded in its place.
 	if sheet is FKEventSheet:
 		sheet.on_loaded_from_disk()
 		return sheet

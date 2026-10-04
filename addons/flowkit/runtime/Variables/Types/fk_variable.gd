@@ -1,3 +1,4 @@
+@tool
 extends Resource
 
 ## Separate from the System variables FlowKit used before. These are meant to be more 

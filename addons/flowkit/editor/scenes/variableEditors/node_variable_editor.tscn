@@ -2,11 +2,12 @@
 
 [ext_resource type="Script" uid="uid://bf2i0rv51e0j5" path="res://addons/flowkit/editor/Ui/Variables/fk_node_variable_ui.gd" id="1"]
 
-[node name="NodeVariableEditor" type="HBoxContainer" unique_id=1351464796 node_paths=PackedStringArray("value_field", "name_field", "access_scope_field", "removal_button")]
+[node name="NodeVariableEditor" type="HBoxContainer" unique_id=1351464796 node_paths=PackedStringArray("value_field", "clear_button", "name_field", "access_scope_field", "removal_button")]
 custom_minimum_size = Vector2(600, 32)
 size_flags_horizontal = 3
 script = ExtResource("1")
-value_field = NodePath("ValueHolder/Value")
+value_field = NodePath("ValueHolder/ValueLayout/Value")
+clear_button = NodePath("ValueHolder/ValueLayout/ClearButton")
 type_display_name = "Node"
 name_field = NodePath("Name")
 access_scope_field = NodePath("AccessScopeHolder/AccessScope")
@@ -59,14 +60,28 @@ grow_horizontal = 2
 grow_vertical = 2
 color = Color(0.27387273, 0.27387273, 0.27387273, 1)
 
-[node name="Value" type="LineEdit" parent="ValueHolder" unique_id=896703151]
+[node name="ValueLayout" type="HBoxContainer" parent="ValueHolder"]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-placeholder_text = "Relative node path"
+theme_override_constants/separation = 2
+
+[node name="Value" type="Button" parent="ValueHolder/ValueLayout"]
+layout_mode = 2
+size_flags_horizontal = 3
+tooltip_text = "Click to select a node from the edited scene."
+text = "[Select Node]"
+alignment = 0
+text_overrun_behavior = 3
+clip_text = true
+
+[node name="ClearButton" type="Button" parent="ValueHolder/ValueLayout"]
+layout_mode = 2
+tooltip_text = "Clear the selected node."
+text = " x "
 
 [node name="AccessScopeHolder" type="Control" parent="." unique_id=1438009441]
 custom_minimum_size = Vector2(100, 0)

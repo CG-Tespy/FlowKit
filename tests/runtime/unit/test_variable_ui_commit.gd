@@ -168,11 +168,15 @@ func test_node_path_applies_on_apply() -> void:
 	variable.set_node_path(NodePath("Target"))
 	var ui := _make_ui(NODE_EDITOR, variable) as FKNodeVariableUi
 
-	ui.value_field.text = "Other"
-	ui.value_field.focus_exited.emit()
+	assert_eq(ui.value_field.text, "Target")
+	ui.set_picked_path(NodePath("Other"))
 	assert_eq(variable.get_node_path(), NodePath("Target"))
 
 	assert_true(ui.apply_to_variable())
+	assert_eq(variable.get_node_path(), NodePath("Other"))
+
+	ui.clear_button.pressed.emit()
+	assert_eq(ui.value_field.text, FKNodeVariableUi.NO_NODE_TEXT)
 	assert_eq(variable.get_node_path(), NodePath("Other"))
 	ui.free()
 	owner.free()

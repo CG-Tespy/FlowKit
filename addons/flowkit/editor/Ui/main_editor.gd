@@ -185,6 +185,11 @@ func _set_menu_bar_subs(wants_subs_active: bool):
 		menu_bar.global_var_view_requested.disconnect(_on_global_var_view_requested)
 
 func _on_local_var_view_requested():
+	if _current_sheet == null:
+		if current_scene_uid == 0:
+			push_warning("[FKMainEditor] No scene open to edit variables for.")
+			return
+
 	# Bring up the local var view modal
 	var modal := modal_manager.get_variable_editor_modal(_current_sheet)
 	_popup_centered_on_editor(modal)
@@ -770,7 +775,7 @@ func _save_sheet() -> FKEventSheet:
 
 	var units := blocks_container.units
 		
-	var sheet := FKEventSheet.from_units(units)
+	var sheet := FKEventSheet.from_units(units, _current_sheet.variable_manager if _current_sheet else null)
 	var err := sheet_io.save_sheet(current_scene_uid, sheet)
 	var result: FKEventSheet = null
 	if err == OK:
@@ -795,8 +800,11 @@ func _refresh_ui(sheet: FKEventSheet = null):
 	_on_ui_restoration_done()
 	_current_sheet = sheet
 
-var _current_sheet: FKEventSheet
-	
+var _current_sheet: FKEventSheet:
+	get:
+		return editor_globals.current_sheet
+	set(value):
+		editor_globals.current_sheet = value
 func _refresh_sheet_ui(sheet: FKEventSheet):
 	blocks_container.clear_unit_nodes()
 	

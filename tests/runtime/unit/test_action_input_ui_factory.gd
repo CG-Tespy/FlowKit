@@ -75,6 +75,9 @@ func test_factory_creates_vector4_input_ui():
 	input_ui.free()
 
 func test_factory_creates_audio_stream_input_ui():
+	if not ClassDB.can_instantiate("EditorResourcePicker"):
+		pending("EditorResourcePicker only exists in the editor.")
+		return
 	var input := AUDIO_STREAM_ACTION_INPUT.new("Correct Answer")
 	var input_ui: Variant = factory.create_from(input)
 	add_child(input_ui)

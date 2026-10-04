@@ -47,17 +47,31 @@ func _toggle_subs(wants_subs_active: bool):
 	if wants_subs_active and not _is_subbed:
 		access_scope_field.get_popup().id_pressed.connect(_on_access_scope_selected)
 		removal_button.pressed.connect(_on_removal_button_pressed)
+		name_field.text_submitted.connect(_on_name_field_text_submitted)
+		name_field.focus_exited.connect(_on_name_field_focus_exited)
 
 		_toggle_var_subs(wants_subs_active)
 	elif _is_subbed and not wants_subs_active:
 		access_scope_field.get_popup().id_pressed.disconnect(_on_access_scope_selected)
 		removal_button.pressed.disconnect(_on_removal_button_pressed)
+		name_field.text_submitted.disconnect(_on_name_field_text_submitted)
+		name_field.focus_exited.disconnect(_on_name_field_focus_exited)
 
 		_toggle_var_subs(wants_subs_active)
 	else:
 		return
 
 	_is_subbed = !_is_subbed
+
+func _on_name_field_text_submitted(_new_text: String):
+	name_committed.emit(self)
+
+func _on_name_field_focus_exited():
+	name_committed.emit(self)
+
+## The user is done typing in name_field. Whatever shows this is the one that knows
+## about the other variables, so it's the one that decides whether the name is okay.
+signal name_committed(var_ui: FKVariableUi)
 
 func _on_removal_button_pressed():
 	removal_requested.emit(self)

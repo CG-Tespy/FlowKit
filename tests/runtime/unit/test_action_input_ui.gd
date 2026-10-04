@@ -15,6 +15,8 @@ const AUDIO_STREAM_ACTION_INPUT := preload("res://addons/flowkit/runtime/ActionI
 const STRING_INPUT_SCENE := preload("res://addons/flowkit/editor/scenes/actionInputs/string_input.tscn")
 const VARIANT_INPUT_SCENE := preload("res://addons/flowkit/editor/scenes/actionInputs/variant_input.tscn")
 
+const NEEDS_EDITOR_CLASSES := "EditorResourcePicker only exists in the editor."
+
 class TestEditorGlobals extends FKEditorGlobals:
 	var auto_enclose_strings := false
 
@@ -120,6 +122,9 @@ func test_vector4_input_ui_uses_input_name_and_value():
 	input_ui.free()
 
 func test_audio_stream_input_ui_uses_input_name_and_value():
+	if not ClassDB.can_instantiate("EditorResourcePicker"):
+		pending(NEEDS_EDITOR_CLASSES)
+		return
 	var input_ui: FKActionInputUi = AUDIO_STREAM_INPUT_SCENE.instantiate()
 	var expected_stream := load("res://addons/flowkit/assets/correct.ogg") as AudioStream
 	input_ui.legitimize(AUDIO_STREAM_ACTION_INPUT.new("Correct Answer"), _new_editor_globals())
@@ -128,30 +133,39 @@ func test_audio_stream_input_ui_uses_input_name_and_value():
 	input_ui.try_set_value(expected_stream)
 
 	assert_eq(input_ui.input_label.text, "Correct Answer")
-	assert_eq(input_ui.line_edit.text, expected_stream.resource_path)
+	assert_same(input_ui.resource_picker.edited_resource, expected_stream)
 	assert_same(input_ui.get_value(), expected_stream)
 	input_ui.free()
 
-func test_audio_stream_input_ui_accepts_file_system_audio_stream_drops():
+func test_audio_stream_input_ui_returns_the_picked_stream():
+	if not ClassDB.can_instantiate("EditorResourcePicker"):
+		pending(NEEDS_EDITOR_CLASSES)
+		return
 	var input_ui: FKActionInputUi = AUDIO_STREAM_INPUT_SCENE.instantiate()
+	var picked_stream := load("res://addons/flowkit/assets/correct.ogg") as AudioStream
 	input_ui.legitimize(AUDIO_STREAM_ACTION_INPUT.new("Correct Answer"), _new_editor_globals())
 	add_child(input_ui)
-	var drop_data := {"files": PackedStringArray(["res://addons/flowkit/assets/correct.ogg"])}
+	input_ui.try_set_value(null)
 
-	assert_true(input_ui._can_drop_data(Vector2.ZERO, drop_data))
-	input_ui._drop_data(Vector2.ZERO, drop_data)
+	input_ui.resource_picker.edited_resource = picked_stream
+	input_ui.resource_picker.resource_changed.emit(picked_stream)
 
-	assert_eq(input_ui.line_edit.text, "res://addons/flowkit/assets/correct.ogg")
-	assert_true(input_ui.get_value() is AudioStream)
+	assert_same(input_ui.get_value(), picked_stream)
 	input_ui.free()
 
-func test_audio_stream_input_ui_rejects_non_audio_file_drops():
+func test_audio_stream_input_ui_loads_stream_from_saved_path():
+	if not ClassDB.can_instantiate("EditorResourcePicker"):
+		pending(NEEDS_EDITOR_CLASSES)
+		return
 	var input_ui: FKActionInputUi = AUDIO_STREAM_INPUT_SCENE.instantiate()
+	var path := "res://addons/flowkit/assets/correct.ogg"
 	input_ui.legitimize(AUDIO_STREAM_ACTION_INPUT.new("Correct Answer"), _new_editor_globals())
 	add_child(input_ui)
-	var drop_data := {"files": PackedStringArray(["res://addons/flowkit/assets/icon.svg"])}
 
-	assert_false(input_ui._can_drop_data(Vector2.ZERO, drop_data))
+	input_ui.try_set_value(path)
+
+	assert_false(input_ui.is_expression_mode)
+	assert_eq(input_ui.resource_picker.edited_resource.resource_path, path)
 	input_ui.free()
 
 func test_string_input_ui_uses_input_name_and_value():

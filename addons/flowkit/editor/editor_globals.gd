@@ -74,6 +74,9 @@ var variable_editor_factory := FKVariableEditorFactory.new(variable_editor_regis
 var variable_ui_pool := FKVariableUiPool.new(variable_editor_factory)
 var current_scene_uid: int = 0
 
+## The sheet of the scene being edited, as last loaded or saved. The variable editor
+## works on its variables, and saving a sheet carries them over to the new one.
+var current_sheet: FKEventSheet
 ## Should return a SceneTree object. No args.
 var get_main_editor_tree: Callable
 
