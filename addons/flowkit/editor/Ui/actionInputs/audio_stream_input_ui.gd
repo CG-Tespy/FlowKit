@@ -12,6 +12,7 @@ func _toggle_subs(on: bool):
 
 	if _is_subbed:
 		resource_picker.resource_changed.connect(_on_resource_picker_resource_changed)
+	
 	else:
 		resource_picker.resource_changed.disconnect(_on_resource_picker_resource_changed)
 

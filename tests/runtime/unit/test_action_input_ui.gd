@@ -248,3 +248,120 @@ func test_variant_input_ui_does_not_double_enclose_literal_text():
 
 	assert_eq(input_ui.get_value(), "\"Updated value\"")
 	input_ui.free()
+func _make_float_input_ui(sheet: FKEventSheet) -> FKActionInputUi:
+	var editor_globals := _new_editor_globals()
+	editor_globals.current_sheet = sheet
+	var input_ui: FKActionInputUi = FLOAT_INPUT_SCENE.instantiate()
+	input_ui.legitimize(FKFloatActionInput.new("Speed", "", 1.0), editor_globals)
+	add_child(input_ui)
+	return input_ui
+
+func _make_sheet_with_vars() -> FKEventSheet:
+	var sheet := FKEventSheet.new()
+	for variable in [FKNumberVariable.new(), FKStringVariable.new(), FKBoolVariable.new()]:
+		sheet.variable_manager.add_var(variable)
+	sheet.variable_manager.get_variables()[0].key = "speed"
+	sheet.variable_manager.get_variables()[1].key = "title"
+	return sheet
+
+func test_toggle_cycles_through_literal_variable_and_expression_modes():
+	var input_ui := _make_float_input_ui(null)
+	assert_eq(input_ui.input_mode, FKActionInputUi.InputMode.LITERAL)
+	assert_true(input_ui.literal_control.visible)
+
+	input_ui.expression_toggle.pressed.emit()
+	assert_eq(input_ui.input_mode, FKActionInputUi.InputMode.VARIABLE)
+	assert_true(input_ui.variable_menu.visible)
+	assert_false(input_ui.literal_control.visible)
+	assert_false(input_ui.expression_line_edit.visible)
+
+	input_ui.expression_toggle.pressed.emit()
+	assert_eq(input_ui.input_mode, FKActionInputUi.InputMode.EXPRESSION)
+	assert_true(input_ui.expression_line_edit.visible)
+	assert_false(input_ui.variable_menu.visible)
+
+	input_ui.expression_toggle.pressed.emit()
+	assert_eq(input_ui.input_mode, FKActionInputUi.InputMode.LITERAL)
+	assert_true(input_ui.literal_control.visible)
+	input_ui.free()
+
+func test_variable_mode_lists_only_variables_matching_the_input_type():
+	var input_ui := _make_float_input_ui(_make_sheet_with_vars())
+
+	input_ui.expression_toggle.pressed.emit()
+
+	var popup := input_ui.variable_menu.get_popup()
+	assert_eq(popup.item_count, 1)
+	assert_eq(popup.get_item_text(0), "speed")
+	assert_false(input_ui.variable_menu.disabled)
+	assert_eq(input_ui.variable_menu.text, FKActionInputUi.PICK_VARIABLE_TEXT)
+	input_ui.free()
+
+func test_variable_mode_warns_when_no_variable_matches():
+	var sheet := FKEventSheet.new()
+	sheet.variable_manager.add_var(FKStringVariable.new())
+	var input_ui := _make_float_input_ui(sheet)
+
+	input_ui.expression_toggle.pressed.emit()
+
+	assert_eq(input_ui.variable_menu.get_popup().item_count, 0)
+	assert_true(input_ui.variable_menu.disabled)
+	assert_eq(input_ui.variable_menu.text, "No valid vars in sheet!")
+	input_ui.free()
+
+func test_variable_mode_warns_when_there_is_no_sheet():
+	var input_ui := _make_float_input_ui(null)
+
+	input_ui.expression_toggle.pressed.emit()
+
+	assert_true(input_ui.variable_menu.disabled)
+	assert_eq(input_ui.variable_menu.text, FKActionInputUi.NO_VARIABLES_TEXT)
+	input_ui.free()
+
+func test_picked_variable_becomes_a_reference_to_it():
+	var sheet := _make_sheet_with_vars()
+	var speed: FKVariable = sheet.variable_manager.get_variables()[0]
+	var input_ui := _make_float_input_ui(sheet)
+	input_ui.try_set_value(2.0)
+
+	input_ui.expression_toggle.pressed.emit()
+	var popup := input_ui.variable_menu.get_popup()
+	popup.id_pressed.emit(popup.get_item_id(0))
+
+	var value: Variant = input_ui.get_value()
+	assert_true(value is FKVariableRef)
+	assert_eq(value.variable_id, speed.id)
+	input_ui.free()
+
+func test_variable_mode_without_a_pick_falls_back_to_the_literal():
+	var input_ui := _make_float_input_ui(_make_sheet_with_vars())
+	input_ui.try_set_value(2.0)
+
+	input_ui.expression_toggle.pressed.emit()
+
+	assert_eq(input_ui.get_value(), input_ui.spin_box.value)
+	input_ui.free()
+
+func test_existing_variable_reference_is_shown_in_variable_mode():
+	var sheet := _make_sheet_with_vars()
+	var speed: FKVariable = sheet.variable_manager.get_variables()[0]
+	var input_ui := _make_float_input_ui(sheet)
+
+	input_ui.try_set_value(FKVariableRef.to(speed))
+
+	assert_true(input_ui.is_variable_mode)
+	assert_true(input_ui.variable_menu.visible)
+	assert_eq(input_ui.variable_menu.text, "speed")
+	assert_eq(input_ui.get_value().variable_id, speed.id)
+	input_ui.free()
+
+func test_reference_to_a_missing_variable_is_kept_and_flagged():
+	var ref := FKVariableRef.new()
+	ref.variable_id = 99
+	var input_ui := _make_float_input_ui(_make_sheet_with_vars())
+
+	input_ui.try_set_value(ref)
+
+	assert_eq(input_ui.variable_menu.text, FKActionInputUi.MISSING_VARIABLE_TEXT)
+	assert_eq(input_ui.get_value().variable_id, 99)
+	input_ui.free()

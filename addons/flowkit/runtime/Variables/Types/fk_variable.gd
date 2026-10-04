@@ -95,6 +95,11 @@ func _normalize_type(type: String) -> String:
 func _can_hold_of_type(type: String) -> bool:
 	return false
 
+## Whether this can be given as a value of the type, which is any of the (case-insensitive)
+## type names that action inputs use (e.g. "float", "AudioStream").
+func can_hold_type(type: String) -> bool:
+	return _can_hold_of_type(_normalize_type(type))
+
 func _report_type_incompatibility(type: String) -> void:
 	var log_message := "[%s] Cannot hold a value of type %s" % [self.get_class(), type]
 	printerr(log_message)
