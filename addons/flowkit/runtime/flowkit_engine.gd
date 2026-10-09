@@ -18,8 +18,9 @@ var registry: FKRegistry
 var active_sheets: Array[SheetEntry] = []
 var last_scene: Node = null
 var active_behavior_nodes: Array = []  # Track nodes with active behaviors
-var _event_unit_providers: Dictionary = {}  # FKUnit uid -> per-unit event provider instance
+var _event_unit_providers: Dictionary = {}  # Scene instance + FKUnit uid -> event provider instance
 var _branch_executor := FKBranchExecutor.new()
+var _warned_keys: Dictionary = {}  # Keys of warnings already emitted (see _warn_once)
 
 const PROJECT_SETTINGS_PATH := "res://addons/flowkit/editor/_fk_project_settings.tres"
 
@@ -103,6 +104,7 @@ func _on_scene_changed(scene_root: Node) -> void:
 	# Teardown signal events on previous sheets before clearing
 	_teardown_all_signal_events()
 	_event_unit_providers.clear()
+	_warned_keys.clear()
 	
 	if scene_root == null:
 		# Scene unloaded: clear active sheets (optional)
@@ -132,16 +134,14 @@ func _load_sheets_for_scene(scene_root: Node) -> void:
 	# Clear previous sheets
 	active_sheets.clear()
 
-	# Collect unique scene_file_path UIDs and map to their root node instances
-	var uid_to_node: Dictionary = {}
+	# Collect every scene root instance, including repeated instances of the same PackedScene.
+	var scene_roots: Array[Node] = []
+	_collect_scene_roots(scene_root, scene_roots)
 
-	# Start from the scene root
-	_collect_node_paths(scene_root, uid_to_node)
-
-	# Load sheets for each discovered scene UID
-	for uid in uid_to_node.keys():
-		var node_root: Node = uid_to_node[uid]
+	# Load the matching event sheet for each scene instance.
+	for node_root: Node in scene_roots:
 		var scene_path: String = node_root.scene_file_path
+		var uid: int = ResourceLoader.get_resource_uid(scene_path)
 		var scene_name: String = scene_path.get_file().get_basename()
 		var sheet_path: String = "res://addons/flowkit/saved/event_sheet/%d.tres" % uid
 
@@ -162,23 +162,20 @@ func _load_sheets_for_scene(scene_root: Node) -> void:
 			print("[FlowKit] No sheet found for scene: ", scene_name, " (expected at ", sheet_path, ")")
 
 
-# Helper method moved outside
-func _collect_node_paths(node: Node, uid_to_node: Dictionary) -> void:
+func _collect_scene_roots(node: Node, scene_roots: Array[Node]) -> void:
 	var path: String = node.scene_file_path
-	if path and path != "":
-		# Only consider nodes that are the topmost root of their instanced scene
-		var parent = node.get_parent()
+	if not path.is_empty():
+		# Only consider nodes that are the topmost root of their instanced scene.
+		var parent: Node = node.get_parent()
 		var parent_path: String = ""
 		if parent:
 			parent_path = parent.scene_file_path
 
 		if parent_path != path:
-			var uid = ResourceLoader.get_resource_uid(path)
-			if uid >= 0 and not uid_to_node.has(uid):
-				uid_to_node[uid] = node
+			scene_roots.append(node)
 
-	for child in node.get_children():
-		_collect_node_paths(child, uid_to_node)
+	for child: Node in node.get_children():
+		_collect_scene_roots(child, scene_roots)
 
 
 ## Create a new event provider instance for each FKEventUnit in a sheet entry.
@@ -213,14 +210,23 @@ func _create_unit_providers(entry: SheetEntry) -> void:
 			push_error(log_message)
 			continue
 
-		var key := _event_provider_key(sheet_uid, unit_id)
+		var root_instance_id: int = entry.root.get_instance_id()
+		var key: String = _event_provider_key(sheet_uid, root_instance_id, unit_id)
 		if not _event_unit_providers.has(key):
-			var instance := registry.create_event_instance(event_unit.event_id)
+			var instance: FKEvent = registry.create_event_instance(event_unit.event_id)
 			if instance:
 				_event_unit_providers[key] = instance
 
-func _event_provider_key(sheet_uid: int, event_unit_id: int) -> String:
-	return "%d:%d" % [sheet_uid, event_unit_id]
+## Targets can be freed at runtime (e.g. by a "destroy" action), so these
+## warnings would otherwise repeat every frame.
+func _warn_once(key: String, message: String) -> void:
+	if _warned_keys.has(key):
+		return
+	_warned_keys[key] = true
+	push_warning(message)
+
+func _event_provider_key(sheet_uid: int, root_instance_id: int, event_unit_id: int) -> String:
+	return "%d:%d:%d" % [sheet_uid, root_instance_id, event_unit_id]
 
 func _run_sheet(entry: SheetEntry) -> void:
 	var sheet: FKEventSheet = entry.sheet
@@ -249,7 +255,7 @@ func _run_sheet(entry: SheetEntry) -> void:
 				if not anode:
 					log_message = "[FlowKit] Standalone condition action target " +\
 					"node not found: %s" % str(act.target_node)
-					push_warning(log_message)
+					_warn_once("standalone:%d:%d:%d" % [entry.uid, current_root.get_instance_id(), act.uid], log_message)
 					continue
 				var provider: Variant = await registry.execute_action(act.action_id, anode, 
 				act.inputs, current_root)
@@ -265,23 +271,24 @@ func _run_sheet(entry: SheetEntry) -> void:
 		if not event_unit:
 			continue
 
-		# Resolve target node for polling
-		var target: String = str(event_unit.target_node)
-		var node: Node = _resolve_target(target, current_root)
-		if not node:
-			log_message = "[FlowKit] Event polling target node not found: %s in scene root: %s" \
-			% [str(event_unit.target_node), current_root.name]
-			push_warning(log_message)
-			continue
-
-		# Lookup provider instance by (sheet uid + unit personal_id)
-		var key := _event_provider_key(sheet_uid, event_unit.uid)
+		# Lookup provider instance by scene resource, scene instance, and event unit.
+		var root_instance_id: int = current_root.get_instance_id()
+		var key: String = _event_provider_key(sheet_uid, root_instance_id, event_unit.uid)
 		var provider: FKEvent = _event_unit_providers.get(key, null)
 		if not provider:
 			continue
 
 		# Signal events fire via callback — skip them in the poll loop
 		if provider.is_signal_event():
+			continue
+
+		# Resolve target node for polling
+		var target: String = str(event_unit.target_node)
+		var node: Node = _resolve_target(target, current_root)
+		if not node:
+			log_message = "[FlowKit] Event polling target node not found: %s in scene root: %s" \
+			% [str(event_unit.target_node), current_root.name]
+			_warn_once("poll:%d:%d:%d" % [entry.uid, current_root.get_instance_id(), event_unit.uid], log_message)
 			continue
 
 		# Skip events that belong to the wrong callback
@@ -303,11 +310,9 @@ func _run_sheet(entry: SheetEntry) -> void:
 # --- Signal event lifecycle -------------------------------------------------
 
 ## Set up signal-based events for a loaded sheet entry.
-## For each FKEventUnit, calls registry.setup_event() with a trigger callback
-## so signal events can connect to Godot signals and fire immediately.
-## Set up signal-based events for a loaded sheet entry.
-## For each FKEventUnit, calls provider.setup() with a trigger callback
-## so signal events can connect to Godot signals and fire immediately.
+## For each FKEventUnit, evaluates its configured inputs and calls
+## provider.setup_with_inputs() with a trigger callback so signal events can
+## connect to Godot signals and fire immediately.
 func _setup_signal_events(entry: SheetEntry) -> void:
 	var sheet: FKEventSheet = entry.sheet
 	var root_node: Node = entry.root
@@ -322,7 +327,8 @@ func _setup_signal_events(entry: SheetEntry) -> void:
 		if not event_unit:
 			continue
 
-		var key := _event_provider_key(sheet_uid, event_unit.uid)
+		var root_instance_id: int = root_node.get_instance_id()
+		var key: String = _event_provider_key(sheet_uid, root_instance_id, event_unit.uid)
 		var provider: FKEvent = _event_unit_providers.get(key, null)
 		if not provider:
 			continue
@@ -333,11 +339,21 @@ func _setup_signal_events(entry: SheetEntry) -> void:
 		var target := str(event_unit.target_node)
 		var node: Node = _resolve_target(target, root_node)
 		if not node:
+			_warn_once(
+				"signal:%d:%d:%d" % [sheet_uid, root_instance_id, event_unit.uid],
+				"[FlowKit] Signal event target node not found: %s in scene root: %s" \
+				% [target, root_node.name]
+			)
 			continue
 
 		# Build a trigger callback that runs this unit's conditions & actions
 		var trigger_cb: Callable = _make_trigger_callback(event_unit, root_node)
-		provider.setup(node, trigger_cb, event_unit.uid)
+		var evaluated_inputs: Dictionary = ExpressionEvaluator.evaluate_inputs(
+			event_unit.inputs,
+			node,
+			root_node
+		)
+		provider.setup_with_inputs(node, evaluated_inputs, trigger_cb, event_unit.uid)
 
 ## Teardown all signal events across every active sheet.
 func _teardown_all_signal_events() -> void:
@@ -355,7 +371,8 @@ func _teardown_all_signal_events() -> void:
 			if not event_unit:
 				continue
 
-			var key := _event_provider_key(sheet_uid, event_unit.uid)
+			var root_instance_id: int = root_node.get_instance_id()
+			var key: String = _event_provider_key(sheet_uid, root_instance_id, event_unit.uid)
 			var provider: FKEvent = _event_unit_providers.get(key, null)
 			if not provider:
 				continue
