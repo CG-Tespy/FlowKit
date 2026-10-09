@@ -159,7 +159,6 @@ func _set_menu_bar_subs(wants_subs_active: bool):
 		menu_bar.add_comment_requested.connect(_on_add_comment_button_pressed)
 		menu_bar.add_group_requested.connect(_on_add_group_button_pressed)
 
-		menu_bar.manifest_generation_requested.connect(_on_generate_manifest)
 		menu_bar.provider_generation_requested.connect(_on_generate_providers)
 		
 		menu_bar.redo_requested.connect(redo)
@@ -175,7 +174,6 @@ func _set_menu_bar_subs(wants_subs_active: bool):
 		menu_bar.add_comment_requested.disconnect(_on_add_comment_button_pressed)
 		menu_bar.add_group_requested.disconnect(_on_add_group_button_pressed)
 
-		menu_bar.manifest_generation_requested.disconnect(_on_generate_manifest)
 		menu_bar.provider_generation_requested.disconnect(_on_generate_providers)
 		
 		menu_bar.redo_requested.disconnect(redo)
