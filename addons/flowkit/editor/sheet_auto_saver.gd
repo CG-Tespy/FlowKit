@@ -73,7 +73,8 @@ func _save_sheet() -> FKEventSheet:
 		return
 
 	var units := _block_container.units
-	var sheet := FKEventSheet.from_units(units)
+	var current_sheet := _globals.current_sheet
+	var sheet := FKEventSheet.from_units(units, current_sheet.variable_manager if current_sheet else null)
 	
 	var result: FKEventSheet = null
 	var sheet_io := _globals.sheet_io
@@ -81,6 +82,7 @@ func _save_sheet() -> FKEventSheet:
 
 	if err == OK:
 		print("[FKSheetAutoSaver] ✓ Event sheet saved")
+		_globals.current_sheet = sheet
 		result = sheet
 	else:
 		push_error("[FKSheetAutoSaver] Failed to save event sheet: ", err)

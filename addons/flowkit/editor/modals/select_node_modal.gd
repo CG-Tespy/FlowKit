@@ -6,6 +6,17 @@ class_name FKSelectNodeModal
 @export var item_list: ItemList
 @export var recent_item_list: ItemList
 
+@export_category("Behaviour")
+## When false, picks are only reported through node_chosen, so listeners of the
+## shared modal signals (like the main editor's workflow) don't react to them.
+@export var broadcast_selection := true
+@export var include_system_option := true
+## When true, nodes no FKEvent supports can't be picked.
+@export var require_compatible_events := true
+
+## Emitted whenever the user picks a node, regardless of broadcast_selection.
+signal node_chosen(node_path: String, node_class: String)
+
 var _all_items_cache: Array = []
 
 func _enter_tree() -> void:
@@ -46,12 +57,15 @@ func _populate_recent_list() -> void:
 	
 	recent_item_list.clear()
 	
-	if _recent_items_manager.recent_nodes.is_empty():
+	var recent_nodes: Array = _recent_items_manager.recent_nodes.filter(
+		func(recent_node): return include_system_option or recent_node["path"] != "System")
+	
+	if recent_nodes.is_empty():
 		recent_item_list.add_item("(No recent items)")
 		recent_item_list.set_item_disabled(0, true)
 		return
 	
-	for recent_node in _recent_items_manager.recent_nodes:
+	for recent_node in recent_nodes:
 		var display_name = recent_node["path"]
 		if recent_node["path"] == "System":
 			display_name = "System"
@@ -66,23 +80,27 @@ func populate_from_scene(scene_root: Node) -> void:
 	
 	_all_items_cache.clear()
 	
-	# Add System option at the top
-	var system_icon = null
-	system_icon = _base_control.get_theme_icon("Node", "EditorIcons")
-		
-	_all_items_cache.append({
-		"display_name": "System",
-		"metadata": "System",
-		"icon": system_icon,
-		"disabled": false,
-		"indentation": 0,
-		"path": "System"
-	})
+	if include_system_option:
+		# Add System option at the top
+		var system_icon = null
+		system_icon = _base_control.get_theme_icon("Node", "EditorIcons")
+			
+		_all_items_cache.append({
+			"display_name": "System",
+			"metadata": "System",
+			"icon": system_icon,
+			"disabled": false,
+			"indentation": 0,
+			"path": "System"
+		})
 	
 	if scene_root:
 		_add_node_recursive(scene_root, scene_root, 0)
 		
 	_update_list()
+	if _recent_items_manager:
+		# Other instances of this modal may have added recent items since we last loaded them
+		_recent_items_manager.load_from_config()
 	_populate_recent_list()
 
 func _add_node_recursive(node: Node, scene_root: Node, depth: int) -> void:
@@ -92,8 +110,7 @@ func _add_node_recursive(node: Node, scene_root: Node, depth: int) -> void:
 	# Store the path relative to the scene root
 	var relative_path = scene_root.get_path_to(node)
 	
-	# Check if any event supports this node type
-	var has_compatible_event = _has_compatible_event(node_class)
+	var is_disabled := require_compatible_events and not _has_compatible_event(node_class)
 	
 	var icon = null
 	icon = _base_control.get_theme_icon(node_class, "EditorIcons")
@@ -102,7 +119,7 @@ func _add_node_recursive(node: Node, scene_root: Node, depth: int) -> void:
 		"display_name": node_name,
 		"metadata": str(relative_path),
 		"icon": icon,
-		"disabled": not has_compatible_event,
+		"disabled": is_disabled,
 		"indentation": depth,
 		"path": str(relative_path)
 	})
@@ -160,7 +177,7 @@ func _on_item_activated(index: int) -> void:
 	if node_path_str == "System":
 		print("[FKSelectNodeModal]: Node selected: System (System)")
 		_recent_items_manager.add_recent_node("System", "System")
-		_modal_signals.node_selected.emit("System", "System")
+		_report_selection("System", "System")
 		hide()
 		return
 	
@@ -169,8 +186,13 @@ func _on_item_activated(index: int) -> void:
 		var node_class = node.get_class()
 		print("[FKSelectNodeModal]: Node selected: ", node_path_str, " (", node_class, ")")
 		_recent_items_manager.add_recent_node(node_path_str, node_class)
-		_modal_signals.node_selected.emit(node_path_str, node_class)
+		_report_selection(node_path_str, node_class)
 		hide()
+
+func _report_selection(node_path_str: String, node_class: String) -> void:
+	node_chosen.emit(node_path_str, node_class)
+	if broadcast_selection:
+		_modal_signals.node_selected.emit(node_path_str, node_class)
 
 func _get_node_from_path(node_path_str: String) -> Node:
 	"""Get the actual node from the scene by path."""
@@ -201,7 +223,7 @@ func _on_recent_item_activated(index: int) -> void:
 	var node_class = recent_node["class"]
 	
 	print("[FKSelectNodeModal]: Recent node selected: ", node_path_str, " (", node_class, ")")
-	_modal_signals.node_selected.emit(node_path_str, node_class)
+	_report_selection(node_path_str, node_class)
 	hide()
 
 func get_class() -> String:

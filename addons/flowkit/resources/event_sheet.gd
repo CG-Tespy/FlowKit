@@ -83,10 +83,16 @@ func _collect_events_from_groups(groups: Array, out_events: Array) -> void:
 				_collect_events_from_groups([unit], out_events)
 
 
-static func from_units(units: Array[FKUnit]) -> FKEventSheet:
+## If a variable manager is passed, the new sheet takes it over (and with it, the variables
+## the units don't know about). Without that, saving a sheet built from units alone would
+## drop the variables.
+static func from_units(units: Array[FKUnit], variable_manager: FKVariableManager = null) -> FKEventSheet:
 	var sheet := FKEventSheet.new()
 	for elem in units:
 		sheet.append_copy_of(elem)
+	if variable_manager != null:
+		sheet.variable_manager = variable_manager
+		variable_manager.set_owner(sheet)
 	return sheet
 
 ## Updates the item order as well.

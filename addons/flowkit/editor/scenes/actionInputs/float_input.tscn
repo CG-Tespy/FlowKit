@@ -3,7 +3,7 @@
 [ext_resource type="Script" uid="uid://b7gadu0n2t7pt" path="res://addons/flowkit/editor/Ui/actionInputs/float_input_ui.gd" id="1_float"]
 [ext_resource type="StyleBox" uid="uid://4vsupaoluret" path="res://addons/flowkit/editor/styles/action_input_bg_style.tres" id="2_65i5a"]
 
-[node name="FloatInput" type="Control" unique_id=1961574866 node_paths=PackedStringArray("spin_box", "input_label", "desc_label", "literal_control", "expression_line_edit", "expression_toggle")]
+[node name="FloatInput" type="Control" unique_id=1961574866 node_paths=PackedStringArray("spin_box", "input_label", "desc_label", "literal_control", "expression_line_edit", "expression_toggle", "variable_menu")]
 custom_minimum_size = Vector2(300, 85)
 layout_mode = 3
 anchors_preset = 0
@@ -17,6 +17,7 @@ desc_label = NodePath("MarginContainer/VBoxContainer/Description")
 literal_control = NodePath("MarginContainer/VBoxContainer/HBoxContainer/SpinBox")
 expression_line_edit = NodePath("MarginContainer/VBoxContainer/HBoxContainer/ExpressionLineEdit")
 expression_toggle = NodePath("MarginContainer/VBoxContainer/HBoxContainer/ExpressionToggle")
+variable_menu = NodePath("MarginContainer/VBoxContainer/HBoxContainer/VariableMenu")
 
 [node name="Background" type="Panel" parent="." unique_id=173903274]
 layout_mode = 1
@@ -64,12 +65,19 @@ layout_mode = 2
 size_flags_horizontal = 3
 placeholder_text = "Expression"
 
-[node name="ExpressionToggle" type="Button" parent="MarginContainer/VBoxContainer/HBoxContainer" unique_id=1136207106]
-custom_minimum_size = Vector2(28, 0)
+[node name="VariableMenu" type="MenuButton" parent="MarginContainer/VBoxContainer/HBoxContainer"]
+visible = false
 layout_mode = 2
-tooltip_text = "Use expression"
-toggle_mode = true
-text = "fx"
+size_flags_horizontal = 3
+flat = false
+text = "Select a variable"
+clip_text = true
+
+[node name="ExpressionToggle" type="Button" parent="MarginContainer/VBoxContainer/HBoxContainer" unique_id=1136207106]
+custom_minimum_size = Vector2(36, 0)
+layout_mode = 2
+tooltip_text = "Using a literal value. Click to use a variable."
+text = "Lit"
 
 [node name="Description" type="RichTextLabel" parent="MarginContainer/VBoxContainer" unique_id=282251225]
 layout_mode = 2

@@ -2,6 +2,7 @@
 
 [ext_resource type="Script" uid="uid://djydfg62dkp7k" path="res://addons/flowkit/editor/Ui/Variables/fk_audio_stream_variable_ui.gd" id="1"]
 [ext_resource type="StyleBox" uid="uid://b8qtdvqpjx7k4" path="res://addons/flowkit/editor/styles/audio_var_ui_type_name_style.tres" id="2_xy7qc"]
+[ext_resource type="Script" path="res://addons/flowkit/editor/Ui/fk_named_resource_picker.gd" id="3_named_picker"]
 
 [node name="AudioStreamVariableEditor" type="HBoxContainer" unique_id=623768857 node_paths=PackedStringArray("value_field", "name_field", "access_scope_field", "removal_button")]
 custom_minimum_size = Vector2(680, 32)
@@ -60,14 +61,24 @@ grow_horizontal = 2
 grow_vertical = 2
 color = Color(0.27387273, 0.27387273, 0.27387273, 1)
 
-[node name="Value" type="EditorResourcePicker" parent="ValueHolder" unique_id=912381676]
+[node name="Value" type="EditorResourcePicker" parent="ValueHolder" unique_id=912381676 node_paths=PackedStringArray("name_label")]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
+script = ExtResource("3_named_picker")
+name_label = NodePath("../NameLabel")
 base_type = "AudioStream"
+
+[node name="NameLabel" type="Label" parent="ValueHolder"]
+layout_mode = 0
+mouse_filter = 2
+text = "<empty>"
+vertical_alignment = 1
+clip_text = true
+text_overrun_behavior = 3
 
 [node name="AccessScopeHolder" type="Control" parent="." unique_id=1668776705]
 custom_minimum_size = Vector2(100, 0)
