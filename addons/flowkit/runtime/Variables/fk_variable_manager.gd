@@ -12,6 +12,13 @@ class_name FKVariableManager
 func get_variables() -> Array[FKVariable]:
 	return fk_variables.duplicate()
 
+## Returns null if none of the variables has the id.
+func get_var_by_id(id: int) -> FKVariable:
+	for fk_var in fk_variables:
+		if fk_var != null and fk_var.id == id:
+			return fk_var
+	return null
+
 func set_owner(new_owner):
 	_owner = new_owner 
 	for elem in fk_variables:

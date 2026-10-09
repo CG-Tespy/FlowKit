@@ -177,6 +177,7 @@ func get_variable_reference() -> FKVariableRef:
 		return null
 	var result := FKVariableRef.new()
 	result.variable_id = _selected_variable_id
+	result.target_type = action_input.type if action_input != null else ""
 	return result
 
 func _on_literal_control_gui_input(_event: InputEvent) -> void:

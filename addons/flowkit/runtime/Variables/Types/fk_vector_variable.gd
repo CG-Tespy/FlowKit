@@ -36,7 +36,12 @@ func _set_for_our_type(new_val: Variant) -> void:
 func _can_hold_of_type(type: String) -> bool:
 	return type == "vector4" or type == "vector3" or type == "vector2"
 
-func _convert_to_target_type(_target_type: String) -> Variant:
+func _convert_to_target_type(target_type: String) -> Variant:
+	match target_type:
+		"vector2":
+			return as_vec_two()
+		"vector3":
+			return as_vec_three()
 	return value
 
 func x() -> float:

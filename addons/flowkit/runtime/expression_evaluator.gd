@@ -331,6 +331,21 @@ target_node: Node = null) -> FKEvalResult:
 	return FKEvalResult.succeeded(result)
 
 
+## Gets the value of the variable that the ref points to, from the variables of the sheet
+## running on scene_root. Returns null if there's no such sheet or variable.
+static func _resolve_variable_ref(variable_ref: FKVariableRef, scene_root: Node) -> Variant:
+	if scene_root == null or not scene_root.is_inside_tree():
+		return null
+
+	var engine := scene_root.get_tree().root.get_node_or_null("/root/FlowKit")
+	if engine == null or not engine.has_method("get_variable_manager_for"):
+		return null
+
+	var manager: FKVariableManager = engine.get_variable_manager_for(scene_root)
+	if manager == null:
+		return null
+	return variable_ref.resolve(manager, scene_root)
+
 ## Convenience method to evaluate all inputs in a dictionary
 ## Returns a new dictionary with evaluated values
 ## context_node: the base instance for expression execution
@@ -343,6 +358,13 @@ scene_root: Node = null, target_node: Node = null, type_hints: Dictionary = {}) 
 	
 	for key in inputs.keys():
 		var value = inputs[key]
+
+		if value is FKVariableRef:
+			# Left out when it can't be resolved, so the input's default applies
+			var variable_value: Variant = _resolve_variable_ref(value, scene_root)
+			if variable_value != null:
+				evaluated[key] = variable_value
+			continue
 		
 		# Only evaluate if the value is a string
 		if value is String:

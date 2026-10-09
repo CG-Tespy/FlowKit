@@ -80,7 +80,6 @@ func get_value_as(target_type: String) -> Variant:
 	if not _can_hold_of_type(normalized_type):
 		_report_type_incompatibility(normalized_type)
 	else:
-		print("Converting to target type")
 		result = _convert_to_target_type(normalized_type)
 
 	return result

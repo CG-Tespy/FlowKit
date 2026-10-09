@@ -47,6 +47,14 @@ func _resolve_target(target: String, root: Node) -> Node:
 		return get_node(_path_to_sys)
 	return root.get_node_or_null(target)
 
+## Returns the variable manager of the sheet running on the scene root passed, or null if
+## there isn't one.
+func get_variable_manager_for(scene_root: Node) -> FKVariableManager:
+	for entry in active_sheets:
+		if entry.root == scene_root and entry.sheet != null:
+			return entry.sheet.variable_manager
+	return null
+
 func _process(delta: float) -> void:
 	# Regularly check if the current_scene changed (robust against timing issues).
 	_check_for_scene_change()
