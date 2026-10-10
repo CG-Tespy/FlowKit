@@ -78,18 +78,21 @@ func _toggle_subs(on: bool):
 		expression_toggle.pressed.connect(_on_expression_toggle_pressed)
 		literal_control.gui_input.connect(_on_literal_control_gui_input)
 		expression_line_edit.text_changed.connect(_on_expression_text_changed)
-		variable_menu.get_popup().id_pressed.connect(_on_variable_menu_id_pressed)
+		var_popup().id_pressed.connect(_on_variable_menu_id_pressed)
 	elif _is_subbed and not on:
 		expression_toggle.pressed.disconnect(_on_expression_toggle_pressed)
 		literal_control.gui_input.disconnect(_on_literal_control_gui_input)
 		expression_line_edit.text_changed.disconnect(_on_expression_text_changed)
-		variable_menu.get_popup().id_pressed.disconnect(_on_variable_menu_id_pressed)
+		var_popup().id_pressed.disconnect(_on_variable_menu_id_pressed)
 	else:
 		return
 
 	_is_subbed = !_is_subbed
 
 var _is_subbed := false 
+
+func var_popup() -> PopupMenu:
+	return variable_menu.get_popup()
 
 func _on_expression_toggle_pressed() -> void:
 	if not _is_populating:
@@ -138,7 +141,7 @@ var _selected_variable_id := FKVariableRef.INVALID_ID
 
 ## Lists the sheet's variables that can be used as a value for this input.
 func _refresh_variable_menu() -> void:
-	var popup := variable_menu.get_popup()
+	var popup := var_popup()
 	popup.clear()
 
 	var sheet: FKEventSheet = null
@@ -150,13 +153,14 @@ func _refresh_variable_menu() -> void:
 
 	for variable in variables:
 		if variable != null and _can_use_variable(variable):
+			print("[%s] Adding %s to variable popup" % [self.get_class(), variable.key])
 			popup.add_item(variable.key if not variable.key.is_empty() else "[Unnamed]", variable.id)
 
 	variable_menu.disabled = popup.item_count == 0
 	_update_variable_menu_text()
 
 func _update_variable_menu_text() -> void:
-	var popup := variable_menu.get_popup()
+	var popup := var_popup()
 	if _selected_variable_id != FKVariableRef.INVALID_ID:
 		var index := popup.get_item_index(_selected_variable_id)
 		# No such item means the variable was removed or isn't valid for this input, but
@@ -193,6 +197,9 @@ func _ready() -> void:
 		return
 	
 	_apply_styling()
+	# The general action input modal is always-on-top, which would otherwise
+	# keep this popup hidden behind it.
+	var_popup().always_on_top = true
 	_apply_action_input_to_controls()
 	_set_input_mode(input_mode)
 
