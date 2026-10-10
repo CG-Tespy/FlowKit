@@ -126,6 +126,7 @@ func _on_save_button_pressed():
 	# Those are all in their final places now, so they shouldn't be discarded on hide.
 	_new_vars.clear()
 	_pending_removals.clear()
+	editor_globals.variable_signals.variables_edited.emit()
 	hide()
 
 func _on_close_attempt():

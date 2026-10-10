@@ -47,6 +47,9 @@ func update_display() -> void:
 	_update_label()
 	_update_styling()
 
+func _on_variables_edited() -> void:
+	_update_label()
+
 func _update_styling() -> void:
 	if not panel:
 		return
@@ -96,7 +99,7 @@ func _get_params_text() -> String:
 		var param_pairs := []
 		for key in _action.inputs:
 			var input = _action.inputs[key]
-			var pair = str(input)
+			var pair = _input_to_text(input)
 			param_pairs.append(pair)
 		params_text = ": " + ", ".join(param_pairs)
 		
