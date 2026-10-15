@@ -36,3 +36,6 @@ func _convert_to_target_type(target_type: String) -> Variant:
 
 func get_class() -> String:
 	return "FKNumberVariable"
+
+func arithmetic_compatible() -> bool:
+	return true

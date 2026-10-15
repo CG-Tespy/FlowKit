@@ -132,3 +132,29 @@ func get_class() -> String:
 
 func get_real_class() -> String:
 	return self.get_class()
+
+func compatible_operators() -> Array[SetOperator]:
+	var result: Array[SetOperator] = [SetOperator.ASSIGN]
+	if arithmetic_compatible():
+		result.append_array(ARITHMETIC_OPERATORS)
+	return result
+
+func arithmetic_compatible() -> bool:
+	return false
+
+## For mutating the values of variables through the visual-scripting interface.
+enum SetOperator
+{
+	NULL,
+	ASSIGN,
+	ADD,
+	SUBTRACT,
+	MULTIPLY,
+	DIVIDE
+}
+
+const ARITHMETIC_OPERATORS: Array[SetOperator] = \
+[SetOperator.ADD, 
+SetOperator.SUBTRACT, 
+SetOperator.MULTIPLY, 
+SetOperator.DIVIDE]

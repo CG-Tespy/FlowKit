@@ -66,3 +66,6 @@ func as_vec_two() -> Vector2:
 func as_vec_three() -> Vector3:
 	var result = Vector3(value.x, value.y, value.z)
 	return result
+
+func arithmetic_compatible() -> bool:
+	return true
