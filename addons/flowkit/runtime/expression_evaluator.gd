@@ -362,6 +362,10 @@ scene_root: Node = null, target_node: Node = null, type_hints: Dictionary = {}) 
 	for key in inputs.keys():
 		var value = inputs[key]
 
+		if value is FKVariableRef and value.is_target:
+			evaluated[key] = value
+			continue
+
 		if value is FKVariableRef:
 			# Left out when it can't be resolved, so the input's default applies
 			var variable_value: Variant = _resolve_variable_ref(value, scene_root)

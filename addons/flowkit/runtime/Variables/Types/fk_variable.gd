@@ -133,3 +133,91 @@ func get_class() -> String:
 
 func get_real_class() -> String:
 	return self.get_class()
+
+func compatible_operators() -> Array[SetOperator]:
+	var result: Array[SetOperator] = [SetOperator.ASSIGN]
+	if arithmetic_compatible():
+		result.append_array(ARITHMETIC_OPERATORS)
+	return result
+
+func arithmetic_compatible() -> bool:
+	return false
+
+## Makes the FKActionInput that gets a value for this variable from the user (e.g. in
+## the Set Variable action). Meant to be overridden by subclasses.
+func create_value_action_input(input_name: String = "Value", input_desc: String = "") -> FKActionInput:
+	return FKActionInput.new(input_name, "Variant", input_desc, null)
+
+## Changes our value by way of the operator and operand. Returns true if the new value was
+## accepted. Arithmetic operators only work for the variable types that allow them.
+func apply_operator(op: SetOperator, operand: Variant) -> bool:
+	if not compatible_operators().has(op):
+		printerr("[%s %s] Does not support the operator %s." % [self.get_class(), key, operator_symbol(op)])
+		return false
+
+	if op == SetOperator.ASSIGN:
+		return set_value(operand)
+
+	var prepared_operand: Variant = _prepare_operand(operand)
+	if _is_divide_by_zero(op, prepared_operand):
+		printerr("[%s %s] Cannot divide by zero." % [self.get_class(), key])
+		return false
+
+	var current: Variant = get_value()
+	var result: Variant = null
+	match op:
+		SetOperator.ADD:
+			result = current + prepared_operand
+		SetOperator.SUBTRACT:
+			result = current - prepared_operand
+		SetOperator.MULTIPLY:
+			result = current * prepared_operand
+		SetOperator.DIVIDE:
+			result = current / prepared_operand
+	return set_value(result)
+
+## Meant to be overridden by subclasses that need the operand converted to a form
+## they can do arithmetic with.
+func _prepare_operand(operand: Variant) -> Variant:
+	return operand
+
+## Meant to be overridden by subclasses that allow arithmetic.
+func _is_divide_by_zero(_op: SetOperator, _operand: Variant) -> bool:
+	return false
+
+const _OPERATOR_SYMBOLS := {
+	SetOperator.ASSIGN: "=",
+	SetOperator.ADD: "+=",
+	SetOperator.SUBTRACT: "-=",
+	SetOperator.MULTIPLY: "*=",
+	SetOperator.DIVIDE: "/=",
+}
+
+## How the operator reads to users (and how actions store it).
+static func operator_symbol(op: SetOperator) -> String:
+	return _OPERATOR_SYMBOLS.get(op, "?")
+
+## SetOperator.NULL if the symbol doesn't stand for any operator.
+static func operator_from_symbol(symbol: String) -> SetOperator:
+	var cleaned := symbol.strip_edges().trim_prefix("\"").trim_suffix("\"")
+	for op in _OPERATOR_SYMBOLS:
+		if _OPERATOR_SYMBOLS[op] == cleaned:
+			return op
+	return SetOperator.NULL
+
+## For mutating the values of variables through the visual-scripting interface.
+enum SetOperator
+{
+	NULL,
+	ASSIGN,
+	ADD,
+	SUBTRACT,
+	MULTIPLY,
+	DIVIDE
+}
+
+const ARITHMETIC_OPERATORS: Array[SetOperator] = \
+[SetOperator.ADD, 
+SetOperator.SUBTRACT, 
+SetOperator.MULTIPLY, 
+SetOperator.DIVIDE]

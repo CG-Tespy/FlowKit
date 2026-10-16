@@ -35,5 +35,8 @@ func _can_hold_of_type(type: String) -> bool:
 func _convert_to_target_type(_target_type: String) -> Variant:
 	return get_value()
 
+func create_value_action_input(input_name: String = "Value", input_desc: String = "") -> FKActionInput:
+	return FKActionInput.new(input_name, "Node", input_desc, null)
+
 func get_class() -> String:
 	return "FKNodeVariable"
