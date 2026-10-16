@@ -4,7 +4,7 @@
 [ext_resource type="StyleBox" uid="uid://4vsupaoluret" path="res://addons/flowkit/editor/styles/action_input_bg_style.tres" id="2_0d0b7"]
 
 [node name="StringInput" type="Control" unique_id=398668189 node_paths=PackedStringArray("line_edit", "input_label", "desc_label", "literal_control", "expression_line_edit", "expression_toggle", "variable_menu")]
-custom_minimum_size = Vector2(300, 85)
+custom_minimum_size = Vector2(300, 120)
 layout_mode = 3
 anchors_preset = 0
 offset_right = 300.0
@@ -12,10 +12,10 @@ offset_bottom = 30.0
 size_flags_horizontal = 3
 size_flags_vertical = 0
 script = ExtResource("1_string")
-line_edit = NodePath("MarginContainer/VBoxContainer/HBoxContainer/LineEdit")
+line_edit = NodePath("MarginContainer/VBoxContainer/LineEdit")
 input_label = NodePath("MarginContainer/VBoxContainer/HBoxContainer/Label")
 desc_label = NodePath("MarginContainer/VBoxContainer/Description")
-literal_control = NodePath("MarginContainer/VBoxContainer/HBoxContainer/LineEdit")
+literal_control = NodePath("MarginContainer/VBoxContainer/LineEdit")
 expression_line_edit = NodePath("MarginContainer/VBoxContainer/HBoxContainer/ExpressionLineEdit")
 expression_toggle = NodePath("MarginContainer/VBoxContainer/HBoxContainer/ExpressionToggle")
 variable_menu = NodePath("MarginContainer/VBoxContainer/HBoxContainer/VariableMenu")
@@ -51,11 +51,9 @@ layout_mode = 2
 [node name="Label" type="Label" parent="MarginContainer/VBoxContainer/HBoxContainer" unique_id=1993706123]
 custom_minimum_size = Vector2(150, 0)
 layout_mode = 2
-text = "Value"
-
-[node name="LineEdit" type="LineEdit" parent="MarginContainer/VBoxContainer/HBoxContainer" unique_id=1037292920]
-layout_mode = 2
 size_flags_horizontal = 3
+size_flags_stretch_ratio = 0.01
+text = "Value"
 
 [node name="ExpressionLineEdit" type="LineEdit" parent="MarginContainer/VBoxContainer/HBoxContainer" unique_id=1729048018]
 visible = false
@@ -76,6 +74,12 @@ custom_minimum_size = Vector2(36, 0)
 layout_mode = 2
 tooltip_text = "Using a literal value. Click to use a variable."
 text = "Lit"
+
+[node name="LineEdit" type="TextEdit" parent="MarginContainer/VBoxContainer" unique_id=1037292920]
+custom_minimum_size = Vector2(0, 31)
+layout_mode = 2
+size_flags_horizontal = 3
+wrap_mode = 1
 
 [node name="Description" type="RichTextLabel" parent="MarginContainer/VBoxContainer" unique_id=607376062]
 layout_mode = 2
