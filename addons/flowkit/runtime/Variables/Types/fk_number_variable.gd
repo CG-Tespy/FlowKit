@@ -34,6 +34,17 @@ func _convert_to_target_type(target_type: String) -> Variant:
 		return int(value)
 	return value
 
+func create_value_action_input(input_name: String = "Value", input_desc: String = "") -> FKActionInput:
+	if whole_nums_only:
+		return FKIntActionInput.new(input_name, input_desc)
+	return FKFloatActionInput.new(input_name, input_desc)
+
+func _prepare_operand(operand: Variant) -> Variant:
+	return float(operand)
+
+func _is_divide_by_zero(op: SetOperator, operand: Variant) -> bool:
+	return op == SetOperator.DIVIDE and is_zero_approx(operand)
+
 func get_class() -> String:
 	return "FKNumberVariable"
 

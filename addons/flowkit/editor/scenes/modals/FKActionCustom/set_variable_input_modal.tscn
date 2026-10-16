@@ -1,0 +1,100 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://addons/flowkit/editor/modals/set_variable_input_modal.gd" id="1_modal"]
+[ext_resource type="StyleBox" uid="uid://tqqxoi1osov3" path="res://addons/flowkit/editor/styles/action_input_modal_bg_style.tres" id="2_bg"]
+[ext_resource type="PackedScene" path="res://addons/flowkit/editor/scenes/set_operator_selector.tscn" id="3_selector"]
+
+[node name="set_variable_input_modal" type="Window" node_paths=PackedStringArray("variable_menu", "error_label", "operator_selector", "confirm_button", "cancel_button", "desc_label", "input_holder")]
+oversampling_override = 1.0
+title = "Set Variable"
+initial_position = 1
+size = Vector2i(750, 500)
+minimize_disabled = true
+maximize_disabled = true
+script = ExtResource("1_modal")
+variable_menu = NodePath("MarginContainer/VBoxContainer/VariableRow/VariableMenu")
+error_label = NodePath("MarginContainer/VBoxContainer/ErrorLabel")
+operator_selector = NodePath("MarginContainer/VBoxContainer/SetOperatorSelector")
+confirm_button = NodePath("MarginContainer/VBoxContainer/BottomRow/ConfirmButton")
+cancel_button = NodePath("MarginContainer/VBoxContainer/BottomRow/CancelButton")
+desc_label = NodePath("MarginContainer/VBoxContainer/ActionDesc")
+input_holder = NodePath("MarginContainer/VBoxContainer/HoldsInputFields")
+
+[node name="Background" type="Panel" parent="."]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+theme_override_styles/panel = ExtResource("2_bg")
+
+[node name="MarginContainer" type="MarginContainer" parent="."]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 4.0
+offset_top = 4.0
+offset_right = -4.0
+offset_bottom = -4.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/margin_left = 10
+theme_override_constants/margin_top = 10
+theme_override_constants/margin_right = 10
+theme_override_constants/margin_bottom = 10
+
+[node name="VBoxContainer" type="VBoxContainer" parent="MarginContainer"]
+layout_mode = 2
+
+[node name="ActionDesc" type="Label" parent="MarginContainer/VBoxContainer"]
+custom_minimum_size = Vector2(0, 35)
+layout_mode = 2
+size_flags_vertical = 0
+horizontal_alignment = 1
+autowrap_mode = 3
+
+[node name="VariableRow" type="HBoxContainer" parent="MarginContainer/VBoxContainer"]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="MarginContainer/VBoxContainer/VariableRow"]
+custom_minimum_size = Vector2(150, 0)
+layout_mode = 2
+text = "Variable"
+
+[node name="VariableMenu" type="MenuButton" parent="MarginContainer/VBoxContainer/VariableRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+tooltip_text = "One of this sheet's variables."
+flat = false
+text = "Select a variable"
+clip_text = true
+
+[node name="ErrorLabel" type="Label" parent="MarginContainer/VBoxContainer"]
+visible = false
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.45, 0.45, 1)
+autowrap_mode = 3
+
+[node name="SetOperatorSelector" parent="MarginContainer/VBoxContainer" instance=ExtResource("3_selector")]
+visible = false
+layout_mode = 2
+
+[node name="HoldsInputFields" type="VBoxContainer" parent="MarginContainer/VBoxContainer"]
+visible = false
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="BottomRow" type="HBoxContainer" parent="MarginContainer/VBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 4
+size_flags_vertical = 8
+alignment = 2
+
+[node name="ConfirmButton" type="Button" parent="MarginContainer/VBoxContainer/BottomRow"]
+layout_mode = 2
+text = "Confirm"
+
+[node name="CancelButton" type="Button" parent="MarginContainer/VBoxContainer/BottomRow"]
+layout_mode = 2
+text = "Cancel"

@@ -15,6 +15,10 @@ const INVALID_ID := 0
 ## FKActionInput names them. The variable's value gets converted to it where it can.
 @export var target_type: String = ""
 
+## When true, this names the variable itself (e.g. the one an action sets) instead of
+## standing in for its value, so input evaluation leaves it as is.
+@export var is_target := false
+
 static func to(variable: FKVariable, wanted_type: String = "") -> FKVariableRef:
 	var result := FKVariableRef.new()
 	result.variable_id = variable.id if variable != null else INVALID_ID

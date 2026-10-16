@@ -1,0 +1,22 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://addons/flowkit/editor/Ui/set_operator_selector.gd" id="1_selector"]
+
+[node name="SetOperatorSelector" type="HBoxContainer" node_paths=PackedStringArray("label", "operator_menu")]
+offset_right = 300.0
+offset_bottom = 31.0
+script = ExtResource("1_selector")
+label = NodePath("Label")
+operator_menu = NodePath("OperatorMenu")
+
+[node name="Label" type="Label" parent="."]
+custom_minimum_size = Vector2(150, 0)
+layout_mode = 2
+text = "Operator"
+
+[node name="OperatorMenu" type="MenuButton" parent="."]
+layout_mode = 2
+size_flags_horizontal = 3
+flat = false
+text = "Select an operator"
+clip_text = true

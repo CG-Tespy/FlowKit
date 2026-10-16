@@ -25,5 +25,8 @@ func _can_hold_of_type(type: String) -> bool:
 func _convert_to_target_type(_target_type: String) -> Variant:
 	return value
 
+func create_value_action_input(input_name: String = "Value", input_desc: String = "") -> FKActionInput:
+	return FKActionInput.new(input_name, "Color", input_desc, Color.WHITE)
+
 func get_class() -> String:
 	return "FKColorVariable"

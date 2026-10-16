@@ -44,6 +44,26 @@ func _convert_to_target_type(target_type: String) -> Variant:
 			return as_vec_three()
 	return value
 
+func create_value_action_input(input_name: String = "Value", input_desc: String = "") -> FKActionInput:
+	return FKVector4ActionInput.new(input_name, input_desc)
+
+## Operands can be Vector2s and Vector3s too; the missing components count as zero.
+func _prepare_operand(operand: Variant) -> Variant:
+	if operand is Vector4:
+		return operand
+
+	var result := Vector4.ZERO
+	result.x = operand.x
+	result.y = operand.y
+
+	if operand is Vector3:
+		result.z = operand.z
+		
+	return result
+
+func _is_divide_by_zero(op: SetOperator, operand: Variant) -> bool:
+	return op == SetOperator.DIVIDE and (is_zero_approx(operand.x) or is_zero_approx(operand.y) 	or is_zero_approx(operand.z) or is_zero_approx(operand.w))
+
 func x() -> float:
 	return value.x
 
