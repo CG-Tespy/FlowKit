@@ -72,11 +72,13 @@ grow_vertical = 2
 placeholder_text = "Value"
 wrap_mode = 1
 
+[node name="Spacer" type="Control" parent="TopRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+
 [node name="AccessScopeHolder" type="Control" parent="TopRow" unique_id=971323493]
 custom_minimum_size = Vector2(100, 0)
 layout_mode = 2
-size_flags_horizontal = 3
-size_flags_stretch_ratio = 0.7
 
 [node name="AccessScopeBgColor" type="ColorRect" parent="TopRow/AccessScopeHolder" unique_id=1539625297]
 layout_mode = 1
