@@ -34,9 +34,9 @@ func _raise_editor_quick_open() -> void:
 	for dialog in base.find_children("*", "EditorQuickOpenDialog", true, false):
 		dialog.always_on_top = true
 
-func _toggle_subs(on: bool):
+func _set_subs(on: bool):
 	var was_subbed := _is_subbed
-	super._toggle_subs(on)
+	super._set_subs(on)
 	if was_subbed == _is_subbed:
 		return
 

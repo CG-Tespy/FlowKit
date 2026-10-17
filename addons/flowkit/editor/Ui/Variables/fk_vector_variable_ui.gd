@@ -46,7 +46,7 @@ func _refresh_component_fields():
 
 var _component_fields: Array[SpinBox] = []
 
-func _pre_legitimize_toggle_subs(wants_subs_active: bool):
+func _pre_legitimize_set_subs(wants_subs_active: bool):
 	if wants_subs_active and not _is_pre_subbed:
 		axis_count_field.value_changed.connect(_on_axis_count_changed)
 	elif _is_pre_subbed and not wants_subs_active:

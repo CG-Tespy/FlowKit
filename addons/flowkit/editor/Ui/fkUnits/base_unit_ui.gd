@@ -27,15 +27,15 @@ var _globals: FKEditorGlobals
 func _enter_tree() -> void:
 	if is_editor_preview:
 		return
-	_toggle_subs(true)
+	_set_subs(true)
 
 ## When overriding, make sure to call the super class version last.
-func _toggle_subs(on: bool):
-	var success := _toggle_subs_for_signal_bus(on)
+func _set_subs(on: bool):
+	var success := _set_subs_for_signal_bus(on)
 	if success:
 		_is_subbed = on
 
-func _toggle_subs_for_signal_bus(on: bool) -> bool:
+func _set_subs_for_signal_bus(on: bool) -> bool:
 	# So that objects that want to listen for FKUnitUi signals
 	# won't need to have any references to such beforehand.
 	# This returns true if successful, false otherwise
@@ -189,7 +189,7 @@ func _drop_data(_pos: Vector2, _data): pass
 func _exit_tree() -> void:
 	if is_editor_preview:
 		return
-	_toggle_subs(false)
+	_set_subs(false)
 
 func _to_string() -> String:
 	var result := "FKUnitUi"

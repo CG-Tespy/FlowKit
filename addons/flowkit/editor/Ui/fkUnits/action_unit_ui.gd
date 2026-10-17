@@ -125,7 +125,7 @@ const _delete_requested_choice := 1
 # Input Handling
 # ---------------------------------------------------------
 
-func _toggle_subs(on: bool) -> void:
+func _set_subs(on: bool) -> void:
 	if on && !_is_subbed:
 		gui_input.connect(_on_gui_input)
 		mouse_exited.connect(_on_mouse_exited)
@@ -135,7 +135,7 @@ func _toggle_subs(on: bool) -> void:
 		mouse_exited.disconnect(_on_mouse_exited)
 		context_menu.id_pressed.disconnect(_on_context_menu_id_pressed)
 		
-	super._toggle_subs(on)
+	super._set_subs(on)
 
 func _on_gui_input(event: InputEvent) -> void:
 	if event is not InputEventMouseButton or not event.pressed:
