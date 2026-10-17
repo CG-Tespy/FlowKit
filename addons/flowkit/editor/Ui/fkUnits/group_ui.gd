@@ -101,7 +101,7 @@ func _enter_tree() -> void:
 	children_container.parent_group = self
 
 
-func _toggle_subs(on: bool) -> void:
+func _set_subs(on: bool) -> void:
 	if on and not _is_subbed:
 		gui_input.connect(_on_gui_input)
 		
@@ -133,7 +133,7 @@ func _toggle_subs(on: bool) -> void:
 
 			header.gui_input.disconnect(_on_header_gui_input)
 
-	super._toggle_subs(on)
+	super._set_subs(on)
 
 func _input(event: InputEvent) -> void:
 	if is_editor_preview:

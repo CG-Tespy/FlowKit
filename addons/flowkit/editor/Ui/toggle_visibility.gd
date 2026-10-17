@@ -6,9 +6,9 @@ class_name FKToggleVisibility
 @export var to_toggle_for: Array[Control]
 
 func _enter_tree() -> void:
-	_toggle_subs(true)
+	_set_subs(true)
 
-func _toggle_subs(wants_subs_active: bool):
+func _set_subs(wants_subs_active: bool):
 	if wants_subs_active and not _is_subbed:
 		clickable.pressed.connect(_on_click)
 	elif _is_subbed and not wants_subs_active:
@@ -27,4 +27,4 @@ func _on_click():
 		item.visible = !item.visible
 
 func _exit_tree() -> void:
-	_toggle_subs(false)
+	_set_subs(false)

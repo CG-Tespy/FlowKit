@@ -23,7 +23,7 @@ func legitimize() -> void:
 	refresh()
 
 func _pre_legitimize_enter_tree():
-	_pre_legitimize_toggle_subs(true)
+	_pre_legitimize_set_subs(true)
 
 func _enter_tree() -> void:
 	_pre_legitimize_enter_tree()
@@ -32,7 +32,7 @@ func _enter_tree() -> void:
 	_set_subs(true)
 
 ## These apply regardless of legitimization.
-func _pre_legitimize_toggle_subs(wants_subs_active: bool):
+func _pre_legitimize_set_subs(wants_subs_active: bool):
 	pass
 
 func _prep_access_scope_field() -> void:
@@ -129,7 +129,7 @@ func _exit_tree() -> void:
 	_set_subs(false)
 
 func _pre_legitimize_exit_tree():
-	_pre_legitimize_toggle_subs(false)
+	_pre_legitimize_set_subs(false)
 
 func _on_access_scope_selected(scope_id: int) -> void:
 	_selected_scope = scope_id as FKAccessScope.Keys

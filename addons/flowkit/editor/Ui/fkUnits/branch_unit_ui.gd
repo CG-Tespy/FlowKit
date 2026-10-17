@@ -56,7 +56,7 @@ func _on_variables_edited() -> void:
 # Subscription Handling
 # ---------------------------------------------------------
 
-func _toggle_subs(on: bool) -> void:
+func _set_subs(on: bool) -> void:
 	if on and not _is_subbed:
 		add_action_label.gui_input.connect(_on_add_action_input)
 		add_action_label.mouse_entered.connect(_on_add_action_hover.bind(true))
@@ -68,7 +68,7 @@ func _toggle_subs(on: bool) -> void:
 		add_action_label.mouse_exited.disconnect(_on_add_action_hover)
 		add_action_context_menu.id_pressed.disconnect(_on_add_action_context_menu_id_pressed)
 
-	super._toggle_subs(on)
+	super._set_subs(on)
 
 # ---------------------------------------------------------
 # Input Handling

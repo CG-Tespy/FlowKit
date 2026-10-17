@@ -20,10 +20,10 @@ var current_drop_index: int = -1  ## Current calculated drop position
 # === Lifecycle ===
 
 func _enter_tree() -> void:
-	_toggle_subs(true)
+	_set_subs(true)
 	pass
 	
-func _toggle_subs(on: bool):
+func _set_subs(on: bool):
 	if on and not _is_subbed:
 		child_entered_tree.connect(_on_child_entered_tree)
 		child_exiting_tree.connect(_on_child_exiting_tree)
@@ -311,4 +311,4 @@ func _gui_input(event: InputEvent) -> void:
 			empty_area_clicked.emit()
 
 func _exit_tree() -> void:
-	_toggle_subs(false)
+	_set_subs(false)
