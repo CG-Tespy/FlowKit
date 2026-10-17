@@ -17,6 +17,7 @@ func _enter_tree() -> void:
 	transient = false
 	exclusive = false
 	always_on_top = true
+	add_var_popup.always_on_top = true
 
 func _ready() -> void:
 	if _is_editor_preview:
