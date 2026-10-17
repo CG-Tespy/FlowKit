@@ -247,7 +247,7 @@ func try_set_value(_value: Variant) -> void:
 	_set_expression_mode(false)
 	var value := _get_literal_value(_value)
 	if not _can_hold_value(value):
-		push_error("[%s] Cannot hold %s as a value." % [self.get_class()])
+		push_error("[%s] Cannot hold %s as a value." % [self.get_class(), str(value)])
 		_is_populating = false
 		return
 	_set_value(value)

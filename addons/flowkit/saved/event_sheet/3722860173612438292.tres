@@ -12,163 +12,164 @@
 [ext_resource type="Script" uid="uid://c3drnmj762dgn" path="res://addons/flowkit/runtime/Variables/Types/fk_string_variable.gd" id="9_rcit6"]
 [ext_resource type="Script" uid="uid://d1ljmaujup1ue" path="res://addons/flowkit/runtime/Variables/fk_variable_manager.gd" id="10_h11u5"]
 [ext_resource type="Script" uid="uid://cyt1q8hm1688n" path="res://addons/flowkit/runtime/Variables/Types/fk_number_variable.gd" id="11_kn4dn"]
+[ext_resource type="Script" uid="uid://b0dcjfayxujoc" path="res://addons/flowkit/runtime/Variables/Types/fk_color_variable.gd" id="12_kn4dn"]
 
-[sub_resource type="Resource" id="Resource_h11u5"]
+[sub_resource type="Resource" id="Resource_h727k"]
 script = ExtResource("1_cth2l")
 _latest_id_given = 13
 
-[sub_resource type="Resource" id="Resource_kn4dn"]
+[sub_resource type="Resource" id="Resource_2hg74"]
 script = ExtResource("5_h11u5")
 variable_id = 7
 target_type = "int"
 
-[sub_resource type="Resource" id="Resource_h727k"]
+[sub_resource type="Resource" id="Resource_3m0o0"]
 script = ExtResource("3_uraip")
 action_id = "set_window_size"
 target_node = NodePath("System")
 inputs = {
-"Height": SubResource("Resource_kn4dn"),
+"Height": SubResource("Resource_2hg74"),
 "Width": 1280
 }
 block_type = "action"
 uid = 2
 
-[sub_resource type="Resource" id="Resource_2hg74"]
+[sub_resource type="Resource" id="Resource_dgt5r"]
 script = ExtResource("5_h11u5")
 variable_id = 1
 target_type = "String"
 
-[sub_resource type="Resource" id="Resource_3m0o0"]
+[sub_resource type="Resource" id="Resource_vag8j"]
 script = ExtResource("3_uraip")
 action_id = "set_window_mode"
 target_node = NodePath("System")
 inputs = {
-"Mode": SubResource("Resource_2hg74")
+"Mode": SubResource("Resource_dgt5r")
 }
 block_type = "action"
 uid = 3
 
-[sub_resource type="Resource" id="Resource_dgt5r"]
-script = ExtResource("5_h11u5")
-variable_id = 2
-target_type = "float"
-
-[sub_resource type="Resource" id="Resource_vag8j"]
-script = ExtResource("3_uraip")
-action_id = "set_wait_time"
-target_node = NodePath("Logic/SecondTimer")
-inputs = {
-"Wait Time": SubResource("Resource_dgt5r")
-}
-block_type = "action"
-uid = 4
-
 [sub_resource type="Resource" id="Resource_kqclp"]
 script = ExtResource("5_h11u5")
-variable_id = 3
+variable_id = 2
 target_type = "float"
 
 [sub_resource type="Resource" id="Resource_ljp47"]
 script = ExtResource("3_uraip")
 action_id = "set_wait_time"
-target_node = NodePath("Logic/ThirdTimer")
+target_node = NodePath("Logic/SecondTimer")
 inputs = {
 "Wait Time": SubResource("Resource_kqclp")
 }
 block_type = "action"
-uid = 5
+uid = 4
 
 [sub_resource type="Resource" id="Resource_3qpm3"]
+script = ExtResource("5_h11u5")
+variable_id = 3
+target_type = "float"
+
+[sub_resource type="Resource" id="Resource_fpg26"]
+script = ExtResource("3_uraip")
+action_id = "set_wait_time"
+target_node = NodePath("Logic/ThirdTimer")
+inputs = {
+"Wait Time": SubResource("Resource_3qpm3")
+}
+block_type = "action"
+uid = 5
+
+[sub_resource type="Resource" id="Resource_nnujy"]
 script = ExtResource("2_cth2l")
 event_id = "on_ready"
 target_node = NodePath("Logic")
-actions = Array[ExtResource("3_uraip")]([SubResource("Resource_h727k"), SubResource("Resource_3m0o0"), SubResource("Resource_vag8j"), SubResource("Resource_ljp47")])
+actions = Array[ExtResource("3_uraip")]([SubResource("Resource_3m0o0"), SubResource("Resource_vag8j"), SubResource("Resource_ljp47"), SubResource("Resource_fpg26")])
 block_type = "event"
 uid = 1
 
-[sub_resource type="Resource" id="Resource_fpg26"]
+[sub_resource type="Resource" id="Resource_w4jhr"]
 script = ExtResource("5_h11u5")
 variable_id = 4
 target_type = "String"
 
-[sub_resource type="Resource" id="Resource_nnujy"]
+[sub_resource type="Resource" id="Resource_uf5tt"]
 script = ExtResource("3_uraip")
 action_id = "Print Message"
 target_node = NodePath("Logic")
 inputs = {
 "color": "\"\"",
-"message": SubResource("Resource_fpg26")
+"message": SubResource("Resource_w4jhr")
 }
 block_type = "action"
 uid = 7
 
-[sub_resource type="Resource" id="Resource_w4jhr"]
+[sub_resource type="Resource" id="Resource_lmbx3"]
 script = ExtResource("3_uraip")
 action_id = "start"
 target_node = NodePath("Logic/SecondTimer")
 block_type = "action"
 uid = 8
 
-[sub_resource type="Resource" id="Resource_uf5tt"]
+[sub_resource type="Resource" id="Resource_5rwxj"]
 script = ExtResource("2_cth2l")
 event_id = "Timer on Timeout"
 target_node = NodePath("Logic/FirstTimer")
-actions = Array[ExtResource("3_uraip")]([SubResource("Resource_nnujy"), SubResource("Resource_w4jhr")])
+actions = Array[ExtResource("3_uraip")]([SubResource("Resource_uf5tt"), SubResource("Resource_lmbx3")])
 block_type = "event"
 uid = 6
 
-[sub_resource type="Resource" id="Resource_lmbx3"]
+[sub_resource type="Resource" id="Resource_mi5lf"]
 script = ExtResource("5_h11u5")
 variable_id = 5
 target_type = "String"
 
-[sub_resource type="Resource" id="Resource_5rwxj"]
+[sub_resource type="Resource" id="Resource_fb32f"]
 script = ExtResource("3_uraip")
 action_id = "Print Message"
 target_node = NodePath("Logic")
 inputs = {
 "color": "",
-"message": SubResource("Resource_lmbx3")
+"message": SubResource("Resource_mi5lf")
 }
 block_type = "action"
 uid = 10
 
-[sub_resource type="Resource" id="Resource_mi5lf"]
+[sub_resource type="Resource" id="Resource_sf6qj"]
 script = ExtResource("3_uraip")
 action_id = "start"
 target_node = NodePath("Logic/ThirdTimer")
 block_type = "action"
 uid = 11
 
-[sub_resource type="Resource" id="Resource_fb32f"]
+[sub_resource type="Resource" id="Resource_owi5m"]
 script = ExtResource("2_cth2l")
 event_id = "Timer on Timeout"
 target_node = NodePath("Logic/SecondTimer")
-actions = Array[ExtResource("3_uraip")]([SubResource("Resource_5rwxj"), SubResource("Resource_mi5lf")])
+actions = Array[ExtResource("3_uraip")]([SubResource("Resource_fb32f"), SubResource("Resource_sf6qj")])
 block_type = "event"
 uid = 9
 
-[sub_resource type="Resource" id="Resource_sf6qj"]
+[sub_resource type="Resource" id="Resource_2h0rf"]
 script = ExtResource("5_h11u5")
 variable_id = 6
 target_type = "String"
 
-[sub_resource type="Resource" id="Resource_owi5m"]
+[sub_resource type="Resource" id="Resource_ojud5"]
 script = ExtResource("3_uraip")
 action_id = "Print Message"
 target_node = NodePath("Logic")
 inputs = {
 "color": "",
-"message": SubResource("Resource_sf6qj")
+"message": SubResource("Resource_2h0rf")
 }
 block_type = "action"
 uid = 13
 
-[sub_resource type="Resource" id="Resource_2h0rf"]
+[sub_resource type="Resource" id="Resource_3p1wd"]
 script = ExtResource("2_cth2l")
 event_id = "Timer on Timeout"
 target_node = NodePath("Logic/ThirdTimer")
-actions = Array[ExtResource("3_uraip")]([SubResource("Resource_owi5m")])
+actions = Array[ExtResource("3_uraip")]([SubResource("Resource_ojud5")])
 block_type = "event"
 uid = 12
 
@@ -214,18 +215,23 @@ value = 720.0
 key = "window_height"
 id = 7
 
+[sub_resource type="Resource" id="Resource_7a5eg"]
+script = ExtResource("12_kn4dn")
+key = "new_color"
+id = 8
+
 [sub_resource type="Resource" id="Resource_1k3d6"]
 script = ExtResource("1_cth2l")
-_latest_id_given = 7
+_latest_id_given = 8
 
 [sub_resource type="Resource" id="Resource_4k17f"]
 script = ExtResource("10_h11u5")
-fk_variables = Array[ExtResource("8_jarre")]([SubResource("Resource_qyrqk"), SubResource("Resource_jf4ho"), SubResource("Resource_6j10f"), SubResource("Resource_h5q2a"), SubResource("Resource_2t5vk"), SubResource("Resource_yqp1m"), SubResource("Resource_cq5sy")])
+fk_variables = Array[ExtResource("8_jarre")]([SubResource("Resource_qyrqk"), SubResource("Resource_jf4ho"), SubResource("Resource_6j10f"), SubResource("Resource_h5q2a"), SubResource("Resource_2t5vk"), SubResource("Resource_yqp1m"), SubResource("Resource_cq5sy"), SubResource("Resource_7a5eg")])
 id_assigner = SubResource("Resource_1k3d6")
 
 [resource]
 script = ExtResource("6_rcit6")
-events = Array[ExtResource("2_cth2l")]([SubResource("Resource_3qpm3"), SubResource("Resource_uf5tt"), SubResource("Resource_fb32f"), SubResource("Resource_2h0rf")])
+events = Array[ExtResource("2_cth2l")]([SubResource("Resource_nnujy"), SubResource("Resource_5rwxj"), SubResource("Resource_owi5m"), SubResource("Resource_3p1wd")])
 item_order = Array[Dictionary]([{
 "index": 0,
 "type": "event"
@@ -239,5 +245,5 @@ item_order = Array[Dictionary]([{
 "index": 3,
 "type": "event"
 }])
-_id_assigner = SubResource("Resource_h11u5")
+_id_assigner = SubResource("Resource_h727k")
 variable_manager = SubResource("Resource_4k17f")
