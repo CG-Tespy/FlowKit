@@ -41,9 +41,9 @@ func _apply_value_to_variable() -> bool:
 	variable.set_node_path(_picked_path)
 	return true
 
-func _toggle_subs(wants_subs_active: bool):
+func _set_subs(wants_subs_active: bool):
 	var was_subbed := _is_subbed
-	super._toggle_subs(wants_subs_active)
+	super._set_subs(wants_subs_active)
 	if was_subbed == _is_subbed:
 		return
 

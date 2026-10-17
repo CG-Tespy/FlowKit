@@ -89,7 +89,7 @@ func _update_styling() -> void:
 func update_display() -> void:
 	_update_display()
 
-func _toggle_subs(on: bool) -> void:
+func _set_subs(on: bool) -> void:
 	if on and not _is_subbed:
 		gui_input.connect(_on_gui_input)
 		context_menu.id_pressed.connect(_on_context_menu_id_pressed)
@@ -101,7 +101,7 @@ func _toggle_subs(on: bool) -> void:
 		_toggle_label_subs(false)
 		_toggle_drop_zone_signals(false)
 
-	super._toggle_subs(on)
+	super._set_subs(on)
 
 # ---------------------------------------------------------
 # Input & Context Menu

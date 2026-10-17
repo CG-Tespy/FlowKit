@@ -71,9 +71,9 @@ func _apply_action_input_to_controls() -> void:
 func _enter_tree() -> void:
 	if is_editor_preview:
 		return
-	_toggle_subs(true)
+	_set_subs(true)
 
-func _toggle_subs(on: bool):
+func _set_subs(on: bool):
 	if on and not _is_subbed:
 		expression_toggle.pressed.connect(_on_expression_toggle_pressed)
 		literal_control.gui_input.connect(_on_literal_control_gui_input)
@@ -153,7 +153,7 @@ func _refresh_variable_menu() -> void:
 
 	for variable in variables:
 		if variable != null and _can_use_variable(variable):
-			print("[%s] Adding %s to variable popup" % [self.get_class(), variable.key])
+			#print("[%s] Adding %s to variable popup" % [self.get_class(), variable.key])
 			popup.add_item(variable.key if not variable.key.is_empty() else "[Unnamed]", variable.id)
 
 	variable_menu.disabled = popup.item_count == 0
@@ -247,7 +247,7 @@ func try_set_value(_value: Variant) -> void:
 	_set_expression_mode(false)
 	var value := _get_literal_value(_value)
 	if not _can_hold_value(value):
-		push_error("[%s] Cannot hold %s as a value." % [self.get_class()])
+		push_error("[%s] Cannot hold %s as a value." % [self.get_class(), str(value)])
 		_is_populating = false
 		return
 	_set_value(value)
@@ -324,4 +324,4 @@ var _editor_settings: EditorSettings:
 func _exit_tree() -> void:
 	if is_editor_preview:
 		return
-	_toggle_subs(false)
+	_set_subs(false)

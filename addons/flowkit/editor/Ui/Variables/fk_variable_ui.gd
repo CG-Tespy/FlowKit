@@ -23,16 +23,16 @@ func legitimize() -> void:
 	refresh()
 
 func _pre_legitimize_enter_tree():
-	_pre_legitimize_toggle_subs(true)
+	_pre_legitimize_set_subs(true)
 
 func _enter_tree() -> void:
 	_pre_legitimize_enter_tree()
 	if _is_editor_preview:
 		return
-	_toggle_subs(true)
+	_set_subs(true)
 
 ## These apply regardless of legitimization.
-func _pre_legitimize_toggle_subs(wants_subs_active: bool):
+func _pre_legitimize_set_subs(wants_subs_active: bool):
 	pass
 
 func _prep_access_scope_field() -> void:
@@ -41,9 +41,11 @@ func _prep_access_scope_field() -> void:
 	popup.add_item("Public", FKAccessScope.Keys.PUBLIC)
 	popup.add_item("Read-Only", FKAccessScope.Keys.READONLY)
 	popup.add_item("Private", FKAccessScope.Keys.PRIVATE)
+	popup.always_on_top = true
+	
 var _is_editor_preview := true 
 
-func _toggle_subs(wants_subs_active: bool):
+func _set_subs(wants_subs_active: bool):
 	if wants_subs_active and not _is_subbed:
 		access_scope_field.get_popup().id_pressed.connect(_on_access_scope_selected)
 		removal_button.pressed.connect(_on_removal_button_pressed)
@@ -83,7 +85,7 @@ func _toggle_var_subs(wants_subs_active: bool):
 		return 
 	
 	## At this point, we assume that the connection status is appropriate
-	## (hence why we don't repeat as many of the checks in _toggle_subs)
+	## (hence why we don't repeat as many of the checks in _set_subs)
 	if wants_subs_active:
 		_variable.changed.connect(refresh)
 	else:
@@ -104,9 +106,9 @@ func set_variable(new_var: FKVariable) -> void:
 	if _variable == new_var:
 		return
 
-	_toggle_subs(false) # Making sure to unsub to whatever var we were already repping
+	_set_subs(false) # Making sure to unsub to whatever var we were already repping
 	_variable = new_var
-	_toggle_subs(true)
+	_set_subs(true)
 	refresh()
 
 ## Resets the widgets to match the variable, discarding any edits not yet applied.
@@ -124,10 +126,10 @@ func _exit_tree() -> void:
 	_pre_legitimize_exit_tree()
 	if _is_editor_preview:
 		return
-	_toggle_subs(false)
+	_set_subs(false)
 
 func _pre_legitimize_exit_tree():
-	_pre_legitimize_toggle_subs(false)
+	_pre_legitimize_set_subs(false)
 
 func _on_access_scope_selected(scope_id: int) -> void:
 	_selected_scope = scope_id as FKAccessScope.Keys

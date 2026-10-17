@@ -22,7 +22,7 @@ func setup(target_node: Node, trigger_callback: Callable, instance_id: int = -1)
 	# the target answer button's text changes.
 	_our_target = target_node
 	_exec_actions = trigger_callback
-	_toggle_subs_for(target_node, true)
+	_set_subs_for(target_node, true)
 
 var _our_target: Node
 # ^We need this so that when responding to the global signal, we only respond to 
@@ -31,7 +31,7 @@ var _our_target: Node
 var _exec_actions: Callable
 
 ## Handles connecting and disconnecting the signals. ##
-func _toggle_subs_for(target_node: Node, on: bool):
+func _set_subs_for(target_node: Node, on: bool):
 	var type: StringName = target_node.get_class()
 	var globals: FKGlobalSignals = FlowKitSystem.global_signals
 	var use_our_own_signal: bool = !auto_signals_own_text_changes.has(type)
@@ -62,5 +62,5 @@ func teardown(target_node: Node, instance_id: int = -1) -> void:
 	if !is_instance_valid(target_node):
 		return
 		
-	_toggle_subs_for(target_node, false)
+	_set_subs_for(target_node, false)
 	
