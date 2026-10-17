@@ -4,6 +4,15 @@ class_name FKColorActionInputUi
 
 @export var color_picker_button: ColorPickerButton
 
+func _ready() -> void:
+	super._ready()
+	if is_editor_preview:
+		return
+	# The general action input modal is always-on-top, which would otherwise
+	# keep the picker popup hidden behind it.
+	var popup := color_picker_button.get_popup()
+	popup.always_on_top = true
+
 func get_value() -> Variant:
 	return get_value_or_expression(color_picker_button.color)
 

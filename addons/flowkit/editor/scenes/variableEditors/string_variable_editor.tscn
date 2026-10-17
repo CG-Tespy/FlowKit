@@ -2,21 +2,25 @@
 
 [ext_resource type="Script" uid="uid://b85n1yeeqk5i8" path="res://addons/flowkit/editor/Ui/Variables/fk_string_variable_ui.gd" id="1"]
 
-[node name="StringVariableEditor" type="HBoxContainer" unique_id=2136096431 node_paths=PackedStringArray("value_field", "name_field", "access_scope_field", "removal_button")]
-custom_minimum_size = Vector2(600, 32)
+[node name="StringVariableEditor" type="VBoxContainer" unique_id=2136096431 node_paths=PackedStringArray("value_field", "name_field", "access_scope_field", "removal_button")]
+custom_minimum_size = Vector2(600, 0)
 size_flags_horizontal = 3
 script = ExtResource("1")
 value_field = NodePath("ValueHolder/Value")
 type_display_name = "String"
-name_field = NodePath("Name")
-access_scope_field = NodePath("AccessScopeHolder/AccessScope")
-removal_button = NodePath("RemovalButton")
+name_field = NodePath("TopRow/Name")
+access_scope_field = NodePath("TopRow/AccessScopeHolder/AccessScope")
+removal_button = NodePath("TopRow/RemovalButton")
 
-[node name="TypeHolder" type="Control" parent="." unique_id=2668361]
+[node name="TopRow" type="HBoxContainer" parent="."]
+custom_minimum_size = Vector2(0, 32)
+layout_mode = 2
+
+[node name="TypeHolder" type="Control" parent="TopRow" unique_id=2668361]
 custom_minimum_size = Vector2(100, 0)
 layout_mode = 2
 
-[node name="TypeBgColor" type="ColorRect" parent="TypeHolder" unique_id=501350130]
+[node name="TypeBgColor" type="ColorRect" parent="TopRow/TypeHolder" unique_id=501350130]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -25,7 +29,7 @@ grow_horizontal = 2
 grow_vertical = 2
 color = Color(0.27450982, 0.27450982, 0.27450982, 1)
 
-[node name="MarginContainer" type="MarginContainer" parent="TypeHolder" unique_id=508584647]
+[node name="MarginContainer" type="MarginContainer" parent="TopRow/TypeHolder" unique_id=508584647]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -34,21 +38,20 @@ grow_horizontal = 2
 grow_vertical = 2
 theme_override_constants/margin_left = 5
 
-[node name="TypeName" type="Label" parent="TypeHolder/MarginContainer" unique_id=1873036729]
+[node name="TypeName" type="Label" parent="TopRow/TypeHolder/MarginContainer" unique_id=1873036729]
 layout_mode = 2
 text = "String"
 vertical_alignment = 1
 
-[node name="Name" type="LineEdit" parent="." unique_id=1652905921]
+[node name="Name" type="LineEdit" parent="TopRow" unique_id=1652905921]
 custom_minimum_size = Vector2(160, 0)
 layout_mode = 2
 placeholder_text = "Variable name"
 
 [node name="ValueHolder" type="Control" parent="." unique_id=973737198]
-custom_minimum_size = Vector2(160, 0)
+custom_minimum_size = Vector2(0, 32)
 layout_mode = 2
 size_flags_horizontal = 3
-size_flags_stretch_ratio = 2.0
 
 [node name="ValueBgColor" type="ColorRect" parent="ValueHolder" unique_id=1022180173]
 layout_mode = 1
@@ -59,7 +62,7 @@ grow_horizontal = 2
 grow_vertical = 2
 color = Color(0.27387273, 0.27387273, 0.27387273, 1)
 
-[node name="Value" type="LineEdit" parent="ValueHolder" unique_id=1529794181]
+[node name="Value" type="TextEdit" parent="ValueHolder" unique_id=1529794181]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -67,14 +70,15 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 placeholder_text = "Value"
+wrap_mode = 1
 
-[node name="AccessScopeHolder" type="Control" parent="." unique_id=971323493]
+[node name="AccessScopeHolder" type="Control" parent="TopRow" unique_id=971323493]
 custom_minimum_size = Vector2(100, 0)
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_stretch_ratio = 0.7
 
-[node name="AccessScopeBgColor" type="ColorRect" parent="AccessScopeHolder" unique_id=1539625297]
+[node name="AccessScopeBgColor" type="ColorRect" parent="TopRow/AccessScopeHolder" unique_id=1539625297]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -83,7 +87,7 @@ grow_horizontal = 2
 grow_vertical = 2
 color = Color(0.27387273, 0.27387273, 0.27387273, 1)
 
-[node name="AccessScope" type="MenuButton" parent="AccessScopeHolder" unique_id=295062417]
+[node name="AccessScope" type="MenuButton" parent="TopRow/AccessScopeHolder" unique_id=295062417]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -92,6 +96,6 @@ grow_horizontal = 2
 grow_vertical = 2
 text = "Scope"
 
-[node name="RemovalButton" type="Button" parent="."]
+[node name="RemovalButton" type="Button" parent="TopRow"]
 layout_mode = 2
 text = "   -   "
