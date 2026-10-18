@@ -1,9 +1,9 @@
 [gd_scene format=3 uid="uid://chprcg8gmycxb"]
 
-[ext_resource type="Script" uid="uid://b7gadu0n2t7pt" path="res://addons/flowkit/editor/Ui/actionInputs/float_input_ui.gd" id="1_float"]
+[ext_resource type="Script" uid="uid://b7gadu0n2t7pt" path="res://addons/flowkit/editor/Ui/actionInputs/number_input_ui.gd" id="1_float"]
 [ext_resource type="StyleBox" uid="uid://4vsupaoluret" path="res://addons/flowkit/editor/styles/action_input_bg_style.tres" id="2_65i5a"]
 
-[node name="FloatInput" type="Control" unique_id=1961574866 node_paths=PackedStringArray("spin_box", "input_label", "desc_label", "literal_control", "expression_line_edit", "expression_toggle", "variable_menu")]
+[node name="NumberInput" type="Control" unique_id=1961574866 node_paths=PackedStringArray("spin_box", "input_label", "desc_label", "literal_control", "expression_line_edit", "expression_toggle", "variable_menu")]
 custom_minimum_size = Vector2(300, 85)
 layout_mode = 3
 anchors_preset = 0

@@ -47,8 +47,8 @@ uid = 3
 
 [sub_resource type="Resource" id="Resource_a77t4"]
 script = ExtResource("5_kbegb")
-variable_id = 1
-target_type = "Color"
+variable_id = 5
+target_type = "float"
 
 [sub_resource type="Resource" id="Resource_g2c3u"]
 script = ExtResource("3_ytm5k")
@@ -58,46 +58,64 @@ inputs = {
 "Alpha": "0",
 "Alpha Only": "true",
 "Duration": 0.0,
-"Target Color": SubResource("Resource_a77t4"),
+"Target Alpha": SubResource("Resource_a77t4"),
+"Target Color": Color(0, 0, 0, 1),
 "Wait For Finish": ""
 }
 block_type = "action"
 uid = 4
 
 [sub_resource type="Resource" id="Resource_li7lq"]
+script = ExtResource("5_kbegb")
+variable_id = 5
+target_type = "float"
+
+[sub_resource type="Resource" id="Resource_b3hw7"]
 script = ExtResource("3_ytm5k")
 action_id = "Fade Modulate Color"
 target_node = NodePath("CanvasLayer/GodotLogo")
 inputs = {
 "Alpha": "0",
 "Alpha Only": "true",
-"Duration": "0",
+"Duration": 0.0,
+"Target Alpha": SubResource("Resource_li7lq"),
 "Target Color": Color(0, 0, 0, 0),
 "Wait For Finish": ""
 }
 block_type = "action"
 uid = 5
 
-[sub_resource type="Resource" id="Resource_b3hw7"]
+[sub_resource type="Resource" id="Resource_1qadt"]
+script = ExtResource("5_kbegb")
+variable_id = 5
+target_type = "float"
+
+[sub_resource type="Resource" id="Resource_cdt56"]
 script = ExtResource("5_kbegb")
 variable_id = 1
 target_type = "Color"
 
-[sub_resource type="Resource" id="Resource_1qadt"]
+[sub_resource type="Resource" id="Resource_ioy8n"]
 script = ExtResource("3_ytm5k")
 action_id = "Fade Modulate Color"
 target_node = NodePath("CanvasLayer/StudioLogo")
 inputs = {
 "Alpha": "0",
-"Alpha Only": "true",
+"Alpha Only": true,
 "Duration": 0.0,
-"Target Color": SubResource("Resource_b3hw7"),
-"Wait For Finish": "true"
+"Target Alpha": SubResource("Resource_1qadt"),
+"Target Color": SubResource("Resource_cdt56"),
+"Wait For Finish": true
 }
 block_type = "action"
 uid = 6
 
-[sub_resource type="Resource" id="Resource_cdt56"]
+[sub_resource type="Resource" id="Resource_jon7v"]
+script = ExtResource("5_kbegb")
+variable_id = 5
+target_type = "float"
+
+[sub_resource type="Resource" id="Resource_uctla"]
 script = ExtResource("3_ytm5k")
 action_id = "Fade Color"
 target_node = NodePath("CanvasLayer/CoversScreen")
@@ -105,13 +123,19 @@ inputs = {
 "Alpha": "0",
 "Alpha Only": "false",
 "Duration": 3.5,
+"Target Alpha": SubResource("Resource_jon7v"),
 "Target Color": Color(0, 0, 0, 0),
 "Wait For Finish": ""
 }
 block_type = "action"
 uid = 7
 
-[sub_resource type="Resource" id="Resource_ioy8n"]
+[sub_resource type="Resource" id="Resource_ryos8"]
+script = ExtResource("5_kbegb")
+variable_id = 4
+target_type = "float"
+
+[sub_resource type="Resource" id="Resource_sc2cb"]
 script = ExtResource("3_ytm5k")
 action_id = "Fade Modulate Color"
 target_node = NodePath("CanvasLayer/StudioLogo")
@@ -119,13 +143,14 @@ inputs = {
 "Alpha": "100",
 "Alpha Only": "true",
 "Duration": 2.0,
+"Target Alpha": SubResource("Resource_ryos8"),
 "Target Color": Color(1, 1, 1, 1),
 "Wait For Finish": true
 }
 block_type = "action"
 uid = 8
 
-[sub_resource type="Resource" id="Resource_jon7v"]
+[sub_resource type="Resource" id="Resource_l1gn4"]
 script = ExtResource("3_ytm5k")
 action_id = "Wait For Input"
 target_node = NodePath("System")
@@ -135,7 +160,12 @@ inputs = {
 block_type = "action"
 uid = 9
 
-[sub_resource type="Resource" id="Resource_uctla"]
+[sub_resource type="Resource" id="Resource_iyn0x"]
+script = ExtResource("5_kbegb")
+variable_id = 5
+target_type = "float"
+
+[sub_resource type="Resource" id="Resource_ot8l1"]
 script = ExtResource("3_ytm5k")
 action_id = "Fade Modulate Color"
 target_node = NodePath("CanvasLayer/StudioLogo")
@@ -143,13 +173,19 @@ inputs = {
 "Alpha": "0",
 "Alpha Only": "true",
 "Duration": 2.0,
+"Target Alpha": SubResource("Resource_iyn0x"),
 "Target Color": Color(1, 1, 1, 0),
 "Wait For Finish": true
 }
 block_type = "action"
 uid = 10
 
-[sub_resource type="Resource" id="Resource_ryos8"]
+[sub_resource type="Resource" id="Resource_mjn35"]
+script = ExtResource("5_kbegb")
+variable_id = 4
+target_type = "float"
+
+[sub_resource type="Resource" id="Resource_8wkdm"]
 script = ExtResource("3_ytm5k")
 action_id = "Fade Modulate Color"
 target_node = NodePath("CanvasLayer/GodotLogo")
@@ -157,13 +193,14 @@ inputs = {
 "Alpha": "100",
 "Alpha Only": "true",
 "Duration": 2.0,
+"Target Alpha": SubResource("Resource_mjn35"),
 "Target Color": Color(1, 1, 1, 1),
 "Wait For Finish": true
 }
 block_type = "action"
 uid = 11
 
-[sub_resource type="Resource" id="Resource_sc2cb"]
+[sub_resource type="Resource" id="Resource_wijc0"]
 script = ExtResource("3_ytm5k")
 action_id = "Wait For Input"
 target_node = NodePath("System")
@@ -173,7 +210,12 @@ inputs = {
 block_type = "action"
 uid = 12
 
-[sub_resource type="Resource" id="Resource_l1gn4"]
+[sub_resource type="Resource" id="Resource_jyvdk"]
+script = ExtResource("5_kbegb")
+variable_id = 5
+target_type = "float"
+
+[sub_resource type="Resource" id="Resource_ryhon"]
 script = ExtResource("3_ytm5k")
 action_id = "Fade Modulate Color"
 target_node = NodePath("CanvasLayer/GodotLogo")
@@ -181,13 +223,19 @@ inputs = {
 "Alpha": "0",
 "Alpha Only": "true",
 "Duration": 2.0,
+"Target Alpha": SubResource("Resource_jyvdk"),
 "Target Color": Color(0, 0, 0, 0),
 "Wait For Finish": true
 }
 block_type = "action"
 uid = 13
 
-[sub_resource type="Resource" id="Resource_iyn0x"]
+[sub_resource type="Resource" id="Resource_78acu"]
+script = ExtResource("5_kbegb")
+variable_id = 4
+target_type = "float"
+
+[sub_resource type="Resource" id="Resource_nnhn3"]
 script = ExtResource("3_ytm5k")
 action_id = "Fade Modulate Color"
 target_node = NodePath("CanvasLayer/FlowkitLogo")
@@ -195,13 +243,14 @@ inputs = {
 "Alpha": "100",
 "Alpha Only": true,
 "Duration": 2.0,
+"Target Alpha": SubResource("Resource_78acu"),
 "Target Color": Color(0, 0, 0, 1),
 "Wait For Finish": true
 }
 block_type = "action"
 uid = 14
 
-[sub_resource type="Resource" id="Resource_ot8l1"]
+[sub_resource type="Resource" id="Resource_tn363"]
 script = ExtResource("3_ytm5k")
 action_id = "Wait For Input"
 target_node = NodePath("System")
@@ -211,7 +260,12 @@ inputs = {
 block_type = "action"
 uid = 15
 
-[sub_resource type="Resource" id="Resource_mjn35"]
+[sub_resource type="Resource" id="Resource_igfol"]
+script = ExtResource("5_kbegb")
+variable_id = 5
+target_type = "float"
+
+[sub_resource type="Resource" id="Resource_q076a"]
 script = ExtResource("3_ytm5k")
 action_id = "Fade Modulate Color"
 target_node = NodePath("CanvasLayer/FlowkitLogo")
@@ -219,17 +273,18 @@ inputs = {
 "Alpha": "0",
 "Alpha Only": "true",
 "Duration": 2.0,
+"Target Alpha": SubResource("Resource_igfol"),
 "Target Color": Color(0, 0, 0, 0),
 "Wait For Finish": ""
 }
 block_type = "action"
 uid = 16
 
-[sub_resource type="Resource" id="Resource_8wkdm"]
+[sub_resource type="Resource" id="Resource_mirsi"]
 script = ExtResource("2_s7o4u")
 event_id = "on_ready"
 target_node = NodePath("Timers")
-actions = Array[ExtResource("3_ytm5k")]([SubResource("Resource_8saiw"), SubResource("Resource_vta5f"), SubResource("Resource_g2c3u"), SubResource("Resource_li7lq"), SubResource("Resource_1qadt"), SubResource("Resource_cdt56"), SubResource("Resource_ioy8n"), SubResource("Resource_jon7v"), SubResource("Resource_uctla"), SubResource("Resource_ryos8"), SubResource("Resource_sc2cb"), SubResource("Resource_l1gn4"), SubResource("Resource_iyn0x"), SubResource("Resource_ot8l1"), SubResource("Resource_mjn35")])
+actions = Array[ExtResource("3_ytm5k")]([SubResource("Resource_8saiw"), SubResource("Resource_vta5f"), SubResource("Resource_g2c3u"), SubResource("Resource_b3hw7"), SubResource("Resource_ioy8n"), SubResource("Resource_uctla"), SubResource("Resource_sc2cb"), SubResource("Resource_l1gn4"), SubResource("Resource_ot8l1"), SubResource("Resource_8wkdm"), SubResource("Resource_wijc0"), SubResource("Resource_ryhon"), SubResource("Resource_nnhn3"), SubResource("Resource_tn363"), SubResource("Resource_q076a")])
 block_type = "event"
 uid = 1
 
@@ -257,18 +312,23 @@ value = 100.0
 key = "full_opacity_num"
 id = 4
 
+[sub_resource type="Resource" id="Resource_wjtww"]
+script = ExtResource("11_2i0f5")
+key = "full_transparency_num"
+id = 5
+
 [sub_resource type="Resource" id="Resource_ar7m7"]
 script = ExtResource("1_s7o4u")
-_latest_id_given = 4
+_latest_id_given = 5
 
 [sub_resource type="Resource" id="Resource_iwu3a"]
 script = ExtResource("10_ejtba")
-fk_variables = Array[ExtResource("8_iynvq")]([SubResource("Resource_hijl1"), SubResource("Resource_dsop8"), SubResource("Resource_n2cp5"), SubResource("Resource_75mps")])
+fk_variables = Array[ExtResource("8_iynvq")]([SubResource("Resource_hijl1"), SubResource("Resource_dsop8"), SubResource("Resource_n2cp5"), SubResource("Resource_75mps"), SubResource("Resource_wjtww")])
 id_assigner = SubResource("Resource_ar7m7")
 
 [resource]
 script = ExtResource("6_1sc5p")
-events = Array[ExtResource("2_s7o4u")]([SubResource("Resource_8wkdm")])
+events = Array[ExtResource("2_s7o4u")]([SubResource("Resource_mirsi")])
 comments = Array[ExtResource("1_t5adf")]([SubResource("Resource_2i0f5")])
 item_order = Array[Dictionary]([{
 "index": 0,
