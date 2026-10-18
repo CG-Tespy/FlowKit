@@ -3,6 +3,7 @@ extends FKActionInputModal
 class_name FKFadeColorInputModal
 
 @export var target_color_input_ui: FKActionInputUi
+@export var target_alpha_input_ui: FKActionInputUi
 @export var alpha_only_input_ui: FKActionInputUi
 @export var duration_input_ui: FKActionInputUi
 @export var wait_for_finish_input_ui: FKActionInputUi
@@ -40,6 +41,7 @@ func _apply_ui_state_to_inputs():
 func _get_uis() -> Array:
 	return [
 		target_color_input_ui,
+		target_alpha_input_ui,
 		alpha_only_input_ui,
 		duration_input_ui,
 		wait_for_finish_input_ui,
@@ -48,7 +50,7 @@ func _get_uis() -> Array:
 ## The action inputs matching _get_uis() by index. Empty if any is missing.
 func _get_field_inputs() -> Array:
 	var result := []
-	for input_name in ["Target Color", "Alpha Only", "Duration", "Wait For Finish"]:
+	for input_name in ["Target Color", "Target Alpha", "Alpha Only", "Duration", "Wait For Finish"]:
 		var action_input := _get_action_input(input_name)
 		if action_input == null:
 			return []

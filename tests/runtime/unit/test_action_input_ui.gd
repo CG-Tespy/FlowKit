@@ -1,6 +1,6 @@
 extends GutTest
 
-const FLOAT_INPUT_SCENE := preload("res://addons/flowkit/editor/scenes/actionInputs/float_input.tscn")
+const FLOAT_INPUT_SCENE := preload("res://addons/flowkit/editor/scenes/actionInputs/number_input.tscn")
 const INTEGER_INPUT_SCENE := preload("res://addons/flowkit/editor/scenes/actionInputs/integer_input.tscn")
 const BOOL_INPUT_SCENE := preload("res://addons/flowkit/editor/scenes/actionInputs/bool_input.tscn")
 const COLOR_INPUT_SCENE := preload("res://addons/flowkit/editor/scenes/actionInputs/color_input.tscn")
@@ -28,7 +28,7 @@ func _new_editor_globals(auto_enclose_strings := false) -> FKEditorGlobals:
 	editor_globals.auto_enclose_strings = auto_enclose_strings
 	return editor_globals
 
-func test_float_input_ui_uses_input_name_and_value():
+func test_number_input_ui_uses_input_name_and_value():
 	var input_ui: FKActionInputUi = FLOAT_INPUT_SCENE.instantiate()
 	input_ui.legitimize(FKFloatActionInput.new("Speed", "", 1.0), _new_editor_globals())
 	add_child(input_ui)
@@ -248,7 +248,7 @@ func test_variant_input_ui_does_not_double_enclose_literal_text():
 
 	assert_eq(input_ui.get_value(), "\"Updated value\"")
 	input_ui.free()
-func _make_float_input_ui(sheet: FKEventSheet) -> FKActionInputUi:
+func _make_number_input_ui(sheet: FKEventSheet) -> FKActionInputUi:
 	var editor_globals := _new_editor_globals()
 	editor_globals.current_sheet = sheet
 	var input_ui: FKActionInputUi = FLOAT_INPUT_SCENE.instantiate()
@@ -265,7 +265,7 @@ func _make_sheet_with_vars() -> FKEventSheet:
 	return sheet
 
 func test_toggle_cycles_through_literal_variable_and_expression_modes():
-	var input_ui := _make_float_input_ui(null)
+	var input_ui := _make_number_input_ui(null)
 	assert_eq(input_ui.input_mode, FKActionInputUi.InputMode.LITERAL)
 	assert_true(input_ui.literal_control.visible)
 
@@ -286,7 +286,7 @@ func test_toggle_cycles_through_literal_variable_and_expression_modes():
 	input_ui.free()
 
 func test_variable_mode_lists_only_variables_matching_the_input_type():
-	var input_ui := _make_float_input_ui(_make_sheet_with_vars())
+	var input_ui := _make_number_input_ui(_make_sheet_with_vars())
 
 	input_ui.expression_toggle.pressed.emit()
 
@@ -300,7 +300,7 @@ func test_variable_mode_lists_only_variables_matching_the_input_type():
 func test_variable_mode_warns_when_no_variable_matches():
 	var sheet := FKEventSheet.new()
 	sheet.variable_manager.add_var(FKStringVariable.new())
-	var input_ui := _make_float_input_ui(sheet)
+	var input_ui := _make_number_input_ui(sheet)
 
 	input_ui.expression_toggle.pressed.emit()
 
@@ -310,7 +310,7 @@ func test_variable_mode_warns_when_no_variable_matches():
 	input_ui.free()
 
 func test_variable_mode_warns_when_there_is_no_sheet():
-	var input_ui := _make_float_input_ui(null)
+	var input_ui := _make_number_input_ui(null)
 
 	input_ui.expression_toggle.pressed.emit()
 
@@ -321,7 +321,7 @@ func test_variable_mode_warns_when_there_is_no_sheet():
 func test_picked_variable_becomes_a_reference_to_it():
 	var sheet := _make_sheet_with_vars()
 	var speed: FKVariable = sheet.variable_manager.get_variables()[0]
-	var input_ui := _make_float_input_ui(sheet)
+	var input_ui := _make_number_input_ui(sheet)
 	input_ui.try_set_value(2.0)
 
 	input_ui.expression_toggle.pressed.emit()
@@ -334,7 +334,7 @@ func test_picked_variable_becomes_a_reference_to_it():
 	input_ui.free()
 
 func test_variable_mode_without_a_pick_falls_back_to_the_literal():
-	var input_ui := _make_float_input_ui(_make_sheet_with_vars())
+	var input_ui := _make_number_input_ui(_make_sheet_with_vars())
 	input_ui.try_set_value(2.0)
 
 	input_ui.expression_toggle.pressed.emit()
@@ -345,7 +345,7 @@ func test_variable_mode_without_a_pick_falls_back_to_the_literal():
 func test_existing_variable_reference_is_shown_in_variable_mode():
 	var sheet := _make_sheet_with_vars()
 	var speed: FKVariable = sheet.variable_manager.get_variables()[0]
-	var input_ui := _make_float_input_ui(sheet)
+	var input_ui := _make_number_input_ui(sheet)
 
 	input_ui.try_set_value(FKVariableRef.to(speed))
 
@@ -358,7 +358,7 @@ func test_existing_variable_reference_is_shown_in_variable_mode():
 func test_reference_to_a_missing_variable_is_kept_and_flagged():
 	var ref := FKVariableRef.new()
 	ref.variable_id = 99
-	var input_ui := _make_float_input_ui(_make_sheet_with_vars())
+	var input_ui := _make_number_input_ui(_make_sheet_with_vars())
 
 	input_ui.try_set_value(ref)
 

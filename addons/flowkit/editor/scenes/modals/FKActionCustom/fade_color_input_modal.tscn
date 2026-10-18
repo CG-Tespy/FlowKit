@@ -1,17 +1,19 @@
-[gd_scene load_steps=6 format=3 uid="uid://ckq1tfc6bueg"]
+[gd_scene format=3 uid="uid://ckq1tfc6bueg"]
 
 [ext_resource type="Script" uid="uid://bav3rj7euxjqt" path="res://addons/flowkit/editor/modals/fade_color_input_modal.gd" id="1_ioa3y"]
 [ext_resource type="StyleBox" uid="uid://tqqxoi1osov3" path="res://addons/flowkit/editor/styles/action_input_modal_bg_style.tres" id="2_arvqb"]
 [ext_resource type="PackedScene" uid="uid://bawjhhuyhegdc" path="res://addons/flowkit/editor/scenes/actionInputs/color_input.tscn" id="3_wj3va"]
-[ext_resource type="PackedScene" uid="uid://chprcg8gmycxb" path="res://addons/flowkit/editor/scenes/actionInputs/float_input.tscn" id="4_float"]
+[ext_resource type="PackedScene" uid="uid://chprcg8gmycxb" path="res://addons/flowkit/editor/scenes/actionInputs/number_input.tscn" id="4_float"]
 [ext_resource type="PackedScene" uid="uid://bom422qu8lcuk" path="res://addons/flowkit/editor/scenes/actionInputs/bool_input.tscn" id="5_bool"]
 
-[node name="fade_color_input_modal" type="Window" node_paths=PackedStringArray("target_color_input_ui","alpha_only_input_ui", "duration_input_ui", "wait_for_finish_input_ui", "confirm_button", "cancel_button", "desc_label", "input_holder")]
+[node name="fade_color_input_modal" type="Window" unique_id=962748196 node_paths=PackedStringArray("target_color_input_ui", "target_alpha_input_ui", "alpha_only_input_ui", "duration_input_ui", "wait_for_finish_input_ui", "confirm_button", "cancel_button", "desc_label", "input_holder")]
+oversampling_override = 1.0
 title = "Fade Color Inputs"
 initial_position = 1
 size = Vector2i(500, 640)
 script = ExtResource("1_ioa3y")
 target_color_input_ui = NodePath("MarginContainer/VBoxContainer/HoldsInputFields/TargColor")
+target_alpha_input_ui = NodePath("MarginContainer/VBoxContainer/HoldsInputFields/TargAlpha")
 alpha_only_input_ui = NodePath("MarginContainer/VBoxContainer/HoldsInputFields/AlphaOnly")
 duration_input_ui = NodePath("MarginContainer/VBoxContainer/HoldsInputFields/Duration")
 wait_for_finish_input_ui = NodePath("MarginContainer/VBoxContainer/HoldsInputFields/WaitForFinish")
@@ -21,7 +23,7 @@ desc_label = NodePath("MarginContainer/VBoxContainer/ActionDesc")
 input_holder = NodePath("MarginContainer/VBoxContainer/HoldsInputFields")
 metadata/_custom_type_script = "uid://bav3rj7euxjqt"
 
-[node name="Background" type="Panel" parent="."]
+[node name="Background" type="Panel" parent="." unique_id=1334082285]
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
@@ -30,7 +32,7 @@ grow_vertical = 2
 mouse_filter = 2
 theme_override_styles/panel = ExtResource("2_arvqb")
 
-[node name="MarginContainer" type="MarginContainer" parent="."]
+[node name="MarginContainer" type="MarginContainer" parent="." unique_id=1441599422]
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
@@ -45,48 +47,56 @@ theme_override_constants/margin_top = 10
 theme_override_constants/margin_right = 10
 theme_override_constants/margin_bottom = 10
 
-[node name="VBoxContainer" type="VBoxContainer" parent="MarginContainer"]
+[node name="VBoxContainer" type="VBoxContainer" parent="MarginContainer" unique_id=971718551]
 layout_mode = 2
 
-[node name="Title" type="RichTextLabel" parent="MarginContainer/VBoxContainer"]
+[node name="Title" type="RichTextLabel" parent="MarginContainer/VBoxContainer" unique_id=278410991]
 custom_minimum_size = Vector2(0, 25)
 layout_mode = 2
 bbcode_enabled = true
 text = "[wave]Fade Color[/wave]"
 horizontal_alignment = 1
 
-[node name="ActionDesc" type="Label" parent="MarginContainer/VBoxContainer"]
+[node name="ActionDesc" type="Label" parent="MarginContainer/VBoxContainer" unique_id=397919938]
 custom_minimum_size = Vector2(0, 35)
 layout_mode = 2
 horizontal_alignment = 1
 autowrap_mode = 3
 
-[node name="HoldsInputFields" type="VBoxContainer" parent="MarginContainer/VBoxContainer"]
+[node name="HoldsInputFields" type="VBoxContainer" parent="MarginContainer/VBoxContainer" unique_id=459043244]
 layout_mode = 2
 size_flags_vertical = 3
 
-[node name="TargColor" parent="MarginContainer/VBoxContainer/HoldsInputFields" instance=ExtResource("3_wj3va")]
+[node name="TargColor" parent="MarginContainer/VBoxContainer/HoldsInputFields" unique_id=1479559375 instance=ExtResource("3_wj3va")]
 layout_mode = 2
 
-[node name="AlphaOnly" parent="MarginContainer/VBoxContainer/HoldsInputFields" instance=ExtResource("5_bool")]
+[node name="TargAlpha" parent="MarginContainer/VBoxContainer/HoldsInputFields" unique_id=1297648323 instance=ExtResource("4_float")]
 layout_mode = 2
 
-[node name="Duration" parent="MarginContainer/VBoxContainer/HoldsInputFields" instance=ExtResource("4_float")]
+[node name="Label" parent="MarginContainer/VBoxContainer/HoldsInputFields/TargAlpha/MarginContainer/VBoxContainer/HBoxContainer" parent_id_path=PackedInt32Array(1297648323, 2036236908) index="0" unique_id=1173632293]
+text = "Target Alpha"
+
+[node name="AlphaOnly" parent="MarginContainer/VBoxContainer/HoldsInputFields" unique_id=356172749 instance=ExtResource("5_bool")]
 layout_mode = 2
 
-[node name="WaitForFinish" parent="MarginContainer/VBoxContainer/HoldsInputFields" instance=ExtResource("5_bool")]
+[node name="Duration" parent="MarginContainer/VBoxContainer/HoldsInputFields" unique_id=484363104 instance=ExtResource("4_float")]
 layout_mode = 2
 
-[node name="BottomRow" type="HBoxContainer" parent="MarginContainer/VBoxContainer"]
+[node name="WaitForFinish" parent="MarginContainer/VBoxContainer/HoldsInputFields" unique_id=614968254 instance=ExtResource("5_bool")]
+layout_mode = 2
+
+[node name="BottomRow" type="HBoxContainer" parent="MarginContainer/VBoxContainer" unique_id=2146669741]
 layout_mode = 2
 size_flags_horizontal = 4
 size_flags_vertical = 8
 alignment = 2
 
-[node name="ConfirmButton" type="Button" parent="MarginContainer/VBoxContainer/BottomRow"]
+[node name="ConfirmButton" type="Button" parent="MarginContainer/VBoxContainer/BottomRow" unique_id=1916038365]
 layout_mode = 2
 text = "Confirm"
 
-[node name="CancelButton" type="Button" parent="MarginContainer/VBoxContainer/BottomRow"]
+[node name="CancelButton" type="Button" parent="MarginContainer/VBoxContainer/BottomRow" unique_id=102111035]
 layout_mode = 2
 text = "Cancel"
+
+[editable path="MarginContainer/VBoxContainer/HoldsInputFields/TargAlpha"]
