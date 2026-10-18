@@ -2,6 +2,7 @@
 extends EditorPlugin
 
 var action_registry: FKRegistry = FKRegistry.new()
+var var_registry := FKVariableRegistry.new()
 var generator: FKGenerator = null
 var inspector_plugin
 var export_plugin
@@ -21,6 +22,8 @@ func _disable_plugin() -> void:
 func _enter_tree() -> void:
 	_prep_editor_globals()
 	_prep_settings_window()
+	_prep_registries()
+
 	var project_settings: FKProjectSettings = settings_window.get_project_settings()
 	action_registry.set_project_settings(project_settings)
 	generator.set_project_settings(project_settings)
@@ -48,8 +51,13 @@ func _prep_editor_globals():
 
 	editor_globals = FKEditorGlobals.new()
 	editor_globals.registry = action_registry
+	editor_globals.var_registry = var_registry
+	var_editor_registry = editor_globals.variable_editor_registry
+	print("Registered var editor registry")
 	editor_globals.editor_interface = editor_interface
 	editor_globals.generator = generator
+
+var var_editor_registry: FKVariableEditorRegistry
 
 func _prep_main_editor():
 	const path := FKEditorGlobals.MAIN_EDITOR_SCENE_PATH
@@ -74,6 +82,19 @@ func _prep_settings_window():
 	
 var settings_window: FKSettingsWindow
 
+func _prep_registries():
+	var proj_settings := settings_window.get_project_settings()
+
+	action_registry.set_project_settings(proj_settings)
+	var_editor_registry.set_project_settings(proj_settings)
+
+	action_registry.load_providers()
+	var_editor_registry.load_providers()
+	var_registry.set_editor_globals(editor_globals)
+	var_registry.load_types()
+	
+	
+
 func _prep_tool_submenu_entries():
 	_base_popup = PopupMenu.new()
 	_base_popup.add_item("Settings", MENU_ITEM_SETTINGS)
@@ -81,12 +102,11 @@ func _prep_tool_submenu_entries():
 	add_tool_submenu_item("FlowKit", _base_popup)
 	
 var _base_popup: PopupMenu
+const MENU_ITEM_SETTINGS := 0
 
 func _on_base_popup_id_pressed(id: int):
 	if id == MENU_ITEM_SETTINGS:
 		settings_window.popup_centered()
-
-const MENU_ITEM_SETTINGS := 0
 
 func _add_runtime_autoloads():
 	add_autoload_singleton(
@@ -104,7 +124,6 @@ func _register_as_main_screen_plugin():
 	editor_main_screen.add_child(editor)
 	
 func _create_and_add_custom_inspector():
-	# Create and add custom inspector
 	inspector_plugin = FKEditorInspectorPlugin.new()
 	inspector_plugin.set_registry(action_registry)
 	inspector_plugin.set_editor_interface(editor_interface)

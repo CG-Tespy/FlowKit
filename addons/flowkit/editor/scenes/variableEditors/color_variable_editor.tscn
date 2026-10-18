@@ -1,0 +1,97 @@
+[gd_scene format=3 uid="uid://x7k1wkn3tmlt"]
+
+[ext_resource type="Script" uid="uid://c5y6pr5lwy8gw" path="res://addons/flowkit/editor/Ui/Variables/fk_color_variable_ui.gd" id="1"]
+[ext_resource type="StyleBox" uid="uid://dtc3xhc885ld8" path="res://addons/flowkit/editor/styles/graphical_var_ui_type_name_style.tres" id="2_cufet"]
+
+[node name="ColorVariableEditor" type="HBoxContainer" unique_id=1579864267 node_paths=PackedStringArray("value_field", "name_field", "access_scope_field", "removal_button")]
+custom_minimum_size = Vector2(680, 32)
+size_flags_horizontal = 3
+script = ExtResource("1")
+value_field = NodePath("ValueHolder/Value")
+type_display_name = "Color"
+name_field = NodePath("Name")
+access_scope_field = NodePath("AccessScopeHolder/AccessScope")
+removal_button = NodePath("RemovalButton")
+
+[node name="TypeHolder" type="Control" parent="." unique_id=1934703090]
+custom_minimum_size = Vector2(100, 0)
+layout_mode = 2
+
+[node name="TypeBgColor" type="Panel" parent="TypeHolder" unique_id=1978697364]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_styles/panel = ExtResource("2_cufet")
+
+[node name="MarginContainer" type="MarginContainer" parent="TypeHolder" unique_id=1277179554]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/margin_left = 5
+
+[node name="TypeName" type="Label" parent="TypeHolder/MarginContainer" unique_id=745247473]
+layout_mode = 2
+text = "Color"
+vertical_alignment = 1
+
+[node name="Name" type="LineEdit" parent="." unique_id=1969543039]
+custom_minimum_size = Vector2(160, 0)
+layout_mode = 2
+placeholder_text = "Variable name"
+
+[node name="ValueHolder" type="Control" parent="." unique_id=64717845]
+custom_minimum_size = Vector2(160, 0)
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_stretch_ratio = 2.0
+
+[node name="ValueBgColor" type="ColorRect" parent="ValueHolder" unique_id=1968218867]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.27387273, 0.27387273, 0.27387273, 1)
+
+[node name="Value" type="ColorPickerButton" parent="ValueHolder" unique_id=1390961038]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="AccessScopeHolder" type="Control" parent="." unique_id=310806764]
+custom_minimum_size = Vector2(100, 0)
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_stretch_ratio = 0.7
+
+[node name="AccessScopeBgColor" type="ColorRect" parent="AccessScopeHolder" unique_id=1491761778]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.27387273, 0.27387273, 0.27387273, 1)
+
+[node name="AccessScope" type="MenuButton" parent="AccessScopeHolder" unique_id=479015168]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+text = "Scope"
+
+[node name="RemovalButton" type="Button" parent="."]
+layout_mode = 2
+text = "   -   "

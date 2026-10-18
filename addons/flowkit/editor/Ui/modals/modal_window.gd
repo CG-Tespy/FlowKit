@@ -11,7 +11,7 @@ func _enter_tree() -> void:
 		return
 	transient = true
 	exclusive = true;
-	_toggle_subs(true)
+	_set_subs(true)
 
 var is_fully_legit: bool:
 	get:
@@ -30,7 +30,7 @@ var is_editor_preview: bool:
 		
 var _is_editor_preview := true
 
-func _toggle_subs(on: bool):
+func _set_subs(on: bool):
 	pass # We expect subclasses to override this
 	
 var _is_subbed := false
@@ -60,10 +60,16 @@ func legitimize():
 func _exit_tree() -> void:
 	if !is_fully_legit:
 		return
-	_toggle_subs(false)
+	_set_subs(false)
 
 func _ready() -> void:
 	pass
 	
 func _get_registry() -> FKRegistry:
 	return editor_globals.registry if editor_globals else null
+
+func get_class() -> String:
+	return "FKModalWindow"
+
+func get_real_class() -> String:
+	return self.get_class()

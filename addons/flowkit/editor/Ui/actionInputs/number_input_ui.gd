@@ -1,6 +1,6 @@
 @tool
 extends FKActionInputUi
-class_name FKFloatActionInputUi
+class_name FKNumberActionInputUi
 
 @export var spin_box: SpinBox
 
@@ -14,7 +14,7 @@ func _set_value(_value) -> void:
 	spin_box.value = float(_value)
 
 func get_class() -> String:
-	return "FKFloatActionInputUi"
+	return "FKNumberActionInputUi"
 
 func get_real_class() -> String:
 	return self.get_class()

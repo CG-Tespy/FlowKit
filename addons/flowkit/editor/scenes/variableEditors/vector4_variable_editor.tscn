@@ -1,0 +1,160 @@
+[gd_scene format=3 uid="uid://bopt7m5eig6rp"]
+
+[ext_resource type="Script" uid="uid://cs38q44xqqhya" path="res://addons/flowkit/editor/Ui/Variables/fk_vector4_variable_ui.gd" id="1"]
+[ext_resource type="StyleBox" uid="uid://cvovw3ks5tvxg" path="res://addons/flowkit/editor/styles/numeric_var_ui_type_name_style.tres" id="2_io68v"]
+
+[node name="Vector4VariableEditor" type="HBoxContainer" unique_id=1698249114 node_paths=PackedStringArray("x_field", "y_field", "z_field", "w_field", "name_field", "access_scope_field", "removal_button")]
+custom_minimum_size = Vector2(680, 32)
+size_flags_horizontal = 3
+script = ExtResource("1")
+x_field = NodePath("ValueHolder/Components/X")
+y_field = NodePath("ValueHolder/Components/Y")
+z_field = NodePath("ValueHolder/Components/Z")
+w_field = NodePath("ValueHolder/Components/W")
+name_field = NodePath("NameMargin/Name")
+access_scope_field = NodePath("AccessScopeMargin/AccessScopeHolder/AccessScope")
+type_display_name = "VecFour"
+removal_button = NodePath("RemovalButton")
+
+[node name="TypeHolderMargin" type="MarginContainer" parent="." unique_id=1652528467]
+layout_mode = 2
+theme_override_constants/margin_bottom = 45
+
+[node name="TypeHolder" type="Control" parent="TypeHolderMargin" unique_id=1461301226]
+custom_minimum_size = Vector2(100, 0)
+layout_mode = 2
+
+[node name="TypeBgColor" type="Panel" parent="TypeHolderMargin/TypeHolder" unique_id=1523766659]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_styles/panel = ExtResource("2_io68v")
+
+[node name="MarginContainer" type="MarginContainer" parent="TypeHolderMargin/TypeHolder" unique_id=1437752228]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/margin_left = 5
+
+[node name="TypeName" type="Label" parent="TypeHolderMargin/TypeHolder/MarginContainer" unique_id=1760214183]
+layout_mode = 2
+text = "VecFour"
+vertical_alignment = 1
+
+[node name="NameMargin" type="MarginContainer" parent="." unique_id=1248748321]
+layout_mode = 2
+theme_override_constants/margin_bottom = 45
+
+[node name="Name" type="LineEdit" parent="NameMargin" unique_id=1530576940]
+custom_minimum_size = Vector2(160, 0)
+layout_mode = 2
+placeholder_text = "Variable name"
+
+[node name="ValueHolder" type="Control" parent="." unique_id=718673776]
+custom_minimum_size = Vector2(160, 80)
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_stretch_ratio = 2.0
+
+[node name="ValueBgColor" type="ColorRect" parent="ValueHolder" unique_id=1036374294]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.27387273, 0.27387273, 0.27387273, 1)
+
+[node name="Components" type="Control" parent="ValueHolder" unique_id=2002191244]
+custom_minimum_size = Vector2(0, 75)
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_bottom = 4.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="X" type="SpinBox" parent="ValueHolder/Components" unique_id=2060172230]
+layout_mode = 0
+offset_right = 100.0
+offset_bottom = 35.0
+size_flags_horizontal = 3
+allow_greater = true
+allow_lesser = true
+
+[node name="Y" type="SpinBox" parent="ValueHolder/Components" unique_id=1478019528]
+layout_mode = 0
+offset_left = 104.0
+offset_right = 204.0
+offset_bottom = 35.0
+grow_horizontal = 2
+size_flags_horizontal = 3
+allow_greater = true
+allow_lesser = true
+
+[node name="Z" type="SpinBox" parent="ValueHolder/Components" unique_id=748527338]
+layout_mode = 0
+offset_left = 208.0
+offset_right = 308.0
+offset_bottom = 35.0
+grow_horizontal = 0
+size_flags_horizontal = 3
+allow_greater = true
+allow_lesser = true
+
+[node name="W" type="SpinBox" parent="ValueHolder/Components" unique_id=974449524]
+layout_mode = 1
+anchors_preset = 7
+anchor_left = 0.5
+anchor_top = 1.0
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_left = -50.0
+offset_top = -44.0
+offset_right = 50.0
+offset_bottom = -9.0
+grow_horizontal = 2
+grow_vertical = 0
+size_flags_horizontal = 3
+allow_greater = true
+allow_lesser = true
+
+[node name="AccessScopeMargin" type="MarginContainer" parent="." unique_id=1325023145]
+custom_minimum_size = Vector2(100, 0)
+layout_mode = 2
+theme_override_constants/margin_bottom = 45
+
+[node name="AccessScopeHolder" type="Control" parent="AccessScopeMargin" unique_id=381096323]
+custom_minimum_size = Vector2(100, 0)
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_stretch_ratio = 0.7
+
+[node name="AccessScopeBgColor" type="ColorRect" parent="AccessScopeMargin/AccessScopeHolder" unique_id=1481214970]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.27387273, 0.27387273, 0.27387273, 1)
+
+[node name="AccessScope" type="MenuButton" parent="AccessScopeMargin/AccessScopeHolder" unique_id=1220755329]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+text = "Scope"
+
+[node name="RemovalButton" type="Button" parent="."]
+layout_mode = 2
+text = "   -   "

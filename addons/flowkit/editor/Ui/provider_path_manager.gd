@@ -24,7 +24,7 @@ func _enter_tree() -> void:
 		return
 
 	_find_path_fields()
-	_toggle_subs(true)
+	_set_subs(true)
 
 func _find_path_fields():
 	print("[FKProviderPathManager] Finding pickers")
@@ -43,7 +43,7 @@ func set_globals(new_globals: FKEditorGlobals):
 var _globals: FKEditorGlobals
 var _signals: FKSettingsWindowSignals
 
-func _toggle_subs(do_sub: bool):
+func _set_subs(do_sub: bool):
 	if do_sub and not _is_subbed:
 		add_button.pressed.connect(_on_add_button_pressed)
 		_signals.editor_path_removal_requested.connect(_on_editor_path_removal_requested)

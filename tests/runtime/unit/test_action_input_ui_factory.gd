@@ -29,12 +29,12 @@ func test_factory_creates_integer_input_ui():
 	assert_eq(input_ui.input_label.text, "Lives")
 	input_ui.free()
 
-func test_factory_creates_float_input_ui():
+func test_factory_creates_number_input_ui():
 	var input := FKFloatActionInput.new("Speed", "", 1.0)
 	var input_ui: Variant = factory.create_from(input)
 	add_child(input_ui)
 
-	assert_true(input_ui is FKFloatActionInputUi)
+	assert_true(input_ui is FKNumberActionInputUi)
 	assert_eq(input_ui.input_label.text, "Speed")
 	input_ui.free()
 
@@ -75,6 +75,9 @@ func test_factory_creates_vector4_input_ui():
 	input_ui.free()
 
 func test_factory_creates_audio_stream_input_ui():
+	if not ClassDB.can_instantiate("EditorResourcePicker"):
+		pending("EditorResourcePicker only exists in the editor.")
+		return
 	var input := AUDIO_STREAM_ACTION_INPUT.new("Correct Answer")
 	var input_ui: Variant = factory.create_from(input)
 	add_child(input_ui)

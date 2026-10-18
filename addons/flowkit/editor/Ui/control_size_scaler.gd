@@ -35,7 +35,7 @@ func _enter_tree() -> void:
 
 	_scale_timer = Timer.new()
 	add_child(_scale_timer)
-	_toggle_subs(true)
+	_set_subs(true)
 	_scale_timer.start()
 
 func _report_invalid_contents():
@@ -45,7 +45,7 @@ func _report_invalid_contents():
 			push_warning("[%s] Found invalid item at index %d registered under %s" % \
 			[self.get_class(), ind, self.name])
 
-func _toggle_subs(wants_subs_active: bool):
+func _set_subs(wants_subs_active: bool):
 	if wants_subs_active and not _is_subbed:
 		_scale_timer.timeout.connect(_scale_target)
 	elif _is_subbed and not wants_subs_active:
@@ -119,7 +119,7 @@ func _resize_target_to_chosen():
 	# 0 is as low as it gets, so...
 
 func _exit_tree() -> void:
-	_toggle_subs(false)
+	_set_subs(false)
 	_scale_timer.stop()
 
 func get_class() -> String:

@@ -61,7 +61,7 @@ func _enter_tree() -> void:
 	path_text_field.editable = browsable
 	var inputs_are_fine := _validate_inputs()
 	if inputs_are_fine:
-		_toggle_subs(true)
+		_set_subs(true)
 
 	_toggle_button_enabled(true)
 
@@ -100,7 +100,7 @@ func set_file_dialog(new_dialog: FileDialog):
 
 var _file_dialog: FileDialog
 
-func _toggle_subs(do_sub: bool):
+func _set_subs(do_sub: bool):
 	if not _window_signals:
 		return
 
@@ -206,13 +206,11 @@ func _report_invalid_path(to_report: String):
 
 func _exit_tree() -> void:
 	if _is_editor_preview:
-		var log_message := "[FlowKit]: FKPathField exiting the Scene View."
-		print(log_message)
 		return
 
 	var inputs_are_fine := _validate_inputs()
 	if inputs_are_fine:
-		_toggle_subs(false)
+		_set_subs(false)
 	
 ## Path chosen for this field.
 func path_chosen() -> String:

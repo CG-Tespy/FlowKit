@@ -27,15 +27,15 @@ var _globals: FKEditorGlobals
 func _enter_tree() -> void:
 	if is_editor_preview:
 		return
-	_toggle_subs(true)
+	_set_subs(true)
 
 ## When overriding, make sure to call the super class version last.
-func _toggle_subs(on: bool):
-	var success := _toggle_subs_for_signal_bus(on)
+func _set_subs(on: bool):
+	var success := _set_subs_for_signal_bus(on)
 	if success:
 		_is_subbed = on
 
-func _toggle_subs_for_signal_bus(on: bool) -> bool:
+func _set_subs_for_signal_bus(on: bool) -> bool:
 	# So that objects that want to listen for FKUnitUi signals
 	# won't need to have any references to such beforehand.
 	# This returns true if successful, false otherwise
@@ -46,6 +46,8 @@ func _toggle_subs_for_signal_bus(on: bool) -> bool:
 		edit_requested.connect(_on_edit_requested)
 		delete_requested.connect(_on_delete_requested)
 		reorder_requested.connect(_on_reorder_requested)
+		if _globals != null:
+			_globals.variable_signals.variables_edited.connect(_on_variables_edited)
 	elif _is_subbed and not on:
 		before_contents_changed.disconnect(_on_before_contents_changed)
 		contents_changed.disconnect(_on_contents_changed)
@@ -53,6 +55,8 @@ func _toggle_subs_for_signal_bus(on: bool) -> bool:
 		edit_requested.disconnect(_on_edit_requested)
 		delete_requested.disconnect(_on_delete_requested)
 		reorder_requested.disconnect(_on_reorder_requested)
+		if _globals != null:
+			_globals.variable_signals.variables_edited.disconnect(_on_variables_edited)
 	else:
 		return false
 		
@@ -99,6 +103,27 @@ func get_unit() -> FKUnit:
 
 ## The FKUnit that this Node represents.
 var _unit: FKUnit
+
+## Called after the sheet's variables were edited. Meant to be overridden by units
+## that show variable names.
+func _on_variables_edited() -> void:
+	pass
+
+## How an input's value should read in the unit's label. Variable refs show the name
+## of the variable they point to.
+func _input_to_text(input: Variant) -> String:
+	if input is FKVariableRef:
+		return _variable_ref_to_text(input as FKVariableRef)
+	return str(input)
+
+func _variable_ref_to_text(ref: FKVariableRef) -> String:
+	var sheet: FKEventSheet = _globals.current_sheet if _globals != null else null
+	if sheet == null or sheet.variable_manager == null:
+		return str(ref)
+	var variable := sheet.variable_manager.get_var_by_id(ref.variable_id)
+	if variable == null:
+		return "[Missing variable]"
+	return variable.key if not variable.key.is_empty() else "[Unnamed]"
 
 func has_unit() -> bool:
 	return _unit != null
@@ -164,7 +189,7 @@ func _drop_data(_pos: Vector2, _data): pass
 func _exit_tree() -> void:
 	if is_editor_preview:
 		return
-	_toggle_subs(false)
+	_set_subs(false)
 
 func _to_string() -> String:
 	var result := "FKUnitUi"

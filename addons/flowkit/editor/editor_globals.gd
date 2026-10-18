@@ -6,9 +6,9 @@ const COMMENT_SCENE_PATH := "res://addons/flowkit/editor/scenes/unitUis/comment_
 const CONDITION_SCENE_PATH := "res://addons/flowkit/editor/scenes/unitUis/condition_unit_ui.tscn"
 const ACTION_ITEM_SCENE_PATH := "res://addons/flowkit/editor/scenes/unitUis/action_unit_ui.tscn"
 const BRANCH_ITEM_SCENE_PATH := "res://addons/flowkit/editor/scenes/unitUis/branch_unit_ui.tscn"
-const GROUP_SCENE_PATH := "res://addons/flowkit/editor/scenes/unitUis/group_ui.tscn"
+const GROUP_SCENE_PATH := "res://addons/flowkit/editor/scenes/unitUis/group_unit_ui.tscn"
 const SETTINGS_WINDOW_SCENE_PATH := "res://addons/flowkit/editor/scenes/fk_editor_settings.tscn"
-const FLOAT_ACTION_INPUT_SCENE_PATH := "res://addons/flowkit/editor/scenes/actionInputs/float_input.tscn"
+const NUMBER_ACTION_INPUT_SCENE_PATH := "res://addons/flowkit/editor/scenes/actionInputs/number_input.tscn"
 const INTEGER_ACTION_INPUT_SCENE_PATH := "res://addons/flowkit/editor/scenes/actionInputs/integer_input.tscn"
 const BOOL_ACTION_INPUT_SCENE_PATH := "res://addons/flowkit/editor/scenes/actionInputs/bool_input.tscn"
 const COLOR_ACTION_INPUT_SCENE_PATH := "res://addons/flowkit/editor/scenes/actionInputs/color_input.tscn"
@@ -28,7 +28,7 @@ const COMMENT_SCENE: PackedScene = preload(COMMENT_SCENE_PATH)
 const CONDITION_ITEM_SCENE: PackedScene = preload(CONDITION_SCENE_PATH)
 const ACTION_ITEM_SCENE: PackedScene = preload(ACTION_ITEM_SCENE_PATH)
 const BRANCH_ITEM_SCENE: PackedScene = preload(BRANCH_ITEM_SCENE_PATH)
-const FLOAT_ACTION_INPUT_SCENE: PackedScene = preload(FLOAT_ACTION_INPUT_SCENE_PATH)
+const NUMBER_ACTION_INPUT_SCENE: PackedScene = preload(NUMBER_ACTION_INPUT_SCENE_PATH)
 const INTEGER_ACTION_INPUT_SCENE: PackedScene = preload(INTEGER_ACTION_INPUT_SCENE_PATH)
 const BOOL_ACTION_INPUT_SCENE: PackedScene = preload(BOOL_ACTION_INPUT_SCENE_PATH)
 const COLOR_ACTION_INPUT_SCENE: PackedScene = preload(COLOR_ACTION_INPUT_SCENE_PATH)
@@ -62,13 +62,21 @@ func should_auto_enclose_string_inputs() -> bool:
 		
 var generator: FKGenerator
 var registry: FKRegistry 
+var var_registry: FKVariableRegistry
 var modal_signals: FKModalSignals = FKModalSignals.new()
 var unit_ui_signals := FKUnitUiSignals.new()
 var settings_window_signals := FKSettingsWindowSignals.new()
+var variable_signals := FKEditorVariableSignals.new()
 var action_input_ui_factory := FKActionInputUiFactory.new(self)
 var action_input_ui_pool := FKActionInputUiPool.new(self, action_input_ui_factory)
+var variable_editor_registry := FKVariableEditorRegistry.new()
+var variable_editor_factory := FKVariableEditorFactory.new(variable_editor_registry)
+var variable_ui_pool := FKVariableUiPool.new(variable_editor_factory)
 var current_scene_uid: int = 0
 
+## The sheet of the scene being edited, as last loaded or saved. The variable editor
+## works on its variables, and saving a sheet carries them over to the new one.
+var current_sheet: FKEventSheet
 ## Should return a SceneTree object. No args.
 var get_main_editor_tree: Callable
 

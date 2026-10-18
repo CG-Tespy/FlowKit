@@ -12,7 +12,7 @@ class_name FKMainEditor
 @export var blocks_container: FKUnitContainerUi
 @export var empty_label: Label
 @export var add_event_btn: Button
-@export var menu_bar: FKMenuBar
+@export var menu_bar: FKSheetEditorMenuBar
 
 # Drag spacer state
 var drag_spacer_top: Control = null  # Temporary spacer at top during drag
@@ -79,7 +79,7 @@ func _enter_tree() -> void:
 	input_manager.initialize(self)
 	
 	_modal_related_prep()
-	_toggle_subs(true)
+	_set_subs(true)
 
 func _ready() -> void:
 	if is_fully_legit:
@@ -126,36 +126,79 @@ func _modal_related_prep():
 	add_child(modal_manager)
 	modal_manager.initialize(editor_globals)
 	
-func _toggle_subs(on: bool):
+func _set_subs(wants_subs_active: bool):
 	if not modal_signals:
 		# This means that either this isn't a legit instance, or the signals object
 		# exited the tree before we did.
 		return
 	
-	_toggle_modal_signal_subs(on)
-	
-	if on and !_is_subbed:
+	_set_modal_signal_subs(wants_subs_active)
+	_set_menu_bar_subs(wants_subs_active)
+
+	if wants_subs_active and !_is_subbed:
 		# For undo state on drag-and-drop reorder
 		visibility_changed.connect(_on_visibility_changed)
 		blocks_container.before_unit_moved.connect(_push_undo_state)
-		menu_bar.save_sheet.connect(_save_sheet)
 		add_event_btn.pressed.connect(_on_add_event_button_pressed)
-	elif !on and _is_subbed:
+	elif !wants_subs_active and _is_subbed:
 		visibility_changed.disconnect(_on_visibility_changed)
 		blocks_container.before_unit_moved.disconnect(_push_undo_state)
-		menu_bar.save_sheet.disconnect(_save_sheet)
 		add_event_btn.pressed.disconnect(_on_add_event_button_pressed)
 	else:
 		return
 	
-	_is_subbed = on
+	_is_subbed = wants_subs_active
 
 var _is_subbed := false
+
+func _set_menu_bar_subs(wants_subs_active: bool):
+	if wants_subs_active and !_is_subbed:
+		menu_bar.new_sheet_requested.connect(_on_new_sheet)
+		menu_bar.save_sheet_requested.connect(_save_sheet)
+
+		menu_bar.add_comment_requested.connect(_on_add_comment_button_pressed)
+		menu_bar.add_group_requested.connect(_on_add_group_button_pressed)
+
+		menu_bar.provider_generation_requested.connect(_on_generate_providers)
+		
+		menu_bar.redo_requested.connect(redo)
+		menu_bar.undo_requested.connect(_undo)
+		
+		menu_bar.local_var_view_requested.connect(_on_local_var_view_requested)
+		menu_bar.global_var_view_requested.connect(_on_global_var_view_requested)
+
+	elif !wants_subs_active and _is_subbed:
+		menu_bar.new_sheet_requested.disconnect(_on_new_sheet)
+		menu_bar.save_sheet_requested.disconnect(_save_sheet)
+
+		menu_bar.add_comment_requested.disconnect(_on_add_comment_button_pressed)
+		menu_bar.add_group_requested.disconnect(_on_add_group_button_pressed)
+
+		menu_bar.provider_generation_requested.disconnect(_on_generate_providers)
+		
+		menu_bar.redo_requested.disconnect(redo)
+		menu_bar.undo_requested.disconnect(_undo)
+
+		menu_bar.local_var_view_requested.disconnect(_on_local_var_view_requested)
+		menu_bar.global_var_view_requested.disconnect(_on_global_var_view_requested)
+
+func _on_local_var_view_requested():
+	if _current_sheet == null:
+		if current_scene_uid == 0:
+			push_warning("[FKMainEditor] No scene open to edit variables for.")
+			return
+
+	# Bring up the local var view modal
+	var modal := modal_manager.get_variable_editor_modal(_current_sheet)
+	_popup_centered_on_editor(modal)
 	
+func _on_global_var_view_requested():
+	print("[%s] Global var view not implemented yet.")
+
 func _on_visibility_changed():
 	editor_globals.sheet_editor_visible = self.visible
 
-func _toggle_modal_signal_subs(on: bool):
+func _set_modal_signal_subs(on: bool):
 	if on and !_is_subbed:
 		modal_signals.node_selected.connect(_on_node_selected)
 		modal_signals.event_selected.connect(_on_event_selected)
@@ -179,7 +222,7 @@ func _exit_tree() -> void:
 		print("[FKMainEditor]: Exiting tree as editor preview. Instance id: " + str(get_instance_id()))
 		return
 	print("[FKMainEditor]: Exiting tree as legit instance. Instance id: " + str(get_instance_id()))
-	_toggle_subs(false)
+	_set_subs(false)
 
 func _popup_centered_on_editor(popup: Window) -> void:
 	"""Center popup on the same window as the editor, supporting multi-monitor setups."""
@@ -730,17 +773,18 @@ func _save_sheet() -> FKEventSheet:
 
 	var units := blocks_container.units
 		
-	var sheet := FKEventSheet.from_units(units)
+	var sheet := FKEventSheet.from_units(units, _current_sheet.variable_manager if _current_sheet else null)
 	var err := sheet_io.save_sheet(current_scene_uid, sheet)
 	var result: FKEventSheet = null
 	if err == OK:
 		print("[FKMainEditor]: ✓ Event sheet saved")
+		_current_sheet = sheet
 		result = sheet
 	else:
 		push_error("[FKMainEditor]: Failed to save event sheet: ", err)
 	
 	return result
-	
+
 # Refreshes the Event Sheet Ui based on the sheet passed. If none is passed, 
 # this goes for the sheet tied to the current scene uid.
 func _refresh_ui(sheet: FKEventSheet = null):
@@ -752,7 +796,13 @@ func _refresh_ui(sheet: FKEventSheet = null):
 		
 	_refresh_sheet_ui(sheet)
 	_on_ui_restoration_done()
-	
+	_current_sheet = sheet
+
+var _current_sheet: FKEventSheet:
+	get:
+		return editor_globals.current_sheet
+	set(value):
+		editor_globals.current_sheet = value
 func _refresh_sheet_ui(sheet: FKEventSheet):
 	blocks_container.clear_unit_nodes()
 	
@@ -2045,7 +2095,7 @@ func _on_action_edit_requested(action_item: FKActionUnitUi, bound_row: FKUnitUi)
 			provider_inputs,
 			act_data.inputs
 		)
-		_popup_centered_on_editor(expression_modal)
+	_popup_centered_on_editor(expression_modal)
 
 
 # === Drag and Drop Handlers ===

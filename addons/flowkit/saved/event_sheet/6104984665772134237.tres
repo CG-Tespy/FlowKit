@@ -7,12 +7,15 @@
 [ext_resource type="Script" uid="uid://bmaxurgrsv4ct" path="res://addons/flowkit/runtime/Units/condition_unit.gd" id="4_ayedq"]
 [ext_resource type="Script" path="res://addons/flowkit/runtime/Units/group_unit.gd" id="5_np8on"]
 [ext_resource type="Script" uid="uid://bumsyiqkp46l1" path="res://addons/flowkit/resources/event_sheet.gd" id="6_v1ajb"]
+[ext_resource type="Script" uid="uid://bql6wdr0b4bt1" path="res://addons/flowkit/runtime/Variables/Types/fk_variable.gd" id="8_np8on"]
+[ext_resource type="Script" uid="uid://cyt1q8hm1688n" path="res://addons/flowkit/runtime/Variables/Types/fk_number_variable.gd" id="9_v1ajb"]
+[ext_resource type="Script" uid="uid://d1ljmaujup1ue" path="res://addons/flowkit/runtime/Variables/fk_variable_manager.gd" id="10_e46t1"]
 
-[sub_resource type="Resource" id="Resource_ju1rn"]
+[sub_resource type="Resource" id="Resource_5spa6"]
 script = ExtResource("1_ju1rn")
 _latest_id_given = 8
 
-[sub_resource type="Resource" id="Resource_5poua"]
+[sub_resource type="Resource" id="Resource_a8al3"]
 script = ExtResource("3_5poua")
 action_id = "set_window_size"
 target_node = NodePath("System")
@@ -23,7 +26,7 @@ inputs = {
 block_type = "action"
 uid = 2
 
-[sub_resource type="Resource" id="Resource_ayedq"]
+[sub_resource type="Resource" id="Resource_xle1s"]
 script = ExtResource("3_5poua")
 action_id = "set_window_mode"
 target_node = NodePath("System")
@@ -33,7 +36,7 @@ inputs = {
 block_type = "action"
 uid = 3
 
-[sub_resource type="Resource" id="Resource_np8on"]
+[sub_resource type="Resource" id="Resource_doexb"]
 script = ExtResource("3_5poua")
 action_id = "Print Message"
 target_node = NodePath(".")
@@ -44,7 +47,7 @@ inputs = {
 block_type = "action"
 uid = 4
 
-[sub_resource type="Resource" id="Resource_v1ajb"]
+[sub_resource type="Resource" id="Resource_qqi6y"]
 script = ExtResource("3_5poua")
 action_id = "Print Message"
 target_node = NodePath(".")
@@ -55,7 +58,7 @@ inputs = {
 block_type = "action"
 uid = 5
 
-[sub_resource type="Resource" id="Resource_e46t1"]
+[sub_resource type="Resource" id="Resource_e7twh"]
 script = ExtResource("3_5poua")
 action_id = "Print Message"
 target_node = NodePath(".")
@@ -66,7 +69,7 @@ inputs = {
 block_type = "action"
 uid = 6
 
-[sub_resource type="Resource" id="Resource_5spa6"]
+[sub_resource type="Resource" id="Resource_qo3pd"]
 script = ExtResource("3_5poua")
 action_id = "Print Message"
 target_node = NodePath(".")
@@ -77,7 +80,7 @@ inputs = {
 block_type = "action"
 uid = 7
 
-[sub_resource type="Resource" id="Resource_a8al3"]
+[sub_resource type="Resource" id="Resource_qvomb"]
 script = ExtResource("3_5poua")
 action_id = "Print Message"
 target_node = NodePath(".")
@@ -88,19 +91,43 @@ inputs = {
 block_type = "action"
 uid = 8
 
-[sub_resource type="Resource" id="Resource_xle1s"]
+[sub_resource type="Resource" id="Resource_pej1s"]
 script = ExtResource("2_ju1rn")
 event_id = "on_ready"
 target_node = NodePath(".")
-actions = Array[ExtResource("3_5poua")]([SubResource("Resource_5poua"), SubResource("Resource_ayedq"), SubResource("Resource_np8on"), SubResource("Resource_v1ajb"), SubResource("Resource_e46t1"), SubResource("Resource_5spa6"), SubResource("Resource_a8al3")])
+actions = Array[ExtResource("3_5poua")]([SubResource("Resource_a8al3"), SubResource("Resource_xle1s"), SubResource("Resource_doexb"), SubResource("Resource_qqi6y"), SubResource("Resource_e7twh"), SubResource("Resource_qo3pd"), SubResource("Resource_qvomb")])
 block_type = "event"
 uid = 1
 
+[sub_resource type="Resource" id="Resource_goamb"]
+script = ExtResource("9_v1ajb")
+value = 720.0
+whole_nums_only = true
+key = "window_width"
+id = 1
+
+[sub_resource type="Resource" id="Resource_y8l74"]
+script = ExtResource("9_v1ajb")
+value = 1080.0
+whole_nums_only = true
+key = "window_height"
+id = 2
+
+[sub_resource type="Resource" id="Resource_m50xm"]
+script = ExtResource("1_ju1rn")
+_latest_id_given = 2
+
+[sub_resource type="Resource" id="Resource_cjl2h"]
+script = ExtResource("10_e46t1")
+fk_variables = Array[ExtResource("8_np8on")]([SubResource("Resource_goamb"), SubResource("Resource_y8l74")])
+id_assigner = SubResource("Resource_m50xm")
+
 [resource]
 script = ExtResource("6_v1ajb")
-events = Array[ExtResource("2_ju1rn")]([SubResource("Resource_xle1s")])
+events = Array[ExtResource("2_ju1rn")]([SubResource("Resource_pej1s")])
 item_order = Array[Dictionary]([{
 "index": 0,
 "type": "event"
 }])
-_id_assigner = SubResource("Resource_ju1rn")
+_id_assigner = SubResource("Resource_5spa6")
+variable_manager = SubResource("Resource_cjl2h")

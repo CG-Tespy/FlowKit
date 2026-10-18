@@ -41,6 +41,9 @@ func update_display() -> void:
 	_update_label()
 	_update_styling()
 
+func _on_variables_edited() -> void:
+	_update_label()
+
 func _update_styling() -> void:
 	if not panel:
 		return
@@ -90,7 +93,7 @@ func _get_params_text() -> String:
 		var param_pairs := []
 		for key in _cond_block.inputs:
 			var current_input = _cond_block.inputs[key]
-			var pair = str(current_input)
+			var pair = _input_to_text(current_input)
 			param_pairs.append(pair)
 			
 		params_text = ": " + ", ".join(param_pairs)
@@ -132,7 +135,7 @@ signal negate_requested(node: FKUnitUi)
 # Input Handling
 # ---------------------------------------------------------
 
-func _toggle_subs(on: bool) -> void:
+func _set_subs(on: bool) -> void:
 	if on && !_is_subbed:
 		gui_input.connect(_on_gui_input)
 		mouse_exited.connect(_on_mouse_exited)
@@ -142,7 +145,7 @@ func _toggle_subs(on: bool) -> void:
 		mouse_exited.disconnect(_on_mouse_exited)
 		context_menu.id_pressed.disconnect(_on_context_menu_id_pressed)
 		
-	super._toggle_subs(on)
+	super._set_subs(on)
 
 func _on_gui_input(event: InputEvent) -> void:
 	if event is not InputEventMouseButton or not event.pressed:

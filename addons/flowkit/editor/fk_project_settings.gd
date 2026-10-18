@@ -7,6 +7,7 @@ class_name FKProjectSettings
 ## Best mutate this through funcs like set_provider_paths
 ## rather than doing so directly.
 @export var provider_paths: Array[String] = []
+@export var variable_type_paths: Array[String] = []
 
 func set_provider_paths(new_paths: Array[String]):
 	provider_paths.clear()

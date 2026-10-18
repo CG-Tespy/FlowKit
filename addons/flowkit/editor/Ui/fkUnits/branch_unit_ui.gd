@@ -49,11 +49,14 @@ func update_display() -> void:
 	_update_header()
 	_update_branch_actions()
 
+func _on_variables_edited() -> void:
+	_update_header()
+
 # ---------------------------------------------------------
 # Subscription Handling
 # ---------------------------------------------------------
 
-func _toggle_subs(on: bool) -> void:
+func _set_subs(on: bool) -> void:
 	if on and not _is_subbed:
 		add_action_label.gui_input.connect(_on_add_action_input)
 		add_action_label.mouse_entered.connect(_on_add_action_hover.bind(true))
@@ -65,7 +68,7 @@ func _toggle_subs(on: bool) -> void:
 		add_action_label.mouse_exited.disconnect(_on_add_action_hover)
 		add_action_context_menu.id_pressed.disconnect(_on_add_action_context_menu_id_pressed)
 
-	super._toggle_subs(on)
+	super._set_subs(on)
 
 # ---------------------------------------------------------
 # Input Handling
@@ -243,7 +246,7 @@ func _update_condition_desc() -> void:
 
 		var params := []
 		for key in cond.inputs:
-			params.append(str(cond.inputs[key]))
+			params.append(_input_to_text(cond.inputs[key]))
 
 		var params_text := "" if params.is_empty() \
 		else ": " + ", ".join(params)
@@ -253,7 +256,7 @@ func _update_condition_desc() -> void:
 	elif input_type == "evaluation":
 		var pairs := []
 		for key in _action.branch_inputs:
-			pairs.append("%s: %s" % [key, str(_action.branch_inputs[key])])
+			pairs.append("%s: %s" % [key, _input_to_text(_action.branch_inputs[key])])
 		condition_label.text = ", ".join(pairs)
 	else:
 		condition_label.text = "(no inputs set)"

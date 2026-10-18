@@ -21,7 +21,7 @@ signal insert_event_below_requested(comment_node)
 @export var selected_style: StyleBoxFlat
 # ^Different styles for different modes
 
-func _toggle_subs(on: bool):
+func _set_subs(on: bool):
 	if on && !_is_subbed:
 		text_edit.focus_exited.connect(_on_text_edit_focus_exited)
 		

@@ -7,8 +7,8 @@ class_name FKActionInputModal
 @export var desc_label: Label
 @export var input_holder: Control
 
-func _toggle_subs(do_sub: bool):
-	super._toggle_subs(do_sub)
+func _set_subs(do_sub: bool):
+	super._set_subs(do_sub)
 
 	var should_add_subs := do_sub and not _is_subbed
 	var should_remove_subs := not do_sub and _is_subbed
@@ -24,6 +24,7 @@ func _toggle_subs(do_sub: bool):
 		cancel_button.pressed.disconnect(_on_cancel_pressed)
 		close_requested.disconnect(_on_close_requested)
 		visibility_changed.disconnect(_on_visibility_changed)
+		
 		FKEditorGlobals.is_action_input_modal_visible = false
 	else:
 		return

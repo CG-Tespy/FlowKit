@@ -26,12 +26,14 @@ offset_right = 0.0
 offset_bottom = 0.0
 grow_horizontal = 2
 
-[node name="Scaler" parent="FoldableContainer" index="1" unique_id=353188948 node_paths=PackedStringArray("target", "contents", "_scale_timer")]
+[node name="Bg2" parent="FoldableContainer/MarginContainer/VBoxContainer/HoldsContents" parent_id_path=PackedInt32Array(1767715980, 1130337238) index="1" unique_id=1176634726]
+mouse_filter = 2
+
+[node name="Scaler" parent="FoldableContainer" index="1" unique_id=353188948 node_paths=PackedStringArray("target", "_scale_timer")]
 process_mode = 4
 target = NodePath("../..")
-contents = [NodePath("../MarginContainer/VBoxContainer/Header"), NodePath("../MarginContainer/VBoxContainer/HoldsContents")]
 scale_y = false
-_scale_timer = NodePath("@Timer@21767")
+_scale_timer = NodePath("@Timer@23445")
 
 [node name="FileDialog" type="FileDialog" parent="." unique_id=137929853]
 oversampling_override = 1.0
@@ -46,7 +48,7 @@ contents = [NodePath("../FoldableContainer/MarginContainer/VBoxContainer/Header"
 scale_y = true
 cumulative_y = true
 _last_chosen_size = Vector2(500, 285)
-_scale_timer = NodePath("@Timer@21768")
+_scale_timer = NodePath("@Timer@23446")
 metadata/_custom_type_script = "uid://bys18rjuthmd"
 
 [editable path="FoldableContainer"]

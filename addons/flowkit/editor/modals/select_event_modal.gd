@@ -53,7 +53,7 @@ func _ensure_export_fields_filled():
 func _apply_styling():
 	desc_panel.add_theme_stylebox_override("panel", desc_panel_style)
 		
-func _toggle_subs(on: bool):
+func _set_subs(on: bool):
 	if on and not _is_subbed:
 		search_box.text_changed.connect(_on_search_text_changed)
 		item_list.item_activated.connect(_on_item_activated)
@@ -195,3 +195,6 @@ func _on_recent_item_activated(index: int) -> void:
 	selected_node_path)
 	_modal_signals.event_selected.emit(selected_node_path, event_id, event_inputs)
 	hide()
+
+func get_class() -> String:
+	return "FKSelectEventModal"

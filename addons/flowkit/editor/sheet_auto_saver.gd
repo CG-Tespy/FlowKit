@@ -10,7 +10,7 @@ func init(editor_globals: FKEditorGlobals, enabled: bool = true):
 	self._editor_settings = editor_globals.editor_settings
 	self.enabled = enabled
 	_prep_cooldown_timer.call_deferred()
-	_toggle_subs(true)
+	_set_subs(true)
 	print("[FKSheetAutoSaver]: Initialized.")
 	
 var _globals: FKEditorGlobals
@@ -73,7 +73,8 @@ func _save_sheet() -> FKEventSheet:
 		return
 
 	var units := _block_container.units
-	var sheet := FKEventSheet.from_units(units)
+	var current_sheet := _globals.current_sheet
+	var sheet := FKEventSheet.from_units(units, current_sheet.variable_manager if current_sheet else null)
 	
 	var result: FKEventSheet = null
 	var sheet_io := _globals.sheet_io
@@ -81,6 +82,7 @@ func _save_sheet() -> FKEventSheet:
 
 	if err == OK:
 		print("[FKSheetAutoSaver] ✓ Event sheet saved")
+		_globals.current_sheet = sheet
 		result = sheet
 	else:
 		push_error("[FKSheetAutoSaver] Failed to save event sheet: ", err)
@@ -103,7 +105,7 @@ func refresh():
 	# No-op for now, thanks to the new signal bus approach
 	pass
 	
-func _toggle_subs(on: bool):
+func _set_subs(on: bool):
 	if on and not _is_subbed:
 		_unit_ui_signals.contents_changed.connect(_on_unit_contents_changed)
 		_unit_ui_signals.unit_data_changed.connect(_on_unit_data_changed)

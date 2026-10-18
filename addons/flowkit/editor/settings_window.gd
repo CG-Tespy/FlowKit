@@ -28,7 +28,7 @@ func _enter_tree() -> void:
 	_ensure_settings_registered()
 	_update_toggle()
 	_update_sheet_auto_saver.call_deferred()
-	_toggle_subs(true)
+	_set_subs(true)
 	_load_project_settings()
 	if holds_prov_paths:
 		print("[FKSettingsWindow] Legitimizing prov paths")
@@ -121,7 +121,7 @@ func _update_sheet_auto_saver():
 		print("[FKSettingsWindow]: Updated auto sheet saver enabled to: " + str(current))
 		_globals.sheet_auto_saver.enabled = current
 
-func _toggle_subs(on: bool):
+func _set_subs(on: bool):
 	if on && !_is_subbed:
 		save_button.pressed.connect(_on_save_button_pressed)
 		close_requested.connect(_on_close_requested)
@@ -175,6 +175,8 @@ func _apply_provider_paths():
 func _save_project_settings():
 	ResourceSaver.save(_project_settings, _project_settings_path)
 	_globals.registry.load_providers()
+	_globals.variable_editor_registry.set_project_settings(_project_settings)
+	_globals.variable_editor_registry.load_providers()
 
 func get_project_settings() -> FKProjectSettings:
 	return _project_settings
@@ -187,7 +189,7 @@ func _exit_tree() -> void:
 		var log_message := "[FlowKit]: FKSettingsWindow exiting the Scene View."
 		print(log_message)
 		return
-	_toggle_subs(false)
+	_set_subs(false)
 
 func get_class() -> String:
 	return "FKSettingsWindow"
