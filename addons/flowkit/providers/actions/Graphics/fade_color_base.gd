@@ -8,7 +8,7 @@ func may_need_multi_frames() -> bool:
 	return true
 	
 func get_inputs() -> Array[FKActionInput]:
-	return [_targ_color_input, _alpha_only_input, \
+	return [_targ_color_input, _targ_alpha_input, _alpha_only_input, \
 	_duration_input, _wait_for_finish_input]
 
 func get_input_modal_scene() -> PackedScene:
@@ -19,14 +19,20 @@ func get_input_modal_scene() -> PackedScene:
 static var _targ_color_input: FKActionInput:
 	get:
 		return FKActionInput.new("Target Color", "Color",
-		"The color to fade to. Its alpha is the opacity to fade to. Can also be a Color variable, or an expression that gives a Color. " + \
+		"The color to fade to. Its own alpha is ignored; see Target Alpha. Can also be a Color variable, or an expression that gives a Color. " + \
 		"The older \"(255, 255, 255)\" string format still works. Default: white.",
 		default_color)
+
+static var _targ_alpha_input: FKFloatActionInput:
+	get:
+		return FKFloatActionInput.new("Target Alpha",
+		"The opacity (percent) to fade to: 0 is fully transparent, 100 is fully opaque. Default: " + str(default_alpha) + ".",
+		default_alpha)
 
 static var _alpha_only_input: FKBoolActionInput:
 	get:
 		return FKBoolActionInput.new("Alpha Only",
-		"If true, only the transparency (the target color's alpha) will be changed. Default: " + str(default_alpha_only),
+		"If true, only the transparency (Target Alpha) will be changed, and the Target Color is ignored. Default: " + str(default_alpha_only),
 		default_alpha_only)
 
 static var _duration_input: FKFloatActionInput:
@@ -44,6 +50,7 @@ static var _wait_for_finish_input: FKBoolActionInput:
 )
 
 static var default_color := Color.WHITE
+static var default_alpha := 100.0
 static var default_alpha_only := false
 static var default_duration := 1.0
 static var default_wait_for_finish := true
@@ -73,11 +80,13 @@ func execute(targetNode: Node, inputs: Dictionary, _int := -1) -> void:
 
 func parse_inputs(target_node: Node, inputs: Dictionary) -> void:
 	duration = _duration_input.get_val(inputs)
+	target_alpha = clampf(_targ_alpha_input.get_val(inputs), 0.0, 100.0) / 100.0 # Stored as a percent; Color.a wants 0-1
 	alpha_only = _alpha_only_input.get_val(inputs)
 	wait_for_finish = _wait_for_finish_input.get_val(inputs)
 	target_color = _parse_color_input(target_node, inputs)
 	
 var duration := 0.0
+var target_alpha := 1.0
 var alpha_only := false
 var target_color := Color(1, 1, 1)
 var wait_for_finish := true
@@ -96,12 +105,13 @@ func _parse_color_input(target_node: Node, inputs: Dictionary) -> Color:
 		# Older sheets store the color as an "(r, g, b)" string
 		target = Color.html(rgb_to_hex(str(raw)))
 
+	target.a = target_alpha
 	if not alpha_only:
 		return target
 
 	# Only the target color's opacity is used; the node keeps its current rgb.
 	var result: Color = target_node.get(prop)
-	result.a = target.a
+	result.a = target_alpha
 	return result
 	
 func rgb_to_hex(rgb_string: String) -> String:

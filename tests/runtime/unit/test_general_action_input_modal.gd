@@ -55,7 +55,7 @@ func test_populate_for_action_creates_controls_with_saved_values():
 		"Enabled": false,
 	}))
 
-	var speed_ui := modal.input_holder.get_child(0) as FKFloatActionInputUi
+	var speed_ui := modal.input_holder.get_child(0) as FKNumberActionInputUi
 	var message_ui := modal.input_holder.get_child(1) as FKStringActionInputUi
 	var enabled_ui := modal.input_holder.get_child(2) as FKBoolActionInputUi
 	assert_eq(modal.title, "Configure Movement")
@@ -75,9 +75,9 @@ func test_repopulate_reuses_compatible_control_and_refreshes_its_state():
 	var modal := _create_modal()
 
 	modal.populate_for_action(_create_args(first_action, {"Speed": 4.0}))
-	var first_input_ui := modal.input_holder.get_child(0) as FKFloatActionInputUi
+	var first_input_ui := modal.input_holder.get_child(0) as FKNumberActionInputUi
 	modal.populate_for_action(_create_args(second_action, {"Acceleration": 9.0}))
-	var second_input_ui := modal.input_holder.get_child(0) as FKFloatActionInputUi
+	var second_input_ui := modal.input_holder.get_child(0) as FKNumberActionInputUi
 
 	assert_same(second_input_ui, first_input_ui)
 	assert_eq(second_input_ui.input_label.text, "Acceleration")
@@ -100,7 +100,7 @@ func test_confirm_emits_edited_values_and_hides_modal():
 			received["inputs"] = inputs
 	)
 	modal.populate_for_action(_create_args(action, {"Speed": 1.5, "Enabled": true}))
-	var speed_ui := modal.input_holder.get_child(0) as FKFloatActionInputUi
+	var speed_ui := modal.input_holder.get_child(0) as FKNumberActionInputUi
 	var enabled_ui := modal.input_holder.get_child(1) as FKBoolActionInputUi
 	speed_ui.spin_box.value = 3.0
 	speed_ui._on_literal_control_gui_input(null)
