@@ -15,7 +15,6 @@ const DEMOS_PREFIX := "res://addons/flowkit/demos/"
 # Runtime still loads these settings, so keep only this small editor-side island
 # until project settings are moved into a runtime-neutral location.
 const EDITOR_RUNTIME_ALLOWLIST := {
-	"res://addons/flowkit/editor/_fk_project_settings.tres": true,
 	"res://addons/flowkit/editor/fk_project_settings.gd": true,
 	"res://addons/flowkit/editor/fk_project_settings.gd.uid": true,
 }

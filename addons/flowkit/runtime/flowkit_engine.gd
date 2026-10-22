@@ -22,7 +22,7 @@ var _event_unit_providers: Dictionary = {}  # Scene instance + FKUnit uid -> eve
 var _branch_executor := FKBranchExecutor.new()
 var _warned_keys: Dictionary = {}  # Keys of warnings already emitted (see _warn_once)
 
-const PROJECT_SETTINGS_PATH := "res://addons/flowkit/editor/_fk_project_settings.tres"
+const PROJECT_SETTINGS_PATH := FKProjectSettings.FILE_PATH
 
 func _ready() -> void:
 	# Load registry

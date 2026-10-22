@@ -22,6 +22,7 @@ func _disable_plugin() -> void:
 func _enter_tree() -> void:
 	var folder_setup = FKLocalFolderSetup.new()
 	folder_setup.ensure_dirs_exist()
+	folder_setup.migrate_legacy_settings()
 	_prep_editor_globals()
 	_prep_settings_window()
 	_prep_registries()

@@ -10,6 +10,29 @@ const REQUIRED_DIRS: Array[String] = [
 	"res://flowkit_local/config",
 ]
 
+const LEGACY_SETTINGS_PATH := "res://addons/flowkit/editor/_fk_project_settings.tres"
+
+## Moves the project settings file from its old home in the addon folder into
+## flowkit_local/config, unless one is already there.
+func migrate_legacy_settings() -> void:
+	if not Engine.is_editor_hint():
+		return
+	if not FileAccess.file_exists(LEGACY_SETTINGS_PATH):
+		return
+
+	ensure_dirs_exist()
+	var new_path := FKProjectSettings.FILE_PATH
+	if FileAccess.file_exists(new_path):
+		push_warning("[FlowKit]: Both '%s' and '%s' exist; leaving the old one alone." % [LEGACY_SETTINGS_PATH, new_path])
+		return
+
+	var err := DirAccess.rename_absolute(LEGACY_SETTINGS_PATH, new_path)
+	if err != OK:
+		push_error("[FlowKit]: Couldn't move '%s' to '%s' (error %d)" % [LEGACY_SETTINGS_PATH, new_path, err])
+		return
+	print("[FlowKit]: Moved project settings to ", new_path)
+	EditorInterface.get_resource_filesystem().scan()
+
 func ensure_dirs_exist() -> void:
 	if not Engine.is_editor_hint():
 		return
