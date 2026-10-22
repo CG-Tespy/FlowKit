@@ -7,6 +7,9 @@ class_name FKEventSheet
 ## Each entry is: {"type": "event"|"comment"|"group", "index": int}
 ## The index refers to the position within that type's array (events, comments, or groups).
 
+## Where sheets get saved, named by the uid of the scene they belong to.
+const SAVE_DIR := "res://flowkit_local/event_sheets"
+
 ## These are the top-level events. Others may be nested under groups.
 @export var events: Array[FKEventUnit] = []
 @export var standalone_conditions: Array[FKConditionUnit] = []

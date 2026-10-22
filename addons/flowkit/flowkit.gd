@@ -23,6 +23,7 @@ func _enter_tree() -> void:
 	var folder_setup = FKLocalFolderSetup.new()
 	folder_setup.ensure_dirs_exist()
 	folder_setup.migrate_legacy_settings()
+	FKEventSheetMigrator.new().migrate_legacy_sheets()
 	_prep_editor_globals()
 	_prep_settings_window()
 	_prep_registries()

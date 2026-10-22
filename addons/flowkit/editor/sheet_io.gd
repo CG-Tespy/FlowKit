@@ -5,7 +5,7 @@
 extends RefCounted
 class_name FKSheetIO
 
-const SHEET_DIR := "res://addons/flowkit/saved/event_sheet"
+const SHEET_DIR := FKEventSheet.SAVE_DIR
 
 func get_sheet_path(scene_uid: int) -> String:
 	if scene_uid == 0:

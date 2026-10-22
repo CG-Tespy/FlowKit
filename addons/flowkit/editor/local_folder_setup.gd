@@ -11,6 +11,9 @@ const REQUIRED_DIRS: Array[String] = [
 	"res://flowkit_local/providers/branches",
 	"res://flowkit_local/providers/conditions",
 	"res://flowkit_local/providers/events",
+
+	"res://flowkit_local/event_sheets/",
+
 	"res://flowkit_local/variables",
 	"res://flowkit_local/config",
 ]

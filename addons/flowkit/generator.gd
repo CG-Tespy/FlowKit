@@ -692,7 +692,7 @@ func _write_file(path: String, content: String) -> void:
 # MANIFEST GENERATION
 # ============================================================================
 
-const EVENT_SHEET_DIR = "res://addons/flowkit/saved/event_sheet/"
+const EVENT_SHEET_DIR = FKEventSheet.SAVE_DIR + "/"
 
 ## Generates an optimized provider manifest resource for exported builds.
 ## Only includes providers that are actively used in the project's event sheets,
