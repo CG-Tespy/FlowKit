@@ -6,6 +6,11 @@ extends RefCounted
 const ROOT_DIR := "res://flowkit_local"
 const REQUIRED_DIRS: Array[String] = [
 	"res://flowkit_local/providers",
+	"res://flowkit_local/providers/actions",
+	"res://flowkit_local/providers/behaviors",
+	"res://flowkit_local/providers/branches",
+	"res://flowkit_local/providers/conditions",
+	"res://flowkit_local/providers/events",
 	"res://flowkit_local/variables",
 	"res://flowkit_local/config",
 ]
