@@ -7,15 +7,22 @@ extends RefCounted
 
 const LEGACY_SHEET_DIR := "res://addons/flowkit/saved/event_sheet"
 
-func migrate_legacy_sheets() -> void:
-	if not Engine.is_editor_hint():
-		return
+## The folders below, and the way scenes get classed, can be swapped out (tests do).
+var legacy_dir := LEGACY_SHEET_DIR
+var local_dir := FKEventSheet.SAVE_DIR
+var addon_dir := FKEventSheet.ADDON_SAVE_DIR
+var is_addon_scene_uid: Callable = FKEventSheet.is_addon_scene_uid
+var editor_only := true
 
-	var source_dirs: Array[String] = [LEGACY_SHEET_DIR]
-	source_dirs.append_array(FKEventSheet.all_save_dirs())
+## Returns how many sheets were moved.
+func migrate_legacy_sheets() -> int:
+	if editor_only and not Engine.is_editor_hint():
+		return 0
 
 	var moved := 0
-	for source_dir in source_dirs:
+	for source_dir in [legacy_dir, local_dir, addon_dir]:
+		if not DirAccess.dir_exists_absolute(source_dir):
+			continue
 		for file_name in DirAccess.get_files_at(source_dir):
 			if file_name.get_extension() != "tres":
 				continue
@@ -23,14 +30,16 @@ func migrate_legacy_sheets() -> void:
 				moved += 1
 
 	if moved == 0:
-		return
+		return 0
 	print("[FlowKit]: Moved %d event sheet(s) to their proper folders." % moved)
-	EditorInterface.get_resource_filesystem().scan()
+	if Engine.is_editor_hint():
+		EditorInterface.get_resource_filesystem().scan()
+	return moved
 
 ## Returns whether the sheet was moved.
 func _move_if_misplaced(source_dir: String, file_name: String) -> bool:
 	var scene_uid := file_name.get_basename().to_int()
-	var target_dir := FKEventSheet.save_dir_for_uid(scene_uid)
+	var target_dir := addon_dir if is_addon_scene_uid.call(scene_uid) else local_dir
 	if source_dir == target_dir:
 		return false
 
