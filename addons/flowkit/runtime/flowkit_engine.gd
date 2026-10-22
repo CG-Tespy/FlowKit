@@ -143,7 +143,7 @@ func _load_sheets_for_scene(scene_root: Node) -> void:
 		var scene_path: String = node_root.scene_file_path
 		var uid: int = ResourceLoader.get_resource_uid(scene_path)
 		var scene_name: String = scene_path.get_file().get_basename()
-		var sheet_path: String = "%s/%d.tres" % [FKEventSheet.SAVE_DIR, uid]
+		var sheet_path: String = FKEventSheet.path_for_uid(uid)
 
 		if ResourceLoader.exists(sheet_path):
 			var sheet: FKEventSheet = load(sheet_path)

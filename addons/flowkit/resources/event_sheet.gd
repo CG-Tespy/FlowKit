@@ -9,6 +9,22 @@ class_name FKEventSheet
 
 ## Where sheets get saved, named by the uid of the scene they belong to.
 const SAVE_DIR := "res://flowkit_local/event_sheets"
+## Sheets for scenes that ship inside the addon (e.g. the demos) live in the addon
+## instead, so that updating FlowKit by removing its folder first can't clash with
+## the project's own sheets.
+const ADDON_DIR := "res://addons/flowkit/"
+const ADDON_SAVE_DIR := "res://addons/flowkit/saved/event_sheets"
+
+static func save_dir_for_uid(scene_uid: int) -> String:
+	var scene_path := ResourceUID.get_id_path(scene_uid) if ResourceUID.has_id(scene_uid) else ""
+	return ADDON_SAVE_DIR if scene_path.begins_with(ADDON_DIR) else SAVE_DIR
+
+static func path_for_uid(scene_uid: int) -> String:
+	return "%s/%d.tres" % [save_dir_for_uid(scene_uid), scene_uid]
+
+## Every folder that may hold sheets.
+static func all_save_dirs() -> Array[String]:
+	return [SAVE_DIR, ADDON_SAVE_DIR]
 
 ## These are the top-level events. Others may be nested under groups.
 @export var events: Array[FKEventUnit] = []

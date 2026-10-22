@@ -692,7 +692,6 @@ func _write_file(path: String, content: String) -> void:
 # MANIFEST GENERATION
 # ============================================================================
 
-const EVENT_SHEET_DIR = FKEventSheet.SAVE_DIR + "/"
 
 ## Generates an optimized provider manifest resource for exported builds.
 ## Only includes providers that are actively used in the project's event sheets,
@@ -810,18 +809,13 @@ func _scan_used_provider_ids() -> Dictionary:
 	}
 
 	# Scan event sheets
-	var sheet_dir: DirAccess = DirAccess.open(EVENT_SHEET_DIR)
-	if sheet_dir:
-		sheet_dir.list_dir_begin()
-		var file_name: String = sheet_dir.get_next()
-		while file_name != "":
-			if file_name.ends_with(".tres"):
-				var sheet_path: String = EVENT_SHEET_DIR + file_name
-				var sheet: Resource = load(sheet_path)
-				if sheet is FKEventSheet:
-					_extract_ids_from_sheet(sheet, used)
-			file_name = sheet_dir.get_next()
-		sheet_dir.list_dir_end()
+	for sheet_dir_path in FKEventSheet.all_save_dirs():
+		for file_name in DirAccess.get_files_at(sheet_dir_path):
+			if not file_name.ends_with(".tres"):
+				continue
+			var sheet: Resource = load(sheet_dir_path.path_join(file_name))
+			if sheet is FKEventSheet:
+				_extract_ids_from_sheet(sheet, used)
 
 	# Scan scene files for behavior metadata
 	_scan_scenes_for_behaviors(used)

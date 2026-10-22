@@ -5,12 +5,10 @@
 extends RefCounted
 class_name FKSheetIO
 
-const SHEET_DIR := FKEventSheet.SAVE_DIR
-
 func get_sheet_path(scene_uid: int) -> String:
 	if scene_uid == 0:
 		return ""
-	return "%s/%d.tres" % [SHEET_DIR, scene_uid]
+	return FKEventSheet.path_for_uid(scene_uid)
 
 func load_sheet(scene_uid: int) -> FKEventSheet:
 	var sheet_path := get_sheet_path(scene_uid)
@@ -32,7 +30,7 @@ func save_sheet(scene_uid: int, sheet: FKEventSheet) -> int:
 		print("[SheetIo] Returning err invalid param")
 		return ERR_INVALID_PARAMETER
 
-	DirAccess.make_dir_recursive_absolute(SHEET_DIR)
+	DirAccess.make_dir_recursive_absolute(sheet_path.get_base_dir())
 	return ResourceSaver.save(sheet, sheet_path)
 
 func new_sheet() -> FKEventSheet:
