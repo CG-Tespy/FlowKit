@@ -22,7 +22,7 @@ var _event_unit_providers: Dictionary = {}  # Scene instance + FKUnit uid -> eve
 var _branch_executor := FKBranchExecutor.new()
 var _warned_keys: Dictionary = {}  # Keys of warnings already emitted (see _warn_once)
 
-const PROJECT_SETTINGS_PATH := "res://addons/flowkit/editor/_fk_project_settings.tres"
+const PROJECT_SETTINGS_PATH := FKProjectSettings.FILE_PATH
 
 func _ready() -> void:
 	# Load registry
@@ -143,7 +143,7 @@ func _load_sheets_for_scene(scene_root: Node) -> void:
 		var scene_path: String = node_root.scene_file_path
 		var uid: int = ResourceLoader.get_resource_uid(scene_path)
 		var scene_name: String = scene_path.get_file().get_basename()
-		var sheet_path: String = "res://addons/flowkit/saved/event_sheet/%d.tres" % uid
+		var sheet_path: String = FKEventSheet.path_for_uid(uid)
 
 		if ResourceLoader.exists(sheet_path):
 			var sheet: FKEventSheet = load(sheet_path)

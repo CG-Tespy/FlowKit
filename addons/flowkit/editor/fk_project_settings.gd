@@ -4,6 +4,8 @@
 extends Resource
 class_name FKProjectSettings
 
+const FILE_PATH := "res://flowkit_local/config/_fk_project_settings.tres"
+
 ## Best mutate this through funcs like set_provider_paths
 ## rather than doing so directly.
 @export var provider_paths: Array[String] = []

@@ -7,6 +7,28 @@ class_name FKEventSheet
 ## Each entry is: {"type": "event"|"comment"|"group", "index": int}
 ## The index refers to the position within that type's array (events, comments, or groups).
 
+## Where sheets get saved, named by the uid of the scene they belong to.
+const SAVE_DIR := "res://flowkit_local/event_sheets"
+## Sheets for scenes that ship inside the addon (e.g. the demos) live in the addon
+## instead, so that updating FlowKit by removing its folder first can't clash with
+## the project's own sheets.
+const ADDON_DIR := "res://addons/flowkit/"
+const ADDON_SAVE_DIR := "res://addons/flowkit/saved/event_sheets"
+
+static func is_addon_scene_uid(scene_uid: int) -> bool:
+	var scene_path := ResourceUID.get_id_path(scene_uid) if ResourceUID.has_id(scene_uid) else ""
+	return scene_path.begins_with(ADDON_DIR)
+
+static func save_dir_for_uid(scene_uid: int) -> String:
+	return ADDON_SAVE_DIR if is_addon_scene_uid(scene_uid) else SAVE_DIR
+
+static func path_for_uid(scene_uid: int) -> String:
+	return "%s/%d.tres" % [save_dir_for_uid(scene_uid), scene_uid]
+
+## Every folder that may hold sheets.
+static func all_save_dirs() -> Array[String]:
+	return [SAVE_DIR, ADDON_SAVE_DIR]
+
 ## These are the top-level events. Others may be nested under groups.
 @export var events: Array[FKEventUnit] = []
 @export var standalone_conditions: Array[FKConditionUnit] = []

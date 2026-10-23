@@ -77,11 +77,14 @@ func _load_project_settings():
 	else:
 		_project_settings = ResourceLoader.load(_project_settings_path, "FKProjectSettings")
 
-static var _project_settings_path := "res://addons/flowkit/editor/_fk_project_settings.tres"
+	var prov_paths := _project_settings.provider_paths
+	if not prov_paths.has(_local_provider_dir):
+		prov_paths.append(_local_provider_dir)
+
+static var _local_provider_dir := "res://flowkit_local/providers"
+static var _project_settings_path := FKProjectSettings.FILE_PATH
 var _project_settings := FKProjectSettings.new()
 
-
-		
 func _update_toggle():
 	var current: bool = _auto_save_toggle_setting
 	auto_save_toggle.button_pressed = current
